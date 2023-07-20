@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Set up Google Maps                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<head>
+	<!-- Google Maps -->
+	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
+	{{sndmap.js}}
+</head>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/gpx_bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>{{ gpx.name }}</h1>
+					<span class="subheading">{{ gpx.length_km|int }} km and {{ gpx.ascent_m|int }} m climbing</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--               Owner / Admin control panel - Show before if not public                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if not current_user.is_authenticated: %}
+
+	<!--
+		Tortuous logic as if current_user isn't logged in they won't have inherited .email etc.
+		So, have to test for that first and handle that separately.
+	-->
+
+{% elif (current_user.email == gpx.email or current_user.admin()) and not gpx.public() %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<h2 style="font-size: 30px; margin-top: 10px; margin-bottom: 10px;">Route management</h2>
+				
+				<div class="clearfix">
+				
+					<!-- Edit button -->
+					<a class="btn btn-primary float-left" href="{{ url_for('edit_route', gpx_id=gpx.id) }}">Edit Route</a>
+					
+					<!-- (un)Publish button -->
+					{% if not gpx.public(): %}
+						<a class="btn btn-primary float-left mx-3" href="{{ url_for('publish_route', gpx_id=gpx.id) }}">Publish Route</a>
+					{% else: %}
+						<a class="btn btn-warning float-left mx-3" href="{{ url_for('hide_route', gpx_id=gpx.id) }}">Hide route</a>
+					{% endif %}
+				
+					<!-- Delete button -->
+					<a class="btn btn-danger float-right" href="{{ url_for('route_delete', gpx_id=gpx.id) }}"
+					   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
+					
+				</div>
+				
+				<!-- Separator before next section -->
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Route details                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+	
+            <div class="clearfix">
+               
+                <h2 style="font-size: 30px; text-align:left;float:left;">Route details</h2>
+	            
+	            <!-- Download button -->
+	            {% if current_user.is_authenticated: %}
+	                <a href="{{ url_for('route_download', gpx_id=gpx.id) }}">
+                        <button class="btn btn-primary " style="text-align:right;float:right;">
+                                Download GPX</button>
+		            </a>
+	            {% else %}
+	                <button class="btn btn-primary" disabled style="text-align:right;float:right;"
+	                        href="">Log in to Download</button>
+	            {% endif %}
+	            
+            </div>
+	           
+	        <p>{{ gpx.length_km|int }} km and {{ gpx.ascent_m|int }} m climbing</p>
+			
+			<p class="my-0"> Cafe options:</p>
+			<ul>
+				{% for cafe in cafe_list: %}
+				<li> <a href="{{ url_for('cafe_details', cafe_id=cafe['id']) }}">
+					<b>{{ cafe['name'] }}</b> </a> is {{ cafe['dist_km'] }} km away at {{ cafe['range_km'] }} km along the route
+                </li>
+				
+				{% endfor %}
+			</ul>
+			
+			<p> Uploaded by {{ author }} on {{ gpx.date }} </p>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show the map of the route                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+	
+            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view of {{ gpx.name }} route</h2>
+            
+            {{sndmap.html}}
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--               Owner / Admin control panel - Show after if public                               -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if not current_user.is_authenticated: %}
+
+	<!--
+		Tortuous logic as if current_user isn't logged in they won't have inherited .email etc.
+		So, have to test for that first and handle that separately.
+	-->
+
+{% elif (current_user.email == gpx.email or current_user.admin()) and gpx.public(): %}
+	
+	<!-- Logged in and either admin or owner and route is public -->
+
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				
+				<!-- Button to expose hidden options -->
+				<a class="btn btn-primary" data-toggle="collapse" href="#collapseExample" role="button"
+				   aria-expanded="false" aria-controls="collapseExample">
+                    Route management
+                </a>
+				
+				<!-- Edit buttons etc are collapsed -->
+				<div class="collapse" id="collapseExample">
+                    <div class="card card-body my-3">
+	                   <div class="clearfix">
+				
+							<!-- Edit button -->
+							<a class="btn btn-primary float-left" href="{{ url_for('edit_route', gpx_id=gpx.id) }}">Edit Route</a>
+							
+							<!-- (un)Publish button -->
+							{% if not gpx.public(): %}
+								<a class="btn btn-primary float-left mx-3" href="{{ url_for('publish_route', gpx_id=gpx.id) }}">Publish Route</a>
+							{% else: %}
+								<a class="btn btn-warning float-right mx-3" href="{{ url_for('hide_route', gpx_id=gpx.id) }}">Hide route</a>
+							{% endif %}
+						
+							<!-- Delete button -->
+							<a class="btn btn-danger float-right" href="{{ url_for('route_delete', gpx_id=gpx.id) }}"
+							   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
+				
+						</div>
+	                </div>
+				</div>
+	   
+				<!-- Separator before next section -->
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% elif gpx.public() %}
+
+	<!-- We are logged in -->
+	<!-- Route is public -->
+	<!-- We are neither owner nor admin -->
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto mt-3">
+				
+				<!-- Download button -->
+	            <a class="btn btn-primary float-right" href="">Download GPX</a>
+
+			</div>
+			
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<!-- Separator before footer -->
+				<hr>
+			</div>
+			
+		</div>
+	</div>
+	
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                         Modal form for confirming route delete                                 -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="deleteRouteModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Delete GPX file from database</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!--
+					NB To get the two parameters use:
+						1. gpx_id = request.args.get('gpx_id', None)
+                        2. confirm = request.form['confirm']
+				-->
+				<form action="{{ url_for('route_delete', gpx_id=gpx.id) }}" method="post">
+					
+					<div class="form-group">
+						<label for="confirm" class="col-form-label">Please enter "DELETE" in the box below:</label>
+						<textarea class="form-control" id="confirm" name="confirm"></textarea>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-danger">Submit</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>  <!-- End of modal form -->
+
+
+{% endblock %}

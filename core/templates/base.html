@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	
+	<title>ELSR</title>
+	
+	<!-- Favicons icons -->
+	<link rel="icon" href="{{ url_for('static', filename='../static/img/favicon_d.ico') }}"
+	      media='(prefers-color-scheme: dark)'>
+	<link rel="icon" href="{{ url_for('static', filename='../static/img/favicon_l.ico') }}"
+	      media='(prefers-color-scheme: light)'>
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                           CSS                                                  -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<!-- Bootstrap pack -->
+	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+	
+	<!-- Custom styles -->
+	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                        Fonts and Icons                                         -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<!-- Fontawesome Fonts (bike logo) -->
+	<script src="https://kit.fontawesome.com/8d975d0298.js" crossorigin="anonymous"></script>
+	
+	<!-- Custom fonts from Google -->
+	<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet'
+	      type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+	      rel='stylesheet' type='text/css'>
+	
+	{% block head %}
+	{% endblock %}
+	
+</head>
+
+<body>
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                       Navigation bar                                           -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+		
+		<div class="container">
+			
+			
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                   Website Title Details                                        -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			<a class="navbar-brand" href="{{ url_for('home') }}" style="font-size: 25px;">
+				<i class="fa-solid fa-person-biking fa-xl"></i>
+				&nbsp; EL Social Rides
+			</a>
+			
+			
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                           Menu                                                 -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			<div class="collapse navbar-collapse" id="navbarResponsive">
+				<ul class="navbar-nav ml-auto">
+					
+					<!-- Navigation links -->
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url_for('home') }}">Home</a>
+					</li>
+					
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url_for('cafe_list') }}">Cafes</a>
+					</li>
+					
+					<li class="nav-item">
+						<a class="nav-link" href="{{ url_for('gpx_list') }}">GPX Files</a>
+					</li>
+					
+					<li class="nav-item">
+						<a class="nav-link" href="/about">About</a>
+					</li>
+					
+					<li class="nav-item">
+						<a class="nav-link" href="/contact">Contact</a>
+					</li>
+					
+					
+					<!-- Register / Login links -->
+					{% if not current_user.is_authenticated: %}
+					
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('login') }}">Login</a>
+						</li>
+						
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('register') }}">Register</a>
+						</li>
+						
+					{% endif %}
+					
+				</ul>
+			</div>
+		
+			
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                       User Details                                             -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			{% if current_user.is_authenticated: %}
+			
+				<!-- User is logged in -->
+				<a class="navbar-brand" href="{{url_for('user_page', user_id=current_user.id) }}">
+					
+					<!-- User Gravatar -->
+					<img src="{{ current_user.email | gravatar }}"
+				         width="50"
+						 style="border-radius: 50%;"/>
+					
+					<!-- Personal Mail icon -->
+					{% if current_user.has_mail() %}
+						&nbsp;
+						<i class="fa-solid fa-envelope fa-bounce fa-xl" style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;" ></i>
+					{% endif %}
+
+				</a>
+			
+				<!-- Admin icon -->
+				{% if current_user.admin(): %}
+					 &nbsp; <a href="{{ url_for('admin_page') }}" class="navbar-brand mx-0 px-0">Admin</a>
+				{% endif %}
+				
+				<!-- Admins Mail icon -->
+				{% if current_user.admin() and admin_has_mail() %}
+					<a href="{{ url_for('admin_page') }}" class="navbar-brand mx-0 px-0">
+						&nbsp;
+						<i class="fa-solid fa-envelope fa-bounce fa-xl" style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;" ></i>
+					</a>
+				{% endif %}
+					
+				
+			
+			{% endif %}
+			
+		</div>
+	</nav>
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                        Page contents                                           -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	{% block content %}
+	{% endblock %}
+	
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                          Footer                                                -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<footer>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					<ul class="list-inline text-center">
+						
+						<!-- Twitter icon -->
+						<li class="list-inline-item">
+							<a href="#">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+							</a>
+						</li>
+						
+						<!-- Facebook icon -->
+						<li class="list-inline-item">
+							<a href="https://www.facebook.com/groups/326130959238218">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i>
+                                </span>
+							</a>
+						</li>
+						
+						<!-- Github icon -->
+						<li class="list-inline-item">
+							<a href="https://github.com/footflaps/ELSR-Website">
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+	                                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+							</a>
+						</li>
+						
+					</ul>
+					
+					<p class="copyright text-muted">Copyright &copy; Ben Freeman {{year}}</p>
+					
+				</div>
+			</div>
+		</div>
+	</footer>
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                  Bootstrap core JavaScript                                     -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
+	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                              Custom scripts for this template                                  -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="{{ url_for('static', filename='js/clean-blog.min.js')}}"></script>
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                   Page can insert scripts here                                 -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	{% block scripts %}
+	{% endblock %}
+
+</body>
+
+</html>

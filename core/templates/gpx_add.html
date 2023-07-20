@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+<!-- Add import for bootstrap wtf quickform support -->
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header  class="masthead"
+         style="background-image: url({{ url_for('static', filename='img/cafe.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					
+					{% if gpx: %}
+						<h1>Edit GPX Details</h1>
+					{% else: %}
+						<h1>Add a new GPX route</h1>
+					{% endif %}
+					
+					<span class="subheading">Share your favourite routes with everyone else....</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Upload the GPX                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<hr>
+			
+			<h2 class="post-title">Select the GPX file</h2>
+			<p> Once the file is uploaded, you will be able to edit the GPX file to remove any points near where you live.
+			    The route will remain 'hidden' until you have completed editing it and are happy with the modified file. </p>
+						
+			<!-- This is where the form will go -->
+			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+		
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+{% endblock %}

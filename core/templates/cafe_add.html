@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+<!-- Add import for bootstrap wtf quickform support -->
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if cafe.image_name: %}
+
+<header class="masthead"
+        style="background-image: url( {{cafe.image_name}} )">
+
+{% else %}
+
+<header  class="masthead"
+         style="background-image: url({{ url_for('static', filename='img/cafe.jpg')}})">
+
+{% endif %}
+	
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					
+					{% if cafe: %}
+						<h1>Edit Cafe Details</h1>
+					{% else: %}
+						<h1>Add a new cafe</h1>
+					{% endif %}
+					
+					<span class="subheading">Found a great cafe stop, let everyone else know...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Upload a photo                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!-- Can only do this if the cafe already exists ie edit mode, not 1st add, as we don't have a cafe to assign it to -->
+{% if cafe: %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				
+				<h2 class="post-title py-3">Upload a photo of the cafe</h2>
+				
+	            <form method=post enctype='multipart/form-data' action="{{url_for('edit_cafe', cafe_id=cafe.id)}}">
+		            <input type=file name=input_file class="btn btn-primary float-left">
+	                <input type=submit value=Upload class="btn btn-primary float-right">
+	            </form>
+		
+			</div>
+		</div>
+		
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<p>Please make sure the photo is decent and relevant. Nothing offensive please!</p>
+				<p>Max file size is 5 Mb.</p>
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Cafe Edit form                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<hr>
+			
+			<h2 class="post-title">Edit the cafe details</h2>
+			
+			<!-- Load ckeditor -->
+			{{ ckeditor.load() }}
+			
+			<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
+			{{ ckeditor.config(name='body') }}
+			
+			<!-- This is where the form will go -->
+			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+		
+		
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+{% endblock %}

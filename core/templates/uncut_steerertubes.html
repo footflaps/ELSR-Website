@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+<!-- Add import for bootstrap wtf quickform support -->
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/uncut-steerer.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Uncut Steerer Tubes</h1>
+					<h2>A cautionary tale...</h2>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Main Content                                             -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="mb-5">Some of you may find the following story highly disturbing.</h2>
+			
+			<h3>Our story begins</h3>
+			<p>We begin our sorry tale with a rider called Andrew, but to protect his identity we will call
+			   him Andy instead.</p>
+			<p>Andy wanted to ride bikes very fast and be admired by all the riders in the ELSR Doppio group, so he
+			   bought a Tarmac SL-7. As normal, the bike came with an uncut steerer tube. Andy very quickly lowered
+			   his stem, to 'slam' his bike so he would look like all the Pro Tour riders he saw on TV. But, for
+			   some unknown reason he didn't cut his steerer tube. His fellow riders would mock him on his first
+			   few rides, thinking he just hadn't got round to it yet.</p>
+			
+			<h3>No one knew the truth</h3>
+			<p>The truth was, Andy was starting to quite like his uncut steerer tube, all those headset spacers
+			   stacked up above the stem. At first he thought he could handle it, he'd get round to cutting it down
+			   at some point, but as the weeks, then months passed, it became apparent that something far more serious
+			   was occurring, his steerer tube was taking over his life. His son and wife begged him to trim it, just a
+			   centimetre, but he wouldn't budge. He liked those headset spacers and no one would take them from him.</p>
+			
+			<h3>Then one day</h3>
+			<p>Then the fateful day came, when his life would be changed forever. It was parents evening and on arriving
+			   at the school his teacher was shocked to see him. It turned out that his son had told the school that his
+			   father been killed in a bizarre gardening accident. It also transpired that his wife had corroborated the
+			   story. On probing deeper, the uncut steerer tube came out in the conversation. The school acted immediately,
+			   social services were called and his son was taken into care. Andy would only be allowed to see him on
+			   supervised visits and he wasn't allowed to bring his uncut steerer tube within 500m of his son, nor
+			   any school in the county.</p>
+			
+			<h3>A new hope</h3>
+			<p>Normally, at this stage, Andy would be left to spiral into the abyss, his life collapsing around him all
+			   for sake of a few headset spacers. However, a pioneering experimental treatment has been launched and
+			   Andy was lucky enough to get a place on the pilot scheme. Professor Head Set, lead clinician of the
+			   programme takes over. "At this stage, we would normally only be able to offer a place in an
+			   <a href="https://archiveshub.jisc.ac.uk/search/archives/2a016e18-967a-393e-9503-bc0ab0f86269">
+				   <i class="fa fa-external-link"></i>asylum</a> or
+			   <a href="http://www.dignitas.ch/?lang=en"><i class="fa fa-external-link"></i>Dignitas</a>, but a
+			   revolutionary breakthrough in
+				<a href="https://www.abc.net.au/news/science/2018-09-11/fake-news-online-five-ways-youre-being-fooled/10126574">
+					<i class="fa fa-external-link"></i>soluble headset spacers</a> allows us to try a pioneering
+			   treatment to see if we can break the addiction. After so long, cutting the steerer down in one go
+			   would almost certainly be fatal, but over a process of months or years, we think we can help these
+			   poor individuals so that they can re-integrate into society and at least have some semblance of
+			   self respect."</p>
+			
+			<!-- Register -->
+			<a class="btn btn-primary" href="{{ url_for('register') }}#decision" role="button"
+			   aria-expanded="false" aria-controls="collapseExample">
+                   Back to the T&Cs
+            </a>
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

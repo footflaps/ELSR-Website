@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Set up Google Maps                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<head>
+	<!-- Google Maps -->
+	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
+	{{startmap.js}}
+	{{endmap.js}}
+</head>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header  class="masthead"
+         style="background-image: url({{ url_for('static', filename='img/about-bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					
+					<h1>Edit GPX Details</h1>
+					
+					<span class="subheading">Edit {{gpx.name}} before publishing it....</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show the map of the start                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+	
+            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Edit the start of your route</h2>
+			<p>Click on a point in the map to start the route at that point i.e. delete all previous points.</p>
+            
+            {{startmap.html}}
+			
+			<hr>
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show the map of the end                                        -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+	
+            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Edit the end of your route</h2>
+			<p>Click on a point in the map to end the route at that point i.e. delete all subsequent points.</p>
+            
+            {{endmap.html}}
+			
+			<hr>
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--               Owner / Admin control panel                                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<h2 style="font-size: 30px; margin-top: 10px; margin-bottom: 10px;">When you are happy with the start and finish locations.</h2>
+			
+			<div class="clearfix">
+				
+				{% if not gpx.public(): %}
+					<a class="btn btn-primary float-left" href="{{ url_for('publish_route', gpx_id=gpx.id) }}">Publish Route</a>
+				{% else: %}
+					<a class="btn btn-warning float-left" href="{{ url_for('hide_route', gpx_id=gpx.id) }}">Hide route</a>
+				{% endif %}
+			
+				<!-- Delete button -->
+				<a class="btn btn-danger float-right" href="{{ url_for('route_delete', gpx_id=gpx.id) }}"
+				   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
+				
+			</div>
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                         Modal form for confirming route delete                                 -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="deleteRouteModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="exampleModalLabel">Delete GPX file from database</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!--
+					NB To get the two parameters use:
+						1. gpx_id = request.args.get('gpx_id', None)
+                        2. confirm = request.form['confirm']
+				-->
+				<form action="{{ url_for('route_delete', gpx_id=gpx.id) }}" method="post">
+					
+					<div class="form-group">
+						<label for="confirm" class="col-form-label">Please enter "DELETE" in the box below:</label>
+						<textarea class="form-control" id="confirm" name="confirm"></textarea>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-danger">Submit</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>  <!-- End of modal form -->
+
+
+{% endblock %}

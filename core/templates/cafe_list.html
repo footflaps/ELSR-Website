@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+
+
+{% block content %}
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Set up Google Maps                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<head>
+	<!-- Google Maps -->
+	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
+	{{cafemap.js}}
+</head>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/cafe.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>The Cafes</h1>
+					<span class="subheading">Our favourite spots</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Map View of Cafes                                        -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<!-- Link to route planning guide -->
+			<h4><a href="{{ url_for('plan') }}">
+				<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
+				How to choose a suitable route
+				<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
+				</a>
+			</h4>
+	
+            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view of all {{ cafes | count() }} cafes</h2>
+            
+            {{cafemap.html}}
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      List View of Cafes                                        -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	
+	<!-- Table tile and Add a cafe button -->
+	<div class="row">
+		<div class="col-8 mx-auto">
+	
+			<!-- Button to expose hidden options -->
+			<a class="btn btn-primary float-left" data-toggle="collapse" href="#collapseAdminTools" role="button"
+			   aria-expanded="false" aria-controls="collapseExample">
+				List view of all {{ cafes | count() }} cafes
+	        </a>
+			
+			<!-- Add a cafe button -->
+			{% if current_user.is_authenticated and current_user.can_post_cafe() %}
+				<a class="btn btn-primary float-right" href="{{ url_for('new_cafe') }}">
+					<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i> new cafe
+				</a>
+			{% endif %}
+			
+		</div>
+	</div>
+	
+	
+	<!-- Collapsed button tab -->
+	<div class="collapse" id="collapseAdminTools">
+		<div class="card card-body my-3">
+	         <div class="clearfix">
+	
+				<!-- Loop for all cafes -->
+				{% for cafe in cafes %}
+				
+					<div class="row mt-0">
+						
+						<!-- Blank column to space things out -->
+						<div class="col-2"></div>
+						
+						<!-- First column, Name and summary -->
+						<div class="col-6">
+							<div class="post-preview">
+								<a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}">
+									
+									<h2 style="font-size: 20px; margin-top: 30px;">
+										{{cafe.name}}
+									</h2>
+									
+									<p style="font-size: 20px; margin-top: 0px">
+										{{cafe.summary}}
+									</p>
+									
+								</a>
+							</div>
+						</div>
+						
+						<!-- Second column, Rating -->
+						<div class="col-2 mx-auto">
+							<div class="post-preview">
+								<a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}">
+									
+									<h2 style="font-size: 20px; margin-top: 30px;">
+										{{cafe.rating}}
+									</h2>
+									
+									<p style="font-size: 20px; margin-top: 0px">{{ number_routes_passing_by(cafe.id, current_user) }} route(s)
+									</p>
+									
+								</a>
+							</div>
+						</div>
+						
+						<!-- Blank column to space things out -->
+						<div class="col-2"></div>
+					
+					</div>
+				{% endfor %}
+	
+		        <!-- 2nd Add a new cafe button -->
+		        <div class="row">
+					<div class="col-8 mx-auto">
+			
+						<!-- Must have permission to post -->
+						{% if current_user.is_authenticated and current_user.can_post_cafe() %}
+							<a class="btn btn-primary float-right" href="{{ url_for('new_cafe') }}">
+								<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i> new cafe
+							</a>
+						{% else %}
+							<a class="btn btn-primary disabled float-right">You must be logged in to add a cafe.</a>
+						{% endif %}
+			
+					</div>
+		        </div>
+		 
+			</div>
+		</div>
+	</div>
+
+</div>
+
+
+
+{% endblock %}

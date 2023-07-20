@@ -1,0 +1,1283 @@
+from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory
+from flask_login import login_required, current_user
+from datetime import date
+from flask_googlemaps import Map
+import gpxpy
+import gpxpy.gpx
+import mpu
+import os
+from time import sleep
+from werkzeug import exceptions
+
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import app from __init__.py
+# -------------------------------------------------------------------------------------------------------------- #
+
+from core import app, MAP_STYLE, GPX_UPLOAD_FOLDER_ABS
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import our three database classes and associated forms, decorators etc
+# -------------------------------------------------------------------------------------------------------------- #
+
+from core.dB_gpx import Gpx, UploadGPXForm, GPX_ALLOWED_EXTENSIONS
+from core.db_users import User, update_last_seen, logout_barred_user
+from core.dB_cafes import Cafe, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
+from core.dB_events import Event
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Constants used to verify sensible cafe coordinates
+# -------------------------------------------------------------------------------------------------------------- #
+
+# We only allow cafes within a sensible range to Cambridge (Espresso Library Cafe)
+ELSR_LAT = 52.203316
+ELSR_LON = 0.131689
+ELSR_MAX_KM = 100
+
+# We only associate a cafe with a route if it passes within a sensible range of the cafe
+MIN_DIST_TO_CAFE_KM = 1
+
+# GPX trails can have many points very close together, these look terrible in GM with an icon for each point
+# so we filter the points with a minimum inter point distance, before passing to GM.
+MIN_DISPLAY_STEP_KM = 0.5
+
+# Remove any points closer together than this
+GPX_MAX_RESOLUTION_KM = 0.05
+
+# How far we display along the route for trimming start and end
+TRIM_DISTANCE_KM = 2.0
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Functions...
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
+# Year for (C)
+current_year = date.today().year
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Ensure only GPX files get uploaded
+# -------------------------------------------------------------------------------------------------------------- #
+
+def allowed_file(filename):
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in GPX_ALLOWED_EXTENSIONS
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Update all GPXes with a new cafe
+# -------------------------------------------------------------------------------------------------------------- #
+
+def check_new_cafe_with_all_gpxes(cafe):
+
+    print(f"Updating all routes for closeness to cafe {cafe.name}")
+
+    # Get all the routes
+    gpxes = Gpx().all_gpxes()
+
+    # Loop over each GPX file
+    for gpx in gpxes:
+
+        # Open the file
+        with open(gpx.filename, 'r') as file_ref:
+            gpx_file = gpxpy.parse(file_ref)
+
+            # Max distance
+            min_km = 100
+            dist_km = 0
+            min_km_dist = 100
+
+            for track in gpx_file.tracks:
+                for segment in track.segments:
+
+                    last_lat = segment.points[0].latitude
+                    last_lon = segment.points[0].longitude
+
+                    for point in segment.points:
+
+                        # How far along the route we are
+                        dist_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+
+                        # How far is the cafe from the GPX file
+                        range_km = mpu.haversine_distance((cafe.lat, cafe.lon), (point.latitude, point.longitude))
+
+                        if range_km < min_km:
+                            min_km = range_km
+                            min_km_dist = dist_km
+
+                        last_lat = point.latitude
+                        last_lon = point.longitude
+
+        # Close enough?
+        if min_km <= MIN_DIST_TO_CAFE_KM:
+            print(f"-- Closest to cafe {cafe.name} was {round(min_km, 1)} km at"
+                  f" {round(min_km_dist, 1)} km along the route. Total length was {round(dist_km, 1)} km")
+            Gpx().update_cafe_list(gpx.id, cafe.id, round(min_km, 1), round(min_km_dist, 1))
+        else:
+            Gpx().remove_cafe_list(gpx.id, cafe.id)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Update a GPX from existing cafe dB
+# -------------------------------------------------------------------------------------------------------------- #
+
+def check_new_gpx_with_all_cafes(gpx_id):
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    # Make sure gpx_id is valid
+    if not gpx:
+        print(f"Updating GPX Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        Event().log_event("Update GPX", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        return False
+
+    Event().log_event("Update GPX", f"Updating GPX '{gpx.name}' for closeness to all cafes.'")
+    print(f"Updating GPX '{gpx.name}' for closeness to all cafes.")
+
+    # ----------------------------------------------------------- #
+    # Get all the cafes
+    # ----------------------------------------------------------- #
+    cafes = Cafe().all_cafes()
+
+    # Need a list of closeness
+    min_distance_km = [100] * len(cafes)
+    min_distance_path_km = [0] * len(cafes)
+
+    # ----------------------------------------------------------- #
+    # Loop over the GPX file
+    # ----------------------------------------------------------- #
+    with open(gpx.filename, 'r') as file_ref:
+
+        gpx_file = gpxpy.parse(file_ref)
+
+        for track in gpx_file.tracks:
+            for segment in track.segments:
+
+                last_lat = segment.points[0].latitude
+                last_lon = segment.points[0].longitude
+                dist_along_route_km = 0
+
+                for point in segment.points:
+
+                    # How far along the route we are
+                    dist_along_route_km += mpu.haversine_distance((last_lat, last_lon),
+                                                                  (point.latitude, point.longitude))
+
+                    for cafe in cafes:
+
+                        # How far is the cafe from the GPX file
+                        dist_to_cafe_km = mpu.haversine_distance((cafe.lat, cafe.lon),
+                                                                 (point.latitude, point.longitude))
+
+                        if dist_to_cafe_km < min_distance_km[cafe.id - 1]:
+                            min_distance_km[cafe.id - 1] = dist_to_cafe_km
+                            min_distance_path_km[cafe.id - 1] = dist_along_route_km
+
+                    last_lat = point.latitude
+                    last_lon = point.longitude
+
+        # ----------------------------------------------------------- #
+        # Summarise what we found
+        # ----------------------------------------------------------- #
+        for cafe in cafes:
+            if min_distance_km[cafe.id - 1] <= MIN_DIST_TO_CAFE_KM:
+                print(f"-- Route passes within {round(min_distance_km[cafe.id - 1],1)} km of {cafe.name} "
+                      f"after {round(min_distance_path_km[cafe.id - 1],1)} km.")
+                # Push update to GPX file
+                Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
+                                       min_distance_path_km[cafe.id - 1])
+
+
+# gpx = Gpx().one_gpx(11)
+# check_new_gpx_with_all_cafes(gpx)
+
+# 5 is Mill End Plants
+# for cafe in Cafe().all_cafes():
+#     check_new_cafe_with_all_gpxes(cafe)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Update existing file
+# -------------------------------------------------------------------------------------------------------------- #
+
+def update_existing_gpx(gpx_file, gpx_filename):
+
+    # This is the full path to the existing GPX file we are going to over write
+    old_filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+
+    # This is a temp file we will use to write out the new GPX file to first
+    tmp_filename = f"{old_filename}.tmp"
+
+    # ----------------------------------------------------------- #
+    # Step 1: Delete tmp file if it exists
+    # ----------------------------------------------------------- #
+    # NB It shouldn't exist, but if something went wrong with a deleted GPX, it could end up left orphaned
+    if os.path.exists(tmp_filename):
+        print(f"update_existing_file: Deleting rogue file {tmp_filename}")
+        try:
+            os.remove(tmp_filename)
+            # We need this as remove seems to keep the file locked for a short period
+            sleep(0.5)
+        except Exception as e:
+            Event().log_event("GPX update",
+                              f"Failed to delete existing file '{tmp_filename}', error code was {e.args}")
+            print(f"update_existing_file: Failed to delete existing file '{tmp_filename}', error code was {e.args}")
+            return False
+
+    # ----------------------------------------------------------- #
+    # Step 2: Write out our shortened file to new_filename
+    # ----------------------------------------------------------- #
+    print(f"update_existing_file: Trying to write '{tmp_filename}'")
+    with open(tmp_filename, 'w') as file_ref2:
+        file_ref2.write(gpx_file.to_xml())
+
+    # ----------------------------------------------------------- #
+    # Step 3: Delete the existing (unshortened) GPX file
+    # ----------------------------------------------------------- #
+    try:
+        print(f"cut_start_gpx:Deleting '{old_filename}'")
+        os.remove(old_filename)
+        # We need this as remove seems to keep the file locked for a short period
+        sleep(0.5)
+    except Exception as e:
+        Event().log_event("GPX update", f"Failed to delete existing file '{old_filename}', error code was {e.args}")
+        print(f"update_existing_file: Failed to delete existing file '{old_filename}', error code was {e.args}")
+        return False
+
+    # ----------------------------------------------------------- #
+    # Step 4: Rename our temp (shortened) file
+    # ----------------------------------------------------------- #
+    print(f"cut_start_gpx:Moving '{tmp_filename}' to '{old_filename}'")
+    try:
+        os.rename(tmp_filename, old_filename)
+    except Exception as e:
+        Event().log_event("GPX update", f"Failed to rename existing file '{tmp_filename}', error code was {e.args}")
+        print(f"update_existing_file: Failed to rename existing file '{tmp_filename}', error code was {e.args}")
+        return False
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Cut the end of the start of the GPX
+# -------------------------------------------------------------------------------------------------------------- #
+
+def cut_start_gpx(gpx_filename, start_count):
+    Event().log_event("GPX cut Start", f"Called with gpx_filename='{gpx_filename}', start_count='{start_count}'")
+    print(f"cut_start_gpx: Called with gpx_filename='{gpx_filename}', start_count='{start_count}'")
+
+    # ----------------------------------------------------------- #
+    # Open the file and trim it
+    # ----------------------------------------------------------- #
+    with open(gpx_filename, 'r') as file_ref:
+        gpx_file = gpxpy.parse(file_ref)
+
+        # Read in all points after start_count
+        for track in gpx_file.tracks:
+
+            count_before = len(track.segments[0].points)
+
+            for segment in track.segments:
+                # ----------------------------------------------------------- #
+                # Strip start_count points from the beginning
+                # ----------------------------------------------------------- #
+                for _ in range(max(start_count - 1, 0)):
+                    segment.points.pop(0)
+
+            count_after = len(track.segments[0].points)
+
+    # ----------------------------------------------------------- #
+    # Overwrite the existing file with the new file
+    # ----------------------------------------------------------- #
+    update_existing_gpx(gpx_file, gpx_filename)
+    Event().log_event("GPX cut Start", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Crop the end of the GPX file
+# -------------------------------------------------------------------------------------------------------------- #
+def cut_end_gpx(gpx_filename, end_count):
+    Event().log_event("GPX cut End", f"Called with gpx_filename='{gpx_filename}', end_count='{end_count}'")
+    print(f"cut_end_gpx: Called with gpx_filename='{gpx_filename}', end_count='{end_count}'")
+
+    # ----------------------------------------------------------- #
+    # Open the file and trim it
+    # ----------------------------------------------------------- #
+    with open(gpx_filename, 'r') as file_ref:
+        gpx_file = gpxpy.parse(file_ref)
+
+        # Read in all points after start_count
+        for track in gpx_file.tracks:
+
+            count_before = len(track.segments[0].points)
+
+            for segment in track.segments:
+
+                # ----------------------------------------------------------- #
+                # Strip start_count points from the beginning
+                # ----------------------------------------------------------- #
+                num_points = len(segment.points)
+                num_to_crop = num_points - end_count
+
+                for _ in range(num_to_crop):
+                    segment.points.pop(-1)
+
+                count_after = len(track.segments[0].points)
+
+    # ----------------------------------------------------------- #
+    # Overwrite the existing file with the new file in 4 steps
+    # ----------------------------------------------------------- #
+    update_existing_gpx(gpx_file, gpx_filename)
+    Event().log_event("GPX cut End", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# New "clean" GPX file
+# -------------------------------------------------------------------------------------------------------------- #
+
+def new_gpx():
+    gpx = gpxpy.gpx.GPX()
+
+    # Create first track in our GPX:
+    gpx_track = gpxpy.gpx.GPXTrack()
+    gpx.tracks.append(gpx_track)
+
+    # Create first segment in our GPX track:
+    gpx_segment = gpxpy.gpx.GPXTrackSegment()
+    gpx_track.segments.append(gpx_segment)
+
+    return gpx
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Clean up the GPX file
+# -------------------------------------------------------------------------------------------------------------- #
+
+def strip_excess_info_from_gpx(gpx_filename, gpx_id):
+    Event().log_event("Clean GPX", f"Called with gpx_filename='{gpx_filename}', gpx_id='{gpx_id}'.")
+    print(f"strip_excess_info_from_gpx: called with gpx_filename='{gpx_filename}'.")
+
+    # Want these two things
+    length_km = 0
+    ascent_m = 0
+
+    # For some reason we can't delete the extension data from a GPX file (HR, cadence, power). So, the bodge is
+    # just to create a new file and migrate across only the data we want (lat, lon, height).
+    new_gpx_file = new_gpx()
+
+    # Open the file
+    with open(gpx_filename, 'r') as file_ref:
+        gpx_file = gpxpy.parse(file_ref)
+
+        # Read in all points after start_count
+        for track in gpx_file.tracks:
+
+            for segment in track.segments:
+
+                # Set these to zero, so we always include the first point, otherwise it skips the first
+                # few points till we have moved along the route past GPX_MAX_RESOLUTION_KM
+                last_lat = 0
+                last_lon = 0
+                last_elevation = segment.points[0].elevation
+
+                points_before = len(segment.points)
+
+                for point in segment.points:
+
+                    # How far is this point from the previous one
+                    inter_dist_km = mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+
+                    if inter_dist_km >= GPX_MAX_RESOLUTION_KM:
+
+                        # Create a new point, using just the data we want
+                        new_point = gpxpy.gpx.GPXTrackPoint(point.latitude,
+                                                            point.longitude,
+                                                            point.elevation)
+
+                        # Add to out new GPX file
+                        new_gpx_file.tracks[0].segments[0].points.append(new_point)
+
+                        # How far along the route we are
+                        length_km += inter_dist_km
+
+                        # Total ascent
+                        if point.elevation > last_elevation:
+                            ascent_m += point.elevation - last_elevation
+
+                        # Update last point
+                        last_lat = point.latitude
+                        last_lon = point.longitude
+                        last_elevation = point.elevation
+
+    points_after = len(track.segments[0].points)
+
+    # Update stats in the dB
+    Gpx().update_stats(gpx_id, length_km, ascent_m)
+
+    # ----------------------------------------------------------- #
+    # Overwrite the existing file
+    # ----------------------------------------------------------- #
+    update_existing_gpx(gpx_file, gpx_filename)
+    Event().log_event("Clean GPX", f"Cleaned GPX from {points_before} to {points_after} points, "
+                                   f"gpx_filename='{update_existing_gpx(gpx_file, gpx_filename)}'.")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Markers for the complete GPX file
+# -------------------------------------------------------------------------------------------------------------- #
+
+def markers_for_gpx(filename):
+    markers = []
+    with open(filename, 'r') as gpx_file:
+
+        gpx_track = gpxpy.parse(gpx_file)
+
+        for track in gpx_track.tracks:
+            for segment in track.segments:
+
+                # Need these for working out inter sample spacing
+                last_lat = 0
+                last_lon = 0
+                count = 0
+
+                for point in segment.points:
+
+                    # We sub-sample the raw GPX file as if you plot all the points, the map looks a complete mess.
+                    if mpu.haversine_distance((last_lat, last_lon),
+                                              (point.latitude, point.longitude)) > MIN_DISPLAY_STEP_KM or \
+                            point == segment.points[-1]:
+                        count += 1
+
+                        markers.append({
+                            'icon': 'http://maps.google.com/mapfiles/kml/pal4/icon49.png',
+                            'lat': point.latitude,
+                            'lng': point.longitude,
+                            'infobox': f'Point {count}'
+                        })
+
+                        last_lat = point.latitude
+                        last_lon = point.longitude
+    return markers
+
+
+def markers_for_cafes(cafes):
+    markers = []
+    for cafe_summary in cafes:
+
+        # Need to look up current cafe open / closed status
+        if Cafe().one_cafe(cafe_summary["id"]).active:
+            icon = OPEN_CAFE_ICON
+        else:
+            icon = CLOSED_CAFE_ICON
+
+        markers.append({
+            'icon': icon,
+            'lat': cafe_summary['lat'],
+            'lng': cafe_summary['lon'],
+            'infobox': f'<a href="{url_for("cafe_details", cafe_id=cafe_summary["id"])}">{cafe_summary["name"]}</a>'
+        })
+    return markers
+
+
+def start_and_end_maps(filename, gpx_id):
+    # Creating two seperate maps:
+    start_markers = []
+    end_markers = []
+
+    # open our file
+    with open(filename, 'r') as gpx_file:
+        gpx_track = gpxpy.parse(gpx_file)
+
+        # ----------------------------------------------------------- #
+        #   Markers for 1st 2km
+        # ----------------------------------------------------------- #
+        for track in gpx_track.tracks:
+            for segment in track.segments:
+
+                # Need these for working out inter sample spacing
+                last_lat = segment.points[0].latitude
+                last_lon = segment.points[0].longitude
+                total_km = 0
+                index = 0
+
+                for point in segment.points:
+
+                    # Work out how far we have travelled so far...
+                    total_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+
+                    index += 1
+
+                    # We only want the first km or so
+                    if total_km < TRIM_DISTANCE_KM:
+                        start_markers.append({
+                            'icon': 'http://maps.google.com/mapfiles/kml/pal4/icon49.png',
+                            'lat': point.latitude,
+                            'lng': point.longitude,
+                            'infobox': f'<a href="{url_for("gpx_cut_start", gpx_id=gpx_id, index=index)}">Start Here! (Point {index})</a>'
+                        })
+                    else:
+                        break
+
+                    last_lat = point.latitude
+                    last_lon = point.longitude
+
+        # ----------------------------------------------------------- #
+        #   Markers for last 2km
+        # ----------------------------------------------------------- #
+        for track in gpx_track.tracks:
+            for segment in track.segments:
+
+                # Need these for working out inter sample spacing
+                last_lat = segment.points[-1].latitude
+                last_lon = segment.points[-1].longitude
+                total_km = 0
+                index = len(segment.points)
+
+                for point in segment.points[::-1]:
+
+                    # Work out how far we have travelled so far...
+                    total_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+
+                    # We only want the last km or so
+                    if total_km < TRIM_DISTANCE_KM:
+                        end_markers.append({
+                            'icon': 'http://maps.google.com/mapfiles/kml/pal4/icon49.png',
+                            'lat': point.latitude,
+                            'lng': point.longitude,
+                            'infobox': f'<a href="{url_for("gpx_cut_end", gpx_id=gpx_id, index=index)}">Finish Here! (Point {index})</a>'
+                        })
+                    else:
+                        break
+
+                    last_lat = point.latitude
+                    last_lon = point.longitude
+                    index -= 1
+
+    # Create the Google Map config
+    startmap = Map(
+        identifier="startmap",
+        lat=52.211001,
+        lng=0.117207,
+        fit_markers_to_bounds=True,
+        style=MAP_STYLE,
+        markers=start_markers
+    )
+
+    # Create the Google Map config
+    endmap = Map(
+        identifier="endmap",
+        lat=52.211001,
+        lng=0.117207,
+        fit_markers_to_bounds=True,
+        style=MAP_STYLE,
+        markers=end_markers
+    )
+
+    return [startmap, endmap]
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# html routes
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# List of all known GPX files
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/routes', methods=['GET'])
+@update_last_seen
+def gpx_list():
+
+    # Grab all our routes
+    gpxes = Gpx().all_gpxes()
+
+    # Render in gpx_list template
+    return render_template("gpx_list.html", year=current_year,  gpxes=gpxes)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Display a single GPX file
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/route/<int:gpx_id>', methods=['GET', 'POST'])
+@update_last_seen
+def gpx_details(gpx_id):
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    if not gpx:
+        Event().log_event("One GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"gpx_details(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Rules:
+    # 1. Must be admin or the current author
+    # 2. Route must be public
+    # Tortuous logic as a non logged in user doesn't have any of our custom attributes eg email etc
+    if not gpx.public() and \
+       not current_user.is_authenticated:
+        Event().log_event("One GPX Fail", f"Refusing permission for non logged in user to see "
+                                          f"hidden GPX route, gpx_id = '{gpx_id}'.")
+        print(f"gpx_details(): Refusing permission for non logged in user to see hidden GPX route {gpx.id}!")
+        return abort(403)
+
+    elif not gpx.public() and \
+         current_user.email != gpx.email and \
+         not current_user.admin():
+        Event().log_event("One GPX Fail", f"Refusing permission for user {current_user.email} to see "
+                                          f"hidden GPX route, gpx_id = '{gpx_id}'.")
+        print(f"gpx_details(): Refusing permission for user {current_user.email} to see hidden GPX route {gpx.id}!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Get info for webpage
+    # ----------------------------------------------------------- #
+    author = User().find_user_from_email(gpx.email).name
+    cafe_list = Cafe().cafe_list(gpx.cafes_passed)
+
+    # ----------------------------------------------------------- #
+    # Need a map of the route and nearby cafes
+    # ----------------------------------------------------------- #
+    markers = markers_for_gpx(gpx.filename)
+    markers += markers_for_cafes(cafe_list)
+    sndmap = Map(
+        identifier="cafemap",
+        lat=52.211001,
+        lng=0.117207,
+        fit_markers_to_bounds=True,
+        style=MAP_STYLE,
+        markers=markers
+    )
+
+    # ----------------------------------------------------------- #
+    # Flag if hidden
+    # ----------------------------------------------------------- #
+    if not gpx.public():
+        flash("This route is not public yet!")
+
+    # Render in main index template
+    return render_template("gpx_details.html", gpx=gpx, year=current_year, sndmap=sndmap,
+                           author=author, cafe_list=cafe_list)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Make a route public
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/publish_route', methods=['GET'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def publish_route():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not gpx_id:
+        Event().log_event("Publish GPX Fail", f"Missing gpx_id!")
+        print(f"publish_route(): Missing gpx_id!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    if not gpx:
+        Event().log_event("Publish GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"publish_route(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Rules:
+    # 1. Must be admin or the current author
+    # 2. Must not be barred (NB Admins cannot be barred)
+    if (current_user.email != gpx.email
+        and not current_user.admin()) \
+            or not current_user.can_post_gpx():
+        # Failed authentication
+        Event().log_event("Publish GPX Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
+        print(f"publish_route(): Refusing permission for {current_user.email} to and route {gpx.id}!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Publish route
+    # ----------------------------------------------------------- #
+    if Gpx().publish(gpx_id):
+        Event().log_event("Publish GPX Success", f"Route published with gpx_id = '{gpx_id}'.")
+        flash("Route has been published!")
+        print(f"publish_route(): Route published gpx.id = '{gpx.id}'")
+    else:
+        Event().log_event("Publish GPX Fail", f"Failed to publish, gpx_id = '{gpx_id}'.")
+        flash("Sorry, something went wrong!")
+        print(f"publish_route(): Failed to publish route gpx.id = '{gpx.id}'")
+
+    # ----------------------------------------------------------- #
+    # Clear existing nearby cafe list
+    # ----------------------------------------------------------- #
+    if not Gpx().clear_cafe_list(gpx_id):
+        Event().log_event("Publish GPX Fail", f"Failed clear cafe list, gpx_id = '{gpx_id}'.")
+        flash("Sorry, something went wrong!")
+        print(f"publish_route(): Failed clear cafe list gpx.id = '{gpx.id}'")
+        return redirect(url_for('edit_route', gpx_id=gpx_id))
+
+    # ----------------------------------------------------------- #
+    # Add new existing nearby cafe list
+    # ----------------------------------------------------------- #
+    check_new_gpx_with_all_cafes(gpx_id)
+    flash("Nearby cafe list has been updated.")
+
+    # Redirect back to the details page as the route is now public, ie any editing is over
+    return redirect(url_for('gpx_details', gpx_id=gpx_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Make a route private
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/hide_route', methods=['GET'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def hide_route():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not gpx_id:
+        Event().log_event("Hide GPX Fail", f"Missing gpx_id!")
+        print(f"hide_route(): Missing gpx_id!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    if not gpx:
+        Event().log_event("Hide GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"hide_route(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Rules:
+    # 1. Must be admin or the current author
+    # 2. Must not be barred (NB Admins cannot be barred)
+    if (current_user.email != gpx.email
+        and not current_user.admin()) \
+            or not current_user.can_post_gpx():
+        # Failed authentication
+        Event().log_event("Hide GPX Fail", f"Refusing permission for {current_user.email} to "
+                                           f"and route gpx_id = '{gpx_id}'.")
+        print(f"hide_route(): Refusing permission for {current_user.email} for route gpx_id = '{gpx_id}'.")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Hide route
+    # ----------------------------------------------------------- #
+    if Gpx().hide(gpx_id):
+        Event().log_event("Hide GPX Success", f"Route hidden gpx.id = '{gpx.id}'")
+        flash("Route has been hidden.")
+        print(f"hide_route(): Route hidden gpx.id = '{gpx.id}'")
+    else:
+        Event().log_event("Hide GPX Fail", f"Something went wrong gpx_id = '{gpx_id}'.")
+        flash("Sorry, something went wrong!")
+        print(f"hide_route(): Failed to hide route gpx.id = '{gpx.id}'")
+
+    # Redirect back to the edit page as that's probably what they want to do next
+    return redirect(url_for('edit_route', gpx_id=gpx_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add a GPX ride to the dB
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/new_route', methods=['GET', 'POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def new_route():
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    if not current_user.can_post_gpx():
+        Event().log_event("New GPX Fail", f"Refusing permission for user {current_user.email} to upload GPX route!")
+        print(f"new_route(): Refusing permission for user {current_user.email} to upload GPX route!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Need a form for uploading
+    # ----------------------------------------------------------- #
+    form = UploadGPXForm()
+
+    # Are we posting the completed form?
+    if form.validate_on_submit():
+
+        # ----------------------------------------------------------- #
+        #   POST - form submitted and validated
+        # ----------------------------------------------------------- #
+
+        # Try and get the filename.
+        if 'filename' not in request.files:
+            # Almost certain the form failed validation
+            Event().log_event(f"New GPX Fail", f"Failed to find 'filename' in request.files!")
+            print(f"new_route(): Failed to find 'filename' in request.files!")
+            flash("Couldn't find the file.")
+            return render_template("gpx_add.html", year=current_year, form=form)
+
+        else:
+            # Get the filename
+            file = request.files['filename']
+            print(f"new_route(): Uploading '{file}'")
+
+            # If the user does not select a file, the browser submits an
+            # empty file without a filename.
+            if file.filename == '':
+                Event().log_event(f"New GPX Fail", f"No selected file!")
+                flash('No selected file')
+                return redirect(request.url)
+
+            if not file or \
+               not allowed_file(file.filename):
+                Event().log_event(f"New GPX Fail", f"Invalid file '{file.filename}'!")
+                flash("That's not a GPX file!")
+                return redirect(request.url)
+
+            # Create a new GPX object
+            # We do this first as we need the id in order to create
+            # the filename for the GPX file when we upload it
+            gpx = Gpx()
+            gpx.name = form.name.data
+            gpx.email = current_user.email
+            gpx.cafes_passed = "[]"
+            gpx.ascent_m = 0
+            gpx.length_km = 0
+            gpx.filename = "tmp"
+
+            # Add to the dB
+            gpx = gpx.add_gpx(gpx)
+            if gpx:
+                # Need to acquire if
+                Event().log_event(f"New GPX Success", f" GPX added to dB, gpx.id = '{gpx.id}'")
+                print(f"new_route(): GPX added to dB, id = '{gpx.id}'")
+            else:
+                Event().log_event(f"New GPX Fail", f"Something went wrong with gpx_id = '{gpx.id}'")
+                print(f"new_route(): Failed to add gpx to the dB!")
+                flash("Sorry, something went wrong!")
+                return render_template("gpx_add.html", year=current_year, form=form)
+
+            # This is where we will store it
+            filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
+
+            # Make sure this doesn't already exist
+            if os.path.exists(filename):
+                Event().log_event(f"New GPX Info", f"Deleting rogue file '{filename}', gpx.id = '{gpx.id}'")
+                print(f"new_route(): Deleting rogue file '{filename}'")
+                try:
+                    os.remove(filename)
+                    sleep(0.5)
+                except Exception as e:
+                    Event().log_event(f"New GPX Fail", f"Failed to delete GPX file '{filename}', error code was '{e.args}'.")
+                    print(f"new_route(): Failed to delete GPX file '{filename}', error code was '{e.args}'.")
+                    flash("Sorry, something went wrong!")
+                    return render_template("gpx_add.html", year=current_year, form=form)
+
+            # Upload the GPX file
+            print(f"new_route(): About to try and save to '{filename}'")
+            file.save(filename)
+            print(f"new_route(): File '{filename}' uploaded OK")
+
+            # Update gpx object with filename
+            if not Gpx().update_filename(gpx.id, filename):
+                Event().log_event(f"New GPX Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                print(f"new_route(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                flash("Sorry, something went wrong!")
+
+            # Update GPX with nearby cafes
+            check_new_gpx_with_all_cafes(gpx.id)
+
+            # Strip off any extra info eg HR data etc
+            flash("Any HR or Power data has been removed.")
+            strip_excess_info_from_gpx(filename, gpx.id)
+
+            # Forward to edit route as that's the next step
+            Event().log_event(f"New GPX Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name})")
+            return redirect(url_for('edit_route', gpx_id=gpx.id))
+
+    elif request.method == 'POST':
+
+        # ----------------------------------------------------------- #
+        #   POST - form validation failed
+        # ----------------------------------------------------------- #
+        flash("Form not filled in properly, see below!")
+
+        return render_template("gpx_add.html", year=current_year, form=form)
+
+    # ----------------------------------------------------------- #
+    #   GET - render form etc
+    # ----------------------------------------------------------- #
+
+    return render_template("gpx_add.html", year=current_year, form=form)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Allow the user to edit a GPX file
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/edit_route', methods=['GET', 'POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def edit_route():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not gpx_id:
+        Event().log_event("Edit GPX Fail", f"Missing gpx_id!")
+        print(f"edit_route(): Missing gpx_id!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    if not gpx:
+        Event().log_event("Edit GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"edit_route(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Rules:
+    # 1. Must be admin or the current author
+    # 2. Must not be barred (NB Admins cannot be barred)
+    if (current_user.email != gpx.email
+        and not current_user.admin()) \
+       or not current_user.can_post_gpx():
+        # Failed authentication
+        Event().log_event("Edit GPX Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
+        print(f"edit_route(): Refusing permission for {current_user.email} and route {gpx.id}!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    #   Generate Start and Finish maps
+    # ----------------------------------------------------------- #
+    maps = start_and_end_maps(gpx.filename, gpx_id)
+
+    return render_template("gpx_edit.html", year=current_year, startmap=maps[0], endmap=maps[1], gpx=gpx)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Crop the start of a GPX
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/gpx_cut_start', methods=['GET', 'POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def gpx_cut_start():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+    index = request.args.get('index', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not gpx_id:
+        Event().log_event("Cut Start Fail", f"Missing gpx_id!")
+        print(f"gpx_cut_statr(): Missing gpx_id!")
+        return abort(400)
+    elif not index:
+        Event().log_event("Cut Start Fail", f"Missing index!")
+        print(f"gpx_cut_start(): Missing index!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+    index = int(index)
+
+    if not gpx:
+        Event().log_event("GPX Cut Start Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"gpx_cut_start(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ToDo: Need to check index is valid
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Rules:
+    # 1. Must be admin or the current author
+    # 2. Must not be barred (NB Admins cannot be barred)
+    if (current_user.email != gpx.email
+        and not current_user.admin()) \
+            or not current_user.can_post_gpx():
+        # Failed authentication
+        Event().log_event("GPX Cut Start Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
+        print(f"gpx_cut_start(): Refusing permission for {current_user.email} and route {gpx_id}!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Cut start of route
+    # ----------------------------------------------------------- #
+    print(f"gpx_cut_start(): Cutting start of route {gpx.name} at index {index}...")
+    cut_start_gpx(gpx.filename, index)
+
+    # ----------------------------------------------------------- #
+    # Update GPX for cafes
+    # ----------------------------------------------------------- #
+    print(f"gpx_cut_start(): Clearing cafe list for gpx_id = '{gpx_id}'.")
+    if Gpx().clear_cafe_list(gpx_id):
+        # Go ahead and update the list
+        print(f"gpx_cut_start(): Updating cafe list for gpx_id = '{gpx_id}'.")
+        check_new_gpx_with_all_cafes(gpx_id)
+        flash("Nearby cafe list has been updated.")
+    else:
+        Event().log_event("GPX Cut Start Fail", f"Failed to clear cafe list, gpx_id = '{gpx_id}'.")
+        flash("Sorry, something went wrong!")
+        print(f"gpx_cut_start(): Failed to clear cafe list.")
+
+    # Back to the edit page
+    return redirect(url_for('edit_route', gpx_id=gpx_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Crop the start of a GPX
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/gpx_cut_end', methods=['GET', 'POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def gpx_cut_end():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+    index = request.args.get('index', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not gpx_id:
+        Event().log_event("Cut End Fail", f"Missing gpx_id!")
+        print(f"gpx_cut_end(): Missing gpx_id!")
+        return abort(400)
+    elif not index:
+        Event().log_event("Cut End Fail", f"Missing index!")
+        print(f"gpx_cut_end(): Missing index!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+    index = int(index)
+
+    if not gpx:
+        Event().log_event("GPX Cut End Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"gpx_cut_end(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ToDo: Need to check index is valid
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Rules:
+    # 1. Must be admin or the current author
+    # 2. Must not be barred (NB Admins cannot be barred)
+    if (current_user.email != gpx.email
+        and not current_user.admin()) \
+            or not current_user.can_post_gpx():
+        # Failed authentication
+        Event().log_event("GPX Cut End Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
+        print(f"gpx_cut_end(): Refusing permission for {current_user.email} and route {gpx_id}!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Cut end of route
+    # ----------------------------------------------------------- #
+    print(f"gpx_cut_end(): Cutting end of route {gpx.name} at index {index}...")
+    cut_end_gpx(gpx.filename, index)
+
+    # ----------------------------------------------------------- #
+    # Update GPX for cafes
+    # ----------------------------------------------------------- #
+    print(f"gpx_cut_end(): Clearing cafe list for gpx_id = '{gpx_id}'.")
+    if Gpx().clear_cafe_list(gpx_id):
+        # Go ahead and update the list
+        print(f"gpx_cut_end(): Updating cafe list for gpx_id = '{gpx_id}'.")
+        check_new_gpx_with_all_cafes(gpx_id)
+        flash("Nearby cafe list has been updated.")
+    else:
+        Event().log_event("GPX Cut End Fail", f"Failed to clear cafe list, gpx_id = '{gpx_id}'.")
+        flash("Sorry, something went wrong!")
+        print(f"gpx_cut_end(): Failed to clear cafe list.")
+
+    # Back to the edit page
+    return redirect(url_for('edit_route', gpx_id=gpx_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Delete a GPX route
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/gpx_delete', methods=['GET', 'POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def route_delete():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+    try:
+        confirm = request.form['confirm']
+    except exceptions.BadRequestKeyError:
+        confirm = None
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not gpx_id:
+        Event().log_event("GPX Delete Fail", f"Missing gpx_id!")
+        print(f"route_delete(): Missing gpx_id!")
+        return abort(400)
+    elif not confirm:
+        Event().log_event("GPX Delete Fail", f"Missing confirm!")
+        print(f"route_delete(): Missing confirm!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    if not gpx:
+        Event().log_event("GPX Delete Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"route_delete(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Rules:
+    # 1. Must be admin or the current author
+    # 2. Must not be barred (NB Admins cannot be barred)
+    if (current_user.email != gpx.email
+        and not current_user.admin()) \
+            or not current_user.can_post_gpx():
+        Event().log_event("GPX Delete Fail", f"Refusing permission for {current_user.email} and , gpx_id = {gpx_id}!")
+        print(f"route_delete(): Refusing permission for {current_user.email} and , gpx_id = {gpx_id}!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Confirm Delete
+    # ----------------------------------------------------------- #
+    if confirm != "DELETE":
+        Event().log_event("GPX Delete Fail", f"Delete wasn't confirmed, gpx_id = {gpx_id}!")
+        flash("Delete wasn't confirmed!")
+        return redirect(url_for('edit_route', gpx_id=gpx_id))
+
+    # ----------------------------------------------------------- #
+    # Delete #1: Remove from dB
+    # ----------------------------------------------------------- #
+    if Gpx().delete_gpx(gpx.id):
+        Event().log_event("GPX Delete Success", f"Successfully deleted GPX from dB, gpx_id = {gpx_id}!")
+        flash("Route was deleted!")
+        print(f"route_delete(): Successfully deleted GPX from dB.")
+    else:
+        Event().log_event("GPX Delete Fail", f"Something went wrong, gpx_id = {gpx_id}!")
+        flash("Sorry, something went wrong!")
+        print(f"route_delete(): Failed to delete GPX from dB.")
+        # Back to GPX list page
+        return redirect(url_for('gpx_list'))
+
+    # ----------------------------------------------------------- #
+    # Delete #2: Remove GPX file itself
+    # ----------------------------------------------------------- #
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    try:
+        os.remove(filename)
+        print(f"route_delete(): File '{filename}' deleted from directory.")
+    except Exception as e:
+        Event().log_event("GPX Delete Fail", f"Failed to delete GPX file '{filename}', "
+                                             f"error code was {e.args}, gpx_id = {gpx_id}!")
+        print(f"route_delete(): Failed to delete GPX file '{filename}', error code was {e.args}.")
+
+    # Back to GPX list page
+    return redirect(url_for('gpx_list'))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Download a GPX route
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/gpx_download/<int:gpx_id>', methods=['GET', 'POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def route_download(gpx_id):
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    if not gpx:
+        Event().log_event("GPX Cut Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        print(f"route_download(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Send link to download the file
+    # ----------------------------------------------------------- #
+
+    Event().log_event("GPX Download Success", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
+    return send_from_directory(directory='static', path=f"gpx/{os.path.basename(gpx.filename)}",
+                               download_name=f"ELSR_{gpx.name.replace(' ','_')}.gpx")
+
+
+

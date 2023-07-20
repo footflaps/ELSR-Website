@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Set up Google Maps                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<head>
+	<!-- Google Maps -->
+	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
+	{{cafemap.js}}
+</head>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Page Header                                                -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/home-bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>EL Social Rides</h1>
+					<span class="subheading">The first rule of bike club is....</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>Who? <i class="fa-solid fa-people-group"></i></h2>
+			<p>EL Social Rides are a collective of riders who meet regularly for social rides. There is no club,
+			   no membership, no committee and almost no hierarchy. Although a small number of riders do most of the
+			   organising and lead the rides. There is only rule and that's 'Don't be an arsehole'. Actually, there is
+			   another one, no riders under 18 unless accompanied by a parent or guardian. There's also one about
+			   mudguards in winter...</p>
+			
+			<h2>Where? <i class="fa-solid fa-map-location-dot"></i></h2>
+			<p>We normally meet at 8am every Saturday and Sunday mornings, at Espresso Library, East Road, Cambridge,
+			   see map below: </p>
+			
+			{{cafemap.html}}
+			
+			<h2 class="mt-5">What? <i class="fa-regular fa-circle-question"></i></h2>
+			<p>We then split into groups by ability and destination and start our regular cafe
+			   rides, which can be anything between 50 km and 200 km, although the norm is around 100 km. Nearly all
+			   rides include a stop at a local cafe for coffee, cake and for the more discerning, a bacon roll.
+			   Vegetarian / Vegan options are normally available.</p>
+			
+			<h2>Fancy joining in? <i class="fa-solid fa-person-biking"></i></h2>
+			<p>Rides, routes and leaders are announced in advance via a private WhatsApp group and also a public
+			   <a href="https://www.facebook.com/groups/326130959238218">
+				   <i class="fa fa-external-link fa-2xs"></i> Facebook page
+			   </a>. However, there
+			   is no need to 'sign up' in advance (no one does), we just turn up and ride. New riders are welcome to
+			   turn up at Espresso Libray, say Hello and join the rides. If you play nicely, someone will add you to
+			   the WA group. </p>
+			<p>Depending on numbers, there will be anything from one to five groups departing. We normally strive to
+			   have three routes planned:</p>
+			
+			<ul>
+				<li>
+					<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 10s;"> </i> &nbsp;
+					<strong>Decaff</strong> - 70-100 km at <strong>25 kph</strong>, chatty pace, no man (or woman) will be left behind.</li>
+				<li>
+					<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 5s;"></i> &nbsp
+					<strong>Espresso</strong> - 100 km at <strong>28-30 kph</strong>, no drop ride, will regroup after drags, hills etc.
+				                              Will split into two groups if too large.</li>
+				<li>
+					<i class="fa-solid fa-cog fa-spin fa-xl"></i> &nbsp
+					<strong>Doppio</strong> - 100km at <strong>30-33 kph</strong> with plenty of surging, theoretically 'no drop', but
+				                            the number arriving at the cafe is always less than that which started!
+				                            Will split into two groups if too large.</li>
+			</ul>
+			
+			<h2 class="mt-5">elsr.co.uk</h2>
+			<p>This website is a resource aimed at facilitating the group rides by archiving the details of our
+			   preferred cafes and the associated GPX files used to lead the rides. It is fully editable, just
+			   sign up via email, and add cafes and GPX files to the database.</p>
+			
+			<!-- Register button -->
+			{% if not current_user.is_authenticated %}
+				<a class="btn btn-primary" href="{{ url_for('register') }}" role="button"
+				   aria-expanded="false" aria-controls="collapseExample">
+	                   Register
+	            </a>
+			{% endif %}
+			
+			<!-- Break before footer -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

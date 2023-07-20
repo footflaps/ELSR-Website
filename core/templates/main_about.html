@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/about-bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>I want the truth!</h1>
+					<span class="subheading">You can't handle the truth...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<p>I was bored, so I decided to learn Python. After a bit of googling I came across Udemy courses and
+			   picked their highest rated Python course:
+			   <a class="link-info" href="https://www.udemy.com/course/100-days-of-code/"><i class="fa fa-external-link fa-2xs"></i> 100 Days of Code</a>
+			   by <a href="https://uk.linkedin.com/in/angela-yu1"><i class="fa fa-external-link fa-2xs"></i> Angela Yu</a>. So, for a colossal outlay of £15.99, I started learning Python. The course was excellent
+			   and had a good chunk, maybe 20 days, focussed on designing and building websites using
+			   <a href="https://flask.palletsprojects.com/en/2.3.x/"><i class="fa fa-external-link fa-2xs"></i> Flask / Jinja</a> and the
+			   <a href="https://getbootstrap.com/"> <i class="fa fa-external-link fa-2xs"></i> Bootstrap</a> frameworks. After going through all this, I decided I
+			   needed a project to consolidate everything on, so I wrote this website from scratch.
+			</p>
+			
+			<p class="mb-2">So, what does this website use?
+				<ul>
+					<li class="my-1"><a href="https://www.python.org/"><i class="fa fa-external-link fa-2xs"></i> Python</a> as the underlying back end language.</li>
+					<li class="my-1"><a href="https://flask.palletsprojects.com/en/2.3.x/"><i class="fa fa-external-link fa-2xs"></i> Flask / Jinja</a> as the html templating engine.</li>
+					<li class="my-1">CSS / Javascript styling from <a href="https://getbootstrap.com/"><i class="fa fa-external-link fa-2xs"></i> Bootstrap</a>, this website is based on the
+					    <a href="https://startbootstrap.com/theme/clean-blog"><i class="fa fa-external-link fa-2xs"></i> Clean Blog</a> theme we used in one of the course exercises.</li>
+					<li class="my-1">Fancy font icons including the man on a bike from
+						<a href="https://fontawesome.com/"><i class="fa fa-external-link fa-2xs"></i> Font Awesome</a>, the man on a bike <i class="fa-solid fa-person-biking fa-xl"></i> comes from
+						<a href="https://fontawesome.com/icons/person-biking?f=classic&s=regular">
+							<i class="fa fa-external-link fa-2xs"></i> here</a>.</li>
+					<li class="my-1">Website fonts from <a href="https://fonts.google.com/"><i class="fa fa-external-link fa-2xs"></i> Google Fonts</a>.</li>
+					<li class="my-1">SQL databases courtesy of <a href="https://www.sqlalchemy.org/"><i class="fa fa-external-link fa-2xs"></i> SQLAlchemy</a>.</li>
+					<li class="my-1">Web forms are handled using <a href="https://hackersandslackers.com/flask-wtforms-forms/"><i class="fa fa-external-link fa-2xs"></i> Flask-WTF</a>.</li>
+					<li class="my-1">Password hashing using <a href="https://werkzeug.palletsprojects.com/en/2.3.x/utils/#module-werkzeug.security"><i class="fa fa-external-link fa-2xs"></i> Werkzeug Utilities</a>.</li>
+					<li class="my-1">Google Map plugins using <a href="https://developers.google.com/maps"><i class="fa fa-external-link fa-2xs"></i> Google Maps API</a>. I'll
+					    probably swap this out for <a href="https://www.openstreetmap.org"><i class="fa fa-external-link fa-2xs"></i> OSM</a> as it costs me cold hard cash everytime you see a map.</li>
+					<li class="my-1">Email and web domain courtesy of <a href="https://domains.google/"><i class="fa fa-external-link fa-2xs"></i> Google Domains</a>, a whole
+					    £10 to buy elsr.co.uk and £6 per month to run an email server!</li>
+					<li class="my-1">GPX file parsing using <a href="https://pypi.org/project/gpxpy/"><i class="fa fa-external-link fa-2xs"></i> gpxpy</a></li>
+					<li class="my-1">Most of the background images are my own, although I might have stolen one or two from the internet.</li>
+					<li class="my-1">Fancy user avatars, for logged in users, from <a href="https://gravatar.com/"><i class="fa fa-external-link fa-2xs"></i> Gravatar</a>. Mine
+					    is "Blake et Mortimer" <img src="/static/img/Blake_et_Mortimer.jpg"
+				         width="50"
+						 style="border-radius: 50%;"/> stolen from their <a href="https://www.facebook.com/blake.mortimer.officiel"><i class="fa fa-external-link fa-2xs"></i> facebook page</a>.</li>
+					<li class="my-1">This website uses <a href="https://gunicorn.org/"><i class="fa fa-external-link fa-2xs"></i> Gunicorn</a> as an application server and
+						<a href="https://nginx.org/"><i class="fa fa-external-link fa-2xs"></i> NGINX</a> as a reverse proxy.</li>
+					<li class="my-1">The site is hosted on a <a href="https://cloud.google.com/compute"><i class="fa fa-external-link fa-2xs"></i> Virtual Machine</a> in the
+						<a href="https://cloud.google.com/"><i class="fa fa-external-link fa-2xs"></i> Google Cloud</a> in one of their London data centers.</li>
+					<li class="my-1">Site diagnostics and real time performance data courtesy of <a href="https://sentry.io/welcome/"><i class="fa fa-external-link fa-2xs"></i> Sentry</a>.</li>
+				</ul>
+			</p>
+			
+			<p>The source code is on Github, you can take a look <a href="https://github.com/footflaps/ELSR-Website"> <i class="fa fa-external-link fa-2xs"></i> here</a>.
+			</p>
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}
