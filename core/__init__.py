@@ -3,6 +3,7 @@ from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditor
 from flask_googlemaps import GoogleMaps
+from flask_wtf import CSRFProtect
 import os
 import sys
 
@@ -87,6 +88,13 @@ Bootstrap(app)
 # -------------------------------------------------------------------------------------------------------------- #
 
 ckeditor = CKEditor(app)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add CSRF protection to flask forms
+# -------------------------------------------------------------------------------------------------------------- #
+
+csrf = CSRFProtect(app)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
