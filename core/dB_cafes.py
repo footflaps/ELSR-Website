@@ -232,3 +232,11 @@ class UpdateCafeForm(FlaskForm):
 
     submit = SubmitField("Update Cafe Details")
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with current_app.app_context():
+    cafes = db.session.query(Cafe).all()
+    print(f"Found {len(cafes)} cafes in the dB")

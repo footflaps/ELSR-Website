@@ -639,3 +639,11 @@ class ResetPasswordForm(FlaskForm):
     password2 = PasswordField("Password again", validators=[InputRequired("Please enter a password.")])
     submit = SubmitField("Reset password")
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with current_app.app_context():
+    users = db.session.query(User).all()
+    print(f"Found {len(users)} users in the dB")

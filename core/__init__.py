@@ -4,9 +4,19 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditor
 from flask_googlemaps import GoogleMaps
 import os
+import sys
 
 # We have our own hacked Gravatar
 from core.gravatar_hack import Gravatar
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import env vars if on web server
+# -------------------------------------------------------------------------------------------------------------- #
+
+if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+    sys.path.insert(1, '/home/ben_freeman_eu/elsr_website/ELSR-Website/')
+    import env_vars
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -26,7 +36,7 @@ MAP_STYLE = "height:500px;width:730px;margin:0;"
 
 # Flask only seems to allow one global upload folder, but we have two different end folders for GPX files and
 # cafe images. So, we upload to the same place and then move the file afterwards to it's final home.
-GPX_UPLOAD_FOLDER_ABS = 'D:/Dropbox/100 Days of Code/Python/ELSR-website/core/static/gpx'
+GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 
 
 # -------------------------------------------------------------------------------------------------------------- #

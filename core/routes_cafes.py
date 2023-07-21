@@ -152,8 +152,8 @@ def cafe_details(cafe_id):
 
     # Check id is valid
     if not cafe:
-        Event().log_event("Cafe Fail", f"Failed to locate cafe with cafe.id = '{cafe.id}'.")
-        print(f"cafe_details(): Failed to locate cafe with cafe.id = {cafe.id}")
+        Event().log_event("Cafe Fail", f"Failed to locate cafe with cafe.id = '{cafe_id}'.")
+        print(f"cafe_details(): Failed to locate cafe with cafe.id = {cafe_id}")
         return abort(404)
 
     # ----------------------------------------------------------- #

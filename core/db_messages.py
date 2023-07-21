@@ -189,3 +189,12 @@ def admin_has_mail():
         return False
 
 app.jinja_env.globals.update(admin_has_mail=admin_has_mail)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with current_app.app_context():
+    messages = db.session.query(Message).all()
+    print(f"Found {len(messages)} messages in the dB")

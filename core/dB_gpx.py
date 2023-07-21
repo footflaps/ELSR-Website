@@ -330,3 +330,12 @@ def number_routes_passing_by(cafe_id, user):
     return len(routes)
 
 app.jinja_env.globals.update(number_routes_passing_by=number_routes_passing_by)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with current_app.app_context():
+    gpxes = db.session.query(Gpx).all()
+    print(f"Found {len(gpxes)} GPXes in the dB")

@@ -212,3 +212,12 @@ def good_event(event_type):
 
 # Add this to jinja's environment, so we can use it within html templates
 app.jinja_env.globals.update(good_event=good_event)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with current_app.app_context():
+    events = db.session.query(Event).all()
+    print(f"Found {len(events)} events in the dB")

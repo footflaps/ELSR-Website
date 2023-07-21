@@ -115,3 +115,11 @@ def remove_html_tags(text):
 # Pass this to jinja
 app.jinja_env.globals.update(remove_html_tags=remove_html_tags)
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with current_app.app_context():
+    comments = db.session.query(CafeComment).all()
+    print(f"Found {len(comments)} comments in the dB")
