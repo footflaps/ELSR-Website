@@ -61,7 +61,7 @@ class Email():
                 connection.sendmail(
                     from_addr=admin_email,
                     to_addrs=target_email,
-                    msg=f"Subject:{subject}\n\n{body}"
+                    msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
                 )
                 print(f"Email(): sent verification email to {target_email}")
                 return True
@@ -80,7 +80,7 @@ class Email():
                 connection.sendmail(
                     from_addr=admin_email,
                     to_addrs=target_email,
-                    msg=f"Subject:{subject}\n\n{body}"
+                    msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
                 )
                 print(f"Email(): sent reset email to {target_email}")
                 return True
@@ -96,7 +96,7 @@ class Email():
                 connection.sendmail(
                     from_addr=admin_email,
                     to_addrs=my_email,
-                    msg=f"Subject:{subject}\n\n{body}"
+                    msg=f"To:{my_email}\nSubject:{subject}\n\n{body}"
                 )
                 print(f"Email(): sent message to me")
                 return True
