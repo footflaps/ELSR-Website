@@ -133,5 +133,5 @@ GoogleMaps(app)
 
 # NB This is our own hacked Gravatar with fake celeb icons
 gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False,
-                    force_lower=False, use_ssl=False, base_url=None)
+                    force_lower=False, use_ssl=True, base_url=None)
 
