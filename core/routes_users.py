@@ -25,6 +25,7 @@ from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
+from core.send_emails import Email
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -262,7 +263,8 @@ def register():
             print(f"User '{user.email}' validate status = '{user.verified()}', admin status = '{user.admin()}'")
 
             # They now need to validate email address
-            Event().log_event("Register Pass", f"Verification code sent to '{new_user.email}'.")
+            Email().send_verfication_email(user.email, user.name, user.verification_code)
+            Event().log_event("Register Pass", f"Verification code sent to '{user.email}'.")
             flash("Please validate your email address with the code you have been sent.")
             print("Please validate your email address with the code you have been sent.")
             return redirect(url_for('validate_email'))
