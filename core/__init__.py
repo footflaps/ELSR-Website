@@ -49,8 +49,8 @@ GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 
 app = Flask(__name__)
 
-# Unsure if this is still needed...
-#app.app_context().push()
+# Definitely need this, Nginx / Gunicorn won't load with it.
+app.app_context().push()
 
 # Details on the Secret Key: https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY
 # NOTE: The secret key is used to cryptographically-sign the cookies used for storing the session data.
