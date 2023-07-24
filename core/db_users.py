@@ -74,11 +74,18 @@ NUM_DIGITS_CODES = 6
 
 # You will need to provide a user_loader callback. This callback is used to reload the user object from the user
 # ID stored in the session. It should take the str ID of a user, and return the corresponding user object.
+# Fix for Gunicorn and multiple servers running in parallel
+# See https://stackoverflow.com/questions/39684364/heroku-gunicorn-flask-login-is-not-working-properly
+
 @login_manager.user_loader
 def load_user(user_id):
     app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
+    # Can't say I really understand this, but Gunicorn has multiple servers running in parallel and only
+    # one seemed to know the user was logged in, so you could be randomly logged out if your request was handled
+    # by one of the other servers. This, seems to fix it....
     if session:
         return User.query.filter_by(id=session['_user_id']).first()
+    # Not sure if this ever gets executed.....
     return User.query.get(int(user_id))
 
 
@@ -238,11 +245,12 @@ class User(UserMixin, db.Model):
             return user
 
     def display_name(self, email):
-        user = self.find_user_from_email(email)
-        if user:
-            return user.name
-        else:
-            return "unknown"
+        with current_app.app_context():
+            user = self.find_user_from_email(email)
+            if user:
+                return user.name
+            else:
+                return "unknown"
 
     def name_from_id(self, id):
         with current_app.app_context():
@@ -253,20 +261,21 @@ class User(UserMixin, db.Model):
         return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
 
     def validate_password(self, user, raw_password, user_ip):
-        if check_password_hash(user.password, raw_password):
-            try:
-                # Update last login details
-                user = db.session.query(User).filter_by(id=user.id).first()
-                user.last_login = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                user.last_login_ip = user_ip
-                db.session.commit()
-                return True
-            except Exception as e:
-                print(f"db_users: Failed to validate password user.id = {user.id} error code was {e.args}.")
-                return False
+        with current_app.app_context():
+            if check_password_hash(user.password, raw_password):
+                try:
+                    # Update last login details
+                    user = db.session.query(User).filter_by(id=user.id).first()
+                    user.last_login = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    user.last_login_ip = user_ip
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    print(f"db_users: Failed to validate password user.id = {user.id} error code was {e.args}.")
+                    return False
 
-        else:
-            return False
+            else:
+                return False
 
     def log_activity(self, user_id):
         with current_app.app_context():
