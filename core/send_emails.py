@@ -1,5 +1,6 @@
 import smtplib
 import os
+from core import app
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -63,10 +64,12 @@ class Email():
                     to_addrs=target_email,
                     msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
                 )
-                print(f"Email(): sent verification email to {target_email}")
+                app.logger.debug("Email(): sent verification email to '{target_email}'")
+                print(f"Email(): sent verification email to '{target_email}'")
                 return True
             except Exception as e:
-                print(f"Email(): Failed to send verification email to {target_email}, error code was {e.args}.")
+                app.logger.debug(f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
+                print(f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
                 return False
 
     def send_reset_email(self, target_email, user_name, code):
@@ -82,10 +85,13 @@ class Email():
                     to_addrs=target_email,
                     msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
                 )
+                app.logger.debug("Email(): sent reset email to '{target_email}'")
                 print(f"Email(): sent reset email to {target_email}")
                 return True
             except Exception as e:
-                print(f"Email(): Failed to send reset email to {target_email}, error code was {e.args}.")
+                app.logger.debug(
+                    f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
+                print(f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
                 return False
 
     def contact_form_email(self, from_name, from_email, body):
@@ -98,8 +104,11 @@ class Email():
                     to_addrs=my_email,
                     msg=f"To:{my_email}\nSubject:{subject}\n\n{body}"
                 )
+                app.logger.debug("Email(): sent message to '{my_email}'")
                 print(f"Email(): sent message to me")
                 return True
             except Exception as e:
-                print(f"Email(): Failed to send message to myself, error code was {e.args}.")
+                app.logger.debug(
+                    f"Email(): Failed to send message to '{my_email}', error code was '{e.args}'.")
+                print(f"Email(): Failed to send message to myself, error code was '{e.args}'.")
                 return False
