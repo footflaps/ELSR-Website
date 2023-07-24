@@ -191,7 +191,8 @@ def login():
 
     # Cache the calling referring page, so we can return to that after a successful login
     if not same_origin(request.referrer, good_referrer) \
-            or "validate_email" in str(request.referrer):
+            or "validate_email" in str(request.referrer) \
+            or "reset" in str(request.referrer):
         # If they've come from validate email, no point bouncing them back once they've logged in,
         # so forward them to home instead. Likewise, if they came from another site, don't jump back after login.
         session['url'] = url_for('home')
