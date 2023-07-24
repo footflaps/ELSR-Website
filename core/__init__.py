@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditor
 from flask_googlemaps import GoogleMaps
 from flask_wtf import CSRFProtect
+from flask_login import LoginManager
+from itsdangerous.url_safe import URLSafeTimedSerializer
 import os
 import sys
 import logging
@@ -55,13 +57,24 @@ app.app_context().push()
 #       the session data.
 app.config['SECRET_KEY'] = os.environ['ELSR_FLASK_SECRET_KEY']
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Initialise the login manager
+# -------------------------------------------------------------------------------------------------------------- #
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.session_protection = "strong"
+login_serializer = URLSafeTimedSerializer(app.secret_key)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Set maximum file upload size.
+# -------------------------------------------------------------------------------------------------------------- #
+
 # Seems GPX files are massive eg my polar files are often 5 MB, so we need 10 MB as a limit.
 # NB We shrink the files down to a few 100 kB afterwards.
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
-
-# Give the Flask cookie a helpful name
-app.config['REMEMBER_COOKIE_NAME'] = "elsr_remember_me"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
