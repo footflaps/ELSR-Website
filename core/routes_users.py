@@ -74,6 +74,7 @@ def login():
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
     email = request.args.get('email', None)
+    app.logger.debug(f"login(): Passed email = '{email}'.")
 
     # ----------------------------------------------------------- #
     # Need a login form
@@ -101,6 +102,7 @@ def login():
 
         # Test 1: Does the user exist?
         if not user:
+            app.logger.debug(f"login(): mail not recognised '{email}'.")
             Event().log_event("Login Fail", f"Email not recognised '{email}'")
             print("login(): Email address is not recognised!")
             flash("Email address is not recognised!")
@@ -109,6 +111,7 @@ def login():
         # Test 2: Did they forget password?
         if form.forgot.data:
             # Don't check return status as we don't want to give anything away
+            app.logger.debug(f"login(): Recovery email requested for '{email}'.")
             User().send_reset(form.email.data)
             Event().log_event("Login Fail", f"Recovery email requested for '{email}'")
             print("login(): If your email address is registered, an email recovery mail has been sent.")
@@ -117,6 +120,7 @@ def login():
 
         # Test 3: Do they want a new verification code?
         if form.verify.data:
+            app.logger.debug(f"login(): Reset email requested for '{email}'.")
             Event().log_event("Login Fail", f"Reset email requested for '{email}'")
             print("login(): If your email address is registered, a new verification code has been sent.")
             flash("If your email address is registered, a new verification code has been sent.")
@@ -125,6 +129,7 @@ def login():
 
         # Test 4: Is the user validated?
         if not user.verified():
+            app.logger.debug(f"login(): Failed, Email not verified yet '{email}'.")
             Event().log_event("Login Fail", f"Email not verified yet '{email}'")
             print("login(): That email address has not been verified yet!")
             flash("That email address has not been verified yet!")
@@ -132,6 +137,7 @@ def login():
 
         # Test 5: Is the user barred?
         if user.blocked():
+            app.logger.debug(f"login(): Failed, Email has been blocked '{email}'.")
             Event().log_event("Login Fail", f"Email has been blocked '{email}'")
             print("login(): That email address has been temporarily blocked!")
             flash("That email address has been temporarily blocked!")
@@ -156,6 +162,7 @@ def login():
 
         else:
             # Login failed
+            app.logger.debug(f"login(): Failed, Wrong password for '{email}'.")
             Event().log_event("Login Fail", f"Wrong password for '{email}'")
             print("login(): Password did not match!")
             flash("Password did not match!")
