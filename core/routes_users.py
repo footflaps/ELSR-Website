@@ -150,7 +150,7 @@ def login():
             # Setting "remember=True" means that:
             # "A cookie will be saved on the user’s computer, and then Flask-Login will automatically
             # restore the user ID from that cookie if it is not in the session."
-            login_user(user)
+            login_user(user, remember=True)
             # Log event after they've logged in, so current_user can have an email address
             Event().log_event("Login Success", f"User logged in, forwarding user '{user.email}' to '{session['url']}'.")
             print("login(): Password matched!")
@@ -202,6 +202,7 @@ def logout():
 
     # Logout the user
     logout_user()
+    session.clear()
 
     print("logout(): You have been logged out!")
     flash("You have been logged out!")
