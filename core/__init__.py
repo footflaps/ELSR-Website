@@ -53,8 +53,7 @@ app = Flask(__name__)
 app.app_context().push()
 
 # Details on the Secret Key: https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY
-# NOTE: The secret key is used to cryptographically-sign the cookies used for storing
-#       the session data.
+# NOTE: The secret key is used to cryptographically-sign the cookies used for storing the session data.
 app.config['SECRET_KEY'] = os.environ['ELSR_FLASK_SECRET_KEY']
 
 
@@ -64,7 +63,7 @@ app.config['SECRET_KEY'] = os.environ['ELSR_FLASK_SECRET_KEY']
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.session_protection = "strong"
+login_manager.session_protection = "basic"
 login_serializer = URLSafeTimedSerializer(app.secret_key)
 app.config['REMEMBER_COOKIE_NAME'] = "remember_token"
 
