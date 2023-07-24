@@ -547,9 +547,11 @@ def update_last_seen(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             # Not logged in, so no idea who they are
+            app.logger.debug(f"User not logged in.")
             return f(*args, **kwargs)
         else:
             # They are logged in, so log their activity
+            app.logger.debug(f"User logged in '{current_user.email}'.")
             User().log_activity(current_user.id)
 
             return f(*args, **kwargs)

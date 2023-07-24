@@ -189,6 +189,7 @@ def bad_request(e):
     requested_route = request.path
 
     # Log error in event log
+    app.logger.debug(f"400: Bad request for '{requested_route}', previous page was '{request.referrer}'.")
     Event().log_event("400", f"Bad request for '{requested_route}', previous page was '{request.referrer}'")
 
     # note that we set the 401 status explicitly
@@ -201,9 +202,11 @@ def unauthorized(e):
     requested_route = request.path
 
     # Log error in event log
-    Event().log_event("403", f"Unauthorized for '{requested_route}', previous page was '{request.referrer}'")
+    app.logger.debug(f"401: Unauthorized for '{requested_route}', previous page was '{request.referrer}'.")
+    Event().log_event("401", f"Unauthorized for '{requested_route}', previous page was '{request.referrer}'")
 
     # note that we set the 401 status explicitly
+    # NB Don't have a 401 page, just re-use 403
     return render_template('403.html', year=current_year), 401
 
 
@@ -213,6 +216,7 @@ def forbidden(e):
     requested_route = request.path
 
     # Log error in event log
+    app.logger.debug(f"403: Forbidden for '{requested_route}', previous page was '{request.referrer}'.")
     Event().log_event("403", f"Forbidden for '{requested_route}', previous page was '{request.referrer}'")
 
     # note that we set the 403 status explicitly
@@ -225,6 +229,7 @@ def page_not_found(e):
     requested_route = request.path
 
     # Log error in event log
+    app.logger.debug(f"404: Not found for '{requested_route}', previous page was '{request.referrer}'.")
     Event().log_event("404", f"Not found for '{requested_route}', previous page was '{request.referrer}'")
 
     # note that we set the 404 status explicitly
@@ -236,6 +241,7 @@ def internal_server_error(e):
     requested_route = request.path
 
     # Log error in event log
+    app.logger.debug(f"500: Internal server error for '{requested_route}', previous page was '{request.referrer}'.")
     Event().log_event("500", f"Internal server error for '{requested_route}', previous page was '{request.referrer}'")
 
     # now you're handling non-HTTP exceptions only
