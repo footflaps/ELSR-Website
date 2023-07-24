@@ -76,10 +76,10 @@ def map_icon(route_num):
     while route_num > 36:
         route_num -= 36
     if route_num <= 10:
-        return f"http://maps.google.com/mapfiles/kml/paddle/{route_num}-lv.png"
+        return f"https://maps.google.com/mapfiles/kml/paddle/{route_num}-lv.png"
     else:
         letter = chr(97 + route_num - 11)
-        return f"http://maps.google.com/mapfiles/kml/paddle{letter}-lv.png"
+        return f"https://maps.google.com/mapfiles/kml/paddle{letter}-lv.png"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
