@@ -112,9 +112,15 @@ def login():
         # Test 2: Did they forget password?
         if form.forgot.data:
             # Don't check return status as we don't want to give anything away
-            app.logger.debug(f"login(): Recovery email requested for '{email}'.")
-            User().send_reset(form.email.data)
             Event().log_event("Login Fail", f"Recovery email requested for '{email}'")
+            app.logger.debug(f"login(): Recovery email requested for '{email}'.")
+            # Generate a new code
+            User().create_new_reset_code(email)
+            # Find the user to get the details
+            user = User().find_user_from_email(email)
+            # Send an email
+            Email().send_reset_email(user.email, user.name, user.verification_code)
+            # Tell user to expect an email
             print("login(): If your email address is registered, an email recovery mail has been sent.")
             flash("If your email address is registered, an email recovery mail has been sent.")
             return render_template("user_login.html", form=form, year=current_year)
@@ -123,9 +129,16 @@ def login():
         if form.verify.data:
             app.logger.debug(f"login(): Reset email requested for '{email}'.")
             Event().log_event("Login Fail", f"Reset email requested for '{email}'")
-            print("login(): If your email address is registered, a new verification code has been sent.")
+            # Generate a new code
+            User().create_new_verification(user.id)
+            # Find the user to get the details
+            user = User().find_user_from_email(email)
+            # Send an email
+            Email().send_verfication_email(user.email, user.name, user.verification_code)
+            # Tell user to expect an email
+            print("login(): If your email address is registered, a new verification code has bee"
+                  "n sent.")
             flash("If your email address is registered, a new verification code has been sent.")
-            User().send_new_verification(user.id)
             return redirect(url_for('validate_email'))
 
         # Test 4: Is the user validated?
@@ -775,7 +788,7 @@ def reverify_user():
     # ----------------------------------------------------------- #
     # Send verification code
     # ----------------------------------------------------------- #
-    if User().send_new_verification(user_id):
+    if User().create_new_verification(user_id):
         Event().log_event("Send Verify Pass", f"Verification code sent user_id = '{user_id}'.")
         flash("Verification code sent!")
     else:
@@ -821,7 +834,7 @@ def password_reset_user():
     # ----------------------------------------------------------- #
     # Send reset
     # ----------------------------------------------------------- #
-    if User().send_reset(user.email):
+    if User().create_new_reset_code(user.email):
         Event().log_event("Send Reset Pass", f"Reset code sent to '{user.email}'.")
         flash("Reset code sent!")
     else:

@@ -218,7 +218,7 @@ class User(UserMixin, db.Model):
                 print(f"dB_users: Failed to create new user {new_user.email}, error code was {e.args}.")
                 return False
 
-    def send_new_verification(self, user_id):
+    def create_new_verification(self, user_id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -329,9 +329,8 @@ class User(UserMixin, db.Model):
                 print("dB_users: Verification code doesn't match.")
                 return False
 
-    def send_reset(self, email):
+    def create_new_reset_code(self, email):
         with app.app_context():
-            # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(email=email).first()
             if user:
                 try:
