@@ -199,20 +199,20 @@ def logout():
 
     # Have to log the event before we log out, so we still have their email address
     Event().log_event("Logout", f"User logged out.")
+    app.logger.debug(f"Logging user out now...")
+    flash("You have been logged out!")
 
     # Logout the user
     logout_user()
+
+    # Clear the session
     session.clear()
 
     # Delete the user's cookie
-    response = make_response(redirect(url_for('login')))
+    # From: https://stackoverflow.com/questions/25144092/flask-login-still-logged-in-after-use-logouts-when-using-remember-me
+    response = make_response(redirect(url_for('home')))
     response.delete_cookie(app.config['REMEMBER_COOKIE_NAME'])
-
-    print("logout(): You have been logged out!")
-    flash("You have been logged out!")
-
-    # Back to login page
-    return redirect(url_for('home'))
+    return response
 
 
 # -------------------------------------------------------------------------------------------------------------- #
