@@ -66,6 +66,7 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.session_protection = "strong"
 login_serializer = URLSafeTimedSerializer(app.secret_key)
+app.config['REMEMBER_COOKIE_NAME'] = "remember_token"
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort, session
+from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import date
 from flask_googlemaps import Map
@@ -203,6 +203,10 @@ def logout():
     # Logout the user
     logout_user()
     session.clear()
+
+    # Delete the user's cookie
+    response = make_response(redirect(url_for('login')))
+    response.delete_cookie(app.config['REMEMBER_COOKIE_NAME'])
 
     print("logout(): You have been logged out!")
     flash("You have been logged out!")
