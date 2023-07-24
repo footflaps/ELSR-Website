@@ -79,11 +79,10 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
 # -------------------------------------------------------------------------------------------------------------- #
 
 # NB from: https://stackoverflow.com/questions/26578733/why-is-flask-application-not-creating-any-logs-when-hosted-by-gunicorn
-gunicorn_error_logger = logging.getLogger('gunicorn.error')
-app.logger.handlers.extend(gunicorn_error_logger.handlers)
+# gunicorn_error_logger = logging.getLogger('gunicorn.error')
+# app.logger.handlers.extend(gunicorn_error_logger.handlers)
 app.logger.setLevel(logging.DEBUG)
 app.logger.debug('this will show in the log')
-app.logger.propagate = False
 
 
 # -------------------------------------------------------------------------------------------------------------- #
