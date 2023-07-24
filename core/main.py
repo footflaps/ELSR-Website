@@ -6,6 +6,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -35,7 +36,7 @@ from core.routes_gpx import gpx_list
 from core.routes_admin import admin_page
 from core.routes_messages import mark_read
 from core.routes_events import delete_event
-from core.send_emails import Email
+from core.send_emails import contact_form_email
 from core.dB_events import Event
 
 
@@ -128,8 +129,8 @@ def contact():
         # ----------------------------------------------------------- #
         #   POST - form validated & submitted
         # ----------------------------------------------------------- #
-
-        Email().contact_form_email(form.name.data, form.email.data, form.message.data)
+        print("Sending email in a thread....")
+        Thread(target=contact_form_email, args=(form.name.data, form.email.data, form.message.data,)).start()
         flash("Thankyou, your message has been sent!")
 
         # Clear the form

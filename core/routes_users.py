@@ -4,6 +4,7 @@ from datetime import date
 from flask_googlemaps import Map
 from werkzeug import exceptions
 from urllib.parse import urlparse
+from threading import Thread
 import os
 
 
@@ -25,7 +26,7 @@ from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.send_emails import Email
+from core.send_emails import send_reset_email, send_verfication_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -119,7 +120,7 @@ def login():
             # Find the user to get the details
             user = User().find_user_from_email(email)
             # Send an email
-            Email().send_reset_email(user.email, user.name, user.reset_code)
+            Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()
             # Tell user to expect an email
             print("login(): If your email address is registered, an email recovery mail has been sent.")
             flash("If your email address is registered, an email recovery mail has been sent.")
@@ -134,7 +135,7 @@ def login():
             # Find the user to get the details
             user = User().find_user_from_email(email)
             # Send an email
-            Email().send_verfication_email(user.email, user.name, user.verification_code)
+            Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
             # Tell user to expect an email
             print("login(): If your email address is registered, a new verification code has bee"
                   "n sent.")
@@ -277,7 +278,8 @@ def register():
             print(f"User '{user.email}' validate status = '{user.verified()}', admin status = '{user.admin()}'")
 
             # They now need to validate email address
-            Email().send_verfication_email(user.email, user.name, user.verification_code)
+
+            Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
             Event().log_event("Register Pass", f"Verification code sent to '{user.email}'.")
             flash("Please validate your email address with the code you have been sent.")
             print("Please validate your email address with the code you have been sent.")
