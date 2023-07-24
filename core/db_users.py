@@ -83,8 +83,8 @@ def load_user(user_id):
     # Can't say I really understand this, but Gunicorn has multiple servers running in parallel and only
     # one seemed to know the user was logged in, so you could be randomly logged out if your request was handled
     # by one of the other servers. This, seems to fix it....
-    if session:
-        return User.query.filter_by(id=session['_user_id']).first()
+    # if session:
+    #     return User.query.filter_by(id=session['_user_id']).first()
     # Not sure if this ever gets executed.....
     return User.query.get(int(user_id))
 
