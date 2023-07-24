@@ -16,8 +16,8 @@ VERIFICATION_BODY = "Dear [USER], \n\n" \
                     "Your verification code is [CODE]. \n" \
                     "It will expire in 24 hours.\n\n" \
                     "To verify your email address, either:\n\n" \
-                    "     1. Goto http://www.elsr.co.uk/validate_email and enter your code manually, or \n\n" \
-                    "     2. Click on: http://www.elsr.co.uk/validate_email?code=[CODE]&email='[EMAIL]' \n\n" \
+                    "     1. Goto https://www.elsr.co.uk/validate_email and enter your code manually, or \n\n" \
+                    "     2. Click on: https://www.elsr.co.uk/validate_email?code=[CODE]&email='[EMAIL]' \n\n" \
                     "If you were not expecting this email and have not visited www.elsr.co.uk, then don't worry, " \
                     "somebody probably made a typo when entering their email address and accidentally entered this " \
                     "one. Just delete this email and forget about it. Without access to this email account they can't " \
@@ -32,8 +32,8 @@ RESET_BODY = "Dear [USER], \n\n" \
              "Your reset code is [CODE]. \n" \
              "It will expire in 24 hours.\n\n" \
              "To reset your password, either:\n\n" \
-             "     1. Goto http://www.elsr.co.uk/reset and enter your code manually, or \n\n" \
-             "     2. Click on: http://www.elsr.co.uk/reset?code=[CODE]&email='[EMAIL]' \n\n" \
+             "     1. Goto https://www.elsr.co.uk/reset and enter your code manually, or \n\n" \
+             "     2. Click on: https://www.elsr.co.uk/reset?code=[CODE]&email='[EMAIL]' \n\n" \
              "If you were not expecting this email and have not visited www.elsr.co.uk, then don't worry, " \
              "somebody probably made a typo when entering their email address and accidentally entered this " \
              "one. Just delete this email and forget about it. Without access to this email account they can't " \
