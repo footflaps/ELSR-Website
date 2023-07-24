@@ -192,7 +192,7 @@ def bad_request(e):
     app.logger.debug(f"400: Bad request for '{requested_route}', previous page was '{request.referrer}'.")
     Event().log_event("400", f"Bad request for '{requested_route}', previous page was '{request.referrer}'")
 
-    # note that we set the 401 status explicitly
+    # note that we set the 400 status explicitly
     return render_template('400.html', year=current_year), 400
 
 
