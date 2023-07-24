@@ -50,11 +50,13 @@ GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 app = Flask(__name__)
 
 # Definitely need this, Nginx / Gunicorn won't load with it.
+# Not after changing "current_app." to "app."
 #app.app_context().push()
 
 # Details on the Secret Key: https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY
 # NOTE: The secret key is used to cryptographically-sign the cookies used for storing the session data.
-app.config['SECRET_KEY'] = os.environ['ELSR_FLASK_SECRET_KEY']
+with app.app_context():
+    app.config['SECRET_KEY'] = os.environ['ELSR_FLASK_SECRET_KEY']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -65,7 +67,8 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.session_protection = "basic"
 login_serializer = URLSafeTimedSerializer(app.secret_key)
-app.config['REMEMBER_COOKIE_NAME'] = "remember_token"
+with app.app_context():
+    app.config['REMEMBER_COOKIE_NAME'] = "remember_token"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -74,7 +77,8 @@ app.config['REMEMBER_COOKIE_NAME'] = "remember_token"
 
 # Seems GPX files are massive eg my polar files are often 5 MB, so we need 10 MB as a limit.
 # NB We shrink the files down to a few 100 kB afterwards.
-app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
+with app.app_context():
+    app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -82,52 +86,59 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
 # -------------------------------------------------------------------------------------------------------------- #
 
 # NB from: https://stackoverflow.com/questions/26578733/why-is-flask-application-not-creating-any-logs-when-hosted-by-gunicorn
-gunicorn_error_logger = logging.getLogger('gunicorn.error')
-app.logger.handlers.extend(gunicorn_error_logger.handlers)
-app.logger.setLevel(logging.DEBUG)
-app.logger.debug('this will show in the log')
+with app.app_context():
+    gunicorn_error_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers.extend(gunicorn_error_logger.handlers)
+    app.logger.setLevel(logging.DEBUG)
+    app.logger.debug('this will show in the log')
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Connect to the different SQLite databases
 # -------------------------------------------------------------------------------------------------------------- #
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
-app.config['SQLALCHEMY_BINDS'] = {'users': 'sqlite:///users.db',
-                                  'cafe_comments': 'sqlite:///cafe_comments.db',
-                                  'gpx': 'sqlite:///gpx.db',
-                                  'messages': 'sqlite:///messages.db',
-                                  'events': 'sqlite:///events.db'}
-db = SQLAlchemy(app)
+with app.app_context():
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
+    app.config['SQLALCHEMY_BINDS'] = {'users': 'sqlite:///users.db',
+                                      'cafe_comments': 'sqlite:///cafe_comments.db',
+                                      'gpx': 'sqlite:///gpx.db',
+                                      'messages': 'sqlite:///messages.db',
+                                      'events': 'sqlite:///events.db'}
+    db = SQLAlchemy(app)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Bootstrap Flask
 # -------------------------------------------------------------------------------------------------------------- #
 
-Bootstrap(app)
+with app.app_context():
+    Bootstrap(app)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Initialise the Flask CK Editor (gives formatting in the form eg bold etc)
 # -------------------------------------------------------------------------------------------------------------- #
 
-ckeditor = CKEditor(app)
+
+with app.app_context():
+    ckeditor = CKEditor(app)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Add CSRF protection to flask forms
 # -------------------------------------------------------------------------------------------------------------- #
 
-csrf = CSRFProtect(app)
+with app.app_context():
+    csrf = CSRFProtect(app)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Add Google Maps to Flask app
 # -------------------------------------------------------------------------------------------------------------- #
 
-app.config['GOOGLEMAPS_KEY'] = GOOGLE_MAPS_API_KEY
-GoogleMaps(app)
+with app.app_context():
+    app.config['GOOGLEMAPS_KEY'] = GOOGLE_MAPS_API_KEY
+    GoogleMaps(app)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
