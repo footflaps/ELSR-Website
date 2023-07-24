@@ -39,31 +39,31 @@ class Event(db.Model):
 
     # Return a list of all events
     def all_events(self):
-        with current_app.app_context():
+        with app.app_context():
             events = db.session.query(Event).all()
             return events
 
     def event_id(self, id):
-        with current_app.app_context():
+        with app.app_context():
             event = db.session.query(Event).filter_by(id=id).first()
             return event
 
     def all_events_days(self, days):
         timestamp = time.time() - SECONDS_IN_DAY * days
-        with current_app.app_context():
+        with app.app_context():
             events = db.session.query(Event).filter(Event.date > timestamp).all()
             return events
 
     # Return all events from a given user
     def all_events_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             events = db.session.query(Event).filter_by(email=email).all()
             # Will return nothing if id is invalid
             return events
 
     def all_events_email_days(self, email, days):
         timestamp = time.time() - SECONDS_IN_DAY * days
-        with current_app.app_context():
+        with app.app_context():
             events = db.session.query(Event).filter(Event.date > timestamp).filter_by(email=email).all()
             return events
 
@@ -74,7 +74,7 @@ class Event(db.Model):
         event.date = int(time.time())
 
         # Try and add to dB
-        with current_app.app_context():
+        with app.app_context():
             try:
                 db.session.add(event)
                 db.session.commit()
@@ -87,7 +87,7 @@ class Event(db.Model):
     def delete_events_email_days(self, email, days):
         timestamp = time.time() - SECONDS_IN_DAY * int(days)
         try:
-            with current_app.app_context():
+            with app.app_context():
                 events = db.session.query(Event).filter(Event.date > timestamp).filter_by(email=email).all()
                 for event in events:
                     db.session.delete(event)
@@ -100,7 +100,7 @@ class Event(db.Model):
     def delete_events_all_days(self, days):
         timestamp = time.time() - SECONDS_IN_DAY * int(days)
         try:
-            with current_app.app_context():
+            with app.app_context():
                 events = db.session.query(Event).filter(Event.date > timestamp).all()
                 for event in events:
                     db.session.delete(event)
@@ -111,7 +111,7 @@ class Event(db.Model):
             return False
 
     def delete_event(self, event_id):
-        with current_app.app_context():
+        with app.app_context():
             event = db.session.query(Event).filter_by(id=event_id).first()
 
             if event:
@@ -127,7 +127,7 @@ class Event(db.Model):
 
 
     def log_event(self, event_type, event_details):
-        with current_app.app_context():
+        with app.app_context():
             # Can we get a user email address
             if current_user.is_authenticated:
                 user_email = current_user.email
@@ -162,7 +162,7 @@ class Event(db.Model):
 # -------------------------------------------------------------------------------------------------------------- #
 
 # This seems to be the only one which works?
-with current_app.app_context():
+with app.app_context():
     db.create_all()
 
 
@@ -218,6 +218,6 @@ app.jinja_env.globals.update(good_event=good_event)
 # Check the dB loaded ok
 # -------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
+with app.app_context():
     events = db.session.query(Event).all()
     print(f"Found {len(events)} events in the dB")

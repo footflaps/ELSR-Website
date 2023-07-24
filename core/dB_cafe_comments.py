@@ -35,7 +35,7 @@ class CafeComment(db.Model):
 
     # Add a new comment
     def add_comment(self, new_comment):
-        with current_app.app_context():
+        with app.app_context():
             try:
                 new_comment.date = date.today().strftime("%B %d, %Y")
                 db.session.add(new_comment)
@@ -48,7 +48,7 @@ class CafeComment(db.Model):
 
     # Delete a comment
     def delete_comment(self, comment_id):
-        with current_app.app_context():
+        with app.app_context():
             comment = db.session.query(CafeComment).get(comment_id)
             # Found one?
             if comment:
@@ -63,19 +63,19 @@ class CafeComment(db.Model):
         return False
 
     def get_comment(self, comment_id):
-        with current_app.app_context():
+        with app.app_context():
             comment = db.session.query(CafeComment).get(comment_id)
             return comment
 
     # Return a list of all comments for a given cafe id
     def all_comments_by_id(self, article_id):
-        with current_app.app_context():
+        with app.app_context():
             comments = db.session.query(CafeComment).filter_by(article_id=article_id).all()
             return comments
 
     # Return a list of all comments for a given user email
     def all_comments_by_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             comments = db.session.query(CafeComment).filter_by(email=email).all()
             return comments
 
@@ -99,7 +99,7 @@ class CreateCafeCommentForm(FlaskForm):
 # -------------------------------------------------------------------------------------------------------------- #
 
 # This one doesn't seem to work, need to use the one in the same module as the Primary dB
-with current_app.app_context():
+with app.app_context():
     db.create_all()
 
 
@@ -120,6 +120,6 @@ app.jinja_env.globals.update(remove_html_tags=remove_html_tags)
 # Check the dB loaded ok
 # -------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
+with app.app_context():
     comments = db.session.query(CafeComment).all()
     print(f"Found {len(comments)} comments in the dB")

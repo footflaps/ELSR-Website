@@ -12,7 +12,7 @@ import json
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import db
+from core import db, app
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -51,19 +51,19 @@ class Cafe(db.Model):
 
     # Return a list of all cafes
     def all_cafes(self):
-        with current_app.app_context():
+        with app.app_context():
             cafes = db.session.query(Cafe).order_by('name').all()
             return cafes
 
     # Return a single cafe
     def one_cafe(self, cafe_id):
-        with current_app.app_context():
+        with app.app_context():
             cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
             # Will return nothing if id is invalid
             return cafe
 
     def find_by_name(self, name):
-        with current_app.app_context():
+        with app.app_context():
             cafe = db.session.query(Cafe).filter_by(name=name).first()
             # Will return nothing if name is invalid
             return cafe
@@ -76,7 +76,7 @@ class Cafe(db.Model):
         new_cafe.active = True
 
         # Try and add to dB
-        with current_app.app_context():
+        with app.app_context():
             try:
                 db.session.add(new_cafe)
                 db.session.commit()
@@ -89,7 +89,7 @@ class Cafe(db.Model):
 
     # Update an existing cafe
     def update_cafe(self, cafe_id, updated_cafe):
-        with current_app.app_context():
+        with app.app_context():
             cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
             if cafe:
                 cafe.name = updated_cafe.name
@@ -109,7 +109,7 @@ class Cafe(db.Model):
         return False
 
     def update_photo(self, cafe_id, filename):
-        with current_app.app_context():
+        with app.app_context():
             cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
             if cafe:
                 try:
@@ -123,7 +123,7 @@ class Cafe(db.Model):
 
     # Mark a cafe as being closed or closing
     def close_cafe(self, cafe_id, details):
-        with current_app.app_context():
+        with app.app_context():
             cafe = db.session.query(Cafe).get(cafe_id)
             # Found one?
             if cafe:
@@ -140,7 +140,7 @@ class Cafe(db.Model):
 
     # Mark a cafe as no longer being closed
     def unclose_cafe(self, cafe_id):
-        with current_app.app_context():
+        with app.app_context():
             cafe = db.session.query(Cafe).get(cafe_id)
             # Found one?
             if cafe:
@@ -156,7 +156,7 @@ class Cafe(db.Model):
         return False
 
     def find_all_cafes_by_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             cafes = db.session.query(Cafe).filter_by(added_email=email).all()
             return cafes
 
@@ -195,7 +195,7 @@ class Cafe(db.Model):
 # -------------------------------------------------------------------------------------------------------------- #
 
 # This seems to be the only one which works?
-with current_app.app_context():
+with app.app_context():
     db.create_all()
 
 
@@ -237,6 +237,6 @@ class UpdateCafeForm(FlaskForm):
 # Check the dB loaded ok
 # -------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
+with app.app_context():
     cafes = db.session.query(Cafe).all()
     print(f"Found {len(cafes)} cafes in the dB")

@@ -69,26 +69,26 @@ class Message(db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
 
     def all_messages(self):
-        with current_app.app_context():
+        with app.app_context():
             messages = db.session.query(Message).all()
             return messages
 
     def find_messages_by_id(self, id):
-        with current_app.app_context():
+        with app.app_context():
             message = db.session.query(Message).filter_by(id=id).first()
             return message
     def all_messages_to_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             messages = db.session.query(Message).filter_by(to_email=email).all()
             return messages
 
     def all_messages_from_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             messages = db.session.query(Message).filter_by(from_email=email).all()
             return messages
 
     def all_unread_messages_to_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             messages = db.session.query(Message).filter_by(to_email=email).all()
             unread = []
             for message in messages:
@@ -100,7 +100,7 @@ class Message(db.Model):
         # Add date and unread
         message.sent_date = date.today().strftime("%B %d, %Y")
         message.status = NEW_MESSAGE_STATUS
-        with current_app.app_context():
+        with app.app_context():
             try:
                 db.session.add(message)
                 db.session.commit()
@@ -119,7 +119,7 @@ class Message(db.Model):
         return self.add_message(message)
 
     def mark_as_read(self, id):
-        with current_app.app_context():
+        with app.app_context():
             message = db.session.query(Message).filter_by(id=id).first()
             if message:
                 if not message.been_read():
@@ -135,7 +135,7 @@ class Message(db.Model):
         return False
 
     def mark_as_unread(self, id):
-        with current_app.app_context():
+        with app.app_context():
             message = db.session.query(Message).filter_by(id=id).first()
             if message:
                 if message.been_read():
@@ -151,7 +151,7 @@ class Message(db.Model):
         return False
 
     def delete(self, id):
-        with current_app.app_context():
+        with app.app_context():
             message = db.session.query(Message).filter_by(id=id).first()
             if message:
                 try:
@@ -174,7 +174,7 @@ class Message(db.Model):
 # -------------------------------------------------------------------------------------------------------------- #
 
 # This one doesn't seem to work, need to use the one in the same module as the Primary dB
-with current_app.app_context():
+with app.app_context():
     db.create_all()
 
 
@@ -195,6 +195,6 @@ app.jinja_env.globals.update(admin_has_mail=admin_has_mail)
 # Check the dB loaded ok
 # -------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
+with app.app_context():
     messages = db.session.query(Message).all()
     print(f"Found {len(messages)} messages in the dB")

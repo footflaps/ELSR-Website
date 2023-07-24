@@ -63,17 +63,17 @@ class Gpx(db.Model):
         return self.valid == 1
 
     def all_gpxes(self):
-        with current_app.app_context():
+        with app.app_context():
             gpxes = db.session.query(Gpx).all()
             return gpxes
 
     def all_gpxes_by_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             gpxes = db.session.query(Gpx).filter_by(email=email).all()
             return gpxes
 
     def one_gpx(self, gpx_id):
-        with current_app.app_context():
+        with app.app_context():
             gpx = db.get_or_404(Gpx, gpx_id)
             return gpx
 
@@ -84,7 +84,7 @@ class Gpx(db.Model):
         new_gpx.date = date.today().strftime("%B %d, %Y")
 
         # Try and add to dB
-        with current_app.app_context():
+        with app.app_context():
             try:
                 db.session.add(new_gpx)
                 db.session.commit()
@@ -96,7 +96,7 @@ class Gpx(db.Model):
                 return False
 
     def delete_gpx(self, gpx_id):
-        with current_app.app_context():
+        with app.app_context():
 
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
@@ -114,7 +114,7 @@ class Gpx(db.Model):
         return False
 
     def update_filename(self, gpx_id, filename):
-        with current_app.app_context():
+        with app.app_context():
 
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
@@ -133,7 +133,7 @@ class Gpx(db.Model):
         return False
 
     def clear_cafe_list(self, gpx_id):
-        with current_app.app_context():
+        with app.app_context():
 
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
@@ -152,7 +152,7 @@ class Gpx(db.Model):
         return False
 
     def update_cafe_list(self, gpx_id, cafe_id, dist_km, range_km):
-        with current_app.app_context():
+        with app.app_context():
 
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
@@ -196,7 +196,7 @@ class Gpx(db.Model):
         return False
 
     def remove_cafe_list(self, gpx_id, cafe_id):
-        with current_app.app_context():
+        with app.app_context():
 
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
@@ -232,7 +232,7 @@ class Gpx(db.Model):
 
     # Add length and ascent to the database
     def update_stats(self, gpx_id, length_km, ascent_m):
-        with current_app.app_context():
+        with app.app_context():
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
             # Did we get something?
@@ -275,7 +275,7 @@ class Gpx(db.Model):
         return passing_gpx
 
     def publish(self, gpx_id):
-        with current_app.app_context():
+        with app.app_context():
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
             if gpx:
@@ -289,7 +289,7 @@ class Gpx(db.Model):
         return False
 
     def hide(self, gpx_id):
-        with current_app.app_context():
+        with app.app_context():
             # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
             if gpx:
@@ -307,7 +307,7 @@ class Gpx(db.Model):
 # Create the actual dB
 # -------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
+with app.app_context():
     db.create_all()
 
 
@@ -337,6 +337,6 @@ app.jinja_env.globals.update(number_routes_passing_by=number_routes_passing_by)
 # Check the dB loaded ok
 # -------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
+with app.app_context():
     gpxes = db.session.query(Gpx).all()
     print(f"Found {len(gpxes)} GPXes in the dB")

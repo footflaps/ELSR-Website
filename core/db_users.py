@@ -192,7 +192,7 @@ class User(UserMixin, db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
 
     def all_users(self):
-        with current_app.app_context():
+        with app.app_context():
             users = db.session.query(User).all()
             return users
 
@@ -208,7 +208,7 @@ class User(UserMixin, db.Model):
         print(f"User '{new_user.email}' issued with code '{new_user.verification_code}'")
 
         # Try and add to the dB
-        with current_app.app_context():
+        with app.app_context():
             try:
                 db.session.add(new_user)
                 db.session.commit()
@@ -219,7 +219,7 @@ class User(UserMixin, db.Model):
                 return False
 
     def send_new_verification(self, user_id):
-        with current_app.app_context():
+        with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
                 try:
@@ -235,17 +235,17 @@ class User(UserMixin, db.Model):
         return False
 
     def find_user_from_id(self, id):
-        with current_app.app_context():
+        with app.app_context():
             user = db.session.query(User).filter_by(id=id).first()
             return user
 
     def find_user_from_email(self, email):
-        with current_app.app_context():
+        with app.app_context():
             user = db.session.query(User).filter_by(email=email).first()
             return user
 
     def display_name(self, email):
-        with current_app.app_context():
+        with app.app_context():
             user = self.find_user_from_email(email)
             if user:
                 return user.name
@@ -253,7 +253,7 @@ class User(UserMixin, db.Model):
                 return "unknown"
 
     def name_from_id(self, id):
-        with current_app.app_context():
+        with app.app_context():
             user = db.session.query(User).filter_by(id=id).first()
             return user.name
 
@@ -261,7 +261,7 @@ class User(UserMixin, db.Model):
         return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
 
     def validate_password(self, user, raw_password, user_ip):
-        with current_app.app_context():
+        with app.app_context():
             if check_password_hash(user.password, raw_password):
                 try:
                     # Update last login details
@@ -278,7 +278,7 @@ class User(UserMixin, db.Model):
                 return False
 
     def log_activity(self, user_id):
-        with current_app.app_context():
+        with app.app_context():
             try:
                 user = db.session.query(User).filter_by(id=user_id).first()
                 user.last_login = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
@@ -289,7 +289,7 @@ class User(UserMixin, db.Model):
                 return False
 
     def validate_email(self, user, code):
-        with current_app.app_context():
+        with app.app_context():
 
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user.id).first()
@@ -330,7 +330,7 @@ class User(UserMixin, db.Model):
                 return False
 
     def send_reset(self, email):
-        with current_app.app_context():
+        with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(email=email).first()
             if user:
@@ -347,7 +347,7 @@ class User(UserMixin, db.Model):
         return False
 
     def validate_reset_code(self, user_id, code):
-        with current_app.app_context():
+        with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
                 if user.reset_code != code:
@@ -368,7 +368,7 @@ class User(UserMixin, db.Model):
 
     def reset_codes(self):
         codes = {}
-        with current_app.app_context():
+        with app.app_context():
             users = db.session.query(User).filter(User.reset_code != "").all()
             for user in users:
                 print(user.email, user.reset_code)
@@ -376,7 +376,7 @@ class User(UserMixin, db.Model):
             return codes
 
     def reset_password(self, email, password):
-        with current_app.app_context():
+        with app.app_context():
             user = db.session.query(User).filter_by(email=email).first()
             if user:
                 try:
@@ -391,7 +391,7 @@ class User(UserMixin, db.Model):
         return False
 
     def delete_user(self, user_id):
-        with current_app.app_context():
+        with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
 
             # You can't delete Admins
@@ -417,7 +417,7 @@ class User(UserMixin, db.Model):
         return False
 
     def block_user(self, user_id):
-        with current_app.app_context():
+        with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
 
@@ -442,7 +442,7 @@ class User(UserMixin, db.Model):
         return False
 
     def unblock_user(self, user_id):
-        with current_app.app_context():
+        with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -457,7 +457,7 @@ class User(UserMixin, db.Model):
         return False
 
     def make_admin(self, user_id):
-        with current_app.app_context():
+        with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -472,7 +472,7 @@ class User(UserMixin, db.Model):
         return False
 
     def unmake_admin(self, user_id):
-        with current_app.app_context():
+        with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -501,7 +501,7 @@ class User(UserMixin, db.Model):
 # -------------------------------------------------------------------------------------------------------------- #
 
 # This one doesn't seem to work, need to use the one in the same module as the Primary dB
-with current_app.app_context():
+with app.app_context():
     db.create_all()
 
 
@@ -653,6 +653,6 @@ class ResetPasswordForm(FlaskForm):
 # Check the dB loaded ok
 # -------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
+with app.app_context():
     users = db.session.query(User).all()
     print(f"Found {len(users)} users in the dB")
