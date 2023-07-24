@@ -15,7 +15,7 @@ import os
 # Import out database connection from __init__
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import db, app
+from core import db, app, login_manager
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -71,11 +71,6 @@ NUM_DIGITS_CODES = 6
 # -------------------------------------------------------------------------------------------------------------- #
 # User loader function
 # -------------------------------------------------------------------------------------------------------------- #
-
-# See https://flask-login.readthedocs.io/en/latest/
-login_manager = LoginManager()
-login_manager.init_app(current_app)
-
 
 # You will need to provide a user_loader callback. This callback is used to reload the user object from the user
 # ID stored in the session. It should take the str ID of a user, and return the corresponding user object.
