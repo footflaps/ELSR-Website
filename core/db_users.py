@@ -1,4 +1,4 @@
-from flask import current_app, abort, redirect, url_for, flash, session
+from flask import abort, redirect, url_for, flash, session
 from flask_login import UserMixin, LoginManager, current_user, logout_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField, PasswordField

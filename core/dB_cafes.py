@@ -1,4 +1,3 @@
-from flask import current_app
 from flask_ckeditor import CKEditorField
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, FloatField, SelectField
