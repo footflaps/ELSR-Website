@@ -1,4 +1,4 @@
-from flask import current_app, abort, redirect, url_for, flash
+from flask import current_app, abort, redirect, url_for, flash, session
 from flask_login import UserMixin, LoginManager, current_user, logout_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField, PasswordField
@@ -76,7 +76,9 @@ NUM_DIGITS_CODES = 6
 # ID stored in the session. It should take the str ID of a user, and return the corresponding user object.
 @login_manager.user_loader
 def load_user(user_id):
-    app.logger.debug(f"User id = '{user_id}'")
+    app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
+    if session:
+        return User.query.filter_by(id=session['_user_id']).first()
     return User.query.get(int(user_id))
 
 
