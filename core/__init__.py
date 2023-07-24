@@ -63,7 +63,7 @@ app.config['SECRET_KEY'] = os.environ['ELSR_FLASK_SECRET_KEY']
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-login_manager.session_protection = "basic"
+login_manager.session_protection = None
 login_serializer = URLSafeTimedSerializer(app.secret_key)
 app.config['REMEMBER_COOKIE_NAME'] = "remember_token"
 
