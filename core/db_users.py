@@ -76,6 +76,7 @@ NUM_DIGITS_CODES = 6
 # ID stored in the session. It should take the str ID of a user, and return the corresponding user object.
 @login_manager.user_loader
 def load_user(user_id):
+    app.logger.debug(f"User id = '{user_id}'")
     return User.query.get(int(user_id))
 
 
