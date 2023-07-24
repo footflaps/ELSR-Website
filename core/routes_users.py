@@ -150,6 +150,7 @@ def login():
             print("login(): Password matched!")
 
             # Return back to cached page
+            app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
             print(f"login(): Forwarding user to '{session['url']}'.")
             return redirect(session['url'])
 
@@ -237,7 +238,7 @@ def register():
                 # Email is registered, but unvalidated
                 Event().log_event("Register Fail", f"Already signed up '{new_user.email}'.")
                 print("You've already signed up with that email, verify your email to login!")
-                flash("You've already signed up with that email, verify your email to logi!")
+                flash("You've already signed up with that email, verify your email to login!")
                 return redirect(url_for('validate_email'))
 
         # Add to dB
