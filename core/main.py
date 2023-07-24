@@ -263,5 +263,5 @@ app.register_error_handler(500, internal_server_error)
 
 if __name__ == "__main__":
 
-    app.run(debug=True)
+    app.run(debug=False)
 

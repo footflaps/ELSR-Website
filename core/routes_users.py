@@ -208,8 +208,9 @@ def logout():
     # Clear the session
     session.clear()
 
-    # Delete the user's cookie
+    # Delete the user's cookie as apparently logout doesn't do that
     # From: https://stackoverflow.com/questions/25144092/flask-login-still-logged-in-after-use-logouts-when-using-remember-me
+    # This seems to work now....
     response = make_response(redirect(url_for('home')))
     response.delete_cookie(app.config['REMEMBER_COOKIE_NAME'])
     return response
