@@ -232,21 +232,22 @@ class Gpx(db.Model):
 
     # Add length and ascent to the database
     def update_stats(self, gpx_id, length_km, ascent_m):
-        # Locate the GPX file
-        gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-        # Did we get something?
-        if gpx:
-            try:
-                # Update route stats
-                gpx.length_km = round(length_km,1)
-                gpx.ascent_m = round(ascent_m,1)
-                # Update dB
-                db.session.commit()
-                return True
-            except Exception as e:
-                print(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', error code was {e.args}.")
-                return False
-        return False
+        with current_app.app_context():
+            # Locate the GPX file
+            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
+            # Did we get something?
+            if gpx:
+                try:
+                    # Update route stats
+                    gpx.length_km = round(length_km,1)
+                    gpx.ascent_m = round(ascent_m,1)
+                    # Update dB
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    print(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    return False
+            return False
 
     def find_all_gpx_for_cafe(self, cafe_id, user):
         # We return a list of GPXes which pass this cafe
