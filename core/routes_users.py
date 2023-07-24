@@ -119,7 +119,7 @@ def login():
             # Find the user to get the details
             user = User().find_user_from_email(email)
             # Send an email
-            Email().send_reset_email(user.email, user.name, user.verification_code)
+            Email().send_reset_email(user.email, user.name, user.reset_code)
             # Tell user to expect an email
             print("login(): If your email address is registered, an email recovery mail has been sent.")
             flash("If your email address is registered, an email recovery mail has been sent.")
