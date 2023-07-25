@@ -452,8 +452,7 @@ def reset_password():
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/user_page', methods=['GET', 'POST'])
-@fresh_login_required
-@admin_only
+@login_required
 @update_last_seen
 def user_page():
     # ----------------------------------------------------------- #
