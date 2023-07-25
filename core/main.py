@@ -48,6 +48,18 @@ from core.dB_events import Event
 current_year = date.today().year
 
 
+# Get map size for desktop / mobile
+def dynamic_map_size():
+    user_agent_details = request.user_agent.string
+    phones = ["iphone", "android", "mobile"]
+    if any(phone in user_agent_details.lower() for phone in phones):
+        map_style = mMAP_STYLE
+        app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
+    else:
+        map_style = MAP_STYLE
+    return map_style
+
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Contact form
 # -------------------------------------------------------------------------------------------------------------- #
@@ -75,21 +87,6 @@ class ContactForm(FlaskForm):
 @app.route('/', methods=['GET'])
 @update_last_seen
 def home():
-
-    # -------------------------------------------------------------------------------------------- #
-    # Try and detect mobile usage
-    # -------------------------------------------------------------------------------------------- #
-
-    user_agent_details = request.user_agent.string
-    app.logger.debug(f"user_agent_details = '{user_agent_details}'.")
-    phones = ["iphone", "android"]
-    if any(phone in user_agent_details.lower() for phone in phones):
-        map_style = mMAP_STYLE
-        app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
-    else:
-        map_style = MAP_STYLE
-
-
     # -------------------------------------------------------------------------------------------- #
     # Show Espresso Library on a map
     # -------------------------------------------------------------------------------------------- #
@@ -109,7 +106,7 @@ def home():
         lat=cafe.lat,
         lng=cafe.lon,
         zoom=16,
-        style=map_style,
+        style=dynamic_map_size(),
         markers=cafe_marker
     )
 

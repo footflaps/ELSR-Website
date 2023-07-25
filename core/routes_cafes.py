@@ -13,7 +13,7 @@ import os
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, MAP_STYLE, GPX_UPLOAD_FOLDER_ABS
+from core import app, GPX_UPLOAD_FOLDER_ABS
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -27,6 +27,7 @@ from core.routes_gpx import MIN_DISPLAY_STEP_KM
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import update_last_seen, logout_barred_user
+from core.main import dynamic_map_size
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -130,7 +131,7 @@ def cafe_list():
         lat=52.211001,
         lng=0.117207,
         fit_markers_to_bounds=True,
-        style=MAP_STYLE,
+        style=dynamic_map_size(),
         markers=cafe_markers
     )
 
@@ -187,7 +188,7 @@ def cafe_details(cafe_id):
         lat=cafe.lat,
         lng=cafe.lon,
         zoom=14,
-        style=MAP_STYLE,
+        style=dynamic_map_size(),
         markers=cafe_marker
     )
 
@@ -238,7 +239,7 @@ def cafe_details(cafe_id):
         lat=52.211001,
         lng=0.117207,
         fit_markers_to_bounds=True,
-        style=MAP_STYLE,
+        style=dynamic_map_size(),
         markers=gpx_markers
     )
 

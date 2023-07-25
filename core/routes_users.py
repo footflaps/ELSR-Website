@@ -12,7 +12,7 @@ import os
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, MAP_STYLE
+from core import app
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -27,6 +27,7 @@ from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.send_emails import send_reset_email, send_verfication_email
+from core.main import dynamic_map_size
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -562,7 +563,7 @@ def user_page():
         lat=52.211001,
         lng=0.117207,
         fit_markers_to_bounds=True,
-        style=MAP_STYLE,
+        style=dynamic_map_size(),
         markers=cafe_markers
     )
 

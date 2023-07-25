@@ -32,7 +32,9 @@ GOOGLE_MAPS_API_KEY = os.environ['ELSR_GOOGLE_MAPS_API_KEY']
 
 # This is the size and shape of the Google Map insert
 MAP_STYLE = "height:500px;width:730px;margin:0;"
+# This seems to fit nicely on my iPhone SE 2nd gen
 mMAP_STYLE = "height:500px;width:350px;margin:0;"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # File upload constants

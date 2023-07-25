@@ -15,7 +15,7 @@ from werkzeug import exceptions
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, MAP_STYLE, GPX_UPLOAD_FOLDER_ABS
+from core import app, GPX_UPLOAD_FOLDER_ABS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -26,6 +26,7 @@ from core.dB_gpx import Gpx, UploadGPXForm, GPX_ALLOWED_EXTENSIONS
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_cafes import Cafe, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
 from core.dB_events import Event
+from core.main import dynamic_map_size
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -567,7 +568,7 @@ def start_and_end_maps(filename, gpx_id):
         lat=52.211001,
         lng=0.117207,
         fit_markers_to_bounds=True,
-        style=MAP_STYLE,
+        style=dynamic_map_size(),
         markers=start_markers
     )
 
@@ -577,7 +578,7 @@ def start_and_end_maps(filename, gpx_id):
         lat=52.211001,
         lng=0.117207,
         fit_markers_to_bounds=True,
-        style=MAP_STYLE,
+        style=dynamic_map_size(),
         markers=end_markers
     )
 
@@ -664,7 +665,7 @@ def gpx_details(gpx_id):
         lat=52.211001,
         lng=0.117207,
         fit_markers_to_bounds=True,
-        style=MAP_STYLE,
+        style=dynamic_map_size(),
         markers=markers
     )
 
