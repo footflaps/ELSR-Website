@@ -581,7 +581,6 @@ def user_page():
 @app.route('/delete_user/<int:user_id>', methods=['GET'])
 @logout_barred_user
 @login_required
-@admin_only
 @update_last_seen
 def delete_user(user_id):
     # ----------------------------------------------------------- #
