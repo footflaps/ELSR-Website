@@ -1,7 +1,7 @@
 from flask import abort, redirect, url_for, flash, session
 from flask_login import UserMixin, LoginManager, current_user, logout_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, SubmitField, PasswordField
+from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField
 from wtforms.validators import InputRequired, Email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -619,7 +619,7 @@ class CreateUserForm(FlaskForm):
 # -------------------------------------------------------------------------------------------------------------- #
 class VerifyUserForm(FlaskForm):
     email = EmailField("Email address", validators=[InputRequired("Please enter your email address."), Email()])
-    verification_code = PasswordField("Verification code",
+    verification_code = IntegerField("Verification code",
                                       validators=[InputRequired("Please enter the six digit code emailed to you.")])
     submit = SubmitField("Verify email address")
 
