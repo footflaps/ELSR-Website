@@ -50,7 +50,10 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			<!-- This is where the form will go -->
-			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary", "forgot": "secondary", "verify": "secondary"}) }}
+			{{ wtf.quick_form(form, novalidate=True, button_map={
+								"submit": "primary my-2 float-left",
+								"forgot": "secondary m-2 float-right",
+			                    "verify": "secondary my-2 float-right"}) }}
 			
 		</div>
 	</div>

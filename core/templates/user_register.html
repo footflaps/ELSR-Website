@@ -127,16 +127,18 @@
 			
 			<h4 class="mb-5" id="decision">Decision time...</h4>
 			
-			<!-- Button to expose hidden options -->
-			<a class="btn btn-primary" data-toggle="collapse" href="#collapseRegister" role="button"
-			   aria-expanded="false" aria-controls="collapseExample">
-                   I consent to the T&Cs
-            </a>
-			
-			<a class="btn btn-warning float-right" role="button" href="{{ url_for('uncut') }}"
-			   aria-expanded="false" aria-controls="collapseExample">
-                   I like uncut steerer tubes
-            </a>
+			<div class="clearfix">
+				<!-- Button to expose hidden options -->
+				<a class="btn btn-primary my-2" data-toggle="collapse" href="#collapseRegister" role="button"
+				   aria-expanded="false" aria-controls="collapseExample">
+	                   I consent to the T&Cs
+	            </a>
+				
+				<a class="btn btn-warning float-right my-2" role="button" href="{{ url_for('uncut') }}"
+				   aria-expanded="false" aria-controls="collapseExample">
+	                   I like uncut steerer tubes
+	            </a>
+			</div>
 			
 			<!-- Hidden registration form -->
 			<div class="collapse" id="collapseRegister">

@@ -634,8 +634,8 @@ class LoginUserForm(FlaskForm):
 
     # Two buttons, Log in and I've forgotten my password...
     submit = SubmitField("Log in")
-    forgot = SubmitField("Forgotten Password")
-    verify = SubmitField("Send Verification Code")
+    forgot = SubmitField("Reset Password")
+    verify = SubmitField("re-send Verification Code")
 
 
 # -------------------------------------------------------------------------------------------------------------- #

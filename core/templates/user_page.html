@@ -106,24 +106,28 @@
 								
 								<hr>
 								
-								<!-- Reply button -->
-								<button class="btn-sm btn-primary mr-2" type="button">Reply</button>
-								
-								<!-- Read / unread buttons -->
-								{% if message.been_read() %}
-									<a href="{{ url_for('mark_unread', message_id=message.id) }}">
-										<button class="btn-sm btn-secondary mr-2" type="button">Mark as unRead</button>
+								<div class="clearfix">
+									
+									<!-- Read / unread buttons -->
+									{% if message.been_read() %}
+										<a href="{{ url_for('mark_unread', message_id=message.id) }}">
+											<button class="btn-sm btn-secondary mr-2 mb-2 float-left " type="button">Mark as unRead</button>
+										</a>
+									{% else %}
+										<a href="{{ url_for('mark_read', message_id=message.id) }}">
+											<button class="btn-sm btn-secondary mr-2 mb-2 float-left" type="button">Mark as Read</button>
+										</a>
+									{% endif %}
+									
+									<!-- Delete button -->
+									<a href="{{ url_for('delete_message', message_id=message.id) }}">
+										<button class="btn-sm btn-danger float-right mb-2 ml-2" type="button">Delete</button>
 									</a>
-								{% else %}
-									<a href="{{ url_for('mark_read', message_id=message.id) }}">
-										<button class="btn-sm btn-secondary mr-2" type="button">Mark as Read</button>
-									</a>
-								{% endif %}
-								
-								<!-- Delete button -->
-								<a href="{{ url_for('delete_message', message_id=message.id) }}">
-									<button class="btn-sm btn-danger float-right" type="button">Delete</button>
-								</a>
+									
+									<!-- Reply button -->
+									<button class="btn-sm btn-primary mr-2 mb-2 float-right" type="button">Reply</button>
+									
+								</div>
 								
 							</div>
 						</div>
