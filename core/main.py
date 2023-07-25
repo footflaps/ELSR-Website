@@ -83,7 +83,7 @@ def home():
     user_agent_details = request.user_agent.string
     app.logger.debug(f"user_agent_details = '{user_agent_details}'.")
     phones = ["iphone", "android"]
-    if any(phone in user_agent_details for phone in phones):
+    if any(phone in user_agent_details.lower() for phone in phones):
         map_style = mMAP_STYLE
         app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
     else:
