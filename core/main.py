@@ -84,7 +84,7 @@ def home():
     phones = ["iphone", "android"]
     if any(phone in user_agent_details for phone in phones):
         map_style = mMAP_STYLE
-        app.logger.debug(f"Detected mobile: '{user_agent_details}'")
+        app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
     else:
         map_style = MAP_STYLE
 
