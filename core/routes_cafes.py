@@ -52,7 +52,7 @@ ELSR_MAX_KM = 100
 # -------------------------------------------------------------------------------------------------------------- #
 
 IMAGE_ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-CAFE_FOLDER = "D:/Dropbox/100 Days of Code/Python/ELSR-website/core/static/img/cafe_photos"
+CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
