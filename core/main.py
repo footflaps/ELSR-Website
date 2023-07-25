@@ -1,6 +1,5 @@
 from flask import render_template, url_for, request, flash
 from flask_login import current_user
-from datetime import date
 from flask_googlemaps import Map
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField
@@ -13,7 +12,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, MAP_STYLE, mMAP_STYLE
+from core import app, dynamic_map_size, current_year
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -39,25 +38,6 @@ from core.routes_events import delete_event
 from core.send_emails import contact_form_email
 from core.dB_events import Event
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Functions
-# -------------------------------------------------------------------------------------------------------------- #
-
-# Year for (C)
-current_year = date.today().year
-
-
-# Get map size for desktop / mobile
-def dynamic_map_size():
-    user_agent_details = request.user_agent.string
-    phones = ["iphone", "android", "mobile"]
-    if any(phone in user_agent_details.lower() for phone in phones):
-        map_style = mMAP_STYLE
-        app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
-    else:
-        map_style = MAP_STYLE
-    return map_style
 
 
 # -------------------------------------------------------------------------------------------------------------- #

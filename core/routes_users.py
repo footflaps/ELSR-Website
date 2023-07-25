@@ -12,7 +12,7 @@ import os
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app
+from core import app, dynamic_map_size, current_year
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -27,7 +27,6 @@ from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.send_emails import send_reset_email, send_verfication_email
-from core.main import dynamic_map_size
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -43,9 +42,6 @@ admin_email_address = os.environ['ELSR_ADMIN_EMAIL']
 # -------------------------------------------------------------------------------------------------------------- #
 # Functions
 # -------------------------------------------------------------------------------------------------------------- #
-
-# Year for (C)
-current_year = date.today().year
 
 def same_origin(current_uri, compare_uri):
     current = urlparse(current_uri)

@@ -13,7 +13,8 @@ import os
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS
+from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -27,7 +28,6 @@ from core.routes_gpx import MIN_DISPLAY_STEP_KM
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import update_last_seen, logout_barred_user
-from core.main import dynamic_map_size
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -62,11 +62,6 @@ CAFE_FOLDER = "D:/Dropbox/100 Days of Code/Python/ELSR-website/core/static/img/c
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
-
-
-# Year for (C)
-current_year = date.today().year
-
 
 def allowed_file(filename):
     return '.' in filename and \

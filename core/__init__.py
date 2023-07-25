@@ -9,6 +9,7 @@ from itsdangerous.url_safe import URLSafeTimedSerializer
 import os
 import sys
 import logging
+from datetime import date
 
 # We have our own hacked Gravatar
 from core.gravatar_hack import Gravatar
@@ -134,3 +135,22 @@ GoogleMaps(app)
 gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False,
                     force_lower=False, use_ssl=True, base_url=None)
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Functions
+# -------------------------------------------------------------------------------------------------------------- #
+
+# Year for (C)
+current_year = date.today().year
+
+
+# Get map size for desktop / mobile
+def dynamic_map_size():
+    user_agent_details = request.user_agent.string
+    phones = ["iphone", "android", "mobile"]
+    if any(phone in user_agent_details.lower() for phone in phones):
+        map_style = mMAP_STYLE
+        app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
+    else:
+        map_style = MAP_STYLE
+    return map_style
