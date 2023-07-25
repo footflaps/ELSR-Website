@@ -42,7 +42,6 @@ DEFAULT_EVENT_DAYS = 7
 
 @app.route('/admin', methods=['GET'])
 @login_required
-@fresh_login_required
 @admin_only
 @update_last_seen
 def admin_page():

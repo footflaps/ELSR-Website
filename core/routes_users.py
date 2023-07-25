@@ -578,21 +578,16 @@ def user_page():
 # Delete user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_user', methods=['POST'])
+@app.route('/delete_user/<int:user_id>', methods=['GET'])
 @logout_barred_user
 @login_required
 @admin_only
 @update_last_seen
-def delete_user():
+def delete_user(user_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-
-    user_id = request.args.get('user_id', None)
-    try:
-        confirmation = request.form['confirm']
-    except exceptions.BadRequestKeyError:
-        confirmation = None
+    confirm = request.args.get('confirm', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -602,7 +597,7 @@ def delete_user():
         Event().log_event("Delete User Fail", f"missing user id")
         print(f"delete_user(): missing user id!'.")
         abort(400)
-    elif not confirmation:
+    elif not confirm:
         flash("missing user confirmation")
         Event().log_event("Delete User Fail", f"missing user confirmation")
         print(f"delete_user(): missing user confirmation!'.")
@@ -616,9 +611,9 @@ def delete_user():
         Event().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'")
         print(f"delete_user(): invalid user user_id = '{user_id}'.")
         abort(404)
-    elif confirmation != "DELETE":
-        Event().log_event("Delete User Fail", f"Delete wasn't confirmed '{confirmation}'")
-        flash(f"delete_user(): Delete wasn't confirmed '{confirmation}'.")
+    elif confirm != "DELETE":
+        Event().log_event("Delete User Fail", f"Delete wasn't confirmed '{confirm}'")
+        flash(f"delete_user(): Delete wasn't confirmed '{confirm}'.")
         return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
@@ -656,20 +651,16 @@ def delete_user():
 # Block user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/block_user', methods=['GET', 'POST'])
+@app.route('/block_user/<int:user_id>', methods=['GET'])
 @logout_barred_user
 @login_required
 @admin_only
 @update_last_seen
-def block_user():
+def block_user(user_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-    try:
-        confirmation = request.form['confirm']
-    except exceptions.BadRequestKeyError:
-        confirmation = None
+    confirm = request.args.get('confirm', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -678,7 +669,7 @@ def block_user():
         Event().log_event("Block User Fail", f"missing user id.")
         print(f"block_user(): missing user id!'.")
         abort(400)
-    elif not confirmation:
+    elif not confirm:
         Event().log_event("Block User Fail", f"missing confirmation.")
         print(f"block_user(): missing user confirmation!'.")
         abort(400)
@@ -691,9 +682,9 @@ def block_user():
         Event().log_event("Block User Fail", f"invalid user user_id = '{user_id}'.")
         print(f"block_user(): invalid user user_id = '{user_id}'.")
         abort(404)
-    elif confirmation != "BLOCK":
-        Event().log_event("Block User Fail", f"Block wasn't confirmed '{confirmation}'.")
-        flash(f"lock_user(): Block wasn't confirmed '{confirmation}'.")
+    elif confirm != "BLOCK":
+        Event().log_event("Block User Fail", f"Block wasn't confirmed '{confirm}'.")
+        flash(f"lock_user(): Block wasn't confirmed '{confirm}'.")
         return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
