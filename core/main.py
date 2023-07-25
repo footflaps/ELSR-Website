@@ -13,7 +13,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, MAP_STYLE
+from core import app, MAP_STYLE, mMAP_STYLE
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -77,6 +77,18 @@ class ContactForm(FlaskForm):
 def home():
 
     # -------------------------------------------------------------------------------------------- #
+    # Try and detect mobile usage
+    # -------------------------------------------------------------------------------------------- #
+
+    user_agent_details = request.user_agent.string
+    phones = ["iphone", "android"]
+    if any(phone in user_agent_details for phone in phones):
+        map_style = mMAP_STYLE
+    else:
+        map_style = MAP_STYLE
+
+
+    # -------------------------------------------------------------------------------------------- #
     # Show Espresso Library on a map
     # -------------------------------------------------------------------------------------------- #
 
@@ -95,7 +107,7 @@ def home():
         lat=cafe.lat,
         lng=cafe.lon,
         zoom=16,
-        style=MAP_STYLE,
+        style=map_style,
         markers=cafe_marker
     )
 
