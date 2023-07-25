@@ -32,7 +32,7 @@ from core.dB_events import Event
 # Mark message as read
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/mark_read', methods=['GET', 'POST'])
+@app.route('/mark_read', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -96,7 +96,7 @@ def mark_read():
 # Mark message as unread
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/mark_unread', methods=['GET', 'POST'])
+@app.route('/mark_unread', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -160,7 +160,7 @@ def mark_unread():
 # Delete message
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_message', methods=['GET', 'POST'])
+@app.route('/delete_message', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
