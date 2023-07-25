@@ -688,7 +688,7 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('delete_user', user_id=user.id) }}" method="post">
+				<form action="{{ url_for('delete_user', user_id=user.id) }}" method="POST">
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">
@@ -710,6 +710,7 @@
 		</div>
 	</div>
 </div>  <!-- End of modal form -->
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                         Modal form for confirming barring user                                 -->

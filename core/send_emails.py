@@ -49,7 +49,7 @@ RESET_BODY = "Dear [USER], \n\n" \
 # -------------------------------------------------------------------------------------------------------------- #
 
 # Send an email
-def send_verfication_email(self, target_email, user_name, code):
+def send_verfication_email(target_email, user_name, code):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=admin_email, password=admin_password)
         subject = "Verification email."
@@ -70,7 +70,7 @@ def send_verfication_email(self, target_email, user_name, code):
             print(f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
             return False
 
-def send_reset_email(self, target_email, user_name, code):
+def send_reset_email(target_email, user_name, code):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=admin_email, password=admin_password)
         subject = "Password reset email."

@@ -1,6 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
-from flask_login import login_user, current_user, logout_user, login_required
-from datetime import date
+from flask_login import login_user, current_user, logout_user, login_required, fresh_login_required
 from flask_googlemaps import Map
 from werkzeug import exceptions
 from urllib.parse import urlparse
@@ -247,6 +246,7 @@ def register():
         new_user = User()
         new_user.name = form.name.data
         new_user.email = form.email.data
+        app.logger.debug(f"register(): new_user = '{new_user}', new_user.name = '{new_user.name}', new_user.email = '{new_user.email}'")
 
         # Does the user already exist?
         if User().find_user_from_email(new_user.email):
@@ -275,7 +275,7 @@ def register():
             print(f"User '{user.email}' validate status = '{user.verified()}', admin status = '{user.admin()}'")
 
             # They now need to validate email address
-
+            app.logger.debug(f"register(): Sending verification email to '{user.email}'")
             Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
             Event().log_event("Register Pass", f"Verification code sent to '{user.email}'.")
             flash("Please validate your email address with the code you have been sent.")
@@ -452,8 +452,8 @@ def reset_password():
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/user_page', methods=['GET', 'POST'])
-@logout_barred_user
-@login_required
+@fresh_login_required
+@admin_only
 @update_last_seen
 def user_page():
     # ----------------------------------------------------------- #
@@ -579,14 +579,16 @@ def user_page():
 # Delete user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_user', methods=['GET', 'POST'])
+@app.route('/delete_user', methods=['POST'])
 @logout_barred_user
 @login_required
+@admin_only
 @update_last_seen
 def delete_user():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
+
     user_id = request.args.get('user_id', None)
     try:
         confirmation = request.form['confirm']
@@ -597,10 +599,12 @@ def delete_user():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        flash("missing user id")
         Event().log_event("Delete User Fail", f"missing user id")
         print(f"delete_user(): missing user id!'.")
         abort(400)
     elif not confirmation:
+        flash("missing user confirmation")
         Event().log_event("Delete User Fail", f"missing user confirmation")
         print(f"delete_user(): missing user confirmation!'.")
         abort(400)

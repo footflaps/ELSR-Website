@@ -153,4 +153,5 @@ def dynamic_map_size():
         app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
     else:
         map_style = MAP_STYLE
+        app.logger.debug(f"Detected desktop: '{user_agent_details}'.")
     return map_style
