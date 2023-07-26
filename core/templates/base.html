@@ -104,7 +104,6 @@
 						<a class="nav-link" href="/contact">Contact</a>
 					</li>
 					
-					
 					<!-- Register / Login links -->
 					{% if not current_user.is_authenticated: %}
 					
@@ -118,47 +117,52 @@
 						
 					{% endif %}
 					
-				</ul>
-				
+					
+					<!------------------------------------------------------------------------------------------------>
+					<!--                                       User Details                                         -->
+					<!------------------------------------------------------------------------------------------------>
+					
+					{% if current_user.is_authenticated: %}
+					
+						<!-- User is logged in -->
+						<li class="nav-item">
+							<a class="nav-link" href="{{ url_for('user_page', user_id=current_user.id) }}">
+								
+								<!-- User Gravatar -->
+								<img src="{{ current_user.email | gravatar }}"
+							         width="50"
+									 style="border-radius: 50%;"/>
+								
+								<!-- Personal Mail icon -->
+								{% if current_user.has_mail() %}
+									<i class="fa-solid fa-envelope fa-bounce fa-xl"
+									   style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;" ></i>
+								{% endif %}
 			
-				<!---------------------------------------------------------------------------------------------------->
-				<!--                                       User Details                                             -->
-				<!---------------------------------------------------------------------------------------------------->
-				
-				{% if current_user.is_authenticated: %}
-				
-					<!-- User is logged in -->
-					<a class="navbar-brand" href="{{url_for('user_page', user_id=current_user.id) }}">
-						
-						<!-- User Gravatar -->
-						<img src="{{ current_user.email | gravatar }}"
-					         width="50"
-							 style="border-radius: 50%;"/>
-						
-						<!-- Personal Mail icon -->
-						{% if current_user.has_mail() %}
-							&nbsp;
-							<i class="fa-solid fa-envelope fa-bounce fa-xl" style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;" ></i>
+							</a>
+						</li>
+					
+						<!-- Admin icon -->
+						{% if current_user.admin(): %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ url_for('admin_page') }}">Admin</a>
+							</li>
 						{% endif %}
-	
-					</a>
-				
-					<!-- Admin icon -->
-					{% if current_user.admin(): %}
-						 &nbsp; <a href="{{ url_for('admin_page') }}" class="navbar-brand mx-0 px-0">Admin</a>
+						
+						<!-- Admins Mail icon -->
+						{% if current_user.admin() and admin_has_mail() %}
+							<li class="nav-item">
+								<a class="nav-link" href="{{ url_for('admin_page') }}">
+									<i class="fa-solid fa-envelope fa-bounce fa-xl"
+									   style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;" ></i>
+								</a>
+							</li>
+						{% endif %}
+						
+					
 					{% endif %}
 					
-					<!-- Admins Mail icon -->
-					{% if current_user.admin() and admin_has_mail() %}
-						<a href="{{ url_for('admin_page') }}" class="navbar-brand mx-0 px-0">
-							&nbsp;
-							<i class="fa-solid fa-envelope fa-bounce fa-xl" style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;" ></i>
-						</a>
-					{% endif %}
-					
-					
-				
-				{% endif %}
+				</ul>
 			</div>
 		</div>
 	</nav>
