@@ -90,7 +90,7 @@ class CafeComment(db.Model):
 class CreateCafeCommentForm(FlaskForm):
     # Use the full feature editor for the comment
     body = CKEditorField("Comments should be polite and helpful!", validators=[DataRequired()])
-    submit = SubmitField("Submit Comment")
+    submit = SubmitField("Submit")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
