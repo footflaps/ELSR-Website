@@ -44,134 +44,64 @@
 
 <div class="container">
 	<div class="row">
-		<div class="col-9 mx-auto">
+		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			<h4>So, you want to lead a ride..</h4>
 			<p>In which case, you will need a route. Thankfully, this site makes it really simple to find one.</p>
 			
-			<div class="accordion" id="accordionExample">
-				
-				
-				<!-- Section 1 -->
-				<div class="card">
-					
-					<div class="card-header" id="headingOne">
-						<h5 class="mb-0">
-							<button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne"
-							        aria-expanded="true" aria-controls="collapseOne">
-								Step 1: Check the wind direction
-							</button>
-						</h5>
-					</div>
-					
-					<div id="collapseOne" class="collapse show" aria-labelledby="headingOne"
-					     data-parent="#accordionExample">
-						<div class="card-body">
-							
-							<p>The unwritten rule is '<b>tail wind on the return leg</b>', so you need to look at the
-							   weather forecast for the day of the ride and see which way the wind is blowing..</p>
-							
-							<p>E.g. In this example, the wind is blowing towards the East / North East, so ideally, you
-							   want a route which heads out West / South West.</p>
-							
-							<img src="{{ url_for('static', filename='img/route-plan-wind.jpg')}}">
-							
-							<p>Source: <a href="https://www.bbc.co.uk/weather/2653941">BBC Weather</a></p>
-							
-							<p>NB If the wind speed is below 6 mph, it probably doesn't really matter and just pick a
-							   cafe you've not visited for a while.</p>
-						
-						</div>
-					</div>
-				
-				</div>
-				
-				<!-- Section 2 -->
-				<div class="card">
-					<div class="card-header" id="headingTwo">
-						<h5 class="mb-0">
-							<button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-							        data-target="#collapseTwo"
-							        aria-expanded="false" aria-controls="collapseTwo">
-								Step 2: Pick a cafe
-							</button>
-						</h5>
-					</div>
-					<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
-						<div class="card-body">
-							
-							<p>In our example, we're looking for a cafe SW / W of Cambridge. Look at the list of cafes
-							   on this
-							   site to see what options you have e.g. in our example below, all the cafes circled would
-							   have a tail
-							   wind on the return leg to Cambridge.</p>
-							
-							<img src="{{ url_for('static', filename='img/route-plan-cafe.png')}}"
-							     width="600" height="400">
-							
-							<p>Source: <a href="{{ url_for('cafe_list')}}">ELSR cafe list</a></p>
-							
-							<p>Read the cafe details on this site and pick a cafe which is suitable for the size of
-							   group and the
-							   anticipated weather. Some cafes have limited indoor seating or no heating, so aren't very
-							   suitable
-							   for cold or wet rides.</p>
-						
-						
-						</div>
-					</div>
-				</div>
-				
-				<!-- Section 3 -->
-				<div class="card">
-					<div class="card-header" id="headingThree">
-						<h5 class="mb-0">
-							<button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-							        data-target="#collapseThree"
-							        aria-expanded="false" aria-controls="collapseThree">
-								Step 3: Pick a route
-							</button>
-						</h5>
-					</div>
-					<div id="collapseThree" class="collapse" aria-labelledby="headingThree"
-					     data-parent="#accordionExample">
-						<div class="card-body">
-							
-							<p>Once you've picked a cafe, go to the cafe page and look at the available routes which
-							   pass by that cafe. </p>
-							<p>When deciding on a route, check the length is suitable for your group
-							   and that the target cafe is roughly halfway round the route (or a bit over eg 60km
-							   along a 100km route).</p>
-						
-						</div>
-					</div>
-				</div>
-				
-				<!-- Section 4 -->
-				<div class="card">
-					<div class="card-header" id="headingFour">
-						<h5 class="mb-0">
-							<button class="btn btn-link collapsed" type="button" data-toggle="collapse"
-							        data-target="#collapseFour"
-							        aria-expanded="false" aria-controls="collapseFour">
-								Step 4: You're all set
-							</button>
-						</h5>
-					</div>
-					<div id="collapseFour" class="collapse" aria-labelledby="headingFour"
-					     data-parent="#accordionExample">
-						<div class="card-body">
-							
-							<p>Download the GPX file from this site and upload to your bike computer and away you
-							   go!</p>
-						
-						</div>
-					</div>
-				</div>
+			<h4>Step 1: Check the wind direction</h4>
 			
-				
-			</div>
+			<p>The unwritten rule is '<b>tail wind on the return leg</b>', so you need to look at the
+			   weather forecast for the day of the ride and see which way the wind is blowing..</p>
 			
+			<p>E.g. In this example, the wind is blowing towards the East / North East, so ideally, you
+			   want a route which heads out West / South West.</p>
+			
+			<img src="{{ url_for('static', filename='img/route-plan-wind.jpg')}}">
+			
+			<p>Source: <a href="https://www.bbc.co.uk/weather/2653941">BBC Weather</a></p>
+			
+			<p>NB If the wind speed is below 6 mph, it probably doesn't really matter and just pick a
+			   cafe you've not visited for a while.</p>
+						
+			<hr>
+			
+			<h4>Step 2: Pick a cafe</h4>
+			
+			<p>In our example, we're looking for a cafe SW / W of Cambridge. Look at the list of cafes
+			   on this
+			   site to see what options you have e.g. in our example below, all the cafes circled would
+			   have a tail
+			   wind on the return leg to Cambridge.</p>
+			
+			<img src="{{ url_for('static', filename='img/route-plan-cafe.png')}}"
+			     width="600" height="400">
+			
+			<p>Source: <a href="{{ url_for('cafe_list')}}">ELSR cafe list</a></p>
+			
+			<p>Read the cafe details on this site and pick a cafe which is suitable for the size of
+			   group and the
+			   anticipated weather. Some cafes have limited indoor seating or no heating, so aren't very
+			   suitable
+			   for cold or wet rides.</p>
+						
+			<hr>
+			
+			<h4>Step 3: Pick a route</h4>
+			
+			<p>Once you've picked a cafe, go to the cafe page and look at the available routes which
+			   pass by that cafe. </p>
+			<p>When deciding on a route, check the length is suitable for your group
+			   and that the target cafe is roughly halfway round the route (or a bit over eg 60km
+			   along a 100km route).</p>
+			
+			<hr>
+			
+			<h4>Step 4: You're all set</h4>
+			
+			<p>Download the GPX file from this site and upload to your bike computer and away you
+			   go!</p>
+						
 			<!-- Break before next section / footer -->
 			<hr>
 		
