@@ -84,12 +84,12 @@
 	
 	<!-- Table tile and Add a cafe button -->
 	<div class="row">
-		<div class="col-8 mx-auto">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 	
 			<!-- Button to expose hidden options -->
 			<a class="btn btn-primary float-left" data-toggle="collapse" href="#collapseAdminTools" role="button"
 			   aria-expanded="false" aria-controls="collapseExample">
-				List view of all {{ cafes | count() }} cafes
+				List view
 	        </a>
 			
 			<!-- Add a cafe button -->
@@ -113,11 +113,10 @@
 				
 					<div class="row mt-0">
 						
-						<!-- Blank column to space things out -->
-						<div class="col-2"></div>
+						<div class="col-lg-2 col-md-0 mx-auto"></div>
 						
 						<!-- First column, Name and summary -->
-						<div class="col-6">
+						<div class="col-lg-6 col-md-7 mx-auto">
 							<div class="post-preview">
 								<a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}">
 									
@@ -134,7 +133,7 @@
 						</div>
 						
 						<!-- Second column, Rating -->
-						<div class="col-2 mx-auto">
+						<div class="col-lg-2 col-md-5  mx-auto">
 							<div class="post-preview">
 								<a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}">
 									
@@ -149,15 +148,16 @@
 							</div>
 						</div>
 						
-						<!-- Blank column to space things out -->
-						<div class="col-2"></div>
+						<div class="col-lg-2 col-md-0 mx-auto"></div>
 					
 					</div>
 				{% endfor %}
 	
+		        
+		        
 		        <!-- 2nd Add a new cafe button -->
 		        <div class="row">
-					<div class="col-8 mx-auto">
+					<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 			
 						<!-- Must have permission to post -->
 						{% if current_user.is_authenticated and current_user.can_post_cafe() %}
