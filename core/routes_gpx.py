@@ -74,8 +74,11 @@ def check_new_cafe_with_all_gpxes(cafe):
     # Loop over each GPX file
     for gpx in gpxes:
 
+        # Use absolute path for filename
+        filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
         # Open the file
-        with open(gpx.filename, 'r') as file_ref:
+        with open(filename, 'r') as file_ref:
             gpx_file = gpxpy.parse(file_ref)
 
             # Max distance
@@ -144,7 +147,11 @@ def check_new_gpx_with_all_cafes(gpx_id):
     # ----------------------------------------------------------- #
     # Loop over the GPX file
     # ----------------------------------------------------------- #
-    with open(gpx.filename, 'r') as file_ref:
+
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
+    with open(filename, 'r') as file_ref:
 
         gpx_file = gpxpy.parse(file_ref)
 
@@ -265,7 +272,11 @@ def cut_start_gpx(gpx_filename, start_count):
     # ----------------------------------------------------------- #
     # Open the file and trim it
     # ----------------------------------------------------------- #
-    with open(gpx_filename, 'r') as file_ref:
+
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+
+    with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
 
         # Read in all points after start_count
@@ -299,7 +310,10 @@ def cut_end_gpx(gpx_filename, end_count):
     # ----------------------------------------------------------- #
     # Open the file and trim it
     # ----------------------------------------------------------- #
-    with open(gpx_filename, 'r') as file_ref:
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+
+    with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
 
         # Read in all points after start_count
@@ -362,7 +376,9 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id):
     new_gpx_file = new_gpx()
 
     # Open the file
-    with open(gpx_filename, 'r') as file_ref:
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+    with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
 
         # Read in all points after start_count
