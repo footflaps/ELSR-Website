@@ -317,6 +317,14 @@ def new_cafe():
                        "<li>Where does it rank on the ELSR Coke Price Index? ;-) </li>" \
                        "</ul>"
 
+    # Just for testing
+    form.name.data = "Test cafe"
+    form.lat.data = 52.200687
+    form.lon.data = 0.15762
+    form.summary.data = "nice cafe"
+
+
+
     # Are we posting the completed form?
     if form.validate_on_submit():
 
@@ -374,6 +382,33 @@ def new_cafe():
         # Look up our new cafe in the dB as we can't know its ID until after it's been added
         cafe = Cafe().find_by_name(new_cafe.name)
         print(f"new_cafe(): Cafe added, cafe_id = {cafe.id}")
+
+        # ----------------------------------------------------------- #
+        #   Did we get passed a path for a photo?
+        # ----------------------------------------------------------- #
+
+        if form.cafe_photo.data != "":
+            print(f"Passed photo '{form.cafe_photo.data.filename}'")
+
+            if allowed_file(form.cafe_photo.data.filename):
+                # Create a new filename for the image
+                filename = f"cafe_{cafe.id}.jpg"
+                # Save in our cafe photo folder
+                form.cafe_photo.data.save(os.path.join(CAFE_FOLDER, filename))
+                print(f"new_cafe(): Photo saved as '{filename}'.")
+                # Update cafe object with filename
+                if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
+                    Event().log_event("Add Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
+                    flash("Cafe photo has been updated.")
+                    print(f"new_cafe(): Successfully updated the photo.")
+                else:
+                    Event().log_event("Add Cafe Fail", f"Something went wrong. cafe.id = '{cafe.id}'.")
+                    flash("Sorry, something went wrong!")
+                    print(f"new_cafe(): Failed to update the photo.")
+            else:
+                Event().log_event("Add Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
+                flash("Invalid file type for image!")
+                print(f"new_cafe(): Invalid file type for image.")
 
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc

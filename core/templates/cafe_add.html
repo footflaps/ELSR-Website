@@ -101,6 +101,7 @@
 			<hr>
 			
 			<h2 class="post-title">Edit the cafe details</h2>
+			<h4 class="post-title">NB The cafe must be within 100 km of Cambridge.</h4>
 			
 			<!-- Load ckeditor -->
 			{{ ckeditor.load() }}
@@ -110,8 +111,7 @@
 			
 			<!-- This is where the form will go -->
 			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-		
-		
+			
 		</div>
 	</div>
 </div>
