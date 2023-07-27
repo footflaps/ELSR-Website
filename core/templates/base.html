@@ -17,7 +17,8 @@
 	<meta charset="utf-8">
 	<meta name="description" content="EL (Espresso Library) Social Rides Website">
 	<meta name="author" content="Ben Freeman">
-	<meta name="keywords" content="cycling, social rides, cafe rides, cambridge, road riding, cycling club, cycle routes">
+	<meta name="keywords" content="cycling, social rides, cafe rides, cambridge, road riding, cycling club,
+	                               cycle routes">
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
@@ -62,10 +63,17 @@
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
 	      rel='stylesheet' type='text/css'>
 	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                             Page specific header insertion                                     -->
+	<!---------------------------------------------------------------------------------------------------->
+	
 	{% block head %}
 	{% endblock %}
 	
+	
 </head>
+
 
 <body>
 	
@@ -163,14 +171,19 @@
 							</a>
 						</li>
 					
-						<!-- Admin icon -->
+					
+						<!-------------------------------------------------------------------------------------------->
+						<!--                                   Admin features                                       -->
+						<!-------------------------------------------------------------------------------------------->
+					
+						<!-- Admin icon which links to Admin console -->
 						{% if current_user.admin(): %}
 							<li class="nav-item">
 								<a class="nav-link" href="{{ url_for('admin_page') }}">Admin</a>
 							</li>
 						{% endif %}
 						
-						<!-- Admins Mail icon -->
+						<!-- Admins Mail icon which links to Admin console -->
 						{% if current_user.admin() and admin_has_mail() %}
 							<li class="nav-item">
 								<a class="nav-link" href="{{ url_for('admin_page') }}">
@@ -195,7 +208,6 @@
 	
 	{% block content %}
 	{% endblock %}
-	
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
