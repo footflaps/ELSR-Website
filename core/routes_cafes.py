@@ -20,7 +20,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_cafes import Cafe, CreateCafeForm, UpdateCafeForm, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
+from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.routes_gpx import check_new_cafe_with_all_gpxes
 from core.dB_gpx import Gpx
@@ -440,7 +440,7 @@ def edit_cafe():
     # Need a form for the cafe details
     # ----------------------------------------------------------- #
 
-    form = UpdateCafeForm(
+    form = CreateCafeForm(
         name=cafe.name,
         lat=cafe.lat,
         lon=cafe.lon,

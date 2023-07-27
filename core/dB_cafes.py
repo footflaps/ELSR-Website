@@ -214,22 +214,7 @@ class CreateCafeForm(FlaskForm):
     # Use the full feature editor for the details section
     detail = CKEditorField("Details", validators=[DataRequired()])
 
-    submit = SubmitField("Add Cafe")
-
-
-class UpdateCafeForm(FlaskForm):
-    name = StringField("Cafe name", validators=[DataRequired()])
-    lat = FloatField("Latitude", validators=[DataRequired()])
-    lon = FloatField("Longitude", validators=[DataRequired()])
-    website_url = StringField("Website URL", validators=[])
-    summary = StringField("Five word summary", validators=[DataRequired()])
-    rating = SelectField("Overall rating for a cycling cafe ride", choices=["☕️", "☕☕", "☕☕☕", "☕☕☕☕", "☕☕☕☕☕"],
-                         validators=[DataRequired()])
-
-    # Use the full feature editor for the details section
-    detail = CKEditorField("Details", validators=[DataRequired()])
-
-    submit = SubmitField("Update Cafe Details")
+    submit = SubmitField("Submit")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
