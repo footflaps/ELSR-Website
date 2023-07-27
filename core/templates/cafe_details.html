@@ -82,12 +82,13 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 	
-			<!-- Bit of a break -->
-			<hr>
+			
 			
             <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view {{cafe.name}}</h2>
             
             {{cafemap.html}}
+			
+			<hr>
 			
 		</div>
 	</div>
@@ -99,105 +100,134 @@
 <!--                                   Show details of cafe                                         -->
 <!---------------------------------------------------------------------------------------------------->
 
-<article>
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
-				
-				<!-- Bit of a break -->
-				<hr>
-				
-				<!-- Button to expose hidden options -->
-				<a class="btn btn-primary" data-toggle="collapse" href="#collapseDetails" role="button"
-				   aria-expanded="false" aria-controls="collapseExample">
-	                  Cafe details
-	            </a>
+
+<div class="container">
+	
+	<!-- Button to unhide cafe details section -->
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseDetails" role="button"
+			   aria-expanded="false" aria-controls="collapseExample">
+                  Cafe details
+            </a>
+	   </div>
+	</div>
+	
+	<!-- Hidden cafe details section -->
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<!-- Collapsed button tab -->
+			<div class="collapse" id="collapseDetails">
+				<div class="card card-body my-3">
+	                <div class="clearfix">
 			
-				<!-- Collapsed button tab -->
-				<div class="collapse" id="collapseDetails">
-					<div class="card card-body my-3">
-		                <div class="clearfix">
-				
-				
-							{% if cafe.website_url: %}
-							<!-- Website link -->
-							<a href="{{cafe.website_url}}"
-							   target="_blank"
-							   class="link-primary">
-								<i class="fa fa-external-link"></i>	Cafe website (opens in new tab)
-							</a>
+			
+						{% if cafe.website_url: %}
+						<!-- Website link -->
+						<a href="{{cafe.website_url}}"
+						   target="_blank"
+						   class="link-primary">
+							<i class="fa fa-external-link"></i>	Cafe website (opens in new tab)
+						</a>
+						{% endif %}
+						
+						<!-- This is the cafe contents -->
+						<p>
+							<!--
+							   NOTE: The data from the CKEditorField is saved as HTML. It contains all the structure and styling
+							   of the blog post. In order for this structure to be reflected when you go to the cafe_details.html page for
+								the blog post, you need to add a Jinja safe() filter.
+							-->
+							{{cafe.details|safe}}
+						
+						</p>
+						
+						<!-- Edit or Flag post button -->
+		                {% if not current_user.is_authenticated: %}
+		                
+						{% elif current_user.admin() or current_user.email == cafe.added_email: %}
+						
+						<div class="clearfix">
+							
+							<!----------------------------->
+							<!--      EDIT button        -->
+							<!----------------------------->
+							
+							<a class="btn btn-primary float-right"
+							   href="{{url_for('edit_cafe', cafe_id=cafe.id)}}">Edit</a>
+						
+							{% if cafe.active %}
+							
+								<!----------------------------->
+								<!--      Closed button      -->
+								<!----------------------------->
+							
+								<a class="btn btn-secondary float-left"
+								   data-toggle="modal" data-target="#closedCafe">Mark as closed</a>
+						
+							{% else %}
+							
+								<!----------------------------->
+								<!--    unClosed button      -->
+								<!----------------------------->
+							
+								<a class="btn btn-secondary float-left"
+								   href="{{url_for('unclose_cafe', cafe_id=cafe.id)}}">unClose Cafe</a>
+							
 							{% endif %}
 							
-							<!-- This is the cafe contents -->
-							<p>
-								<!--
-								   NOTE: The data from the CKEditorField is saved as HTML. It contains all the structure and styling
-								   of the blog post. In order for this structure to be reflected when you go to the cafe_details.html page for
-									the blog post, you need to add a Jinja safe() filter.
-								-->
-								{{cafe.details|safe}}
-							
-							</p>
-							
-							<!-- Edit or Flag post button -->
-			                {% if not current_user.is_authenticated: %}
-			                
-							{% elif current_user.admin() or current_user.email == cafe.added_email: %}
+						</div>
+						
+						
+						{% elif current_user.is_authenticated: %}
+						
+							<!----------------------------->
+							<!--      FLAG button        -->
+							<!----------------------------->
 							
 							<div class="clearfix">
-								
-								<!----------------------------->
-								<!--      EDIT button        -->
-								<!----------------------------->
-								
-								<a class="btn btn-primary float-right"
-								   href="{{url_for('edit_cafe', cafe_id=cafe.id)}}">Edit</a>
-							
-								{% if cafe.active %}
-								
-									<!----------------------------->
-									<!--      Closed button      -->
-									<!----------------------------->
-								
-									<a class="btn btn-secondary float-left"
-									   data-toggle="modal" data-target="#closedCafe">Mark as closed</a>
-							
-								{% else %}
-								
-									<!----------------------------->
-									<!--    unClosed button      -->
-									<!----------------------------->
-								
-									<a class="btn btn-secondary float-left"
-									   href="{{url_for('unclose_cafe', cafe_id=cafe.id)}}">unClose Cafe</a>
-								
-								{% endif %}
-								
+								<a class="btn btn-warning float-right"
+								   data-toggle="modal" data-target="#flagCafe">Flag Cafe</a>
 							</div>
-							
-							
-							{% elif current_user.is_authenticated: %}
-							
-								<!----------------------------->
-								<!--      FLAG button        -->
-								<!----------------------------->
-								
-								<div class="clearfix">
-									<a class="btn btn-warning float-right"
-									   data-toggle="modal" data-target="#flagCafe">Flag Cafe</a>
-								</div>
-							
-							{% endif %}
-				
-			            </div>
-			        </div>
-				</div>
-				
-				
+						
+						{% endif %}
+			
+		            </div>
+		        </div>
 			</div>
+			
+			
 		</div>
 	</div>
-</article>
+	
+	<!-- Separator before next section -->
+	<div class="row mb-3">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<hr>
+		</div>
+	</div>
+	
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Map of GPX Routes                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+
+			<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">
+				Map view of routes passing {{cafe.name}}
+			</h2>
+            {{gpxmap.html}}
+			
+			<hr>
+
+		</div>
+	</div>
+</div>
 
 
 <!---------------------------------------------------------------------------------------------------->
@@ -205,64 +235,84 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 	
-			<!-- Bit of a break -->
-			<hr>
-
+	<!-- Header section -->
+	<div class="row">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto mb-3">
+	
 			{% if gpxes | count == 0 %}
-				<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Currently, no routes pass near {{cafe.name}}</h2>
+				<h2 class="float-left" style="font-size: 30px; margin-bottom: 10px;">Currently, no routes pass near cafe</h2>
+            {% elif gpxes | count == 1 %}
+				<h2 class="float-left" style="font-size: 30px; margin-bottom: 10px;">{{ gpxes | count }} route passes cafe</h2>
             {% else %}
+				<h2 class="float-left" style="font-size: 30px; margin-bottom: 10px;">{{ gpxes | count }} routes pass cafe</h2>
+            {% endif %}
 			
-				<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">List of {{ gpxes | count }} routes passing {{cafe.name}}</h2>
-            
-                <table class="table table-striped table-bordered table-sm">
+			{% if gpxes | count != 0 %}
 			
-					<!-- Header -->
-					<thead>
-                        <tr>
-	                        <th scope="col">#</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Length (km)</th>
-                            <th scope="col">Ascent (m)</th>
-                            <th scope="col">Cafe is at (km)</th>
-	                        <th scope="col">Deviation to cafe (km)</th>
-	                    </tr>
-                    </thead>
-			
-					<tbody>
-						{% for gpx in gpxes: %}
-							{% if gpx.public() %}
-								<tr>
-							{% else %}
-								<tr class="table-warning">
-							{% endif %}
-								<th scope="row">{{loop.index}}</th>
-								<td><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{gpx.name}}</a></td>
-								<th scope="row">{{gpx.length_km}}</th>
-                                <td>{{gpx.ascent_m}}</td>
-                                <td>{{gpx.cafes_passed['range_km']}}</td>
-								<td>{{gpx.cafes_passed['dist_km']}}</td>
-					        </tr>
-				
-						{% endfor %}
-					</tbody>
-				
-				</table>
-				
-			
-				<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view of routes passing {{cafe.name}}</h2>
-            
-                {{gpxmap.html}}
-			
+				<!-- Button to expose hidden options -->
+				<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseRoutes" role="button"
+				   aria-expanded="false" aria-controls="collapseExample">
+	                   Routes
+	            </a>
 			
 			{% endif %}
 			
-			<hr>
-			
 		</div>
 	</div>
+	
+	<!-- Hidden list of routes passing the cafe -->
+	{% if gpxes | count != 0 %}
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="collapse" id="collapseRoutes">
+				
+			        <table class="table table-striped table-bordered table-sm">
+			
+						<!-- Header -->
+						<thead>
+	                        <tr>
+		                        <th scope="col">#</th>
+	                            <th scope="col">Name</th>
+	                            <th scope="col">Length (km)</th>
+	                            <th scope="col">Ascent (m)</th>
+	                            <th scope="col">Cafe is at (km)</th>
+		                        <th scope="col">Deviation to cafe (km)</th>
+		                    </tr>
+	                    </thead>
+				
+						<tbody>
+							{% for gpx in gpxes: %}
+								{% if gpx.public() %}
+									<tr>
+								{% else %}
+									<tr class="table-warning">
+								{% endif %}
+									<th scope="row">{{loop.index}}</th>
+									<td><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{gpx.name}}</a></td>
+									<th scope="row">{{gpx.length_km}}</th>
+	                                <td>{{gpx.ascent_m}}</td>
+	                                <td>{{gpx.cafes_passed['range_km']}}</td>
+									<td>{{gpx.cafes_passed['dist_km']}}</td>
+						        </tr>
+					
+							{% endfor %}
+						</tbody>
+					
+					</table>
+				</div>
+			</div>
+		</div>
+			
+	{% endif %}
+	
+	<!-- Separator before next section -->
+	<div class="row mb-3">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<hr>
+		</div>
+	</div>
+	
 </div>
 
 
@@ -270,147 +320,162 @@
 <!--                                       Show Comments                                            -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if comments: %}
-
-	<div class="container">
+<div class="container">
+	
+	{% if not comments: %}
+	
+		<!-- No Comments, so add comment button here -->
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-				<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Comments on {{cafe.name}}</h2>
+				
+				<h2 class="float-left" style="font-size: 30px;">No Comments</h2>
+				
+				{% if current_user.is_authenticated: %}
+					<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseComment" role="button"
+				       aria-expanded="false" aria-controls="collapseExample">
+	                  Comment
+					</a>
+				{% endif %}
+				
 			</div>
 		</div>
-	</div>
 	
-	<div class="container">
-		
+	{% else %}
+	
+		<!-- List the comments -->
+		<div class="row">
+			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+				<h2 style="font-size: 30px;">Comments on {{cafe.name}}:</h2>
+			</div>
+		</div>
+	
 		{% for comment in comments: %}
 		
-		<!-- Row per comment -->
-		<div class="row my-3">
-			
-			<!-- Spacing column -->
-			<div class="col-lg-2 col-md-1 col-sm-0 mx-auto comment">
-			</div>
-			
-			<!-- Gravatar column -->
-			<div class="col-lg-2 col-md-3 col-sm-4 mx-auto comment">
-				<div class="commenterImage mr-2 float-left">
-					<img src="{{ comment.email | gravatar }}"
-					     width="100" height="100"
-					     style="border-radius: 50%;"/>
-				</div>
-			</div>
-			
-			<!-- Comment column -->
-			<div class="col-lg-6 col-md-7 col-sm-8 mx-auto comment">
+			<!-- Row per comment -->
+			<div class="row my-3">
 				
-				<!-- Comment body -->
-				<div class="commentText">
-					{{ comment.body|safe }}
+				<!-- Spacing column -->
+				<div class="col-lg-2 col-md-1 col-sm-0 mx-auto comment">
 				</div>
 				
+				<!-- Gravatar column -->
+				<div class="col-lg-2 col-md-3 col-sm-4 mx-auto comment">
+					<div class="commenterImage mr-2 float-left">
+						<img src="{{ comment.email | gravatar }}"
+						     width="100" height="100"
+						     style="border-radius: 50%;"/>
+					</div>
+				</div>
 				
-				<!-- Author & date -->
-				<div>
-					<span class="date sub-text">{{comment.name}},  {{comment.date}}
-					 
-						{% if not current_user.is_authenticated: %}
-					    
-	                    {% elif current_user.admin() or current_user.email == comment.email: %}
-	                        <!-- Show a delete button if they are the author or admin -->
-	                        
-	                        <!--
-								Show an anchor tag so it behaves like a hyperlink even though it doesn't actually have
-								a valid href. The actual delete takes place in the modal form which it invokes. Not really
-								sure what best practice is with the href, do I leave it set to '#'?
-							-->
-							<a href="#"
-							   data-toggle="modal" data-target="#deleteCommentModal{{comment.id}}">✘ </a>
-					                    
-	                        <!--
-								This is our modal pop up form.
-								The html is returned by the function "delete_comment_modal_form" and '|safe' converts
-								the returned text into html in place.
-								Note that each modal form has both a unique id and a unique target url.
-							-->
-					        {{ delete_comment_modal_form( url_for("delete_comment", comment_id=comment.id, cafe_id=cafe.id) , comment.id)|safe }}
-						
-					    {% endif %}
-							
-					</span>
+				<!-- Comment column -->
+				<div class="col-lg-6 col-md-7 col-sm-8 mx-auto comment">
 					
-					<hr>
-				
+					<!-- Comment body -->
+					<div class="commentText">
+						{{ comment.body|safe }}
+					</div>
+					
+					
+					<!-- Author & date -->
+					<div>
+						<span class="date sub-text">{{comment.name}},  {{comment.date}}
+						 
+							{% if not current_user.is_authenticated: %}
+						    
+		                    {% elif current_user.admin() or current_user.email == comment.email: %}
+		                        <!-- Show a delete button if they are the author or admin -->
+		                        
+		                        <!--
+									Show an anchor tag so it behaves like a hyperlink even though it doesn't actually have
+									a valid href. The actual delete takes place in the modal form which it invokes. Not really
+									sure what best practice is with the href, do I leave it set to '#'?
+								-->
+								<a href="#"
+								   data-toggle="modal" data-target="#deleteCommentModal{{comment.id}}">✘ </a>
+						                    
+		                        <!--
+									This is our modal pop up form.
+									The html is returned by the function "delete_comment_modal_form" and '|safe' converts
+									the returned text into html in place.
+									Note that each modal form has both a unique id and a unique target url.
+								-->
+						        {{ delete_comment_modal_form( url_for("delete_comment", comment_id=comment.id, cafe_id=cafe.id) , comment.id)|safe }}
+							
+						    {% endif %}
+								
+						</span>
+						
+						<hr>
+					
+					</div>
 				</div>
-			</div>
+				
+				<!-- Spacing column -->
+				<div class="col-lg-2 col-md-1 col-sm-0 mx-auto">
+				</div>
 			
-			<!-- Spacing column -->
-			<div class="col-lg-2 col-md-1 col-sm-0 mx-auto">
-			</div>
-		
-		</div>
-		
+			</div> <!-- End of row per comment -->
+			
 		{% endfor %}
-	
-	</div>
+		
+	{% endif %}
 	
 	<!-- Break before next section -->
-	<div class="container">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			<hr>
 		</div>
 	</div>
-	
-{% endif %}
+
+</div>
 
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                       Leave a comment                                          -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if current_user.is_authenticated: %}
+<div class="container">
 
-	<div class="container">
-		
+	{% if current_user.is_authenticated and comments: %}
+	
 		<!-- Button to expose hidden options -->
-		<div class="row col-lg-8 col-md-10 mx-auto mt-3">
-			<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseComment" role="button"
-			   aria-expanded="false" aria-controls="collapseExample">
-                  Add Comment
-            </a>
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseComment" role="button"
+				   aria-expanded="false" aria-controls="collapseExample">
+	                  Add Comment
+	            </a>
+			</div>
 		</div>
-		
-		<!-- Collapsed button tab -->
-		<div class="row col-lg-8 col-md-10 mx-auto mt-3">
-			<div class="collapse" id="collapseComment">
-				<div class="card card-body my-3">
-	                <div class="clearfix">
+	
+	{% endif %}
+	
+	<!-- Collapsed button tab -->
+	<div class="collapse" id="collapseComment">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+			
+				<!-- Load ckeditor -->
+				{{ ckeditor.load() }}
 				
-						<!-- Load ckeditor -->
-						{{ ckeditor.load() }}
-						
-						<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
-						{{ ckeditor.config(name='body') }}
-						
-						<!-- This is where the form will go -->
-						{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary float-right"}) }}
+				<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
+				{{ ckeditor.config(name='body') }}
 				
-					</div>
-				</div>
-		    </div>
-		</div>
-
+				<!-- This is where the form will go -->
+				{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary float-right"}) }}
+				
+			</div>
+	    </div>
 	</div>
 	
-	
 	<!-- Break before next section -->
-	<div class="container">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			<hr>
 		</div>
 	</div>
-	
-{% endif %}
 
+</div>
 
 
 
