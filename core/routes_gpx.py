@@ -423,6 +423,10 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def markers_for_gpx(filename):
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
+
+    # This is the list we will return
     markers = []
     with open(filename, 'r') as gpx_file:
 
