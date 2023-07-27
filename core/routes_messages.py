@@ -220,26 +220,29 @@ def delete_message():
 # Reply message
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/reply_message', methods=['GET', 'POST'])
+@app.route('/reply_message/<int:message_id>', methods=['GET', 'POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def reply_message():
+def reply_message(message_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    message_id = request.args.get('message_id', None)
-    try:
-        body = request.form['body']
-    except exceptions.BadRequestKeyError:
-        body = None
+    body = request.args.get('body', None)
+
+    # Code from when POST used to work!
+    # message_id = request.args.get('message_id', None)
+    # try:
+    #     body = request.form['body']
+    # except exceptions.BadRequestKeyError:
+    #     body = None
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not message_id:
-        Event().log_event("Message Reply Fail", f"Missing user_id!")
-        print(f"reply_message(): Missing user_id!")
+        Event().log_event("Message Reply Fail", f"Missing message_id!")
+        print(f"reply_message(): Missing message_id!")
         return abort(400)
     elif not body:
         Event().log_event("Message Reply Fail", f"Missing body!")

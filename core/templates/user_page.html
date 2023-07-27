@@ -154,8 +154,9 @@
 											</a>
 											
 											<!-- Reply button -->
-											<button class="btn-sm btn-primary mr-2 mb-2 float-right"
-											        type="button">Reply</button>
+												<button class="btn-sm btn-primary mr-2 mb-2 float-right"
+												        data-toggle="modal" data-target="#replyModal{{message.id}}"
+											            type="button">Reply</button>
 											
 										</div>
 										
@@ -163,6 +164,48 @@
 								</div>
 							
 							</div>
+						
+							<!---------------------------------------------------------------------------------------------------->
+							<!--                                   Modal form for reply message                                 -->
+							<!---------------------------------------------------------------------------------------------------->
+							
+							<div class="modal fade" id="replyModal{{message.id}}" tabindex="-1" role="dialog"
+							     aria-labelledby="exampleModalLabel" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="replyLabel">Don't let them have the last word...</h5>
+											
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<div class="modal-body">
+											<!--
+												NB To get the two parameters use:
+													1. gpx_id = request.args.get('gpx_id', None)
+							                        2. confirm = request.form['confirm']
+											-->
+											<form action="{{ url_for('reply_message', message_id=message.id) }}" method="get">
+												
+												<div class="form-group">
+													<label for="confirm" class="col-form-label">
+													Remember fear is the path to the dark side. Fear leads to anger.
+													Anger leads to hate. Hate leads to uncut steerer tubes!</label>
+													<textarea class="form-control" name="body" rows="6"></textarea>
+												</div>
+												
+												<div class="modal-footer">
+													<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+													<button type="submit" class="btn btn-primary">Have Some of that!</button>
+												</div>
+												
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>  <!-- End of modal form -->
+
 						
 						{% endfor %}
 						
