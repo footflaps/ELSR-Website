@@ -417,7 +417,7 @@
 			</div> <!-- End of row per comment -->
 			
 		{% endfor %}
-		
+	
 	{% endif %}
 	
 	<!-- Break before next section -->
@@ -426,7 +426,7 @@
 			<hr>
 		</div>
 	</div>
-
+	
 </div>
 
 
@@ -443,7 +443,7 @@
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseComment" role="button"
 				   aria-expanded="false" aria-controls="collapseExample">
-	                  Add Comment
+	                  Comment
 	            </a>
 			</div>
 		</div>
@@ -468,13 +468,15 @@
 	    </div>
 	</div>
 	
-	<!-- Break before next section -->
-	<div class="row">
-		<div class="col-lg-8 col-md-10 mx-auto">
-			<hr>
+	{% if current_user.is_authenticated and comments: %}
+		<!-- Break before next section -->
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<hr>
+			</div>
 		</div>
-	</div>
-
+	{% endif %}
+	
 </div>
 
 
