@@ -239,3 +239,18 @@ class UpdateCafeForm(FlaskForm):
 with app.app_context():
     cafes = db.session.query(Cafe).all()
     print(f"Found {len(cafes)} cafes in the dB")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Functions
+# -------------------------------------------------------------------------------------------------------------- #
+
+# Jinja needs to be able to look up the cafe name from it's id when resolving comments on the user's page
+
+
+def get_cafe_name_from_id(cafe_id):
+    return Cafe().one_cafe(cafe_id).name
+
+
+# Add this to jinja's environment, so we can use it within html templates
+app.jinja_env.globals.update(get_cafe_name_from_id=get_cafe_name_from_id)
