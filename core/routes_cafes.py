@@ -515,7 +515,7 @@ def edit_cafe():
     )
 
     # ----------------------------------------------------------- #
-    # Handle POST requests (two different entry points)
+    # Handle POST request
     # ----------------------------------------------------------- #
 
     if form.validate_on_submit():
@@ -564,6 +564,46 @@ def edit_cafe():
             print(f"edit_cafe(): Failed to update the cafe.")
 
         # ----------------------------------------------------------- #
+        #   Did we get passed a path for a photo?
+        # ----------------------------------------------------------- #
+        if form.cafe_photo.data != "":
+            print(f"Passed photo '{form.cafe_photo.data.filename}'")
+
+            if allowed_file(form.cafe_photo.data.filename):
+                # Create a new filename for the image
+                filename = f"cafe_{cafe.id}.jpg"
+
+                # Make sure it's not there already
+                if delete_file_if_exists(filename):
+
+                    # Upload and save in our cafe photo folder
+                    form.cafe_photo.data.save(os.path.join(CAFE_FOLDER, filename))
+                    print(f"edit_cafe(): Photo saved as '{filename}'.")
+
+                    # Update cafe object with filename
+                    if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
+                        # Uploaded OK
+                        Event().log_event("Edit Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
+                        flash("Cafe photo has been uploaded.")
+                        print(f"edit_cafe(): Successfully uploaded the photo.")
+                    else:
+                        # Failed to upload eg invalid path
+                        Event().log_event("Edit Cafe Fail",
+                                          f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
+                        flash(f"Sorry, failed to upload the file '{filename}!")
+                        print(f"edit_cafe(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
+                else:
+                    # Failed to delete existing file
+                    # NB delete_file_if_exists() will generate an error with details etc, so just flash here
+                    flash("Sorry, something went wrong!")
+
+            else:
+                # allowed_file() failed.
+                Event().log_event("Edit Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
+                flash("Invalid file type for image!")
+                print(f"edit_cafe(): Invalid file type for image.")
+
+        # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
         # ----------------------------------------------------------- #
         updated_cafe = Cafe().one_cafe(cafe_id)
@@ -574,58 +614,7 @@ def edit_cafe():
         # Back to cafe details page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))
 
-    elif request.method == 'POST':
 
-        # ----------------------------------------------------------- #
-        # Entry method #2 - POSTing filename back (uploading photo)
-        # ----------------------------------------------------------- #
-
-        print(f"edit_cafe(): acting on request.method == 'POST'")
-
-        # We get here for two reasons:
-        #  1. The photo was updated using POST
-        #  2. The form was submitted, but failed validation
-
-        # Did we get passed the filename for the photo?
-        if 'input_file' not in request.files:
-            # Almost certain the form failed validation
-            Event().log_event("Edit Cafe Fail", f"Something missing in the form submission. cafe_id = '{cafe_id}'.")
-            flash("There was something missing in the form submission, see below for details.")
-            return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year)
-
-        else:
-            # Get the filename
-            file = request.files['input_file']
-            print(f"new_cafe(): Uploaded '{file}'")
-
-            file = request.files['input_file']
-            # If the user does not select a file, the browser submits an
-            # empty file without a filename.
-            if file.filename == '':
-                Event().log_event("Edit Cafe Fail", f"No selected file. cafe_id = '{cafe_id}'.")
-                flash('No selected file')
-                return redirect(request.url)
-            if file:
-                if allowed_file(file.filename):
-                    filename = f"cafe_{cafe.id}.jpg"
-                    file.save(os.path.join(CAFE_FOLDER, filename))
-                    print("new_cafe(): All ok")
-                    # Update cafe object with filename
-                    if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
-                        Event().log_event("Edit Cafe Pass", f"Cafe photo updated. cafe_id = '{cafe_id}'.")
-                        flash("Cafe photo has been updated.")
-                        print(f"edit_cafe(): Successfully updated the photo.")
-                    else:
-                        Event().log_event("Edit Cafe Fail", f"Something went wrong. cafe_id = '{cafe_id}'.")
-                        flash("Sorry, something went wrong!")
-                        print(f"edit_cafe(): Failed to update the photo.")
-                else:
-                    Event().log_event("Edit Cafe Fail", f"Invalid image filename. file.filename = '{file.filename}'.")
-                    flash("Invalid file type for image!")
-                    print(f"edit_cafe(): Invalid file type for image.")
-
-            # Show the updated cafe in the details page
-            return redirect(url_for('cafe_details', cafe_id=cafe_id))
 
     # ----------------------------------------------------------- #
     # Handle GET
