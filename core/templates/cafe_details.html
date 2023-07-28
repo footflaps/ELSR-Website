@@ -146,7 +146,9 @@
 						<!-- Edit or Flag post button -->
 		                {% if not current_user.is_authenticated: %}
 		                
-						{% elif current_user.admin() or current_user.email == cafe.added_email: %}
+		                    <!-- Tortuous logic as unauthenticated user won't have .admin() attribute etc -->
+		                
+						{% elif current_user.admin(): %}
 						
 						<div class="clearfix">
 							
@@ -163,7 +165,7 @@
 								<!--      Closed button      -->
 								<!----------------------------->
 							
-								<a class="btn btn-secondary float-left"
+								<a class="btn btn-warning float-left"
 								   data-toggle="modal" data-target="#closedCafe">Mark as closed</a>
 						
 							{% else %}
@@ -172,7 +174,7 @@
 								<!--    unClosed button      -->
 								<!----------------------------->
 							
-								<a class="btn btn-secondary float-left"
+								<a class="btn btn-warning float-left"
 								   href="{{url_for('unclose_cafe', cafe_id=cafe.id)}}">unClose Cafe</a>
 							
 							{% endif %}
