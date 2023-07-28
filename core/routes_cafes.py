@@ -13,7 +13,7 @@ import os
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year
+from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -28,7 +28,6 @@ from core.routes_gpx import MIN_DISPLAY_STEP_KM
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import update_last_seen, logout_barred_user
-from time import sleep
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -77,23 +76,6 @@ def map_icon(route_num):
     else:
         letter = chr(97 + route_num - 11)
         return f"https://maps.google.com/mapfiles/kml/paddle{letter}-lv.png"
-
-
-def delete_file_if_exists(filename):
-    if os.path.exists(filename):
-        print(f"delete_file_if_exists: Deleting rogue file {filename}")
-        try:
-            os.remove(filename)
-            # We need this as remove seems to keep the file locked for a short period
-            sleep(0.5)
-            return True
-        except Exception as e:
-            Event().log_event("Cafe update",
-                              f"Failed to delete existing file '{filename}', error code was {e.args}")
-            print(f"delete_file_if_exists: Failed to delete existing file '{filename}', error code was {e.args}")
-            return False
-    # If file not there, return True as can continue etc
-    return True
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -155,3 +155,20 @@ def dynamic_map_size():
         map_style = MAP_STYLE
         app.logger.debug(f"Detected desktop: '{user_agent_details}'.")
     return map_style
+
+
+def delete_file_if_exists(filename):
+    if os.path.exists(filename):
+        print(f"delete_file_if_exists: Deleting rogue file {filename}")
+        try:
+            os.remove(filename)
+            # We need this as remove seems to keep the file locked for a short period
+            sleep(0.5)
+            return True
+        except Exception as e:
+            Event().log_event("Cafe update",
+                              f"Failed to delete existing file '{filename}', error code was {e.args}")
+            print(f"delete_file_if_exists: Failed to delete existing file '{filename}', error code was {e.args}")
+            return False
+    # If file not there, return True as can continue etc
+    return True

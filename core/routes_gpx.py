@@ -1,6 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory
 from flask_login import login_required, current_user
-from datetime import date
 from flask_googlemaps import Map
 import gpxpy
 import gpxpy.gpx
@@ -15,7 +14,7 @@ from werkzeug import exceptions
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year
+from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -218,7 +217,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
     # ----------------------------------------------------------- #
     # NB It shouldn't exist, but if something went wrong with a deleted GPX, it could end up left orphaned
     if os.path.exists(tmp_filename):
-        print(f"update_existing_file: Deleting rogue file {tmp_filename}")
+        print(f"update_existing_file: Deleting existing file {tmp_filename}")
         try:
             os.remove(tmp_filename)
             # We need this as remove seems to keep the file locked for a short period
@@ -232,7 +231,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
     # ----------------------------------------------------------- #
     # Step 2: Write out our shortened file to new_filename
     # ----------------------------------------------------------- #
-    print(f"update_existing_file: Trying to write '{tmp_filename}'")
+    print(f"update_existing_file: Trying to write tmp file '{tmp_filename}'")
     with open(tmp_filename, 'w') as file_ref2:
         file_ref2.write(gpx_file.to_xml())
 
@@ -240,7 +239,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
     # Step 3: Delete the existing (unshortened) GPX file
     # ----------------------------------------------------------- #
     try:
-        print(f"cut_start_gpx:Deleting '{old_filename}'")
+        print(f"update_existing_file: Deleting original file '{old_filename}'")
         os.remove(old_filename)
         # We need this as remove seems to keep the file locked for a short period
         sleep(0.5)
@@ -252,7 +251,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
     # ----------------------------------------------------------- #
     # Step 4: Rename our temp (shortened) file
     # ----------------------------------------------------------- #
-    print(f"cut_start_gpx:Moving '{tmp_filename}' to '{old_filename}'")
+    print(f"update_existing_file: Moving new file '{tmp_filename}' to replace original '{old_filename}'")
     try:
         os.rename(tmp_filename, old_filename)
     except Exception as e:
@@ -345,11 +344,12 @@ def cut_end_gpx(gpx_filename, end_count):
 # New "clean" GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
-def new_gpx():
+def new_gpx(route_name):
     gpx = gpxpy.gpx.GPX()
 
     # Create first track in our GPX:
     gpx_track = gpxpy.gpx.GPXTrack()
+    gpx_track.name = route_name
     gpx.tracks.append(gpx_track)
 
     # Create first segment in our GPX track:
@@ -363,21 +363,36 @@ def new_gpx():
 # Clean up the GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
-def strip_excess_info_from_gpx(gpx_filename, gpx_id):
+def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
+    # ----------------------------------------------------------- #
+    # Header
+    # ----------------------------------------------------------- #
     Event().log_event("Clean GPX", f"Called with gpx_filename='{gpx_filename}', gpx_id='{gpx_id}'.")
     print(f"strip_excess_info_from_gpx: called with gpx_filename='{gpx_filename}'.")
 
-    # Want these two things
-    length_km = 0
-    ascent_m = 0
+    # ----------------------------------------------------------- #
+    # Use absolute path
+    # ----------------------------------------------------------- #
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
 
+    # ----------------------------------------------------------- #
+    # Generate stats for updating the dB route summary
+    # ----------------------------------------------------------- #
+    total_length_km = 0
+    total_ascent_m = 0
+    num_points_before = 0
+    num_points_after = 0
+
+    # ----------------------------------------------------------- #
+    # Create a new GPX object
+    # ----------------------------------------------------------- #
     # For some reason we can't delete the extension data from a GPX file (HR, cadence, power). So, the bodge is
     # just to create a new file and migrate across only the data we want (lat, lon, height).
-    new_gpx_file = new_gpx()
+    new_gpx_file = new_gpx(route_name)
 
+    # ----------------------------------------------------------- #
     # Open the file
-    # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+    # ----------------------------------------------------------- #
     with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
 
@@ -388,16 +403,36 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id):
 
                 # Set these to zero, so we always include the first point, otherwise it skips the first
                 # few points till we have moved along the route past GPX_MAX_RESOLUTION_KM
-                last_lat = 0
-                last_lon = 0
+                last_lat = segment.points[0].latitude
+                last_lon = segment.points[0].longitude
                 last_elevation = segment.points[0].elevation
 
-                points_before = len(segment.points)
+                # From our new GPX file
+                saved_lat = 0
+                saved_lon = 0
 
                 for point in segment.points:
 
-                    # How far is this point from the previous one
+                    # ----------------------------------------------------------- #
+                    # Route stats come from original file (higher resolution)
+                    # ----------------------------------------------------------- #
                     inter_dist_km = mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+                    total_length_km += inter_dist_km
+                    num_points_before += 1
+
+                    # Total ascent
+                    if point.elevation > last_elevation:
+                        total_ascent_m += point.elevation - last_elevation
+
+                    # Update last point
+                    last_lat = point.latitude
+                    last_lon = point.longitude
+                    last_elevation = point.elevation
+
+                    # ----------------------------------------------------------- #
+                    # How far is this point from the previous saved one?
+                    # ----------------------------------------------------------- #
+                    inter_dist_km = mpu.haversine_distance((saved_lat, saved_lon), (point.latitude, point.longitude))
 
                     if inter_dist_km >= GPX_MAX_RESOLUTION_KM:
 
@@ -408,30 +443,23 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id):
 
                         # Add to out new GPX file
                         new_gpx_file.tracks[0].segments[0].points.append(new_point)
-
-                        # How far along the route we are
-                        length_km += inter_dist_km
-
-                        # Total ascent
-                        if point.elevation > last_elevation:
-                            ascent_m += point.elevation - last_elevation
+                        num_points_after += 1
 
                         # Update last point
-                        last_lat = point.latitude
-                        last_lon = point.longitude
-                        last_elevation = point.elevation
+                        saved_lat = point.latitude
+                        saved_lon = point.longitude
 
-    points_after = len(track.segments[0].points)
-
+    # ----------------------------------------------------------- #
     # Update stats in the dB
-    Gpx().update_stats(gpx_id, length_km, ascent_m)
+    # ----------------------------------------------------------- #
+    Gpx().update_stats(gpx_id, total_length_km, total_ascent_m)
 
     # ----------------------------------------------------------- #
     # Overwrite the existing file
     # ----------------------------------------------------------- #
-    update_existing_gpx(gpx_file, gpx_filename)
-    Event().log_event("Clean GPX", f"Cleaned GPX from {points_before} to {points_after} points, "
-                                   f"gpx_filename='{update_existing_gpx(gpx_file, gpx_filename)}'.")
+    update_existing_gpx(new_gpx_file, gpx_filename)
+    Event().log_event("Clean GPX", f"Cleaned GPX from {num_points_before} to {num_points_after} points.")
+    print(f"Cleaned GPX from {num_points_before} to {num_points_after} points.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -913,10 +941,11 @@ def new_route():
             # Add to the dB
             gpx = gpx.add_gpx(gpx)
             if gpx:
-                # Need to acquire if
+                # Success, added GPX to dB
                 Event().log_event(f"New GPX Success", f" GPX added to dB, gpx.id = '{gpx.id}'")
                 print(f"new_route(): GPX added to dB, id = '{gpx.id}'")
             else:
+                # Failed to create new dB entry
                 Event().log_event(f"New GPX Fail", f"Something went wrong with gpx_id = '{gpx.id}'")
                 print(f"new_route(): Failed to add gpx to the dB!")
                 flash("Sorry, something went wrong!")
@@ -926,17 +955,10 @@ def new_route():
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
 
             # Make sure this doesn't already exist
-            if os.path.exists(filename):
-                Event().log_event(f"New GPX Info", f"Deleting rogue file '{filename}', gpx.id = '{gpx.id}'")
-                print(f"new_route(): Deleting rogue file '{filename}'")
-                try:
-                    os.remove(filename)
-                    sleep(0.5)
-                except Exception as e:
-                    Event().log_event(f"New GPX Fail", f"Failed to delete GPX file '{filename}', error code was '{e.args}'.")
-                    print(f"new_route(): Failed to delete GPX file '{filename}', error code was '{e.args}'.")
-                    flash("Sorry, something went wrong!")
-                    return render_template("gpx_add.html", year=current_year, form=form)
+            if not delete_file_if_exists(filename):
+                # Failed to delete existing file (func will generate error trace)
+                flash("Sorry, something went wrong!")
+                return render_template("gpx_add.html", year=current_year, form=form)
 
             # Upload the GPX file
             print(f"new_route(): About to try and save to '{filename}'")
@@ -948,13 +970,14 @@ def new_route():
                 Event().log_event(f"New GPX Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                 print(f"new_route(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                 flash("Sorry, something went wrong!")
+                return render_template("gpx_add.html", year=current_year, form=form)
 
             # Update GPX with nearby cafes
             check_new_gpx_with_all_cafes(gpx.id)
 
             # Strip off any extra info eg HR data etc
             flash("Any HR or Power data has been removed.")
-            strip_excess_info_from_gpx(filename, gpx.id)
+            strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
 
             # Forward to edit route as that's the next step
             Event().log_event(f"New GPX Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name})")
