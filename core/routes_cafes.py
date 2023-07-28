@@ -28,6 +28,7 @@ from core.routes_gpx import MIN_DISPLAY_STEP_KM
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import update_last_seen, logout_barred_user
+from time import sleep
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -76,6 +77,23 @@ def map_icon(route_num):
     else:
         letter = chr(97 + route_num - 11)
         return f"https://maps.google.com/mapfiles/kml/paddle{letter}-lv.png"
+
+
+def delete_file_if_exists(filename):
+    if os.path.exists(filename):
+        print(f"delete_file_if_exists: Deleting rogue file {filename}")
+        try:
+            os.remove(filename)
+            # We need this as remove seems to keep the file locked for a short period
+            sleep(0.5)
+            return True
+        except Exception as e:
+            Event().log_event("Cafe update",
+                              f"Failed to delete existing file '{filename}', error code was {e.args}")
+            print(f"delete_file_if_exists: Failed to delete existing file '{filename}', error code was {e.args}")
+            return False
+    # If file not there, return True as can continue etc
+    return True
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -391,19 +409,32 @@ def new_cafe():
             if allowed_file(form.cafe_photo.data.filename):
                 # Create a new filename for the image
                 filename = f"cafe_{cafe.id}.jpg"
-                # Save in our cafe photo folder
-                form.cafe_photo.data.save(os.path.join(CAFE_FOLDER, filename))
-                print(f"new_cafe(): Photo saved as '{filename}'.")
-                # Update cafe object with filename
-                if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
-                    Event().log_event("Add Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
-                    flash("Cafe photo has been updated.")
-                    print(f"new_cafe(): Successfully updated the photo.")
+
+                # Make sure it's not there already
+                if delete_file_if_exists(filename):
+
+                    # Upload and save in our cafe photo folder
+                    form.cafe_photo.data.save(os.path.join(CAFE_FOLDER, filename))
+                    print(f"new_cafe(): Photo saved as '{filename}'.")
+
+                    # Update cafe object with filename
+                    if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
+                        # Uploaded OK
+                        Event().log_event("Add Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
+                        flash("Cafe photo has been uploaded.")
+                        print(f"new_cafe(): Successfully uploaded the photo.")
+                    else:
+                        # Failed to upload eg invalid path
+                        Event().log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
+                        flash(f"Sorry, failed to upload the file '{filename}!")
+                        print(f"new_cafe(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
                 else:
-                    Event().log_event("Add Cafe Fail", f"Something went wrong. cafe.id = '{cafe.id}'.")
+                    # Failed to delete existing file
+                    # NB delete_file_if_exists() will generate an error with details etc, so just flash here
                     flash("Sorry, something went wrong!")
-                    print(f"new_cafe(): Failed to update the photo.")
+
             else:
+                # allowed_file() failed.
                 Event().log_event("Add Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
                 flash("Invalid file type for image!")
                 print(f"new_cafe(): Invalid file type for image.")
