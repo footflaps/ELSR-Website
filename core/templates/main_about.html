@@ -61,17 +61,23 @@
 			<ul>
 		
 				<!-- Python -->
-				<li class="my-1"><a href="https://www.python.org/">
+				<li class="my-3"><a href="https://www.python.org/">
+					<img src="{{ url_for('static', filename='img/python_icon.png')}}" width=30>
 					<i class="fa fa-external-link fa-2xs"></i> Python</a> as the underlying back end language.
 				</li>
 				
 				<!-- Flask-->
-				<li class="my-1"><a href="https://flask.palletsprojects.com/en/2.3.x/">
-					<i class="fa fa-external-link fa-2xs"></i> Flask / Jinja</a> as the html templating engine.
+				<li class="my-3"><a href="https://flask.palletsprojects.com/en/2.3.x/">
+					<img src="{{ url_for('static', filename='img/flask_icon.png')}}" width=80>
+					<i class="fa fa-external-link fa-2xs"></i> Flask / Jinja</a> as the html templating engine. There
+					is an epic free course on building Flask websites online
+					<a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world">
+						<i class="fa fa-external-link fa-2xs"></i> here.</a>
 				</li>
 				
 				<!-- Bootstrap -->
-				<li class="my-1">Responsive CSS / Javascript styling from
+				<li class="my-3"><img src="{{ url_for('static', filename='img/bootstrap_icon.png')}}" width=40>
+					Responsive CSS / Javascript styling from
 					<a href="https://getbootstrap.com/">
 						<i class="fa fa-external-link fa-2xs"></i> Bootstrap</a>. This is how the website
 		                 dynamically adapts to the screen size eg for mobiles etc. This website's style is based
@@ -81,16 +87,18 @@
 				</li>
 		
 				<!-- Fontawesome -->
-				<li class="my-1">Fancy font icons including the man on a bike from
+				<li class="my-3"><img src="{{ url_for('static', filename='img/font_awesome_icon.png')}}" width=30>
+					Fancy font icons from
 					<a href="https://fontawesome.com/"><i class="fa fa-external-link fa-2xs"></i> Font Awesome
-					</a>, the man on a bike <i class="fa-solid fa-person-biking fa-xl"></i> comes from
+					</a>, the man on a bike comes from
 					<a href="https://fontawesome.com/icons/person-biking?f=classic&s=regular">
-						<i class="fa fa-external-link fa-2xs"></i> here.
+						<i class="fa fa-external-link fa-2xs"></i> here <i class="fa-solid fa-person-biking fa-xl"></i>.
 					</a>
 				</li>
 		
 				<!-- Google fonts-->
-				<li class="my-1">Website fonts from
+				<li class="my-3"><img src="{{ url_for('static', filename='img/google_fonts_icon.png')}}" width=50>
+					Website fonts from
 					<a href="https://fonts.google.com/">
 						<i class="fa fa-external-link fa-2xs"></i> Google Fonts
 					</a>. This site uses <a href="https://fonts.google.com/specimen/Lora">
@@ -101,90 +109,104 @@
 				</li>
 		
 				<!-- SQL -->
-				<li class="my-1">SQL databases courtesy of
+				<li class="my-3"><img src="{{ url_for('static', filename='img/sqlite_icon.png')}}" width=90>
+					SQL databases courtesy of
 					<a href="https://www.sqlalchemy.org/">
 						<i class="fa fa-external-link fa-2xs"></i> SQLAlchemy.
 					</a>
 				</li>
 		
 				<!-- Forms -->
-				<li class="my-1">Web forms are handled using
+				<li class="my-3"><img src="{{ url_for('static', filename='img/flask_forms_icon.png')}}" width=40>
+					Web forms are handled using
 					<a href="https://hackersandslackers.com/flask-wtforms-forms/">
 						<i class="fa fa-external-link fa-2xs"></i> Flask-WTF.</a>
 				</li>
 				
-				<!-- Gpxpy -->
-				<li class="my-1">Password hashing using
+				<!-- Werkzeug -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/werkzeug_icon.webp')}}" width=120>
+					Password hashing using
 					<a href="https://werkzeug.palletsprojects.com/en/2.3.x/utils/#module-werkzeug.security">
 						<i class="fa fa-external-link fa-2xs"></i> Werkzeug Utilities.
 					</a>
 				</li>
 		
 				<!-- Google Maps -->
-				<li class="my-1">Google Map plugins using
+				<li class="my-3"><img src="{{ url_for('static', filename='img/google_maps_icon.png')}}" width=40>
+					Google Map plugins using
 					<a href="https://developers.google.com/maps">
 						<i class="fa fa-external-link fa-2xs"></i> Google Maps API
 					</a> and
 				    <a href="https://github.com/flask-extensions/Flask-GoogleMaps">
 					    <i class="fa fa-external-link fa-2xs"></i> Flask-GoogleMaps.
 				    </a>I'll probably swap this out for
+					<img src="{{ url_for('static', filename='img/osm_icon.png')}}" width=40>
 					<a href="https://www.openstreetmap.org">
-						<i class="fa fa-external-link fa-2xs"></i> OSM
+						<i class="fa fa-external-link fa-2xs"></i>
+						OSM
 					</a>
 	                 as it costs me £0.003 everytime you see a map.
 				</li>
 				
 				<!-- Gpxpy -->
-				<li class="my-1">GPX file parsing is done using
+				<li class="my-3"><img src="{{ url_for('static', filename='img/gpx_icon.png')}}" width=50>
+					GPX file parsing is done using
 					<a href="https://pypi.org/project/gpxpy/">
 						<i class="fa fa-external-link fa-2xs"></i> gpxpy.
 					</a>
 				</li>
 				
 				<!-- Images -->
-				<li class="my-1">Most of the background images are my own,
-				                 although I might have stolen one or two from the internet.
+				<li class="my-3"><img src="{{ url_for('static', filename='img/flickr_icon.png')}}" width=70>
+					Most of the background images are my own,
+					although I might have stolen one or two from the internet.
 				</li>
 				
 				<!-- Gravatars -->
-				<li class="my-1">Fancy user avatars, for logged-in users, from
+				<li class="my-3"><img src="/static/img/Blake_et_Mortimer.jpg"
+		                                             width="50"
+				                                     style="border-radius: 50%;"/>
+					Fancy user avatars, for logged-in users, from
 					<a href="https://gravatar.com/">
 						<i class="fa fa-external-link fa-2xs"></i> Gravatar.
 					</a>
-                    Mine is "Blake et Mortimer" <img src="/static/img/Blake_et_Mortimer.jpg"
-		                                             width="50"
-				                                     style="border-radius: 50%;"/>
-			        stolen from their
+                    Mine is "Blake et Mortimer" stolen from their
 					<a href="https://www.facebook.com/blake.mortimer.officiel">
 						<i class="fa fa-external-link fa-2xs"></i> facebook page.
 					</a>
 				</li>
 				
 				<!-- Domain -->
-				<li class="my-1">Domain courtesy of
+				<li class="my-3"><img src="{{ url_for('static', filename='img/google_domains_icon.png')}}" width=30>
+					Domain courtesy of
 					<a href="https://domains.google/">
 						<i class="fa fa-external-link fa-2xs"></i> Google Domains,
 					</a>
                     a whole £10 for "elsr.co.uk".</li>
 		
 				<!-- Gunicorn & Nginx -->
-				<li class="my-1">This website uses
+				<li class="my-3"><img src="{{ url_for('static', filename='img/gunicorn_icon.png')}}" width=50>
+					This website uses
 					<a href="https://gunicorn.org/">
 						<i class="fa fa-external-link fa-2xs"></i> Gunicorn
-					</a> as an application server and
-					<a href="https://nginx.org/">
-						<i class="fa fa-external-link fa-2xs"></i> NGINX
-					</a> as a reverse proxy. There's an excellent guide to setting this all up
-					<a href="https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04">
-						<i class="fa fa-external-link fa-2xs"></i> here
-					</a>. If you want to know how to fine tune Gunicorn threads and workers, there is a guide
+					</a> as an application server. If you want to know how to fine tune Gunicorn threads and workers,
+					there is a guide
 					<a href="https://medium.com/building-the-system/gunicorn-3-means-of-concurrency-efbb547674b7">
 						<i class="fa fa-external-link fa-2xs"></i> here.
 					</a>
 				</li>
-			
-				<!-- Google -->
-				<li class="my-1">The site is hosted on an
+				
+				<!-- Nginx -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/nginx_icon.png')}}" width=80>
+					This website uses NGINX as a reverse proxy. There's an excellent guide to setting this all up
+					<a href="https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04">
+						<i class="fa fa-external-link fa-2xs"></i> here.
+					</a>
+				</li>
+				
+				<!-- Google Cloud -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/google_cloud_icon.png')}}" width=40>
+					The site is hosted on an
 					<a href="https://cloud.google.com/compute/docs/general-purpose-machines#e2_machine_types">
 						<i class="fa fa-external-link fa-2xs"></i> E2 series
 					</a>
@@ -203,12 +225,39 @@
 				</li>
 			
 				<!-- Sentry -->
-				<li class="my-1">Site diagnostics and real time performance data courtesy of
+				<li class="my-3"><img src="{{ url_for('static', filename='img/sentry_icon.png')}}" width=30>
+					Site diagnostics and real time performance data courtesy of
 					<a href="https://sentry.io/welcome/">
 						<i class="fa fa-external-link fa-2xs"></i> Sentry.
 					</a>
 				</li>
 			
+				<!-- Stack overflow -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/stackoverflow_icon.png')}}" width=140>
+					Obviously I got stuck many, many times getting this all working and spent many days trawling
+					<a href="https://stackoverflow.com/">
+						<i class="fa fa-external-link fa-2xs"></i> Stack overflow
+					</a> desperately searching for answers to whatever it was I'd screwed up that particluar day!
+				</li>
+				
+				<!-- GitHub Code Scanning -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/github_icon.png')}}" width=100>
+					The code for this website was scanned, for free, by
+					<a href="https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/about-code-scanning">
+						<i class="fa fa-external-link fa-2xs"></i> Git Hub security scanning tools,
+					</a>which found quite a few vulnerabilities I subsequently fixed.
+				</li>
+				
+				<!-- Fail2Ban -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/fail2ban_icon.png')}}" width=50>
+					As soon as you put a site on the internet, 100s of robots start probing it, looking for known
+					vulnerabilities	in software packages. They're pretty stupid, I get dozens of attacks on Microsoft
+					Exchange servers every day, even though I'm not hosting one. However, they now all get blocked by
+					<a href="https://www.fail2ban.org/wiki/index.php/Main_Page">
+						<i class="fa fa-external-link fa-2xs"></i> Fail2Ban,
+					</a>which looks for servers trying it on and blocks their IPs.
+				</li>
+				
 			</ul>
 			
 			
