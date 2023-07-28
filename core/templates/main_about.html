@@ -67,12 +67,22 @@
 				</li>
 				
 				<!-- Flask-->
-				<li class="my-3"><a href="https://flask.palletsprojects.com/en/2.3.x/">
+				<li class="my-3">
 					<img src="{{ url_for('static', filename='img/flask_icon.png')}}" width=80>
-					<i class="fa fa-external-link fa-2xs"></i> Flask / Jinja</a> as the html templating engine. There
-					is an epic free course on building Flask websites online
+					<a href="https://flask.palletsprojects.com/en/2.3.x/">
+						<i class="fa fa-external-link fa-2xs"></i> Flask
+					</a> as the micro framework backend for the website. There is an epic free course on building
+					     Flask websites online
 					<a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world">
-						<i class="fa fa-external-link fa-2xs"></i> here.</a>
+						<i class="fa fa-external-link fa-2xs"></i> here. Possibly I should have used Django, it
+						                                           would probably have been less painful!</a>
+				</li>
+				
+				<!-- Jinja -->
+				<li class="my-3">
+					<img src="{{ url_for('static', filename='img/jinja_icon.png')}}" width=100>
+					<a href="https://jinja.palletsprojects.com/en/3.1.x/">
+					<i class="fa fa-external-link fa-2xs"></i> Jinja</a> as the html templating engine.
 				</li>
 				
 				<!-- Bootstrap -->
@@ -93,7 +103,7 @@
 					</a>, the man on a bike comes from
 					<a href="https://fontawesome.com/icons/person-biking?f=classic&s=regular">
 						<i class="fa fa-external-link fa-2xs"></i> here <i class="fa-solid fa-person-biking fa-xl"></i>.
-					</a>
+					</a>Free for up to 50,000 page impressions a month.
 				</li>
 		
 				<!-- Google fonts-->
@@ -255,7 +265,9 @@
 					Exchange servers every day, even though I'm not hosting one. However, they now all get blocked by
 					<a href="https://www.fail2ban.org/wiki/index.php/Main_Page">
 						<i class="fa fa-external-link fa-2xs"></i> Fail2Ban,
-					</a>which looks for servers trying it on and blocks their IPs.
+					</a>which looks for servers trying it on and blocks their IPs. NB Don't block your ISP as otherwise
+					they'll <a href="https://cloud.google.com/knowledge/kb/fail2ban-package-might-cause-instance-s-health-checks-to-fail-000004595">
+						<i class="fa fa-external-link fa-2xs"></i> restart your VM!</a>
 				</li>
 				
 			</ul>
