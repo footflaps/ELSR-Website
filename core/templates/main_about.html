@@ -60,10 +60,64 @@
 			
 			<ul>
 		
+				<!-- Google Cloud -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/google_cloud_icon.png')}}" width=40>
+					The site is hosted on an
+					<a href="https://cloud.google.com/compute/docs/general-purpose-machines#e2_machine_types">
+						<i class="fa fa-external-link fa-2xs"></i> E2 series
+					</a>
+					<a href="https://cloud.google.com/compute">
+						<i class="fa fa-external-link fa-2xs"></i> Virtual Machine
+					</a> in the
+					<a href="https://cloud.google.com/">
+						<i class="fa fa-external-link fa-2xs"></i> Google Cloud
+					</a> in their London
+				    <a href="https://www.google.co.uk/about/datacenters/">
+					    <i class="fa fa-external-link fa-2xs"></i> data center
+				    </a> part of Google zone
+					<a href="https://dgtlinfra.com/google-cloud-data-center-locations/">
+						<i class="fa fa-external-link fa-2xs"></i> europe-west 2c. The cost is approx £40 / month.
+					</a>
+				</li>
+				
+				<!-- Linux -->
+				<li class="my-3">
+					<img src="{{ url_for('static', filename='img/linux_icon.png')}}" width=100>
+					<img src="{{ url_for('static', filename='img/ubuntu_icon.png')}}" width=100>
+					The operating system is Linux (Ubuntu Server flavour).
+				</li>
+				
+				<!-- Nginx -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/nginx_icon.png')}}" width=100>
+					This website uses NGINX as a reverse proxy (the thing which handles your incoming requests to
+					the server and decides what to do with them, eg hand them to Gunicorn).
+					There's an excellent guide to setting this all up
+					<a href="https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04">
+						<i class="fa fa-external-link fa-2xs"></i> here.
+					</a>
+				</li>
+				
 				<!-- Python -->
 				<li class="my-3"><img src="{{ url_for('static', filename='img/python_icon.png')}}" width=40>
 					<a href="https://www.python.org/">
-					<i class="fa fa-external-link fa-2xs"></i> Python</a> as the underlying back end language.
+					<i class="fa fa-external-link fa-2xs"></i> Python</a> as the underlying back end language. The
+				                                                          website runs in a
+					<a href="https://realpython.com/python-virtual-environments-a-primer/">
+						<i class="fa fa-external-link fa-2xs"></i> Virtual Python Environment</a> on a virtual
+                        machine. That's a lot of virtualness...
+				</li>
+				
+				<!-- Gunicorn -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/gunicorn_icon.png')}}" width=50>
+					This website uses
+					<a href="https://gunicorn.org/">
+						<i class="fa fa-external-link fa-2xs"></i> Gunicorn
+					</a> as an application server (the thing which serves the webpages).
+					If you want to know how to fine tune Gunicorn threads and workers, there is a guide
+					<a href="https://medium.com/building-the-system/gunicorn-3-means-of-concurrency-efbb547674b7">
+						<i class="fa fa-external-link fa-2xs"></i> here. If you're interested this website is
+						configured to use five servers.
+					</a>
 				</li>
 				
 				<!-- Flask-->
@@ -74,15 +128,24 @@
 					</a> as the micro framework backend for the website. There is an epic free course on building
 					     Flask websites online
 					<a href="https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world">
-						<i class="fa fa-external-link fa-2xs"></i> here. Possibly I should have used Django, it
-						                                           would probably have been less painful!</a>
+						<i class="fa fa-external-link fa-2xs"></i> here.
+					</a>
+					Possibly I should have used Django, it would probably have been less painful!
 				</li>
 				
 				<!-- Jinja -->
 				<li class="my-3">
 					<img src="{{ url_for('static', filename='img/jinja_icon.png')}}" width=100>
 					<a href="https://jinja.palletsprojects.com/en/3.1.x/">
-					<i class="fa fa-external-link fa-2xs"></i> Jinja</a> as the html templating engine.
+					<i class="fa fa-external-link fa-2xs"></i> Jinja</a> as the html templating engine. Two very
+					useful tips were
+					<a href="https://stackoverflow.com/questions/49563777/how-do-i-use-a-global-variable-in-jinja2-using-namespace-class">
+						<i class="fa fa-external-link fa-2xs"></i> namespaces
+					</a> and
+					<a href="https://stackoverflow.com/questions/62167968/how-use-python-function-in-flask-jinja2-template?noredirect=1&lq=1">
+						<i class="fa fa-external-link fa-2xs"></i> accessing Flask functions
+					</a>
+					from within Jinja.
 				</li>
 				
 				<!-- Bootstrap -->
@@ -111,7 +174,7 @@
 					Website fonts from
 					<a href="https://fonts.google.com/">
 						<i class="fa fa-external-link fa-2xs"></i> Google Fonts
-					</a>. This site uses <a href="https://fonts.google.com/specimen/Lora">
+					</a> (totally free). This site uses <a href="https://fonts.google.com/specimen/Lora">
 						<i class="fa fa-external-link fa-2xs"></i> <strong style="font-family:lora">Lora</strong>
 					</a> and <a href="https://fonts.google.com/specimen/Open+Sans">
 						<i class="fa fa-external-link fa-2xs"></i> <strong style="font-family:open sans">Open Sans</strong>.
@@ -120,7 +183,7 @@
 		
 				<!-- SQL -->
 				<li class="my-3"><img src="{{ url_for('static', filename='img/sqlite_icon.png')}}" width=90>
-					SQL databases courtesy of
+					SQLite databases courtesy of
 					<a href="https://www.sqlalchemy.org/">
 						<i class="fa fa-external-link fa-2xs"></i> SQLAlchemy.
 					</a>
@@ -194,46 +257,6 @@
 					</a>
                     a whole £10 for "elsr.co.uk".</li>
 		
-				<!-- Gunicorn & Nginx -->
-				<li class="my-3"><img src="{{ url_for('static', filename='img/gunicorn_icon.png')}}" width=50>
-					This website uses
-					<a href="https://gunicorn.org/">
-						<i class="fa fa-external-link fa-2xs"></i> Gunicorn
-					</a> as an application server. If you want to know how to fine tune Gunicorn threads and workers,
-					there is a guide
-					<a href="https://medium.com/building-the-system/gunicorn-3-means-of-concurrency-efbb547674b7">
-						<i class="fa fa-external-link fa-2xs"></i> here.
-					</a>
-				</li>
-				
-				<!-- Nginx -->
-				<li class="my-3"><img src="{{ url_for('static', filename='img/nginx_icon.png')}}" width=100>
-					This website uses NGINX as a reverse proxy. There's an excellent guide to setting this all up
-					<a href="https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04">
-						<i class="fa fa-external-link fa-2xs"></i> here.
-					</a>
-				</li>
-				
-				<!-- Google Cloud -->
-				<li class="my-3"><img src="{{ url_for('static', filename='img/google_cloud_icon.png')}}" width=40>
-					The site is hosted on an
-					<a href="https://cloud.google.com/compute/docs/general-purpose-machines#e2_machine_types">
-						<i class="fa fa-external-link fa-2xs"></i> E2 series
-					</a>
-					<a href="https://cloud.google.com/compute">
-						<i class="fa fa-external-link fa-2xs"></i> Virtual Machine
-					</a> in the
-					<a href="https://cloud.google.com/">
-						<i class="fa fa-external-link fa-2xs"></i> Google Cloud
-					</a> in their London
-				    <a href="https://www.google.co.uk/about/datacenters/">
-					    <i class="fa fa-external-link fa-2xs"></i> data center
-				    </a> part of Google zone
-					<a href="https://dgtlinfra.com/google-cloud-data-center-locations/">
-						<i class="fa fa-external-link fa-2xs"></i> europe-west 2c. The cost is approx £40 / month.
-					</a>
-				</li>
-			
 				<!-- Sentry -->
 				<li class="my-3"><img src="{{ url_for('static', filename='img/sentry_icon.png')}}" width=30>
 					Site diagnostics and real time performance data courtesy of
@@ -255,7 +278,7 @@
 					The code for this website was scanned, for free, by
 					<a href="https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/about-code-scanning">
 						<i class="fa fa-external-link fa-2xs"></i> Git Hub security scanning tools,
-					</a>which found quite a few vulnerabilities I subsequently fixed.
+					</a>which found quite a few vulnerabilities which hopefully I've fixed by the time you read this.
 				</li>
 				
 				<!-- Fail2Ban -->
