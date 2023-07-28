@@ -317,13 +317,11 @@ def new_cafe():
                        "<li>Where does it rank on the ELSR Coke Price Index? ;-) </li>" \
                        "</ul>"
 
-    # Just for testing
-    form.name.data = "Test cafe"
-    form.lat.data = 52.200687
-    form.lon.data = 0.15762
-    form.summary.data = "nice cafe"
-
-
+    # # Just for testing
+    # form.name.data = "Test cafe"
+    # form.lat.data = 52.200687
+    # form.lon.data = 0.15762
+    # form.summary.data = "nice cafe"
 
     # Are we posting the completed form?
     if form.validate_on_submit():
