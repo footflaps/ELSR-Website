@@ -148,38 +148,38 @@
 		                
 		                    <!-- Tortuous logic as unauthenticated user won't have .admin() attribute etc -->
 		                
-						{% elif current_user.admin(): %}
+						{% elif current_user.admin() or current_user.email == cafe.added_email %}
 						
-						<div class="clearfix">
-							
-							<!----------------------------->
-							<!--      EDIT button        -->
-							<!----------------------------->
-							
-							<a class="btn btn-primary float-right"
-							   href="{{url_for('edit_cafe', cafe_id=cafe.id)}}">Edit</a>
-						
-							{% if cafe.active %}
-							
+							<div class="clearfix">
+								
 								<!----------------------------->
-								<!--      Closed button      -->
+								<!--      EDIT button        -->
 								<!----------------------------->
+								
+								<a class="btn btn-primary float-right"
+								   href="{{url_for('edit_cafe', cafe_id=cafe.id)}}">Edit</a>
 							
-								<a class="btn btn-warning float-left"
-								   data-toggle="modal" data-target="#closedCafe">Mark as closed</a>
-						
-							{% else %}
+								{% if current_user.admin() and cafe.active %}
+								
+									<!----------------------------->
+									<!--      Closed button      -->
+									<!----------------------------->
+								
+									<a class="btn btn-warning float-left"
+									   data-toggle="modal" data-target="#closedCafe">Mark as closed</a>
 							
-								<!----------------------------->
-								<!--    unClosed button      -->
-								<!----------------------------->
-							
-								<a class="btn btn-warning float-left"
-								   href="{{url_for('unclose_cafe', cafe_id=cafe.id)}}">unClose Cafe</a>
-							
-							{% endif %}
-							
-						</div>
+								{% elif current_user.admin() and not cafe.active %}
+								
+									<!----------------------------->
+									<!--    unClosed button      -->
+									<!----------------------------->
+								
+									<a class="btn btn-warning float-left"
+									   href="{{url_for('unclose_cafe', cafe_id=cafe.id)}}">unClose Cafe</a>
+								
+								{% endif %}
+								
+							</div>
 						
 						
 						{% elif current_user.is_authenticated: %}
