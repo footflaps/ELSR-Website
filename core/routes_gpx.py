@@ -360,6 +360,38 @@ def new_gpx(route_name):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Make sure the GPX file has an up to date name
+# -------------------------------------------------------------------------------------------------------------- #
+
+def check_route_name(gpx):
+
+    # ----------------------------------------------------------- #
+    # Use absolute path
+    # ----------------------------------------------------------- #
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    route_name = f"ELSR: {gpx.name}"
+
+    # ----------------------------------------------------------- #
+    # Open the file
+    # ----------------------------------------------------------- #
+    with open(filename, 'r') as file_ref:
+        gpx_file = gpxpy.parse(file_ref)
+
+        gpx_track = gpx_file.tracks[0]
+        current_name = gpx_track.name
+        gpx_track.name = route_name
+
+    # ----------------------------------------------------------- #
+    # Overwrite the existing file
+    # ----------------------------------------------------------- #
+    if current_name != route_name:
+        update_existing_gpx(gpx_file, filename)
+        print(f"Updated name for GPX '{filename}' to '{route_name}' points.")
+    else:
+        print(f"No need to update name for GPX '{filename}' to '{route_name}' points.")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Clean up the GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -1317,7 +1349,15 @@ def route_download(gpx_id):
     if not gpx:
         Event().log_event("GPX Cut Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         print(f"route_download(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        flash("Sorry, we couldn't find that GPX file!")
+        flash("I recommend you fire the web developer...")
         return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Update the GPX file with the correct name (in case it's changed)
+    # ----------------------------------------------------------- #
+
+    check_route_name(gpx)
 
     # ----------------------------------------------------------- #
     # Send link to download the file
