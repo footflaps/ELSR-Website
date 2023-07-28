@@ -286,66 +286,78 @@
 
 <a name="eventLog" ></a>
 <div class="container">
-	<div class="row">
+	
+	<div class="row my-2">
 		<div class="col-10 mx-auto">
 			
-			<div>
-				<h2 class="float-left" >Event log</h2>
-				
-				<!-- Delete Events (Super Admin only) -->
-				{% if current_user.id == 1 %}
-					<button class="btn btn-danger float-right ml-2 mb-3" data-toggle="modal" data-target="#deleteEventsModal">
-                        Delete
-					</button>
-				{% endif %}
-				
+			<h2 class="float-left" >Event log</h2>
+			
+			<!-- Use a button group -->
+			<div class="btn-group float-right" role="group">
+			
 				<!-- Change selection -->
 				{% if days == "all" %}
-					<a class="btn btn-primary disabled float-right ml-2 mb-3" href="{{ url_for('admin_page', days='all') }}">
+					<a class="btn btn-sm btn-primary disabled" href="{{ url_for('admin_page', days='all') }}">
 						All
 					</a>
 				{% else %}
-					<a class="btn btn-primary float-right ml-2 mb-3" href="{{ url_for('admin_page', days='all') }}">
+					<a class="btn btn-sm btn-primary" href="{{ url_for('admin_page', days='all') }}">
 						All
 					</a>
 				{% endif %}
 				
 				{% if days == 28 %}
-					<a class="btn btn-primary disabled float-right ml-2 mb-3" href="{{ url_for('admin_page', days=28 ) }}">
+					<a class="btn btn-sm btn-primary disabled" href="{{ url_for('admin_page', days=28 ) }}">
 						4 Weeks
 					</a>
 				{% else %}
-					<a class="btn btn-primary float-right ml-2 mb-3" href="{{ url_for('admin_page', days=28 ) }}">
+					<a class="btn btn-sm btn-primary" href="{{ url_for('admin_page', days=28 ) }}">
 						4 Weeks
 					</a>
 				{% endif %}
 				
 				{% if days == 7 %}
-					<a class="btn btn-primary disabled float-right ml-2 mb-3" href="{{ url_for('admin_page', days=7 ) }}">
+					<a class="btn btn-sm btn-primary disabled" href="{{ url_for('admin_page', days=7 ) }}">
 						1 Week
 					</a>
 				{% else %}
-					<a class="btn btn-primary float-right ml-2 mb-3" href="{{ url_for('admin_page', days=7 ) }}">
+					<a class="btn btn-sm btn-primary" href="{{ url_for('admin_page', days=7 ) }}">
 						1 Week
 					</a>
 				{% endif %}
 				
 				{% if days == 1 %}
-					<a class="btn btn-primary disabled float-right ml-2 mb-3" href="{{ url_for('admin_page', days=1) }}">
+					<a class="btn btn-sm btn-primary disabled" href="{{ url_for('admin_page', days=1) }}">
 						24 hr
 					</a>
 				{% else %}
-					<a class="btn btn-primary float-right ml-2 mb-3" href="{{ url_for('admin_page', days=1) }}">
+					<a class="btn btn-sm btn-primary" href="{{ url_for('admin_page', days=1) }}">
 						24 hr
 					</a>
 				{% endif %}
-				
-			</div>
 			
-			{% if events: %}
-				<br>
-				<h4 class="float-left">{{ events|count }} events in {{ days }} days</h4>
-			{% endif %}
+				<!-- Delete Events (Super Admin only) -->
+				{% if current_user.id == 1 %}
+					<button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#deleteEventsModal">
+                        Delete
+					</button>
+				{% endif %}
+				
+			</div> <!-- End button group -->
+			
+		</div>
+	</div>
+	
+	<!-- Summary count -->
+	<div class="row my-2">
+		<div class="col-10 mx-auto">
+			<h4>{{ events|count }} events in {{ days }} days</h4>
+		</div>
+	</div>
+	
+	<!-- Table -->
+	<div class="row">
+		<div class="col-10 mx-auto">
 			
 			<table class="table table-bordered table-sm table-striped">
 				
@@ -388,10 +400,12 @@
 				<h4>No events over the last {{ days }} days</h4>
 			{% endif %}
 			
+			<!-- Break before next section -->
 			<hr>
 			
 		</div>
 	</div>
+	
 </div>
 
 
