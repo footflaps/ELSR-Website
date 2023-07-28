@@ -663,6 +663,23 @@ def gpx_details(gpx_id):
     cafe_list = Cafe().cafe_list(gpx.cafes_passed)
 
     # ----------------------------------------------------------- #
+    # Double check GPX file actually exists
+    # ----------------------------------------------------------- #
+
+    # This is  the absolute path to the file
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
+    # Check it exists before we try and parse it etc
+    if not os.path.exists(filename):
+        # Should never happen, but may as well handle it cleanly
+        flash("Sorry, we seem to have lost that GPX file!")
+        flash("Somebody should probably fire the web developer...")
+        Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
+        app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
+        print(f"gpx_details(): Can't find '{filename}'!")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
     # Need a map of the route and nearby cafes
     # ----------------------------------------------------------- #
     markers = markers_for_gpx(gpx.filename)
