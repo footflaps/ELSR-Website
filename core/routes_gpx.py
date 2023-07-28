@@ -1245,19 +1245,20 @@ def gpx_cut_end():
 # Delete a GPX route
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/gpx_delete', methods=['GET', 'POST'])
+@app.route('/gpx_delete/<int:gpx_id>', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def route_delete():
+def route_delete(gpx_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    gpx_id = request.args.get('gpx_id', None)
-    try:
-        confirm = request.form['confirm']
-    except exceptions.BadRequestKeyError:
-        confirm = None
+    confirm = request.args.get('confirm', None)
+    # gpx_id = request.args.get('gpx_id', None)
+    # try:
+    #     confirm = request.form['confirm']
+    # except exceptions.BadRequestKeyError:
+    #     confirm = None
 
     # ----------------------------------------------------------- #
     # Handle missing parameters

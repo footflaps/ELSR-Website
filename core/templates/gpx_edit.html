@@ -140,7 +140,7 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('route_delete', gpx_id=gpx.id) }}" method="post">
+				<form action="{{ url_for('route_delete', gpx_id=gpx.id) }}" method="get">
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">Please enter "DELETE" in the box below:</label>
