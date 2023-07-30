@@ -10,6 +10,7 @@ import os
 import sys
 import logging
 from datetime import date
+from time import sleep
 
 # We have our own hacked Gravatar
 from core.gravatar_hack import Gravatar
@@ -162,12 +163,13 @@ def delete_file_if_exists(filename):
         print(f"delete_file_if_exists: Deleting rogue file {filename}")
         try:
             os.remove(filename)
+            app.logger.debug("delete_file_if_exists: Successfully deleted existing file '{filename}'")
             # We need this as remove seems to keep the file locked for a short period
             sleep(0.5)
             return True
         except Exception as e:
-            Event().log_event("Cafe update",
-                              f"Failed to delete existing file '{filename}', error code was {e.args}")
+            app.logger.debug("delete_file_if_exists: Failed to delete existing file '{filename}', "
+                             "error code was {e.args}")
             print(f"delete_file_if_exists: Failed to delete existing file '{filename}', error code was {e.args}")
             return False
     # If file not there, return True as can continue etc
