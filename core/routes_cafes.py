@@ -275,6 +275,9 @@ def cafe_details(cafe_id):
         if not bool(cafe.active):
             flash("The cafe has been marked as closed / closing!")
 
+        # Make sure cafe photo has correct path
+        cafe.image_name = os.path.join(os.path.join(CAFE_FOLDER, os.path.basename(cafe.image_name)))
+
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                cafemap=cafemap, gpxes=gpxes, gpxmap=gpxmap)
@@ -288,6 +291,9 @@ def cafe_details(cafe_id):
         # Flag as closed
         if not bool(cafe.active):
             flash("The cafe has been marked as closed / closing!")
+
+        # Make sure cafe photo has correct path
+        cafe.image_name = os.path.join(os.path.join(CAFE_FOLDER, os.path.basename(cafe.image_name)))
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
