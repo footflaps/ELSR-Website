@@ -8,7 +8,7 @@
 <!--                                       Page Header                                              -->
 <!---------------------------------------------------------------------------------------------------->
 
-<header class="masthead" style="background-image: url({{ url_for('static', filename='img/about-bg.jpg')}})">
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/about-bg.jpg') }})">
 	<div class="overlay"></div>
 	<div class="container">
 		<div class="row">
@@ -71,10 +71,10 @@
 					</a> in the
 					<a href="https://cloud.google.com/">
 						<i class="fa fa-external-link fa-2xs"></i> Google Cloud
-					</a> in their London
+					</a> at their London
 				    <a href="https://www.google.co.uk/about/datacenters/">
 					    <i class="fa fa-external-link fa-2xs"></i> data center
-				    </a> part of Google zone
+				    </a>, which forms part of Google zone
 					<a href="https://dgtlinfra.com/google-cloud-data-center-locations/">
 						<i class="fa fa-external-link fa-2xs"></i> europe-west 2c. The cost is approx £40 / month.
 					</a>
@@ -84,14 +84,14 @@
 				<li class="my-3">
 					<img src="{{ url_for('static', filename='img/linux_icon.png')}}" width=100>
 					<img src="{{ url_for('static', filename='img/ubuntu_icon.png')}}" width=100>
-					The operating system is Linux (Ubuntu Server flavour).
+					The virtual machine runs Linux (Ubuntu Server flavour) as an operating system.
 				</li>
 				
 				<!-- Nginx -->
 				<li class="my-3"><img src="{{ url_for('static', filename='img/nginx_icon.png')}}" width=100>
-					This website uses NGINX as a reverse proxy (the thing which handles your incoming requests to
-					the server and decides what to do with them, eg hand them to Gunicorn).
-					There's an excellent guide to setting this all up
+					This website uses NGINX as a reverse proxy. A reverse proxy is the process which handles your
+					incoming requests, to the server, and decides what to do with them. In most cases it will just pass
+					them on to Gunicorn. There's an excellent guide to setting this all up
 					<a href="https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04">
 						<i class="fa fa-external-link fa-2xs"></i> here.
 					</a>
@@ -137,7 +137,10 @@
 				<li class="my-3">
 					<img src="{{ url_for('static', filename='img/jinja_icon.png')}}" width=100>
 					<a href="https://jinja.palletsprojects.com/en/3.1.x/">
-					<i class="fa fa-external-link fa-2xs"></i> Jinja</a> as the html templating engine. Two very
+					<i class="fa fa-external-link fa-2xs"></i> Jinja</a>
+					as the html templating engine. Most of the web pages you see are created on the fly by taking a
+					pre-defined template page and the contents from a database and merging the two together. Jinja is
+					a scripting language which enables content insertion into html template pages. Two very
 					useful tips were
 					<a href="https://stackoverflow.com/questions/49563777/how-do-i-use-a-global-variable-in-jinja2-using-namespace-class">
 						<i class="fa fa-external-link fa-2xs"></i> namespaces
@@ -152,11 +155,12 @@
 				<li class="my-3"><img src="{{ url_for('static', filename='img/bootstrap_icon.png')}}" width=40>
 					Responsive CSS / Javascript styling from
 					<a href="https://getbootstrap.com/">
-						<i class="fa fa-external-link fa-2xs"></i> Bootstrap</a>. This is how the website
-		                 dynamically adapts to the screen size eg for mobiles etc. This website's style is based
-				         on the
+						<i class="fa fa-external-link fa-2xs"></i> Bootstrap
+					</a>. This is how the website dynamically adapts to the screen size e.g. for mobiles etc. If you
+					narrow or widen your browser window and see content move around, that's Bootstrap's javascript
+					running in your browser. This website's style is based on the
 				    <a href="https://startbootstrap.com/theme/clean-blog">
-					    <i class="fa fa-external-link fa-2xs"></i> Clean Blog</a> theme.
+					    <i class="fa fa-external-link fa-2xs"></i> Clean Blog</a> theme with a bit of tweaking on top.
 				</li>
 		
 				<!-- Fontawesome -->
@@ -179,6 +183,7 @@
 					</a> and <a href="https://fonts.google.com/specimen/Open+Sans">
 						<i class="fa fa-external-link fa-2xs"></i> <strong style="font-family:open sans">Open Sans</strong>.
 					</a>
+					It's very on-trend to mix two fonts, one serif and one sans-serif, in a website design.
 				</li>
 		
 				<!-- SQL -->
@@ -187,6 +192,7 @@
 					<a href="https://www.sqlalchemy.org/">
 						<i class="fa fa-external-link fa-2xs"></i> SQLAlchemy.
 					</a>
+					This website uses six different databases for keeping track of all the content.
 				</li>
 		
 				<!-- Forms -->
@@ -194,13 +200,17 @@
 					Web forms are handled using
 					<a href="https://hackersandslackers.com/flask-wtforms-forms/">
 						<i class="fa fa-external-link fa-2xs"></i> Flask-WTF.</a>
+					They make it very really trivial to build web forms, normally just a single html reference!
 				</li>
 				
 				<!-- Werkzeug -->
 				<li class="my-3"><img src="{{ url_for('static', filename='img/werkzeug_icon.webp')}}" width=120>
-					Password hashing using
+					Password salting and hashing using
 					<a href="https://werkzeug.palletsprojects.com/en/2.3.x/utils/#module-werkzeug.security">
-						<i class="fa fa-external-link fa-2xs"></i> Werkzeug Utilities.
+						<i class="fa fa-external-link fa-2xs"></i> Werkzeug Utilities. Salting makes the password
+						hashes completely useless, to a hacker, as even if you use the same passwords on all websites,
+                        the hashes will be completely different on every site, so a hacker can't make any use of the
+                        information.
 					</a>
 				</li>
 		
@@ -227,12 +237,13 @@
 					<a href="https://pypi.org/project/gpxpy/">
 						<i class="fa fa-external-link fa-2xs"></i> gpxpy.
 					</a>
+					The library makes it very easy to scan the data in the file and work out how close each route
+					passes all the cafes in the database.
 				</li>
 				
 				<!-- Images -->
 				<li class="my-3"><img src="{{ url_for('static', filename='img/flickr_icon.png')}}" width=70>
-					Most of the background images are my own,
-					although I might have stolen one or two from the internet.
+					Most of the background images are my own, although I might have stolen one or two from the internet.
 				</li>
 				
 				<!-- Gravatars -->
@@ -292,9 +303,11 @@
 					Exchange servers every day, even though I'm not hosting one. However, they now all get blocked by
 					<a href="https://www.fail2ban.org/wiki/index.php/Main_Page">
 						<i class="fa fa-external-link fa-2xs"></i> Fail2Ban,
-					</a>which looks for servers trying it on and blocks their IPs. NB Don't block your ISP as otherwise
-					they'll <a href="https://cloud.google.com/knowledge/kb/fail2ban-package-might-cause-instance-s-health-checks-to-fail-000004595">
-						<i class="fa fa-external-link fa-2xs"></i> restart your VM!</a>
+					</a>which looks for servers trying it on and blocks their IPs.
+					If you want to see someone probing the site, trying to find the right webpage for admin access,
+					<a href="{{ url_for('static', filename='img/hacking_attempt.jpg') }}"><strong>this</strong>
+                    </a>
+					is what it looks like.
 				</li>
 				
 			</ul>
