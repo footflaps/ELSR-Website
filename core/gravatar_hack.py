@@ -157,7 +157,7 @@ class Gravatar(object):
             link = link + '&f=y'
 
         if email == "lance@livestrong.com":
-            return url_for('static', filename='img/lance.png')
+            return url_for('static', filename='img/lance.jpg')
 
 
         return link
