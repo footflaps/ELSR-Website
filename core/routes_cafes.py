@@ -554,14 +554,14 @@ def edit_cafe():
 
             if allowed_file(form.cafe_photo.data.filename):
                 # Create a new filename for the image
-                filename = f"cafe_{cafe.id}.jpg"
+                filename = os.path.join(CAFE_FOLDER, f"cafe_{cafe.id}.jpg")
                 app.logger.debug(f"edit_cafe(): Will save photo as '{filename}'")
 
                 # Make sure it's not there already
                 if delete_file_if_exists(filename):
 
                     # Upload and save in our cafe photo folder
-                    form.cafe_photo.data.save(os.path.join(CAFE_FOLDER, filename))
+                    form.cafe_photo.data.save(filename)
                     print(f"edit_cafe(): Photo saved as '{filename}'.")
 
                     # Update cafe object with filename
