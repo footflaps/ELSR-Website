@@ -556,7 +556,8 @@ def edit_cafe():
         # ----------------------------------------------------------- #
         #   Did we get passed a path for a photo?
         # ----------------------------------------------------------- #
-        if form.cafe_photo.data != "":
+        if form.cafe_photo.data != "" and \
+                not form.cafe_photo.data is None:
             app.logger.debug(f"edit_cafe(): Passed photo '{form.cafe_photo.data.filename}'")
             print(f"Passed photo '{form.cafe_photo.data.filename}'")
 
