@@ -287,6 +287,20 @@ def page_not_found(e):
     # note that we set the 404 status explicitly
     return render_template('404.html', year=current_year), 404
 
+@app.errorhandler(413)
+def file_too_large(e):
+    # What page were they looking for?
+    requested_route = request.path
+
+    # Log error in event log
+    flash("The file was too large, limit is 10 MB.")
+    app.logger.debug(f"413: File too large for '{requested_route}', previous page was '{request.referrer}'.")
+    Event().log_event("413", f"File too large for '{requested_route}', previous page was '{request.referrer}'")
+
+    # note that we set the 413 status explicitly
+    return render_template('400.html', year=current_year), 413
+
+
 @app.errorhandler(500)
 def internal_server_error(e):
     # What page were they looking for?
