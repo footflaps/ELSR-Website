@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Set up Google Maps                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<head>
+	<!-- Google Maps -->
+	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
+	{{chaingang_map.js}}
+</head>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Page Header                                                -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/chaingang_bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>EL Chaingang</h1>
+					<span class="subheading">There can be only one....</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<h2>Chain what? <i class="fa-solid fa-link"></i></h2>
+			<p>Every Thursday night, during the summer months, the best of the best meet on a Thursday night for a
+			   <s>fight to the death</s> chaingang where they attempt to rip each others legs off in a paceline.
+			   Imagine Max Max on bicycles crossed with Highlander and you're getting pretty close, although
+			   technically eye gouging is no longer permitted.</p>
+			
+			<h2>Fancy your chances? <i class="fa-solid fa-dice"></i></h2>
+			<p>Depending on numbers, there will be several groups based on ability, weight class and fighting
+			   style. This way, everyone stands a fair chance and can have a decent session with people of similar
+			   ability. Weigh-in commences 15 minutes before the start.
+			</p>
+			
+			<h2>Where? <i class="fa-solid fa-map-location-dot"></i></h2>
+			<p>The meeting point is the
+				<a href="https://threehorseshoesmadingley.co.uk/">
+					<i class="fa fa-external-link fa-2xs"></i> Three Horseshoes
+				</a>pub in Madingley. The map, below, shows the 2023 course and the meeting point.
+			</p>
+			
+			{{chaingang_map.html}}
+			
+			<h2 class="mt-5">Start time? <i class="fa-regular fa-clock"></i></h2>
+			<p>Start times vary throughout the year with daylight, for 2023 we have:</p>
+			<ul>
+				
+				<li>18:00 &nbsp;&nbsp;&nbsp;&nbsp;  30 March - 7 April</li>
+				<li>18:30 &nbsp;&nbsp;&nbsp;&nbsp;  All summer</li>
+				<li>18:00 &nbsp;&nbsp;&nbsp;&nbsp;  14 - 21 September</li>
+				
+			</ul>
+			
+			<p>Please bring lights Front & Rear all year.</p>
+			
+			
+			<!-- Break before footer -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

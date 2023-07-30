@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, flash
+from flask import render_template, url_for, request, flash, abort
 from flask_login import current_user
 from flask_googlemaps import Map
 from flask_wtf import FlaskForm
@@ -6,13 +6,14 @@ from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from threading import Thread
+import os
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, dynamic_map_size, current_year
+from core import app, dynamic_map_size, current_year, GPX_UPLOAD_FOLDER_ABS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -31,12 +32,25 @@ from core.db_users import update_last_seen
 # saying they are not actually used!
 from core.routes_users import login
 from core.routes_cafes import cafe_list
-from core.routes_gpx import gpx_list
+from core.routes_gpx import gpx_list, markers_for_gpx, markers_for_cafes
 from core.routes_admin import admin_page
 from core.routes_messages import mark_read
 from core.routes_events import delete_event
 from core.send_emails import contact_form_email
 from core.dB_events import Event
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Constants
+# -------------------------------------------------------------------------------------------------------------- #
+
+CHAINGANG_GPX_FILENAME = "gpx_el_cg_2023.gpx"
+
+CHAINGANG_MEET = [{
+            'icon': OPEN_CAFE_ICON,
+            'lat': 52.22528,
+            'lng': 0.043116,
+            'infobox': f'<a href="https://threehorseshoesmadingley.co.uk/">Three Horseshoes</a>'
+    }]
 
 
 
@@ -92,6 +106,52 @@ def home():
 
     # Render home page
     return render_template("main_home.html", year=current_year, cafemap=cafemap)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Chaingang
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/chaingang', methods=['GET'])
+@update_last_seen
+def chaingang():
+    # -------------------------------------------------------------------------------------------- #
+    # Show chaingang route
+    # -------------------------------------------------------------------------------------------- #
+
+    # ----------------------------------------------------------- #
+    # Double check GPX file actually exists
+    # ----------------------------------------------------------- #
+
+    # This is  the absolute path to the file
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, CHAINGANG_GPX_FILENAME))
+
+    # Check it exists before we try and parse it etc
+    if not os.path.exists(filename):
+        # Should never happen, but may as well handle it cleanly
+        flash("Sorry, we seem to have lost that GPX file!")
+        flash("Somebody should probably fire the web developer...")
+        Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
+        app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
+        print(f"gpx_details(): Can't find '{filename}'!")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Need a map of the route and nearby cafes
+    # ----------------------------------------------------------- #
+    markers = markers_for_gpx(filename)
+    markers += CHAINGANG_MEET
+    chaingang_map = Map(
+        identifier="cafemap",
+        lat=52.211001,
+        lng=0.117207,
+        fit_markers_to_bounds=True,
+        style=dynamic_map_size(),
+        markers=markers
+    )
+
+    # Render home page
+    return render_template("main_chaingang.html", year=current_year, chaingang_map=chaingang_map)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
