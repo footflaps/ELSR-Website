@@ -216,20 +216,24 @@
 <!--                                     Map of GPX Routes                                          -->
 <!---------------------------------------------------------------------------------------------------->
 
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-
-			<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">
-				Map view of routes passing {{cafe.name}}
-			</h2>
-            {{gpxmap.html}}
-			
-			<hr>
-
+{% if gpxes | count != 0 %}
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+	
+				<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">
+					Map view of routes passing {{cafe.name}}
+				</h2>
+	            {{gpxmap.html}}
+				
+				<hr>
+	
+			</div>
 		</div>
 	</div>
-</div>
+
+{% endif %}
 
 
 <!---------------------------------------------------------------------------------------------------->
