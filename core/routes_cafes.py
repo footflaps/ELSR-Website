@@ -573,7 +573,7 @@ def edit_cafe():
                     print(f"edit_cafe(): Photo saved as '{filename}'.")
 
                     # Update cafe object with filename
-                    if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
+                    if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{os.path.basename(filename)}"):
                         # Uploaded OK
                         app.logger.debug(f"edit_cafe(): Cafe photo updated '{filename}'")
                         Event().log_event("Edit Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
@@ -610,8 +610,6 @@ def edit_cafe():
         # Back to cafe details page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))
 
-
-
     # ----------------------------------------------------------- #
     # Handle GET
     # ----------------------------------------------------------- #
@@ -619,6 +617,10 @@ def edit_cafe():
     # Flag as closed (if set)
     if not bool(cafe.active):
         flash("The cafe has been marked as closed / closing!")
+
+    # Make sure cafe photo has correct path
+    cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
+    app.logger.debug(f"edit_cafe(): cafe.image_name = '{cafe.image_name}'")
 
     # Show edit form for the specified cafe
     return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year)
