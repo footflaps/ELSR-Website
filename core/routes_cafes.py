@@ -549,11 +549,13 @@ def edit_cafe():
         #   Did we get passed a path for a photo?
         # ----------------------------------------------------------- #
         if form.cafe_photo.data != "":
+            app.logger.debug(f"edit_cafe(): Passed photo '{form.cafe_photo.data.filename}'")
             print(f"Passed photo '{form.cafe_photo.data.filename}'")
 
             if allowed_file(form.cafe_photo.data.filename):
                 # Create a new filename for the image
                 filename = f"cafe_{cafe.id}.jpg"
+                app.logger.debug(f"edit_cafe(): Will save photo as '{filename}'")
 
                 # Make sure it's not there already
                 if delete_file_if_exists(filename):
@@ -565,11 +567,13 @@ def edit_cafe():
                     # Update cafe object with filename
                     if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
                         # Uploaded OK
+                        app.logger.debug(f"edit_cafe(): Cafe photo updated '{filename}'")
                         Event().log_event("Edit Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
                         flash("Cafe photo has been uploaded.")
                         print(f"edit_cafe(): Successfully uploaded the photo.")
                     else:
                         # Failed to upload eg invalid path
+                        app.logger.debug(f"edit_cafe(): Failed to upload '{filename}'")
                         Event().log_event("Edit Cafe Fail",
                                           f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
                         flash(f"Sorry, failed to upload the file '{filename}!")
@@ -577,10 +581,12 @@ def edit_cafe():
                 else:
                     # Failed to delete existing file
                     # NB delete_file_if_exists() will generate an error with details etc, so just flash here
+                    app.logger.debug(f"edit_cafe(): Failed to delete existing file '{filename}'")
                     flash("Sorry, something went wrong!")
 
             else:
                 # allowed_file() failed.
+                app.logger.debug(f"edit_cafe(): Invalid file image '{form.cafe_photo.data.filename}'")
                 Event().log_event("Edit Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
                 flash("Invalid file type for image!")
                 print(f"edit_cafe(): Invalid file type for image.")
