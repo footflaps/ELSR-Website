@@ -386,9 +386,11 @@ def check_route_name(gpx):
     # ----------------------------------------------------------- #
     if current_name != route_name:
         update_existing_gpx(gpx_file, filename)
-        print(f"Updated name for GPX '{filename}' to '{route_name}' points.")
+        app.logger.debug(f"check_route_name(): Updated name for GPX '{filename}' to '{route_name}'.")
+        print(f"Updated name for GPX '{filename}' to '{route_name}'.")
     else:
-        print(f"No need to update name for GPX '{filename}' to '{route_name}' points.")
+        app.logger.debug(f"check_route_name(): No need to update name for GPX '{filename}' to '{route_name}'.")
+        print(f"No need to update name for GPX '{filename}' to '{route_name}'.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -1337,21 +1339,35 @@ def route_delete(gpx_id):
 # Download a GPX route
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/gpx_download/<int:gpx_id>', methods=['GET', 'POST'])
+@app.route('/gpx_download/<int:gpx_id>', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
 def route_download(gpx_id):
+
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
     gpx = Gpx().one_gpx(gpx_id)
 
     if not gpx:
-        Event().log_event("GPX Cut Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        app.logger.debug(f"GPX Download: Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
+        Event().log_event("GPX Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         print(f"route_download(): Failed to locate GPX with gpx_id = '{gpx_id}'")
-        flash("Sorry, we couldn't find that GPX file!")
-        flash("I recommend you fire the web developer...")
+        flash("Sorry, we couldn't find that GPX file in the database!")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Check GPX file exists
+    # ----------------------------------------------------------- #
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
+    if not os.path.exists(filename):
+        app.logger.debug(f"GPX Download: Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
+        Event().log_event("GPX Download Fail", f"Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
+        print(f"route_download(): Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
+        flash("Sorry, we couldn't find that GPX file on the server!")
+        flash("You should probably fire the web developer...")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -1364,9 +1380,15 @@ def route_download(gpx_id):
     # Send link to download the file
     # ----------------------------------------------------------- #
 
+    download_name = f"ELSR_{gpx.name.replace(' ','_')}.gpx"
+
+    app.logger.debug(f"GPX Download: Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
     Event().log_event("GPX Download Success", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
-    return send_from_directory(directory='static', path=f"gpx/{os.path.basename(gpx.filename)}",
-                               download_name=f"ELSR_{gpx.name.replace(' ','_')}.gpx")
+    flash(f"File '{download_name}' is now downloading...")
+    return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
+                               path=os.path.basename(gpx.filename),
+                               download_name=download_name) and \
+        redirect(url_for('gpx_details', gpx_id=gpx_id))
 
 
 
