@@ -1384,11 +1384,9 @@ def route_download(gpx_id):
 
     app.logger.debug(f"GPX Download: Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
     Event().log_event("GPX Download Success", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
-    flash(f"File '{download_name}' is now downloading...")
     return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
                                path=os.path.basename(gpx.filename),
-                               download_name=download_name) and \
-        redirect(url_for('gpx_details', gpx_id=gpx_id))
+                               download_name=download_name)
 
 
 
