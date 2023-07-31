@@ -317,7 +317,7 @@ def new_cafe():
     form = CreateCafeForm()
 
     # Prefill form
-    if form.detail.data == "":
+    if not form.detail.data:
         form.detail.data = "<ul>" \
                            "<li>Is the coffee good?  </li>" \
                            "<li>Does it do hot food? </li>" \
