@@ -317,15 +317,16 @@ def new_cafe():
     form = CreateCafeForm()
 
     # Prefill form
-    form.detail.data = "<ul>" \
-                       "<li>Is the coffee good?  </li>" \
-                       "<li>Does it do hot food? </li>" \
-                       "<li>Do you need to book? </li>" \
-                       "<li>Is there seating inside? </li>" \
-                       "<li>Is there seating outside? </li>" \
-                       "<li>Is it suitable for large groups eg 16 riders? </li>" \
-                       "<li>Where does it rank on the ELSR Coke Price Index? ;-) </li>" \
-                       "</ul>"
+    if form.detail.data == "":
+        form.detail.data = "<ul>" \
+                           "<li>Is the coffee good?  </li>" \
+                           "<li>Does it do hot food? </li>" \
+                           "<li>Do you need to book? </li>" \
+                           "<li>Is there seating inside? </li>" \
+                           "<li>Is there seating outside? </li>" \
+                           "<li>Is it suitable for large groups eg 16 riders? </li>" \
+                           "<li>Where does it rank on the ELSR Coke Price Index? ;-) </li>" \
+                           "</ul>"
 
     # # Just for testing
     # form.name.data = "Test cafe"
