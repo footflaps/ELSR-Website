@@ -395,7 +395,8 @@ def new_cafe():
         #   Did we get passed a path for a photo?
         # ----------------------------------------------------------- #
 
-        if form.cafe_photo.data != "":
+        if form.cafe_photo.data != "" and \
+            not form.cafe_photo.data is None:
             print(f"Passed photo '{form.cafe_photo.data.filename}'")
 
             if allowed_file(form.cafe_photo.data.filename):
