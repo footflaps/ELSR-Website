@@ -90,9 +90,37 @@
 			
 			<p>Please bring front & rear lights all year round.</p>
 			
-			<h2>Leader board</h2>
-			<p>Sadly, Strava have deprecated API access to the leader boards, so I can't dynamically list the current
-			   KoM and QoM here :-(</p>
+			<h2>Overall Leader board (from Strava)</h2>
+			
+			<table class="table table-striped table-bordered table-sm">
+		
+				<!-- Header row-->
+				<thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Speed</th>
+	                    <th scope="col">Time</th>
+	                </tr>
+                </thead>
+		
+				<!-- Table rows -->
+				<tbody>
+					{% for rider in leader_table: %}
+						
+						<tr>
+							<th scope="row">{{ loop.index }}</th>
+							<td scope="row">{{ rider[1] }}</td>
+						    <td scope="row">{{ rider[2] }}</td>
+							<td scope="row">{{ rider[4] }}</td>
+					    </tr>
+				
+					{% endfor %}
+				
+				</tbody>
+			
+			</table>
+			
 			
 			<!-- Break before footer -->
 			<hr>

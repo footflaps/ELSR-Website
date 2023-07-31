@@ -7,6 +7,9 @@ from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from threading import Thread
 import os
+import requests
+from bs4 import BeautifulSoup
+import lxml
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -53,6 +56,15 @@ CHAINGANG_MEET = [{
     }]
 
 
+# Getting chaingang leaders
+TARGET_URL = "https://www.strava.com/segments/25278818?filter=overall"
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+    "Accept-Language": "fr,fr-FR;q=0.8,en-US;q=0.5,en;q=0.3"
+}
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Contact form
@@ -63,6 +75,27 @@ class ContactForm(FlaskForm):
     email = EmailField("Email address", validators=[InputRequired("Please enter your email address.")])
     message = CKEditorField("Message", validators=[InputRequired("Please enter a message.")])
     submit = SubmitField("Send")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
+def get_chaingang_top10():
+    # Male leader board
+    response = requests.get(TARGET_URL, headers=headers)
+    webpage = response.text
+    soup = BeautifulSoup(webpage, "lxml")
+    table = soup.find(id='segment-leaderboard')
+    rows = []
+    for i, row in enumerate(table.find_all('tr')):
+        if i != 0:
+            rows.append([el.text.strip() for el in row.find_all('td')])
+    return rows
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -150,8 +183,14 @@ def chaingang():
         markers=markers
     )
 
+    # ----------------------------------------------------------- #
+    # Leader boards from Strava
+    # ----------------------------------------------------------- #
+    leader_table = get_chaingang_top10()
+
     # Render home page
-    return render_template("main_chaingang.html", year=current_year, chaingang_map=chaingang_map)
+    return render_template("main_chaingang.html", year=current_year, chaingang_map=chaingang_map,
+                           leader_table=leader_table)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
