@@ -328,6 +328,8 @@ app.register_error_handler(500, internal_server_error)
 
 
 if __name__ == "__main__":
-
-    app.run(debug=False)
+    if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+        app.run(debug=False)
+    else:
+        app.run(debug=True)
 

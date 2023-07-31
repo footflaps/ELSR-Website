@@ -79,13 +79,9 @@ NUM_DIGITS_CODES = 6
 
 @login_manager.user_loader
 def load_user(user_id):
-    app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
-    # Can't say I really understand this, but Gunicorn has multiple servers running in parallel and only
-    # one seemed to know the user was logged in, so you could be randomly logged out if your request was handled
-    # by one of the other servers. This, seems to fix it....
-    # if session:
-    #     return User.query.filter_by(id=session['_user_id']).first()
-    # Not sure if this ever gets executed.....
+    # Only log user details on the webserver
+    if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+        app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
     return User.query.get(int(user_id))
 
 
