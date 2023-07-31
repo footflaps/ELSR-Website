@@ -147,7 +147,12 @@
 										{{cafe.rating}}
 									</h2>
 									
-									<p style="font-size: 20px; margin-top: 0px">{{ number_routes_passing_by(cafe.id, current_user) }} route(s)
+									<p style="font-size: 20px; margin-top: 0px">
+										{% if number_routes_passing_by(cafe.id, current_user) == 1 %}
+											{{ number_routes_passing_by(cafe.id, current_user) }} route
+										{% else %)
+											{{ number_routes_passing_by(cafe.id, current_user) }} routes
+										{% endif %}
 									</p>
 									
 								</a>
