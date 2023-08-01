@@ -76,6 +76,10 @@ def map_icon(route_num):
 
 def new_cafe_photo_filename(cafe):
     if not cafe.image_name:
+        # First photo for this cafe
+        return f"cafe_{cafe.id}.jpg"
+    elif not os.path.exists(os.path.join(CAFE_FOLDER, os.path.basename(cafe.image_name))):
+        # The current referenced photo isn't there, so just reset
         return f"cafe_{cafe.id}.jpg"
     else:
         current_name = os.path.basename(cafe.image_name)
