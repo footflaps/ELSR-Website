@@ -42,6 +42,9 @@ from core.modal_forms import delete_comment_modal_form, delete_post_modal_form
 ELSR_LAT = 52.203316
 ELSR_LON = 0.131689
 ELSR_MAX_KM = 100
+# Update routes for the cafe if it has moved by at least 100m
+ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used for uploading pictures of the cafes
@@ -82,17 +85,22 @@ def new_cafe_photo_filename(cafe):
         # The current referenced photo isn't there, so just reset
         return f"cafe_{cafe.id}.jpg"
     else:
+        # Already have a photo in use
         current_name = os.path.basename(cafe.image_name)
         # If we use the same filename the browser won't realise it's changed and just uses the cached one, so we
         # have to create a new filename.
         if current_name == f"cafe_{cafe.id}.jpg":
+            # This will be the first new photo, so start at index 1
             return f"cafe_{cafe.id}_1.jpg"
         else:
+            # Already using indices, so need to increment by one
             try:
+                # Split[2] might fail if there aren't enough '_' in the filename
                 index = current_name.split('_')[2]
                 index = int(index) + 1
                 return f"cafe_{cafe.id}_{index}.jpg"
-            except:
+            except IndexError:
+                # Just reset to 1
                 return f"cafe_{cafe.id}_1.jpg"
 
 
@@ -532,6 +540,10 @@ def edit_cafe():
         detail=cafe.details
     )
 
+    # Cache these so we can tell if the cafe coords have been updated
+    last_lat = cafe.lat
+    last_lon = cafe.lon
+
     # ----------------------------------------------------------- #
     # Handle POST request
     # ----------------------------------------------------------- #
@@ -592,10 +604,17 @@ def edit_cafe():
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
         # ----------------------------------------------------------- #
+
         updated_cafe = Cafe().one_cafe(cafe_id)
-        print(f"edit_cafe(): calling check_new_cafe_with_all_gpxes for {updated_cafe.name}")
-        check_new_cafe_with_all_gpxes(updated_cafe)
-        flash(f"All GPX routes have been updated with distance to {updated_cafe.name}.")
+        dist_km  = mpu.haversine_distance((last_lat, last_lon), (updated_cafe.lat, updated_cafe.lon))
+        if dist_km >= ELSR_UPDATE_GPX_MIN_DISTANCE_KM:
+            app.logger.debug(f"edit_cafe(): Cafe has moved {round(dist_km, 1)} km, so need to update GPXes.")
+            print(f"edit_cafe(): calling check_new_cafe_with_all_gpxes for {updated_cafe.name}")
+            check_new_cafe_with_all_gpxes(updated_cafe)
+            flash(f"All GPX routes have been updated with distance to {updated_cafe.name}.")
+        else:
+            app.logger.debug(f"edit_cafe(): Cafe has only moved {round(dist_km,1)} km, so no need to update GPXes.")
+
 
         # Back to cafe details page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))
