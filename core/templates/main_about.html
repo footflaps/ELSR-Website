@@ -91,8 +91,9 @@
 				<li class="my-3"><img src="{{ url_for('static', filename='img/nginx_icon.png')}}" width=100>
 					This website uses NGINX as a reverse proxy and file server. A reverse proxy is the process which
 					handles your incoming requests, to the server, and decides what to do with them. In most cases it
-					will just pass your request on to Gunicorn, but for files (eg css, js, jpg, etc) it also acts as
-					a file server, serving the files direct.	There's an excellent guide to setting this all up
+					will just pass your request on to Gunicorn, but for files (e.g. css, js, jpg, etc) it also acts as
+					a file server, serving the files direct. Downloading GPX files is handled by Gunicorn as they are
+					restricted (you have to be logged in). There's an excellent guide to setting this all up
 					<a href="https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04">
 						<i class="fa fa-external-link fa-2xs"></i> here.
 					</a>
