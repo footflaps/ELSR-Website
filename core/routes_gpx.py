@@ -127,10 +127,12 @@ def check_new_gpx_with_all_cafes(gpx_id):
 
     # Make sure gpx_id is valid
     if not gpx:
+        app.logger.debug(f"Updating GPX Failed to locate GPX: gpx_id = '{gpx_id}'.")
         print(f"Updating GPX Failed to locate GPX: gpx_id = '{gpx_id}'.")
         Event().log_event("Update GPX", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
         return False
 
+    app.logger.debug(f"Updating GPX '{gpx.name}' for closeness to all cafes.")
     Event().log_event("Update GPX", f"Updating GPX '{gpx.name}' for closeness to all cafes.'")
     print(f"Updating GPX '{gpx.name}' for closeness to all cafes.")
 

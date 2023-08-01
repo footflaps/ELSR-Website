@@ -7,6 +7,8 @@ import gpxpy
 import gpxpy.gpx
 import mpu
 import os
+from threading import Thread
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -468,8 +470,10 @@ def new_cafe():
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
         # ----------------------------------------------------------- #
-        check_new_cafe_with_all_gpxes(cafe)
-        flash(f"All GPX routes have been updated with distance to {cafe.name}.")
+
+        flash(f"All GPX routes are being updated with distance to {cafe.name}.")
+        print(f"new_cafe(): calling check_new_cafe_with_all_gpxes for {cafe.name}")
+        Thread(target=check_new_cafe_with_all_gpxes, args=(cafe,)).start()
 
         # Back to Cafe details page
         return redirect(url_for('cafe_details', cafe_id=cafe.id))
@@ -608,13 +612,12 @@ def edit_cafe():
         updated_cafe = Cafe().one_cafe(cafe_id)
         dist_km  = mpu.haversine_distance((last_lat, last_lon), (updated_cafe.lat, updated_cafe.lon))
         if dist_km >= ELSR_UPDATE_GPX_MIN_DISTANCE_KM:
+            flash(f"All GPX routes are being updated with distance to {updated_cafe.name}.")
             app.logger.debug(f"edit_cafe(): Cafe has moved {round(dist_km, 1)} km, so need to update GPXes.")
             print(f"edit_cafe(): calling check_new_cafe_with_all_gpxes for {updated_cafe.name}")
-            check_new_cafe_with_all_gpxes(updated_cafe)
-            flash(f"All GPX routes have been updated with distance to {updated_cafe.name}.")
+            Thread(target=check_new_cafe_with_all_gpxes, args=(updated_cafe,)).start()
         else:
             app.logger.debug(f"edit_cafe(): Cafe has only moved {round(dist_km,1)} km, so no need to update GPXes.")
-
 
         # Back to cafe details page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))
