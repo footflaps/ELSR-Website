@@ -8,13 +8,11 @@ import gpxpy.gpx
 import mpu
 import os
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -29,14 +27,12 @@ from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import update_last_seen, logout_barred_user
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our modal forms
 # -------------------------------------------------------------------------------------------------------------- #
 
 # These are needed, used in html templates, but PyCharm can't see that
 from core.modal_forms import delete_comment_modal_form, delete_post_modal_form
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used to verify sensible cafe coordinates
@@ -76,6 +72,44 @@ def map_icon(route_num):
     else:
         letter = chr(97 + route_num - 11)
         return f"https://maps.google.com/mapfiles/kml/paddle{letter}-lv.png"
+
+
+def update_cafe_photo(form, cafe):
+    print(f"Passed photo '{form.cafe_photo.data.filename}'")
+    app.logger.debug(f"update_cafe_photo(): Passed photo '{form.cafe_photo.data.filename}'")
+
+    if allowed_file(form.cafe_photo.data.filename):
+        # Create a new filename for the image
+        filename = f"cafe_{cafe.id}.jpg"
+
+        # Make sure it's not there already
+        if delete_file_if_exists(filename):
+
+            # Upload and save in our cafe photo folder
+            form.cafe_photo.data.save(os.path.join(CAFE_FOLDER, filename))
+            print(f"update_cafe_photo(): Photo saved as '{filename}'.")
+
+            # Update cafe object with filename
+            if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
+                # Uploaded OK
+                Event().log_event("Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
+                flash("Cafe photo has been uploaded.")
+                print(f"update_cafe_photo(): Successfully uploaded the photo.")
+            else:
+                # Failed to upload eg invalid path
+                Event().log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
+                flash(f"Sorry, failed to upload the file '{filename}!")
+                print(f"update_cafe_photo(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
+        else:
+            # Failed to delete existing file
+            # NB delete_file_if_exists() will generate an error with details etc, so just flash here
+            flash("Sorry, something went wrong!")
+
+    else:
+        # allowed_file() failed.
+        Event().log_event("Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
+        flash("Invalid file type for image!")
+        print(f"update_cafe_photo(): Invalid file type for image.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -395,43 +429,10 @@ def new_cafe():
         # ----------------------------------------------------------- #
         #   Did we get passed a path for a photo?
         # ----------------------------------------------------------- #
-
         if form.cafe_photo.data != "" and \
-            not form.cafe_photo.data is None:
-            print(f"Passed photo '{form.cafe_photo.data.filename}'")
-
-            if allowed_file(form.cafe_photo.data.filename):
-                # Create a new filename for the image
-                filename = f"cafe_{cafe.id}.jpg"
-
-                # Make sure it's not there already
-                if delete_file_if_exists(filename):
-
-                    # Upload and save in our cafe photo folder
-                    form.cafe_photo.data.save(os.path.join(CAFE_FOLDER, filename))
-                    print(f"new_cafe(): Photo saved as '{filename}'.")
-
-                    # Update cafe object with filename
-                    if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{filename}"):
-                        # Uploaded OK
-                        Event().log_event("Add Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
-                        flash("Cafe photo has been uploaded.")
-                        print(f"new_cafe(): Successfully uploaded the photo.")
-                    else:
-                        # Failed to upload eg invalid path
-                        Event().log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
-                        flash(f"Sorry, failed to upload the file '{filename}!")
-                        print(f"new_cafe(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
-                else:
-                    # Failed to delete existing file
-                    # NB delete_file_if_exists() will generate an error with details etc, so just flash here
-                    flash("Sorry, something went wrong!")
-
-            else:
-                # allowed_file() failed.
-                Event().log_event("Add Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
-                flash("Invalid file type for image!")
-                print(f"new_cafe(): Invalid file type for image.")
+                not form.cafe_photo.data is None:
+            # Upload the photo
+            update_cafe_photo(form, cafe)
 
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
@@ -562,47 +563,8 @@ def edit_cafe():
         # ----------------------------------------------------------- #
         if form.cafe_photo.data != "" and \
                 not form.cafe_photo.data is None:
-            app.logger.debug(f"edit_cafe(): Passed photo '{form.cafe_photo.data.filename}'")
-            print(f"Passed photo '{form.cafe_photo.data.filename}'")
-
-            if allowed_file(form.cafe_photo.data.filename):
-                # Create a new filename for the image
-                filename = os.path.join(CAFE_FOLDER, f"cafe_{cafe.id}.jpg")
-                app.logger.debug(f"edit_cafe(): Will save photo as '{filename}'")
-
-                # Make sure it's not there already
-                if delete_file_if_exists(filename):
-
-                    # Upload and save in our cafe photo folder
-                    form.cafe_photo.data.save(filename)
-                    print(f"edit_cafe(): Photo saved as '{filename}'.")
-
-                    # Update cafe object with filename
-                    if Cafe().update_photo(cafe.id, f"/static/img/cafe_photos/{os.path.basename(filename)}"):
-                        # Uploaded OK
-                        app.logger.debug(f"edit_cafe(): Cafe photo updated '{filename}'")
-                        Event().log_event("Edit Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
-                        flash("Cafe photo has been uploaded.")
-                        print(f"edit_cafe(): Successfully uploaded the photo.")
-                    else:
-                        # Failed to upload eg invalid path
-                        app.logger.debug(f"edit_cafe(): Failed to upload '{filename}'")
-                        Event().log_event("Edit Cafe Fail",
-                                          f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
-                        flash(f"Sorry, failed to upload the file '{filename}!")
-                        print(f"edit_cafe(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
-                else:
-                    # Failed to delete existing file
-                    # NB delete_file_if_exists() will generate an error with details etc, so just flash here
-                    app.logger.debug(f"edit_cafe(): Failed to delete existing file '{filename}'")
-                    flash("Sorry, something went wrong!")
-
-            else:
-                # allowed_file() failed.
-                app.logger.debug(f"edit_cafe(): Invalid file image '{form.cafe_photo.data.filename}'")
-                Event().log_event("Edit Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
-                flash("Invalid file type for image!")
-                print(f"edit_cafe(): Invalid file type for image.")
+            # Upload the photo
+            update_cafe_photo(form, cafe)
 
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
