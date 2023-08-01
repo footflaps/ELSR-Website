@@ -473,6 +473,7 @@ def new_cafe():
 
         flash(f"All GPX routes are being updated with distance to {cafe.name}.")
         print(f"new_cafe(): calling check_new_cafe_with_all_gpxes for {cafe.name}")
+        # Update the routes in the background
         Thread(target=check_new_cafe_with_all_gpxes, args=(cafe,)).start()
 
         # Back to Cafe details page
@@ -615,6 +616,7 @@ def edit_cafe():
             flash(f"All GPX routes are being updated with distance to {updated_cafe.name}.")
             app.logger.debug(f"edit_cafe(): Cafe has moved {round(dist_km, 1)} km, so need to update GPXes.")
             print(f"edit_cafe(): calling check_new_cafe_with_all_gpxes for {updated_cafe.name}")
+            # Update the routes in the background
             Thread(target=check_new_cafe_with_all_gpxes, args=(updated_cafe,)).start()
         else:
             app.logger.debug(f"edit_cafe(): Cafe has only moved {round(dist_km,1)} km, so no need to update GPXes.")
