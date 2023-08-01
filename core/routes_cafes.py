@@ -78,13 +78,14 @@ def new_cafe_photo_filename(cafe):
     if not cafe.image_name:
         return f"cafe_{cafe.id}.jpg"
     else:
+        current_name = os.path.basename(cafe.image_name)
         # If we use the same filename the browser won't realise it's changed and just uses the cached one, so we
         # have to create a new filename.
-        if cafe.image_name == f"cafe_{cafe.id}.jpg":
+        if current_name == f"cafe_{cafe.id}.jpg":
             return f"cafe_{cafe.id}_1.jpg"
         else:
             try:
-                index = cafe.image_name.split('_')[2]
+                index = current_name.split('_')[2]
                 index = int(index) + 1
                 return f"cafe_{cafe.id}_{index}.jpg"
             except:
