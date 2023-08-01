@@ -645,19 +645,20 @@ def edit_cafe():
 # Mark a cafe as being closed
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route("/close_cafe", methods=['GET', 'POST'])
+@app.route("/close_cafe/<int:cafe_id>", methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def close_cafe():
+def close_cafe(cafe_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    cafe_id = request.args.get('cafe_id', None)
-    try:
-        details = request.form['details']
-    except exceptions.BadRequestKeyError:
-        details = None
+    details = request.args.get('details', None)
+    # cafe_id = request.args.get('cafe_id', None)
+    # try:
+    #     details = request.form['details']
+    # except exceptions.BadRequestKeyError:
+    #     details = None
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -711,7 +712,7 @@ def close_cafe():
 # Mark a cafe as not being closed
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route("/unclose_cafe", methods=['GET', 'POST'])
+@app.route("/unclose_cafe", methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen

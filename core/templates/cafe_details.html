@@ -496,7 +496,7 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<form action="{{url_for('close_cafe', cafe_id=cafe.id)}}" method="post">
+				<form action="{{url_for('close_cafe', cafe_id=cafe.id)}}" method="get">
 					
 					<div class="form-group">
 						<label for="reason" class="col-form-label">Please say when the cafe closed or is going to close:</label>
