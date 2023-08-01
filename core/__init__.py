@@ -159,19 +159,17 @@ def dynamic_map_size():
 
 
 def delete_file_if_exists(filename):
-    app.logger.debug(f"delete_file_if_exists: Called with '{filename}'")
     if os.path.exists(filename):
-        print(f"delete_file_if_exists: Deleting rogue file {filename}")
         try:
             os.remove(filename)
-            app.logger.debug(f"delete_file_if_exists: Successfully deleted existing file '{filename}'")
             # We need this as remove seems to keep the file locked for a short period
             sleep(0.5)
             return True
         except Exception as e:
-            app.logger.debug(f"delete_file_if_exists: Failed to delete existing file '{filename}', "
-                             f"error code was {e.args}")
-            print(f"delete_file_if_exists: Failed to delete existing file '{filename}', error code was {e.args}")
+            app.logger.debug(f"delete_file_if_exists(): Failed to delete existing file '{filename}', "
+                             f"error code was '{e.args}'.")
+            print(f"delete_file_if_exists(): Failed to delete existing file '{filename}', error code was '{e.args}'.")
             return False
     # If file not there, return True as can continue etc
     return True
+

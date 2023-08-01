@@ -370,5 +370,5 @@ if __name__ == "__main__":
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         app.run(debug=False)
     else:
-        app.run(debug=True)
+        app.run(debug=False)
 

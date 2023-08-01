@@ -6,8 +6,7 @@ import gpxpy.gpx
 import mpu
 import os
 from time import sleep
-from werkzeug import exceptions
-
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -64,8 +63,7 @@ def allowed_file(filename):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def check_new_cafe_with_all_gpxes(cafe):
-
-    print(f"Updating all routes for closeness to cafe {cafe.name}")
+    app.logger.debug(f"check_new_cafe_with_all_gpxes(): Called with '{cafe.name}'.")
 
     # Get all the routes
     gpxes = Gpx().all_gpxes()
@@ -108,8 +106,8 @@ def check_new_cafe_with_all_gpxes(cafe):
 
         # Close enough?
         if min_km <= MIN_DIST_TO_CAFE_KM:
-            print(f"-- Closest to cafe {cafe.name} was {round(min_km, 1)} km at"
-                  f" {round(min_km_dist, 1)} km along the route. Total length was {round(dist_km, 1)} km")
+            app.logger.debug(f"-- Closest to cafe {cafe.name} was {round(min_km, 1)} km"
+                             f" at {round(min_km_dist, 1)} km along the route. Total length was {round(dist_km, 1)} km")
             Gpx().update_cafe_list(gpx.id, cafe.id, round(min_km, 1), round(min_km_dist, 1))
         else:
             Gpx().remove_cafe_list(gpx.id, cafe.id)
@@ -127,14 +125,12 @@ def check_new_gpx_with_all_cafes(gpx_id):
 
     # Make sure gpx_id is valid
     if not gpx:
-        app.logger.debug(f"Updating GPX Failed to locate GPX: gpx_id = '{gpx_id}'.")
-        print(f"Updating GPX Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        app.logger.debug(f"check_new_gpx_with_all_cafes(): Failed to locate GPX: gpx_id = '{gpx_id}'.")
         Event().log_event("Update GPX", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
         return False
 
-    app.logger.debug(f"Updating GPX '{gpx.name}' for closeness to all cafes.")
+    app.logger.debug(f"check_new_gpx_with_all_cafes(): Updating GPX '{gpx.name}' for closeness to all cafes.")
     Event().log_event("Update GPX", f"Updating GPX '{gpx.name}' for closeness to all cafes.'")
-    print(f"Updating GPX '{gpx.name}' for closeness to all cafes.")
 
     # ----------------------------------------------------------- #
     # Get all the cafes
@@ -187,8 +183,8 @@ def check_new_gpx_with_all_cafes(gpx_id):
         # ----------------------------------------------------------- #
         for cafe in cafes:
             if min_distance_km[cafe.id - 1] <= MIN_DIST_TO_CAFE_KM:
-                print(f"-- Route passes within {round(min_distance_km[cafe.id - 1],1)} km of {cafe.name} "
-                      f"after {round(min_distance_path_km[cafe.id - 1],1)} km.")
+                app.logger.debug(f"-- Route passes within {round(min_distance_km[cafe.id - 1],1)} km of {cafe.name} "
+                                 f"after {round(min_distance_path_km[cafe.id - 1],1)} km.")
                 # Push update to GPX file
                 Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
                                        min_distance_path_km[cafe.id - 1])
@@ -219,47 +215,54 @@ def update_existing_gpx(gpx_file, gpx_filename):
     # ----------------------------------------------------------- #
     # NB It shouldn't exist, but if something went wrong with a deleted GPX, it could end up left orphaned
     if os.path.exists(tmp_filename):
-        print(f"update_existing_file: Deleting existing file {tmp_filename}")
         try:
             os.remove(tmp_filename)
             # We need this as remove seems to keep the file locked for a short period
             sleep(0.5)
         except Exception as e:
+            app.logger.debug(f"update_existing_gpx(): Failed to delete existing file '{tmp_filename}', "
+                             f"error code was '{e.args}'.")
             Event().log_event("GPX update",
-                              f"Failed to delete existing file '{tmp_filename}', error code was {e.args}")
-            print(f"update_existing_file: Failed to delete existing file '{tmp_filename}', error code was {e.args}")
+                              f"Failed to delete existing file '{tmp_filename}', error code was '{e.args}'.")
             return False
 
     # ----------------------------------------------------------- #
     # Step 2: Write out our shortened file to new_filename
     # ----------------------------------------------------------- #
-    print(f"update_existing_file: Trying to write tmp file '{tmp_filename}'")
-    with open(tmp_filename, 'w') as file_ref2:
-        file_ref2.write(gpx_file.to_xml())
+    try:
+        with open(tmp_filename, 'w') as file_ref2:
+            file_ref2.write(gpx_file.to_xml())
+    except Exception as e:
+        Event().log_event("GPX update", f"Failed to write file '{tmp_filename}', error code was '{e.args}'.")
+        app.logger.debug(f"update_existing_file: Failed to write file '{tmp_filename}', error code was '{e.args}'.")
+        return False
 
     # ----------------------------------------------------------- #
     # Step 3: Delete the existing (unshortened) GPX file
     # ----------------------------------------------------------- #
     try:
-        print(f"update_existing_file: Deleting original file '{old_filename}'")
         os.remove(old_filename)
         # We need this as remove seems to keep the file locked for a short period
         sleep(0.5)
     except Exception as e:
-        Event().log_event("GPX update", f"Failed to delete existing file '{old_filename}', error code was {e.args}")
-        print(f"update_existing_file: Failed to delete existing file '{old_filename}', error code was {e.args}")
+        Event().log_event("GPX update", f"Failed to delete existing file '{old_filename}', error code was '{e.args}'.")
+        app.logger.debug(f"update_existing_file: Failed to delete existing file '{old_filename}', "
+                         f"error code was '{e.args}'.")
         return False
 
     # ----------------------------------------------------------- #
     # Step 4: Rename our temp (shortened) file
     # ----------------------------------------------------------- #
-    print(f"update_existing_file: Moving new file '{tmp_filename}' to replace original '{old_filename}'")
     try:
         os.rename(tmp_filename, old_filename)
     except Exception as e:
-        Event().log_event("GPX update", f"Failed to rename existing file '{tmp_filename}', error code was {e.args}")
-        print(f"update_existing_file: Failed to rename existing file '{tmp_filename}', error code was {e.args}")
+        Event().log_event("GPX update", f"Failed to rename existing file '{tmp_filename}', error code was '{e.args}'.")
+        app.logger.debug(f"update_existing_file: Failed to rename existing file '{tmp_filename}', "
+                         f"error code was '{e.args}'.")
         return False
+
+    # All worked if we get here!
+    return True
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -267,8 +270,8 @@ def update_existing_gpx(gpx_file, gpx_filename):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def cut_start_gpx(gpx_filename, start_count):
-    Event().log_event("GPX cut Start", f"Called with gpx_filename='{gpx_filename}', start_count='{start_count}'")
-    print(f"cut_start_gpx: Called with gpx_filename='{gpx_filename}', start_count='{start_count}'")
+    Event().log_event("GPX cut Start", f"Called with gpx_filename='{gpx_filename}', start_count='{start_count}'.")
+    app.logger.debug(f"cut_start_gpx: Called with gpx_filename='{gpx_filename}', start_count='{start_count}'.")
 
     # ----------------------------------------------------------- #
     # Open the file and trim it
@@ -299,14 +302,15 @@ def cut_start_gpx(gpx_filename, start_count):
     # ----------------------------------------------------------- #
     update_existing_gpx(gpx_file, gpx_filename)
     Event().log_event("GPX cut Start", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
+    app.logger.debug(f"cut_start_gpx: Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Crop the end of the GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 def cut_end_gpx(gpx_filename, end_count):
-    Event().log_event("GPX cut End", f"Called with gpx_filename='{gpx_filename}', end_count='{end_count}'")
-    print(f"cut_end_gpx: Called with gpx_filename='{gpx_filename}', end_count='{end_count}'")
+    Event().log_event("GPX cut End", f"Called with gpx_filename='{gpx_filename}', end_count='{end_count}'.")
+    app.logger.debug(f"cut_end_gpx: Called with gpx_filename='{gpx_filename}', end_count='{end_count}'.")
 
     # ----------------------------------------------------------- #
     # Open the file and trim it
@@ -339,7 +343,8 @@ def cut_end_gpx(gpx_filename, end_count):
     # Overwrite the existing file with the new file in 4 steps
     # ----------------------------------------------------------- #
     update_existing_gpx(gpx_file, gpx_filename)
-    Event().log_event("GPX cut End", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
+    Event().log_event("GPX cut End", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'.")
+    app.logger.debug(f"cut_end_gpx: Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -371,6 +376,7 @@ def check_route_name(gpx):
     # Use absolute path
     # ----------------------------------------------------------- #
     filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    # This is the name which will appear in the Garmin etc
     route_name = f"ELSR: {gpx.name}"
 
     # ----------------------------------------------------------- #
@@ -378,7 +384,6 @@ def check_route_name(gpx):
     # ----------------------------------------------------------- #
     with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
-
         gpx_track = gpx_file.tracks[0]
         current_name = gpx_track.name
         gpx_track.name = route_name
@@ -389,10 +394,8 @@ def check_route_name(gpx):
     if current_name != route_name:
         update_existing_gpx(gpx_file, filename)
         app.logger.debug(f"check_route_name(): Updated name for GPX '{filename}' to '{route_name}'.")
-        print(f"Updated name for GPX '{filename}' to '{route_name}'.")
     else:
         app.logger.debug(f"check_route_name(): No need to update name for GPX '{filename}' to '{route_name}'.")
-        print(f"No need to update name for GPX '{filename}' to '{route_name}'.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -403,8 +406,7 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
     # ----------------------------------------------------------- #
     # Header
     # ----------------------------------------------------------- #
-    Event().log_event("Clean GPX", f"Called with gpx_filename='{gpx_filename}', gpx_id='{gpx_id}'.")
-    print(f"strip_excess_info_from_gpx: called with gpx_filename='{gpx_filename}'.")
+    app.logger.debug(f"strip_excess_info_from_gpx(): Called with gpx_filename='{gpx_filename}', gpx_id='{gpx_id}'.")
 
     # ----------------------------------------------------------- #
     # Use absolute path
@@ -494,12 +496,12 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
     # Overwrite the existing file
     # ----------------------------------------------------------- #
     update_existing_gpx(new_gpx_file, gpx_filename)
-    Event().log_event("Clean GPX", f"Cleaned GPX from {num_points_before} to {num_points_after} points.")
-    print(f"Cleaned GPX from {num_points_before} to {num_points_after} points.")
+    Event().log_event("Clean GPX", f"Culled from {num_points_before} to {num_points_after} points.")
+    app.logger.debug(f"strip_excess_info_from_gpx(): Culled from {num_points_before} to {num_points_after} points.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Markers for the complete GPX file
+# Markers for the complete GPX file (we subsample the file for Google Maps)
 # -------------------------------------------------------------------------------------------------------------- #
 
 def markers_for_gpx(filename):
@@ -560,7 +562,7 @@ def markers_for_cafes(cafes):
 
 
 def start_and_end_maps(filename, gpx_id):
-    # Creating two seperate maps:
+    # Creating two separate maps:
     start_markers = []
     end_markers = []
 
@@ -694,8 +696,9 @@ def gpx_details(gpx_id):
     gpx = Gpx().one_gpx(gpx_id)
 
     if not gpx:
+        app.logger.debug(f"gpx_details(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
         Event().log_event("One GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        print(f"gpx_details(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        print(f"gpx_details(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -704,20 +707,24 @@ def gpx_details(gpx_id):
     # Rules:
     # 1. Must be admin or the current author
     # 2. Route must be public
-    # Tortuous logic as a non logged in user doesn't have any of our custom attributes eg email etc
+    # Tortuous logic as a non logged-in user doesn't have any of our custom attributes eg email etc
     if not gpx.public() and \
        not current_user.is_authenticated:
+        app.logger.debug(
+            f"gpx_details(): Refusing permission for non logged in user to see hidden GPX route '{gpx.id}'.")
         Event().log_event("One GPX Fail", f"Refusing permission for non logged in user to see "
                                           f"hidden GPX route, gpx_id = '{gpx_id}'.")
-        print(f"gpx_details(): Refusing permission for non logged in user to see hidden GPX route {gpx.id}!")
+        print(f"gpx_details(): Refusing permission for non logged in user to see hidden GPX route '{gpx.id}'!")
         return abort(403)
 
     elif not gpx.public() and \
          current_user.email != gpx.email and \
          not current_user.admin():
+        app.logger.debug(
+            f"gpx_details(): Refusing permission for user '{current_user.email}' to see hidden GPX route '{gpx.id}'!")
         Event().log_event("One GPX Fail", f"Refusing permission for user {current_user.email} to see "
                                           f"hidden GPX route, gpx_id = '{gpx_id}'.")
-        print(f"gpx_details(): Refusing permission for user {current_user.email} to see hidden GPX route {gpx.id}!")
+        print(f"gpx_details(): Refusing permission for user '{current_user.email}' to see hidden GPX route '{gpx.id}'!")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -730,10 +737,10 @@ def gpx_details(gpx_id):
     # Double check GPX file actually exists
     # ----------------------------------------------------------- #
 
-    # This is  the absolute path to the file
+    # This is the absolute path to the file
     filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
 
-    # Check it exists before we try and parse it etc
+    # Check the file is actually there, before we try and parse it etc
     if not os.path.exists(filename):
         # Should never happen, but may as well handle it cleanly
         flash("Sorry, we seem to have lost that GPX file!")
@@ -786,6 +793,7 @@ def publish_route():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not gpx_id:
+        app.logger.debug(f"publish_route(): Missing gpx_id!")
         Event().log_event("Publish GPX Fail", f"Missing gpx_id!")
         print(f"publish_route(): Missing gpx_id!")
         return abort(400)
@@ -796,8 +804,9 @@ def publish_route():
     gpx = Gpx().one_gpx(gpx_id)
 
     if not gpx:
-        Event().log_event("Publish GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        print(f"publish_route(): Failed to locate GPX with gpx_id = '{gpx_id}'")
+        app.logger.debug(f"publish_route(): Failed to locate GPX with gpx_id = '{gpx_id}'!")
+        Event().log_event("Publish GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'!")
+        print(f"publish_route(): Failed to locate GPX with gpx_id = '{gpx_id}'!")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -810,18 +819,21 @@ def publish_route():
         and not current_user.admin()) \
             or not current_user.can_post_gpx():
         # Failed authentication
-        Event().log_event("Publish GPX Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
-        print(f"publish_route(): Refusing permission for {current_user.email} to and route {gpx.id}!")
+        app.logger.debug(f"publish_route(): Refusing permission for '{current_user.email}' to and route '{gpx.id}'!")
+        Event().log_event("Publish GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
+        print(f"publish_route(): Refusing permission for '{current_user.email}' to and route '{gpx.id}'!")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Publish route
     # ----------------------------------------------------------- #
     if Gpx().publish(gpx_id):
+        app.logger.debug(f"publish_route(): Route published gpx.id = '{gpx.id}'.")
         Event().log_event("Publish GPX Success", f"Route published with gpx_id = '{gpx_id}'.")
         flash("Route has been published!")
         print(f"publish_route(): Route published gpx.id = '{gpx.id}'")
     else:
+        app.logger.debug(f"publish_route(): Failed to publish route gpx.id = '{gpx.id}'.")
         Event().log_event("Publish GPX Fail", f"Failed to publish, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
         print(f"publish_route(): Failed to publish route gpx.id = '{gpx.id}'")
@@ -830,6 +842,7 @@ def publish_route():
     # Clear existing nearby cafe list
     # ----------------------------------------------------------- #
     if not Gpx().clear_cafe_list(gpx_id):
+        app.logger.debug(f"publish_route(): Failed clear cafe list gpx.id = '{gpx.id}'.")
         Event().log_event("Publish GPX Fail", f"Failed clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
         print(f"publish_route(): Failed clear cafe list gpx.id = '{gpx.id}'")
@@ -838,8 +851,8 @@ def publish_route():
     # ----------------------------------------------------------- #
     # Add new existing nearby cafe list
     # ----------------------------------------------------------- #
-    check_new_gpx_with_all_cafes(gpx_id)
-    flash("Nearby cafe list has been updated.")
+    flash("Nearby cafe list is being updated.")
+    Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
 
     # Redirect back to the details page as the route is now public, ie any editing is over
     return redirect(url_for('gpx_details', gpx_id=gpx_id))
@@ -922,7 +935,7 @@ def new_route():
     # ----------------------------------------------------------- #
     if not current_user.can_post_gpx():
         Event().log_event("New GPX Fail", f"Refusing permission for user {current_user.email} to upload GPX route!")
-        print(f"new_route(): Refusing permission for user {current_user.email} to upload GPX route!")
+        app.logger.debug(f"new_route(): Refusing permission for user {current_user.email} to upload GPX route!")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -940,25 +953,27 @@ def new_route():
         # Try and get the filename.
         if 'filename' not in request.files:
             # Almost certain the form failed validation
+            app.logger.debug(f"new_route(): Failed to find 'filename' in request.files!")
             Event().log_event(f"New GPX Fail", f"Failed to find 'filename' in request.files!")
-            print(f"new_route(): Failed to find 'filename' in request.files!")
             flash("Couldn't find the file.")
             return render_template("gpx_add.html", year=current_year, form=form)
 
         else:
             # Get the filename
             file = request.files['filename']
-            print(f"new_route(): Uploading '{file}'")
+            app.logger.debug(f"new_route(): About to upload '{file}'.")
 
             # If the user does not select a file, the browser submits an
             # empty file without a filename.
             if file.filename == '':
+                app.logger.debug(f"new_route(): No selected file!")
                 Event().log_event(f"New GPX Fail", f"No selected file!")
                 flash('No selected file')
                 return redirect(request.url)
 
             if not file or \
                not allowed_file(file.filename):
+                app.logger.debug(f"new_route(): Invalid file '{file.filename}'!")
                 Event().log_event(f"New GPX Fail", f"Invalid file '{file.filename}'!")
                 flash("That's not a GPX file!")
                 return redirect(request.url)
@@ -975,20 +990,23 @@ def new_route():
             gpx.filename = "tmp"
 
             # Add to the dB
-            gpx = gpx.add_gpx(gpx)
-            if gpx:
+            new_id = gpx.add_gpx(gpx)
+            if new_id:
                 # Success, added GPX to dB
-                Event().log_event(f"New GPX Success", f" GPX added to dB, gpx.id = '{gpx.id}'")
-                print(f"new_route(): GPX added to dB, id = '{gpx.id}'")
+                # Have to re-get the GPX as it's changed since we created it
+                gpx = Gpx().one_gpx(new_id)
+                app.logger.debug(f"new_route(): GPX added to dB, id = '{gpx.id}'.")
+                Event().log_event(f"New GPX Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
             else:
                 # Failed to create new dB entry
-                Event().log_event(f"New GPX Fail", f"Something went wrong with gpx_id = '{gpx.id}'")
-                print(f"new_route(): Failed to add gpx to the dB!")
+                app.logger.debug(f"new_route(): Failed to add gpx to the dB!")
+                Event().log_event(f"New GPX Fail", f"Failed to add gpx to the dB!")
                 flash("Sorry, something went wrong!")
                 return render_template("gpx_add.html", year=current_year, form=form)
 
             # This is where we will store it
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
+            app.logger.debug(f"new_route(): Filename will be = '{filename}'.")
 
             # Make sure this doesn't already exist
             if not delete_file_if_exists(filename):
@@ -997,26 +1015,28 @@ def new_route():
                 return render_template("gpx_add.html", year=current_year, form=form)
 
             # Upload the GPX file
-            print(f"new_route(): About to try and save to '{filename}'")
-            file.save(filename)
-            print(f"new_route(): File '{filename}' uploaded OK")
-
-            # Update gpx object with filename
-            if not Gpx().update_filename(gpx.id, filename):
-                Event().log_event(f"New GPX Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
-                print(f"new_route(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+            try:
+                file.save(filename)
+            except Exception as e:
+                app.logger.debug(f"new_route(): Failed to upload/save '{filename}', error code was {e.args}.")
+                Event().log_event(f"New GPX Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                 flash("Sorry, something went wrong!")
                 return render_template("gpx_add.html", year=current_year, form=form)
 
-            # Update GPX with nearby cafes
-            check_new_gpx_with_all_cafes(gpx.id)
+            # Update gpx object with filename
+            if not Gpx().update_filename(gpx.id, filename):
+                app.logger.debug(f"new_route(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                Event().log_event(f"New GPX Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                flash("Sorry, something went wrong!")
+                return render_template("gpx_add.html", year=current_year, form=form)
 
-            # Strip off any extra info eg HR data etc
+            # Strip all excess data from the file
             flash("Any HR or Power data has been removed.")
             strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
 
             # Forward to edit route as that's the next step
-            Event().log_event(f"New GPX Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name})")
+            app.logger.debug(f"new_route(): New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
+            Event().log_event(f"New GPX Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
             return redirect(url_for('edit_route', gpx_id=gpx.id))
 
     elif request.method == 'POST':
@@ -1156,8 +1176,9 @@ def gpx_cut_start():
     if Gpx().clear_cafe_list(gpx_id):
         # Go ahead and update the list
         print(f"gpx_cut_start(): Updating cafe list for gpx_id = '{gpx_id}'.")
-        check_new_gpx_with_all_cafes(gpx_id)
-        flash("Nearby cafe list has been updated.")
+        flash("Nearby cafe list is being been updated.")
+        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
+
     else:
         Event().log_event("GPX Cut Start Fail", f"Failed to clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
@@ -1234,8 +1255,8 @@ def gpx_cut_end():
     if Gpx().clear_cafe_list(gpx_id):
         # Go ahead and update the list
         print(f"gpx_cut_end(): Updating cafe list for gpx_id = '{gpx_id}'.")
-        check_new_gpx_with_all_cafes(gpx_id)
-        flash("Nearby cafe list has been updated.")
+        flash("Nearby cafe list is being updated...")
+        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
     else:
         Event().log_event("GPX Cut End Fail", f"Failed to clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")

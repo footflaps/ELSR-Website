@@ -87,11 +87,11 @@ class Gpx(db.Model):
             try:
                 db.session.add(new_gpx)
                 db.session.commit()
-                # Return new GPX object, so the caller can get the ID
-                print(f"db_gpx: Successfully added GPX route '{new_gpx.name}'.")
-                return new_gpx
+                # Return new GPX id
+                return new_gpx.id
             except Exception as e:
-                print(f"db_gpx: Failed to add GPX '{new_gpx.name}', error code was '{e.args}'.")
+                app.logger.debug(f"db_gpx: Failed to add GPX '{new_gpx.name}', "
+                                 f"error code '{e.args}'.")
                 return False
 
     def delete_gpx(self, gpx_id):
@@ -105,10 +105,10 @@ class Gpx(db.Model):
                 try:
                     db.session.delete(gpx)
                     db.session.commit()
-                    print(f"db_gpx: Deleting GPX route for gpx_id = '{gpx.id}'.")
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to delete GPX for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to delete GPX for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
         return False
 
@@ -124,10 +124,10 @@ class Gpx(db.Model):
                     gpx.filename = filename
                     # Write to dB
                     db.session.commit()
-                    print(f"db_gpx: Filename for {gpx.id} updated to {filename}")
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to update filename for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to update filename for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
         return False
 
@@ -141,12 +141,12 @@ class Gpx(db.Model):
             if gpx:
                 try:
                     # Note, the cafes_passed is a JSON string, not a list!
-                    print(f"dB_gpx: Cleared cafe list for GPX route '{gpx.name}'")
                     gpx.cafes_passed = "[]"
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to clear cafe list for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to clear cafe list for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
         return False
 
@@ -168,14 +168,12 @@ class Gpx(db.Model):
 
                     for cafe in cafes_json:
                         if cafe['cafe_id'] == cafe_id:
-                            print(f"dB_gpx: Updating cafe {cafe_id} for GPX route '{gpx.name}'")
                             cafe['dist_km'] = round(dist_km,1)
                             cafe['range_km'] = round(range_km,1)
                             updated = True
 
                     if not updated:
                         # Tag on the end
-                        print(f"dB_gpx: Adding cafe {cafe_id} to GPX route '{gpx.name}'")
                         cafes_json.append({
                             "cafe_id": cafe_id,
                             "dist_km": round(dist_km,1),
@@ -189,7 +187,8 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
 
         return False
@@ -211,7 +210,6 @@ class Gpx(db.Model):
 
                     for cafe in cafes_json:
                         if cafe['cafe_id'] == cafe_id:
-                            print(f"dB_gpx: Removing cafe {cafe_id} from GPX route '{gpx.name}'")
                             # Need to remove this entry
                             cafes_json.remove(cafe)
 
@@ -222,11 +220,11 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
 
         return False
-
 
 
     # Add length and ascent to the database
@@ -244,7 +242,8 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
             return False
 
@@ -283,7 +282,8 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to publish gpx for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to publish gpx for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
         return False
 
@@ -297,7 +297,8 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_gpx: Failed to hide gpx for gpx_id = '{gpx.id}', error code was {e.args}.")
+                    app.logger.debug(f"db_gpx: Failed to hide gpx for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
                     return False
         return False
 

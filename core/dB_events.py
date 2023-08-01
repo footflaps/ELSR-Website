@@ -124,14 +124,18 @@ class Event(db.Model):
         print(f"db_events: Failed to delete event.id = {event_id}, event not found.")
         return False
 
-
     def log_event(self, event_type, event_details):
         with app.app_context():
             # Can we get a user email address
-            if current_user.is_authenticated:
-                user_email = current_user.email
-            else:
-                user_email = "not logged in"
+            # If this is called from a Threaded task it won't necessarily have a valid
+            # current_user and .is_authenticated won't exist
+            try:
+                if current_user.is_authenticated:
+                    user_email = current_user.email
+                else:
+                    user_email = "not logged in"
+            except AttributeError:
+                user_email = "background"
 
             # Create a new event
             event = Event(
