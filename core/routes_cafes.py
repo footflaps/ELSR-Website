@@ -74,13 +74,31 @@ def map_icon(route_num):
         return f"https://maps.google.com/mapfiles/kml/paddle{letter}-lv.png"
 
 
+def new_cafe_photo_filename(cafe):
+    if not cafe.image_name:
+        return f"cafe_{cafe.id}.jpg"
+    else:
+        # If we use the same filename the browser won't realise it's changed and just uses the cached one, so we
+        # have to create a new filename.
+        if cafe.image_name == f"cafe_{cafe.id}.jpg":
+            return f"cafe_{cafe.id}_1.jpg"
+        else:
+            try:
+                index = cafe.image_name.split('_')[2]
+                index = int(index) + 1
+                return f"cafe_{cafe.id}_{index}.jpg"
+            except:
+                return f"cafe_{cafe.id}_1.jpg"
+
+
 def update_cafe_photo(form, cafe):
     print(f"Passed photo '{form.cafe_photo.data.filename}'")
     app.logger.debug(f"update_cafe_photo(): Passed photo '{form.cafe_photo.data.filename}'")
 
     if allowed_file(form.cafe_photo.data.filename):
         # Create a new filename for the image
-        filename = f"cafe_{cafe.id}.jpg"
+        filename = new_cafe_photo_filename(cafe)
+        app.logger.debug(f"update_cafe_photo(): New filename for photo = '{filename}'")
 
         # Make sure it's not there already
         if delete_file_if_exists(filename):
