@@ -11,7 +11,6 @@ from threading import Thread
 from PIL import Image
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -56,6 +55,7 @@ ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 
 IMAGE_ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
 CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
+TARGET_PHOTO_SIZE = 150000
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -100,12 +100,34 @@ def new_cafe_photo_filename(cafe):
             # Already using indices, so need to increment by one
             try:
                 # Split[2] might fail if there aren't enough '_' in the filename
-                index = current_name.split('_')[2]
+                index = current_name.split('_')[2].split('.')[0]
                 index = int(index) + 1
                 return f"cafe_{cafe.id}_{index}.jpg"
             except IndexError:
                 # Just reset to 1
                 return f"cafe_{cafe.id}_1.jpg"
+
+
+def shrink_image(filename):
+    # Get the image size for the os
+    image_size = os.path.getsize(filename)
+
+    # Quit now if the file is already a sensible size
+    if image_size <= TARGET_PHOTO_SIZE:
+        app.logger.debug(f"shrink_image(): Photo '{os.path.basename(filename)}' is small enough already.")
+
+    else:
+        app.logger.debug(f"shrink_image(): Photo '{os.path.basename(filename)}' will be shrunk!")
+
+        # Shrinkage factor (trial and error led to the method)
+        scaler = (TARGET_PHOTO_SIZE / image_size)**0.45
+
+        # Open and shrink teh image
+        img = Image.open(filename)
+        img = img.resize((int(img.size[0] * scaler), int(img.size[1] * scaler)))
+
+        # Save as same file
+        img.save(filename, optimize=True)
 
 
 def update_cafe_photo(form, cafe):
@@ -135,6 +157,10 @@ def update_cafe_photo(form, cafe):
                 Event().log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
                 flash(f"Sorry, failed to upload the file '{filename}!")
                 print(f"update_cafe_photo(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
+
+            # Shrink image if too large
+            shrink_image(os.path.join(CAFE_FOLDER, filename))
+
         else:
             # Failed to delete existing file
             # NB delete_file_if_exists() will generate an error with details etc, so just flash here
