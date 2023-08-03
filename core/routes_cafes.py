@@ -140,7 +140,8 @@ def update_cafe_photo(form, cafe):
 
     else:
         # allowed_file() failed.
-        Event().log_event("Cafe Fail", f"Invalid image filename '{form.cafe_photo.data.filename}'.")
+        Event().log_event("Cafe Fail", f"Invalid image filename '{os.path.basename(form.cafe_photo.data.filename)}',"
+                                       f"permitted file types are '{IMAGE_ALLOWED_EXTENSIONS}'.")
         flash("Invalid file type for image!")
         print(f"update_cafe_photo(): Invalid file type for image.")
 
