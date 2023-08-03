@@ -24,15 +24,17 @@
 
 {% if cafe.image_name: %}
 
-	<!-- Generic cafe photo -->
+	<!-- Specific cafe photo -->
 	<header class="masthead"
-	        style="background-image: url( {{cafe.image_name}} )">
+	        style="background-image: url( {{cafe.image_name}} )"
+			aria-label="Image of cafe {{ cafe.name }}">
 
 {% else %}
 	
-	<!-- Specific cafe photo -->
-	<header  class="masthead"
-	         style="background-image: url({{ url_for('static', filename='img/cafe-bg.jpg')}})">
+	<!-- Generic cafe photo -->
+	<header class="masthead"
+	        style="background-image: url({{ url_for('static', filename='img/cafe-bg.jpg')}})"
+			aria-label="Generic cafe image">
 
 {% endif %}
 	
