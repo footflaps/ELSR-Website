@@ -62,12 +62,10 @@ def send_verfication_email(target_email, user_name, code):
                 to_addrs=target_email,
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
-            app.logger.debug("Email(): sent verification email to '{target_email}'")
-            print(f"Email(): sent verification email to '{target_email}'")
+            app.logger.debug(f"Email(): sent verification email to '{target_email}'")
             return True
         except Exception as e:
             app.logger.debug(f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
-            print(f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
             return False
 
 def send_reset_email(target_email, user_name, code):
@@ -84,12 +82,10 @@ def send_reset_email(target_email, user_name, code):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug("Email(): sent reset email to '{target_email}'")
-            print(f"Email(): sent reset email to {target_email}")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
-            print(f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
             return False
 
 def contact_form_email(from_name, from_email, body):
@@ -102,11 +98,9 @@ def contact_form_email(from_name, from_email, body):
                 to_addrs=my_email,
                 msg=f"To:{my_email}\nSubject:{subject}\n\n{body}"
             )
-            app.logger.debug("Email(): sent message to '{my_email}'")
-            print(f"Email(): sent message to me")
+            app.logger.debug(f"Email(): sent message to '{my_email}'")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message to '{my_email}', error code was '{e.args}'.")
-            print(f"Email(): Failed to send message to myself, error code was '{e.args}'.")
             return False
