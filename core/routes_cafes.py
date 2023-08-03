@@ -52,7 +52,7 @@ ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 # Constants used for uploading pictures of the cafes
 # -------------------------------------------------------------------------------------------------------------- #
 
-IMAGE_ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+IMAGE_ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
 CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
 
 
