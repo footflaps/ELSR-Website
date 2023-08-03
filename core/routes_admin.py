@@ -95,8 +95,6 @@ def admin_page():
         else:
             flash(f"Admin has {count} unread messages")
 
-        print(f"Admin has {count} unread messages")
-
     # ----------------------------------------------------------- #
     # Serve admin page
     # ----------------------------------------------------------- #
@@ -123,32 +121,26 @@ def admin_page():
 # Make a user admin
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/make_admin', methods=['GET', 'POST'])
+@app.route('/make_admin/<int:user_id>', methods=['GET'])
 @login_required
-@fresh_login_required
 @admin_only
 @update_last_seen
-def make_admin():
+def make_admin(user_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-
-    try:
-        confirmation = request.form['admin_confirm']
-    except exceptions.BadRequestKeyError:
-        confirmation = None
+    confirmation = request.args.get('admin_confirm', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"make_admin(): Missing user_id!.")
         Event().log_event("Make Admin Fail", f"Missing user_id")
-        print(f"make_admin(): Missing user_id!")
         return abort(400)
     elif not confirmation:
+        app.logger.debug(f"make_admin(): Missing confirmation!.")
         Event().log_event("Make Admin Fail", f"Missing confirmation")
-        print(f"make_admin(): Missing confirmation!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -158,15 +150,16 @@ def make_admin():
 
     # Check id is valid
     if not user:
-        Event().log_event("Make Admin Fail", f"FAILED to locate user user_id = '{user_id}'")
-        print(f"make_admin(): FAILED to locate user user_id = '{user_id}'")
+        # Can't find that user
+        app.logger.debug(f"make_admin(): FAILED to locate user user_id = '{user_id}'.")
+        Event().log_event("Make Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
     if confirmation != "ADMIN":
         # Failed authentication
-        Event().log_event("Make Admin Fail", f"Rejected request to make admin as no confirmation. user_id = '{user_id}'")
+        app.logger.debug(f"make_admin(): Rejected request as no confirmation, user_id = '{user_id}'.")
+        Event().log_event("Make Admin Fail", f"Rejected request as no confirmation, user_id = '{user_id}'")
         flash("Admin was not confirmed!")
-        print(f"make_admin(): Rejected request to make admin as no confirmation!")
         return redirect(request.referrer)
 
     # ----------------------------------------------------------- #
@@ -174,21 +167,23 @@ def make_admin():
     # ----------------------------------------------------------- #
     if current_user.id != SUPER_ADMIN_USER_ID:
         # Failed authentication
-        Event().log_event(f"Make Admin Fail", "Rejected request as no permissions. user_id = '{user_id}'")
-        print(f"make_admin(): Rejected request for '{current_user.email}' as no permissions!")
+        app.logger.debug(f"make_admin(): Rejected request from '{current_user.email}' as no permissions!")
+        Event().log_event(f"Make Admin Fail", f"Rejected request as no permissions. user_id = '{user_id}'")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Make admin
     # ----------------------------------------------------------- #
     if User().make_admin(user_id):
-        Event().log_event(f"Make Admin Success", "User is now Admin! user_id = '{user_id}'")
+        # Success
+        app.logger.debug(f"make_admin(): Success, user_id = '{user_id}'.")
+        Event().log_event(f"Make Admin Success", f"User is now Admin! user_id = '{user_id}'.")
         flash(f"{user.name} is now an Admin.")
-        print(f"make_admin(): Successfully made user admin.")
     else:
-        Event().log_event(f"Make Admin Fail", "Something went wrong. user_id = '{user_id}'")
+        # Should never get here!
+        app.logger.debug(f"make_admin(): User().make_admin() failed, user_id = '{user_id}.")
+        Event().log_event(f"Make Admin Fail", f"User().make_admin() failed, user_id = '{user_id}'.")
         flash("Sorry, something went wrong!")
-        print(f"make_admin(): Failed to make user Admin.")
 
     # Back to calling page
     return redirect(request.referrer)
@@ -198,32 +193,26 @@ def make_admin():
 # Remove admin privileges
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/unmake_admin', methods=['GET', 'POST'])
+@app.route('/unmake_admin/<int:user_id>', methods=['GET'])
 @login_required
-@fresh_login_required
 @admin_only
 @update_last_seen
-def unmake_admin():
+def unmake_admin(user_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-
-    try:
-        confirmation = request.form['unadmin_confirm']
-    except exceptions.BadRequestKeyError:
-        confirmation = None
+    confirmation = request.args.get('unadmin_confirm', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"unmake_admin(): Missing user_id!.")
         Event().log_event("unMake Admin Fail", f"Missing user_id")
-        print(f"unmake_admin(): Missing user_id!")
         return abort(400)
     elif not confirmation:
+        app.logger.debug(f"unmake_admin(): Missing confirmation")
         Event().log_event("unMake Admin Fail", f"Missing confirmation")
-        print(f"unmake_admin(): Missing confirmation!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -233,15 +222,15 @@ def unmake_admin():
 
     # Check id is valid
     if not user:
-        Event().log_event("unMake Admin Fail", f"FAILED to locate user user_id = '{user_id}'")
-        print(f"unmake_admin(): FAILED to locate user user_id = '{user_id}'")
+        app.logger.debug(f"unmake_admin(): FAILED to locate user user_id = '{user_id}'.")
+        Event().log_event("unMake Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
     if confirmation != "REMOVE":
         # Failed authentication
-        Event().log_event("unMake Admin Fail", f"Rejected request to remove admin as no confirmation")
-        flash("Admin was not confirmed!")
-        print(f"unmake_admin(): Rejected request to remove admin as no confirmation!")
+        app.logger.debug(f"unmake_admin(): Invalid confirmation for user_id = '{user_id}'.")
+        Event().log_event("unMake Admin Fail", f"Invalid confirmation for user_id = '{user_id}'.")
+        flash("Admin was not confirmed properly!")
         return redirect(request.referrer)
 
     # ----------------------------------------------------------- #
@@ -249,21 +238,23 @@ def unmake_admin():
     # ----------------------------------------------------------- #
     if current_user.id != SUPER_ADMIN_USER_ID:
         # Failed authentication
+        app.logger.debug(f"unmake_admin(): Rejected request from '{current_user.email}' as no permissions!")
         Event().log_event("unMake Admin Fail", f"Rejected request as no permissions!")
-        print(f"unmake_admin(): Rejected request for {current_user.email} as no permissions!")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Make admin
     # ----------------------------------------------------------- #
     if User().unmake_admin(user_id):
-        Event().log_event("unMake Admin Success", f"User '{user.email}' is no longer an Admin!, user_id = '{user_id}'")
+        # Success
+        app.logger.debug(f"unmake_admin(): Success with user_id = '{user_id}'.")
+        Event().log_event("unMake Admin Success", f"User '{user.email}' is no longer an Admin!, user_id = '{user_id}'.")
         flash(f"{user.name} is no longer an Admin.")
-        print(f"unmake_admin(): Successfully removed user as admin.")
     else:
-        Event().log_event("unMake Admin Fail", f"Something went wrong. user_id = '{user_id}'")
+        # Should never get here!
+        app.logger.debug(f"unmake_admin(): User().unmake_admin() failed with user_id = '{user_id}'.")
+        Event().log_event("unMake Admin Fail", f"User().unmake_admin() failed with user_id = '{user_id}'")
         flash("Sorry, something went wrong!")
-        print(f"unmake_admin(): Failed to remove user as Admin.")
 
     # Back to calling page
     return redirect(request.referrer)

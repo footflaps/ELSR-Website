@@ -165,8 +165,7 @@ def chaingang():
         flash("Sorry, we seem to have lost that GPX file!")
         flash("Somebody should probably fire the web developer...")
         Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
-        app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
-        print(f"gpx_details(): Can't find '{filename}'!")
+        app.logger.error(f"gpx_details(): Can't find '{filename}'!")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -219,7 +218,6 @@ def contact():
         # ----------------------------------------------------------- #
         #   POST - form validated & submitted
         # ----------------------------------------------------------- #
-        print("Sending email in a thread....")
         Thread(target=contact_form_email, args=(form.name.data, form.email.data, form.message.data,)).start()
         flash("Thankyou, your message has been sent!")
 

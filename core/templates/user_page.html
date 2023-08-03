@@ -923,7 +923,7 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('make_admin', user_id=user.id) }}" method="post">
+				<form action="{{ url_for('make_admin', user_id=user.id) }}" method="get">
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">Please enter "ADMIN" in the box below:</label>
@@ -962,7 +962,7 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('unmake_admin', user_id=user.id) }}" method="post">
+				<form action="{{ url_for('unmake_admin', user_id=user.id) }}" method="get">
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">Please enter "REMOVE" in the box below:</label>
