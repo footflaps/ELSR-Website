@@ -106,7 +106,7 @@ class Message(db.Model):
                 # Return success
                 return True
             except Exception as e:
-                print(f"dB_messages: Failed to create new message from {message}, error code was {e.args}.")
+                app.logger.error(f"dB.add_message(): Failed with error code '{e.args}'.")
                 return False
 
     def send_welcome_message(self, target_email):
@@ -128,8 +128,7 @@ class Message(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(
-                        f"dB_messages: Failed to mark read message from {message}, error code was {e.args}.")
+                    app.logger.error(f"dB.mark_as_read(): Failed with error code '{e.args}'.")
                     return False
         return False
 
@@ -144,8 +143,7 @@ class Message(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(
-                        f"dB_messages: Failed to mark unread message from {message}, error code was {e.args}.")
+                    app.logger.error(f"dB.mark_as_unread(): Failed with error code '{e.args}'.")
                     return False
         return False
 
@@ -158,8 +156,7 @@ class Message(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(
-                        f"dB_messages: Failed to delete message from {message}, error code was {e.args}.")
+                    app.logger.error(f"dB.delete(): Failed with error code '{e.args}'.")
                     return False
         return False
 

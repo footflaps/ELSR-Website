@@ -80,7 +80,7 @@ class Event(db.Model):
                 # Return success
                 return True
             except Exception as e:
-                app.logger.debug(f"dB.add_event(): Failed with error code '{e.args}'.")
+                app.logger.error(f"dB.add_event(): Failed with error code '{e.args}'.")
                 return False
 
     def delete_events_email_days(self, email, days):
@@ -93,7 +93,7 @@ class Event(db.Model):
                 db.session.commit()
                 return True
         except Exception as e:
-            app.logger.debug(f"dB.delete_events_email_days(): Failed with error code '{e.args}'.")
+            app.logger.error(f"dB.delete_events_email_days(): Failed with error code '{e.args}'.")
             return False
 
     def delete_events_all_days(self, days):
@@ -106,7 +106,7 @@ class Event(db.Model):
                 db.session.commit()
                 return True
         except Exception as e:
-            app.logger.debug(f"dB.delete_events_all_days(): Failed with error code '{e.args}'.")
+            app.logger.error(f"dB.delete_events_all_days(): Failed with error code '{e.args}'.")
             return False
 
     def delete_event(self, event_id):
@@ -119,9 +119,9 @@ class Event(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"dB.delete_event(): Failed with error code '{e.args}'.")
+                    app.logger.error(f"dB.delete_event(): Failed with error code '{e.args}'.")
                     return False
-        app.logger.debug(f"dB.delete_event(): Failed to delete event.id = {event_id}, event not found.")
+        app.logger.error(f"dB.delete_event(): Failed to delete event.id = {event_id}, event not found.")
         return False
 
     def log_event(self, event_type, event_details):
@@ -152,7 +152,7 @@ class Event(db.Model):
                 # Return success
                 return True
             except Exception as e:
-                app.logger.debug(f"dB.log_event(): Failed with error code '{e.args}'.")
+                app.logger.error(f"dB.log_event(): Failed with error code '{e.args}'.")
                 return False
 
     # Optional: this will allow each event object to be identified by its details when printed.

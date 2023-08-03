@@ -90,7 +90,7 @@ class Gpx(db.Model):
                 # Return new GPX id
                 return new_gpx.id
             except Exception as e:
-                app.logger.debug(f"db_gpx: Failed to add GPX '{new_gpx.name}', "
+                app.logger.error(f"db_gpx: Failed to add GPX '{new_gpx.name}', "
                                  f"error code '{e.args}'.")
                 return False
 
@@ -107,7 +107,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to delete GPX for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to delete GPX for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False
@@ -126,7 +126,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to update filename for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to update filename for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False
@@ -145,7 +145,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to clear cafe list for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to clear cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False
@@ -187,7 +187,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
 
@@ -220,7 +220,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
 
@@ -242,7 +242,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
             return False
@@ -282,7 +282,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to publish gpx for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to publish gpx for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False
@@ -297,7 +297,7 @@ class Gpx(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"db_gpx: Failed to hide gpx for gpx_id = '{gpx.id}', "
+                    app.logger.error(f"db_gpx: Failed to hide gpx for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False

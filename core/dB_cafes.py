@@ -82,7 +82,7 @@ class Cafe(db.Model):
                 # Return success
                 return True
             except Exception as e:
-                app.logger.debug(f"dB.add_cafe(): Failed to add cafe '{new_cafe.name}', error code was '{e.args}'.")
+                app.logger.error(f"dB.add_cafe(): Failed to add cafe '{new_cafe.name}', error code was '{e.args}'.")
                 return False
 
     # Update an existing cafe
@@ -101,9 +101,9 @@ class Cafe(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"dB.update_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
+                    app.logger.error(f"dB.update_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
-        app.logger.debug(f"dB.update_cafe(): Failed to with cafe '{cafe.name}', invalid cafe_id='{cafe_id}'.")
+        app.logger.error(f"dB.update_cafe(): Failed to with cafe '{cafe.name}', invalid cafe_id='{cafe_id}'.")
         return False
 
     def update_photo(self, cafe_id, filename):
@@ -115,7 +115,7 @@ class Cafe(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"dB.update_photo(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
+                    app.logger.error(f"dB.update_photo(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
         return False
 
@@ -133,7 +133,7 @@ class Cafe(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"dB.close_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
+                    app.logger.error(f"dB.close_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
         return False
 
@@ -151,7 +151,7 @@ class Cafe(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    app.logger.debug(f"dB.unclose_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
+                    app.logger.error(f"dB.unclose_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
         return False
 

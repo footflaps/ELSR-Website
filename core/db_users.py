@@ -201,7 +201,7 @@ class User(UserMixin, db.Model):
         new_user.verification_code_timestamp = time.time()
         new_user.start_date = date.today().strftime("%B %d, %Y")
         new_user.permissions = 0
-        print(f"User '{new_user.email}' issued with code '{new_user.verification_code}'")
+        app.logger.debug(f"db.create_user(): User '{new_user.email}' issued with code '{new_user.verification_code}'.")
 
         # Try and add to the dB
         with app.app_context():
@@ -211,7 +211,7 @@ class User(UserMixin, db.Model):
                 # Return success
                 return True
             except Exception as e:
-                print(f"dB_users: Failed to create new user {new_user.email}, error code was {e.args}.")
+                app.logger.error(f"dB.create_user(): Failed with error code '{e.args}'.")
                 return False
 
     def create_new_verification(self, user_id):
@@ -221,12 +221,14 @@ class User(UserMixin, db.Model):
                 try:
                     user.verification_code = random_code(NUM_DIGITS_CODES)
                     user.verification_code_timestamp = time.time()
-                    print(f"User '{user.email}' issued with code '{user.verification_code}'")
+                    app.logger.debug(f"dB.create_new_verification(): User '{user.email}' "
+                                     f"issued with code '{user.verification_code}'")
                     # Write to dB
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to send_new_verification user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.create_new_verification(): Failed with error code '{e.args}' "
+                                     f"for user_id = '{user_id}'.")
                     return False
         return False
 
@@ -267,7 +269,7 @@ class User(UserMixin, db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to validate password user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.validate_password(): Failed with error code '{e.args}'.")
                     return False
 
             else:
@@ -281,7 +283,7 @@ class User(UserMixin, db.Model):
                 db.session.commit()
                 return True
             except Exception as e:
-                print(f"db_users: Failed to update activity user_id = {user_id} error code was {e.args}.")
+                app.logger.error(f"dB.log_activity(): Failed with error code '{e.args}'.")
                 return False
 
     def validate_email(self, user, code):
@@ -292,22 +294,22 @@ class User(UserMixin, db.Model):
             now = time.time()
 
             # Debug
-            print(f"dB_users: Verifying user.id = {user.id}, user.email = {user.email}")
-            print(f"dB_users: Received code = {code}, user.verification_code = {user.verification_code}")
-            print(f"dB_users: user.verification_code_timestamp = {user.verification_code_timestamp}, now = {now}")
+            app.logger.debug(f"dB.validate_email(): Verifying user.id = '{user.id}', user.email = '{user.email}'")
+            app.logger.debug(f"dB.validate_email(): Received code = '{code}', "
+                             f"user.verification_code = '{user.verification_code}'")
+            app.logger.debug(f"dB.validate_email(): user.verification_code_timestamp = "
+                             f"'{user.verification_code_timestamp}', now = '{now}'")
 
             # Has the code timed out
             if now - user.verification_code_timestamp > VERIFICATION_TIMEOUT_SECS:
                 # Code has time out
-                print("dB_users: Verification code has timed out.")
+                app.logger.debug(f"dB.validate_email(): Verification code has timed out, user.email = '{user.email}'.")
                 return False
 
             if int(code) == int(user.verification_code):
-                print(f"dB_users: Verification code matches, before user.permissions = {user.permissions}")
                 user.permissions = user.permissions \
                                    | MASK_VERIFIED \
                                    | DEFAULT_PERMISSIONS
-                print(f"dB_users: Verification code matches, after user.permissions = {user.permissions}")
 
                 # Clear verification data, so it can't be used again
                 user.verification_code = int(0)
@@ -318,11 +320,11 @@ class User(UserMixin, db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to validate email user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.validate_email(): Failed with error code '{e.args}'.")
                     return False
 
             else:
-                print("dB_users: Verification code doesn't match.")
+                app.logger.debug(f"dB.validate_email(): Verification code doesn't match, user.email = '{user.email}'.")
                 return False
 
     def create_new_reset_code(self, email):
@@ -330,14 +332,14 @@ class User(UserMixin, db.Model):
             user = db.session.query(User).filter_by(email=email).first()
             if user:
                 try:
-                    print(user.id, user.email)
                     user.reset_code = random_code(NUM_DIGITS_CODES)
                     user.reset_code_timestamp = time.time()
-                    print(f"User '{email}' issued with reset code '{user.reset_code}'")
+                    app.logger.debug(f"dB.create_new_reset_code(): User '{email}' issued with "
+                                     f"reset code '{user.reset_code}'.")
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to send reset user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.create_new_reset_code(): Failed with error code '{e.args}'.")
                     return False
         return False
 
@@ -346,42 +348,36 @@ class User(UserMixin, db.Model):
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
                 if user.reset_code != code:
-                    print(f"dB_users: Invalid reset code for '{user.email}', code was '{code}', expecting '{user.reset_code}'.")
+                    app.logger.debug(f"dB.validate_reset_code(): Invalid reset code for '{user.email}', "
+                                     f"code was '{code}', expecting '{user.reset_code}'.")
                     return False
                 else:
                     reset_timestamp = user.reset_code_timestamp
                     now = time.time()
                     age_hours = round((now - reset_timestamp) / 60 / 60, 1)
                     if now - reset_timestamp > RESET_TIMEOUT_SECS:
-                        print(f"dB_users: Valid reset code for '{user.email}', but it has timed out ({age_hours} hours old)")
+                        app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}', "
+                                         f"but it has timed out ({age_hours} hours old).")
                         return False
                     else:
-                        print(f"dB_users: Valid reset code for '{user.email}' and in date ({age_hours} hours old).")
+                        app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}' "
+                                         f"and in date ({age_hours} hours old).")
                         return True
 
         return False
-
-    def reset_codes(self):
-        codes = {}
-        with app.app_context():
-            users = db.session.query(User).filter(User.reset_code != "").all()
-            for user in users:
-                print(user.email, user.reset_code)
-                codes[str(user.reset_code)] = user.email
-            return codes
 
     def reset_password(self, email, password):
         with app.app_context():
             user = db.session.query(User).filter_by(email=email).first()
             if user:
                 try:
-                    print(f"dB_users: Resetting password for user '{email}'")
+                    app.logger.debug(f"dB.reset_password(): Resetting password for user '{email}'.")
                     user.reset_code = None
                     user.password = self.hash_password(password)
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to reset password user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.reset_password(): Failed with error code '{e.args}' with email = '{email}'.")
                     return False
         return False
 
@@ -391,23 +387,22 @@ class User(UserMixin, db.Model):
 
             # You can't delete Admins
             if user.admin():
-                print(f"dB_users: Rejected attempt to delete admin '{user.email}'.")
+                app.logger.debug(f"dB.delete_user: Rejected attempt to delete admin '{user.email}'.")
                 return False
 
             # Extra protection in case someone finds a way around route protection
             if user.email in PROTECTED_USERS:
-                print(f"dB_users: Rejected attempt to delete protected user '{user.email}'.")
+                app.logger.debug(f"dB.delete_user: Rejected attempt to delete protected user '{user.email}'.")
                 return False
 
             if user:
                 try:
                     # Delete the user
-                    print(f"dB_users: Deleting user '{user.email}'.")
                     db.session.delete(user)
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to delete user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
         return False
 
@@ -418,12 +413,12 @@ class User(UserMixin, db.Model):
 
             # You can't block Admins
             if user.admin():
-                print(f"dB_users: Rejected attempt to block admin '{user.email}'.")
+                app.logger.debug(f"dB.block_user(): Rejected attempt to block admin '{user.email}'.")
                 return False
 
             # Extra protection in case someone finds a way around route protection
             if user.email in PROTECTED_USERS:
-                print(f"dB_users: Rejected attempt to block protected user '{user.email}'.")
+                app.logger.debug(f"dB.block_user(): Rejected attempt to block protected user '{user.email}'.")
                 return False
 
             if user:
@@ -432,7 +427,7 @@ class User(UserMixin, db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to block user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.block_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
         return False
 
@@ -447,7 +442,7 @@ class User(UserMixin, db.Model):
                         db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to unblock user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.unblock_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
         return False
 
@@ -462,7 +457,7 @@ class User(UserMixin, db.Model):
                         db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to make admin user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.make_admin(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
         return False
 
@@ -472,7 +467,7 @@ class User(UserMixin, db.Model):
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
                 if user.email in PROTECTED_USERS:
-                    print(f"dB_users: Rejected attempt to unadmin protected user")
+                    app.logger.debug(f"dB.unmake_admin(): Rejected attempt to unadmin protected user '{user.email}'.")
                     return False
                 try:
                     if user.permissions & MASK_ADMIN == 1:
@@ -480,7 +475,7 @@ class User(UserMixin, db.Model):
                         db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_users: Failed to unmake admin user.id = {user.id} error code was {e.args}.")
+                    app.logger.error(f"dB.unmake_admin(): Failed with error code '{e.args}' for user '{user.email}'.")
                     return False
         return False
 
@@ -533,12 +528,17 @@ def admin_only(f):
             # Otherwise continue with the route function
             return f(*args, **kwargs)
         else:
+            # Naughty boy!
+
+            # Who do we think they are?
             if current_user.is_authenticated:
                 who = current_user.email
             else:
                 who = "lot logged in"
+
+            # Give them a stern talking to
+            app.logger.debug(f"admin_only(): User '{who}' attempted access to an admin page!")
             Event().log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
-            print(f"User '{who}' attempted access to an admin page!")
             return abort(403)
 
     return decorated_function
@@ -549,13 +549,12 @@ def update_last_seen(f):
     def decorated_function(*args, **kwargs):
         if not current_user.is_authenticated:
             # Not logged in, so no idea who they are
-            app.logger.debug(f"User not logged in.")
+            app.logger.debug(f"update_last_seen(): User not logged in.")
             return f(*args, **kwargs)
         else:
             # They are logged in, so log their activity
-            app.logger.debug(f"User logged in '{current_user.email}'.")
+            app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}'.")
             User().log_activity(current_user.id)
-
             return f(*args, **kwargs)
 
     return decorated_function
@@ -571,9 +570,10 @@ def logout_barred_user(f):
             user = User().find_user_from_id(current_user.id)
             if user:
                 if user.blocked():
-                    flash("You have been logged out.")
-                    print(f"Logged out user '{user.email}' as barred.")
+                    # Log out the user
+                    app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
                     Event().log_event("Blocked User logout", "Logged out user as blocked")
+                    flash("You have been logged out.")
                     logout_user()
             return f(*args, **kwargs)
 
