@@ -47,14 +47,14 @@ def delete_event():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not event_id:
+        app.logger.debug(f"delete_event(): Missing message_id!")
         Event().log_event("Delete Event Fail", f"Missing event_id!")
-        print(f"delete_event(): Missing message_id!")
         return abort(400)
     elif not user_id \
             and "user_page" in request.referrer:
         # NB If we are jumping back to user_page, we must have a valid user_id
+        app.logger.debug(f"delete_event(): Missing user_id!")
         Event().log_event("Delete Event Fail", f"Missing user_id!")
-        print(f"delete_event(): Missing user_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -62,8 +62,8 @@ def delete_event():
     # ----------------------------------------------------------- #
     event = Event().event_id(event_id)
     if not event:
-        Event().log_event("Delete Event Fail", f"Can't locate event id = '{event_id}'")
-        print(f"delete_event(): Can't locate event id = {event_id}")
+        app.logger.debug(f"delete_event(): Can't locate event event_id = '{event_id}'.")
+        Event().log_event("Delete Event Fail", f"Can't locate event id = '{event_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -72,8 +72,9 @@ def delete_event():
     if Event().delete_event(event_id):
         flash("Event has been deleted")
     else:
-        Event().log_event("MDelete Event Fail", f"Failed to delete, id = '{event_id}'")
-        print(f"delete_event(): Failed to delete, id = '{event_id}'")
+        # Should never get here, but...
+        app.logger.debug(f"delete_event(): Event().delete_event() failed, event_id = '{event_id}'")
+        Event().log_event("MDelete Event Fail", f"Failed to delete, event_id = '{event_id}'")
         flash("Sorry, something went wrong")
 
     # Back to calling page, which will either be:
@@ -113,12 +114,12 @@ def delete_events():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not days:
+        app.logger.debug(f"delete_events(): Missing days!")
         Event().log_event("Delete Events Fail", f"Missing days!")
-        print(f"delete_events(): Missing days!")
         return abort(400)
     elif not user_id:
+        app.logger.debug(f"delete_events(): Missing user_id!")
         Event().log_event("Delete Events Fail", f"Missing user_id!")
-        print(f"delete_events(): Missing user_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -127,8 +128,8 @@ def delete_events():
     if user_id != "admin":
         user = User().find_user_from_id(user_id)
         if not user:
-            Event().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'")
-            print(f"delete_events(): Invalid user_id = '{user_id}'")
+            app.logger.debug(f"delete_events(): Invalid user_id = '{user_id}'.")
+            Event().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'.")
             return abort(404)
 
     # ----------------------------------------------------------- #
@@ -137,19 +138,22 @@ def delete_events():
     # If user_id = "admin" we're deleting all events from the admin page, otherwise
     # we're on the user page and just deleting their events
     if user_id.lower() == "admin":
-        print(f"delete_events(): Delete {days} days of events for all users!")
+        app.logger.debug(f"delete_events(): We think we're called from admin, so delete events for all users.")
         if Event().delete_events_all_days(days):
             flash("Messages deleted!")
         else:
-            Event().log_event("Delete Events Fail", f"Days = '{days}'")
-            print(f"delete_events(): Delete Events Fail, days = '{days}'")
+            # Should never get here, but...
+            app.logger.debug(f"delete_events(): Event().delete_events_all_days() failed, days = '{days}'.")
+            Event().log_event("Delete Events Fail", f"days = '{days}'")
     else:
-        print(f"delete_events(): Delete {days} days of events for user {user.email}!")
+        app.logger.debug(f"delete_events(): Delete '{days}' days of events for user '{user.email}'.")
         if Event().delete_events_email_days(user.email, days):
             flash("Messages deleted!")
         else:
+            # Should never get here, but...
+            app.logger.debug(f"delete_events(): Event().delete_events_email_days() failed, "
+                             f"days = '{days}', email = '{user.email}'.")
             Event().log_event("Delete Events Fail", f"Days = '{days}', email = '{user.email}'")
-            print(f"delete_events(): Delete Events Fail, days = '{days}', email = '{user.email}'")
 
     # Back to calling page, which will either be:
     #   1. user_page

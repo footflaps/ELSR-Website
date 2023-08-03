@@ -47,8 +47,8 @@ def mark_read():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not message_id:
+        app.logger.debug(f"mark_read(): Missing message_id!")
         Event().log_event("Message Read Fail", f"Missing message_id!")
-        print(f"mark_read(): Missing message_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -56,8 +56,8 @@ def mark_read():
     # ----------------------------------------------------------- #
     message = Message().find_messages_by_id(message_id)
     if not message:
-        Event().log_event("Message Read Fail", f"Can't locate message id = '{message_id}'")
-        print(f"mark_read(): Can't locate message id = '{message_id}'")
+        app.logger.debug(f"mark_read(): Can't locate message id = '{message_id}'.")
+        Event().log_event("Message Read Fail", f"Can't locate message id = '{message_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -69,10 +69,10 @@ def mark_read():
     if (message.to_email == ADMIN_EMAIL
         and not current_user.admin()) and \
             message.to_email != current_user.email:
+        app.logger.debug(f"mark_read(): Prevented attempt by '{current_user.email}' to mark as "
+                         f"read message id = '{message_id}'.")
         Event().log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to mark as "
-                                               f"read message id = '{message_id}'")
-        print(f"mark_read(): Prevented attempt by '{current_user.email}' to mark as "
-              f"read message id = '{message_id}'")
+                                               f"read message id = '{message_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -81,8 +81,9 @@ def mark_read():
     if Message().mark_as_read(message_id):
         flash("Message has been marked as read")
     else:
-        Event().log_event("Message Read Fail", f"Failed to mark as read, id = '{message_id}'")
-        print(f"mark_read(): Failed to mark as read, id = '{message_id}'")
+        # Should never get here, but...
+        app.logger.debug(f"mark_read(): Message().mark_as_read() failed, message id = '{message_id}'.")
+        Event().log_event("Message Read Fail", f"Failed to mark as read, id = '{message_id}'.")
         flash("Sorry, something went wrong")
 
     # Back to calling page
@@ -111,8 +112,8 @@ def mark_unread():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not message_id:
+        app.logger.debug(f"mark_unread(): Missing message_id!")
         Event().log_event("Message unRead Fail", f"Missing message_id!")
-        print(f"mark_unread(): Missing message_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -120,8 +121,8 @@ def mark_unread():
     # ----------------------------------------------------------- #
     message = Message().find_messages_by_id(message_id)
     if not message:
-        Event().log_event("Message unRead Fail", f"Can't locate message id = '{message_id}'")
-        print(f"mark_unread(): Can't locate message id = {message_id}")
+        app.logger.debug(f"mark_unread(): Can't locate message_id = '{message_id}'")
+        Event().log_event("Message unRead Fail", f"Can't locate message_id = '{message_id}'")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -133,10 +134,10 @@ def mark_unread():
     if (message.to_email == ADMIN_EMAIL
         and not current_user.admin()) and \
             message.to_email != current_user.email:
+        app.logger.debug(f"mark_unread(): Prevented attempt by '{current_user.email}' to mark "
+                         f"as unread message id = '{message_id}'.")
         Event().log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to mark as "
-                                               f"unread message id = '{message_id}'")
-        print(f"mark_unread(): Prevented attempt by {current_user.email} to mark "
-              f"as unread message id = {message_id}")
+                                               f"unread message id = '{message_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -145,8 +146,9 @@ def mark_unread():
     if Message().mark_as_unread(message_id):
         flash("Message has been marked as unread")
     else:
-        Event().log_event("Message unRead Fail", f"Failed to mark as unread, id = '{message_id}'")
-        print(f"mark_unread(): Failed to mark as unread, id = '{message_id}'")
+        # Should never get here, but...
+        app.logger.debug(f"mark_unread(): Message().mark_as_unread() failed, message_id = '{message_id}'.")
+        Event().log_event("Message unRead Fail", f"Message().mark_as_unread() failed, message_id = '{message_id}'")
         flash("Sorry, something went wrong")
 
     # Back to calling page
@@ -174,8 +176,8 @@ def delete_message():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not message_id:
+        app.logger.debug(f"delete_message(): Missing message_id")
         Event().log_event("Message Delete Fail", f"Missing message_id!")
-        print(f"delete_message(): Missing user_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -183,8 +185,8 @@ def delete_message():
     # ----------------------------------------------------------- #
     message = Message().find_messages_by_id(message_id)
     if not message:
-        Event().log_event("Message Delete Fail", f"Can't locate message id = '{message_id}'")
-        print(f"delete_message(): Can't locate message id = {message_id}")
+        app.logger.debug(f"delete_message(): Can't locate message id = '{message_id}'.")
+        Event().log_event("Message Delete Fail", f"Can't locate message id = '{message_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -196,20 +198,23 @@ def delete_message():
     if (message.to_email == ADMIN_EMAIL
         and not current_user.admin()) and \
             message.to_email != current_user.email:
+        app.logger.debug(f"delete_message(): Prevented attempt by '{current_user.email}' to delete "
+                         f"message_id = '{message_id}'.")
         Event().log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to Delete "
-                                               f"message, id = '{message_id}'")
-        print(f"delete_message(): Prevented attempt by {current_user.email} to "
-              f"delete message id = {message_id}")
+                                               f"message_id = '{message_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Mark as read
     # ----------------------------------------------------------- #
     if Message().delete(message_id):
+        app.logger.debug(f"delete_message(): Success for message_id = '{message_id}'.")
+        Event().log_event("Message Delete Success", f"message_id = '{message_id}'")
         flash("Message has been deleted")
     else:
-        Event().log_event("Message Delete Fail", f"Failed to delete, id = '{message_id}'")
-        print(f"delete_message(): Failed to delete, id = '{message_id}'")
+        # Should never get here, but...
+        app.logger.debug(f"delete_message(): Message().delete() failed for message_id = '{message_id}'.")
+        Event().log_event("Message Delete Fail", f"Failed to delete, message_id = '{message_id}'")
         flash("Sorry, something went wrong")
 
     # Back to calling page
@@ -241,12 +246,12 @@ def reply_message(message_id):
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not message_id:
+        app.logger.debug(f"reply_message(): Missing message_id!")
         Event().log_event("Message Reply Fail", f"Missing message_id!")
-        print(f"reply_message(): Missing message_id!")
         return abort(400)
     elif not body:
+        app.logger.debug(f"reply_message(): Missing body!")
         Event().log_event("Message Reply Fail", f"Missing body!")
-        print(f"reply_message(): Missing body!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -254,8 +259,8 @@ def reply_message(message_id):
     # ----------------------------------------------------------- #
     message = Message().find_messages_by_id(message_id)
     if not message:
-        Event().log_event("Message Reply Fail", f"Can't locate message id = '{message_id}'")
-        print(f"reply_message(): Can't locate message id = '{message_id}'")
+        app.logger.debug(f"reply_message(): Can't locate message_id = '{message_id}'.")
+        Event().log_event("Message Reply Fail", f"Can't locate message_id = '{message_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -267,10 +272,10 @@ def reply_message(message_id):
     if (message.to_email == ADMIN_EMAIL
         and not current_user.admin()) and \
             message.to_email != current_user.email:
+        app.logger.debug(f"reply_message(): Prevented attempt by '{current_user.email}' to "
+                         f"reply to message id = '{message_id}'.")
         Event().log_event("Message Reply Fail", f"Prevented attempt by '{current_user.email}' to Reply to "
-                                                f"message, id = '{message_id}'")
-        print(f"reply_message(): Prevented attempt by {current_user.email} to "
-              f"reply to message id = {message_id}")
+                                                f"message, id = '{message_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -285,13 +290,15 @@ def reply_message(message_id):
 
     # Try and send it
     if Message().add_message(new_message):
+        app.logger.debug(f"reply_message(): User '{current_user.email}' has sent message "
+                         f"to '{message.from_email}', body = '{body}'.")
         Event().log_event("Message Reply Success", f" User '{current_user.name}' has sent message "
                                                    f"to '{message.from_email}'.")
-        print(f"contact_admin(): User {current_user.name} has sent message to {message.from_email}, body = '{body}'")
         flash("Your message has been sent.")
     else:
+        # Should never get here, but...
+        app.logger.debug(f"reply_message(): Message().add_message() failed for user.id = '{current_user.id}'.")
         Event().log_event("Message Reply Fail", f"Failed to send message.")
-        print(f"contact_admin(): Failed to send message from user {current_user.name} with body = '{body}'")
         flash("Sorry, something went wrong")
 
     # Back to calling page
@@ -321,12 +328,12 @@ def message_admin():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"message_admin(): Missing user_id!")
         Event().log_event("Message Admin Fail", f"Missing user_id!")
-        print(f"contact_admin(): Missing user_id!")
         return abort(400)
     elif not body:
+        app.logger.debug(f"message_admin(): Missing body")
         Event().log_event("Message Admin Fail", f"Missing body!")
-        print(f"contact_admin(): Missing body!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -336,8 +343,8 @@ def message_admin():
 
     # Check id is valid
     if not user:
-        Event().log_event("Message Admin Fail", f"FAILED to locate user user.id = '{user.id}'.")
-        print(f"contact_admin(): FAILED to locate user user.id = '{user.id}'")
+        app.logger.debug(f"message_user(): FAILED to locate user user_id = '{user_id}'.")
+        Event().log_event("Message Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -352,12 +359,13 @@ def message_admin():
     )
 
     if Message().add_message(message):
+        app.logger.debug(f"message_admin(): User '{user.email}' has sent message = '{body}'")
         Event().log_event("Message Admin Success", f"Message was sent successfully.")
-        print(f"contact_admin(): User {user.name} has sent message = '{body}'")
         flash("Your message has been forwarded to the Admin Team")
     else:
+        # Should never get here, but...
+        app.logger.debug(f"message_admin(): Message().add_message() failed user.email = '{user.email}'.")
         Event().log_event("Message Admin Fail", f"Message send failed!")
-        print(f"contact_admin(): Failed to send message from user {user.name} has sent message = '{body}'")
         flash("Sorry, something went wrong")
 
     # Back to calling page
@@ -388,12 +396,12 @@ def message_user():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"message_user(): Missing user_id!")
         Event().log_event("Message User Fail", f"Missing user_id!")
-        print(f"contact_user(): Missing user_id!")
         return abort(400)
     elif not body:
+        app.logger.debug(f"message_user(): Missing body!")
         Event().log_event("Message User Fail", f"Missing body!")
-        print(f"contact_user(): Missing body!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -403,8 +411,8 @@ def message_user():
 
     # Check id is valid
     if not user:
-        Event().log_event("Message User Fail", f"FAILED to locate user user.id = '{user.id}'")
-        print(f"contact_user(): FAILED to locate user user.id = '{user.id}'")
+        app.logger.debug(f"message_user(): FAILED to locate user user_id = '{user_id}'.")
+        Event().log_event("Message User Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -419,12 +427,13 @@ def message_user():
     )
 
     if Message().add_message(message):
+        app.logger.debug(f"message_user(): Admin has sent message to '{user.name}', body = '{body}'.")
         Event().log_event("Message User Success", f"Message was sent successfully to '{user.email}'.")
-        print(f"message_user(): Admin has sent message to '{user.name}', body = '{body}'")
         flash(f"Your message has been forwarded to {user.name}")
     else:
-        Event().log_event("Message User Fail", f"Message send failed to '{user.email}'.")
-        print(f"message_user(): Failed to send message to '{user.name}', body = '{body}'")
+        # Should never get here, but...
+        app.logger.debug(f"message_user(): Message().add_message() failed, user.email = '{user.email}'.")
+        Event().log_event("Message User Fail", f"Message send failed to user.email = '{user.email}'.")
         flash("Sorry, something went wrong")
 
     # Back to calling page

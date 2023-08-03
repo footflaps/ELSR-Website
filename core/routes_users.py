@@ -100,17 +100,16 @@ def login():
 
         # Test 1: Does the user exist?
         if not user:
-            app.logger.debug(f"login(): mail not recognised '{email}'.")
+            app.logger.debug(f"login(): email not recognised '{email}'.")
             Event().log_event("Login Fail", f"Email not recognised '{email}'")
-            print("login(): Email address is not recognised!")
             flash("Email address is not recognised!")
             return render_template("user_login.html", form=form, year=current_year)
 
         # Test 2: Did they forget password?
         if form.forgot.data:
             # Don't check return status as we don't want to give anything away
-            Event().log_event("Login Fail", f"Recovery email requested for '{email}'")
             app.logger.debug(f"login(): Recovery email requested for '{email}'.")
+            Event().log_event("Login Fail", f"Recovery email requested for '{email}'.")
             # Generate a new code
             User().create_new_reset_code(email)
             # Find the user to get the details
@@ -118,14 +117,13 @@ def login():
             # Send an email
             Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()
             # Tell user to expect an email
-            print("login(): If your email address is registered, an email recovery mail has been sent.")
             flash("If your email address is registered, an email recovery mail has been sent.")
             return render_template("user_login.html", form=form, year=current_year)
 
         # Test 3: Do they want a new verification code?
         if form.verify.data:
             app.logger.debug(f"login(): Reset email requested for '{email}'.")
-            Event().log_event("Login Fail", f"Reset email requested for '{email}'")
+            Event().log_event("Login Fail", f"Reset email requested for '{email}'.")
             # Generate a new code
             User().create_new_verification(user.id)
             # Find the user to get the details
@@ -133,26 +131,22 @@ def login():
             # Send an email
             Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
             # Tell user to expect an email
-            print("login(): If your email address is registered, a new verification code has bee"
-                  "n sent.")
             flash("If your email address is registered, a new verification code has been sent.")
             return redirect(url_for('validate_email'))
 
         # Test 4: Is the user validated?
         if not user.verified():
             app.logger.debug(f"login(): Failed, Email not verified yet '{email}'.")
-            Event().log_event("Login Fail", f"Email not verified yet '{email}'")
-            print("login(): That email address has not been verified yet!")
+            Event().log_event("Login Fail", f"Email not verified yet '{email}'.")
             flash("That email address has not been verified yet!")
             return redirect(url_for('validate_email'))
 
         # Test 5: Is the user barred?
         if user.blocked():
             app.logger.debug(f"login(): Failed, Email has been blocked '{email}'.")
-            Event().log_event("Login Fail", f"Email has been blocked '{email}'")
-            print("login(): That email address has been temporarily blocked!")
+            Event().log_event("Login Fail", f"Email has been blocked '{email}'.")
             flash("That email address has been temporarily blocked!")
-            flash(f"Contact {admin_email_address} to discuss...")
+            flash(f"Contact '{admin_email_address}' to discuss.")
             return render_template("user_login.html", form=form, year=current_year)
 
         # Test 6: Check password
@@ -163,19 +157,17 @@ def login():
             # restore the user ID from that cookie if it is not in the session."
             login_user(user, remember=True)
             # Log event after they've logged in, so current_user can have an email address
+            app.logger.debug(f"login(): User logged in for '{email}'.")
             Event().log_event("Login Success", f"User logged in, forwarding user '{user.email}' to '{session['url']}'.")
-            print("login(): Password matched!")
 
             # Return back to cached page
             app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
-            print(f"login(): Forwarding user to '{session['url']}'.")
             return redirect(session['url'])
 
         else:
             # Login failed
             app.logger.debug(f"login(): Failed, Wrong password for '{email}'.")
             Event().log_event("Login Fail", f"Wrong password for '{email}'")
-            print("login(): Password did not match!")
             flash("Password did not match!")
             return render_template("user_login.html", form=form, year=current_year)
 
@@ -196,7 +188,7 @@ def login():
     else:
         session['url'] = request.referrer
 
-    print(f"Login: Cached {session['url']}")
+    app.logger.debug(f"login(): Saved '{session['url']}' as return page after login.")
 
     return render_template("user_login.html", form=form, year=current_year)
 
@@ -210,8 +202,8 @@ def login():
 def logout():
 
     # Have to log the event before we log out, so we still have their email address
-    Event().log_event("Logout", f"User logged out.")
-    app.logger.debug(f"Logging user out now...")
+    app.logger.debug(f"logout(): Logging user '{current_user.email}' out now...")
+    Event().log_event("Logout", f"User '{current_user.email}' logged out.")
     flash("You have been logged out!")
 
     # Logout the user
@@ -220,7 +212,7 @@ def logout():
     # Clear the session
     session.clear()
 
-    # Delete the user's cookie as apparently logout doesn't do that
+    # Delete the user's "remember me" cookie as apparently logout doesn't do that
     # From: https://stackoverflow.com/questions/25144092/flask-login-still-logged-in-after-use-logouts-when-using-remember-me
     # This seems to work now....
     response = make_response(redirect(url_for('home')))
@@ -254,16 +246,16 @@ def register():
             if User().find_user_from_email(new_user.email).verified():
 
                 # Email is validated, so they can just login
+                app.logger.debug(f"register(): Duplicate email '{new_user.email}'.")
                 Event().log_event("Register Fail", f"Duplicate email '{new_user.email}'.")
-                print("You've already signed up with that email, log in instead!")
                 flash("You've already signed up with that email, log in instead!")
                 return redirect(url_for('login', email=new_user.email))
 
             else:
 
                 # Email is registered, but unvalidated
+                app.logger.debug(f"register(): Already signed up '{new_user.email}'.")
                 Event().log_event("Register Fail", f"Already signed up '{new_user.email}'.")
-                print("You've already signed up with that email, verify your email to login!")
                 flash("You've already signed up with that email, verify your email to login!")
                 return redirect(url_for('validate_email'))
 
@@ -272,21 +264,20 @@ def register():
 
             # Debug
             user = User().find_user_from_email(form.email.data)
-            print(f"User '{user.email}' validate status = '{user.verified()}', admin status = '{user.admin()}'")
 
             # They now need to validate email address
-            app.logger.debug(f"register(): Sending verification email to '{user.email}'")
-            Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
+            app.logger.debug(f"register(): Sending verification email to '{user.email}'.")
             Event().log_event("Register Pass", f"Verification code sent to '{user.email}'.")
             flash("Please validate your email address with the code you have been sent.")
-            print("Please validate your email address with the code you have been sent.")
+            # User threading as sending an email can take a while and we want a snappy website
+            Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
             return redirect(url_for('validate_email'))
 
         else:
             # User already exists probably
-            Event().log_event("Register Error", f"Something went wrong with '{new_user.email}'.")
-            print("Something went wrong!")
-            flash("Something went wrong!")
+            app.logger.debug(f"register(): User().create_user() failed for '{new_user.email}'.")
+            Event().log_event("Register Error", f"User().create_user() failed for '{new_user.email}'.")
+            flash("Sorry, something went wrong!")
             return render_template("user_register.html", form=form, year=current_year,
                                    admin_email_address=admin_email_address)
 
@@ -317,17 +308,31 @@ def validate_email():
     # ----------------------------------------------------------- #
     # Only validate if we were actually sent them
     if email and code:
-        print(f"validate_email(): detected code '{code}' and email '{email}' passed in hyperlink")
+
+        # ----------------------------------------------------------- #
+        # Method 1: the URL in the email passed through their params
+        # ----------------------------------------------------------- #
+
         email = email.strip('"').strip("'")
         user = User().find_user_from_email(email)
         if not user:
-            print(f"validate_email(): Invalid email = '{email}'.")
+            # User doesn't exist
+            app.logger.debug(f"validate_email(): URL route, can't find user email = '{email}'.")
+            Event().log_event("Validate Fail", f"URL route, can't find user email = '{email}'.")
             abort(404)
+
         if User().validate_email(user, code):
-            Event().log_event("Validate Pass", f"User '{email}' has been validated.")
-            print(f"validate_email(): User {email} has been validated.")
+            # Success, user email validated!
+            app.logger.debug(f"validate_email(): URL route, user '{email}' has been validated.")
+            Event().log_event("Validate Pass", f"URL route, user '{email}' has been validated.")
             flash("Email verified, please now log in!")
+
+            # Send welcome email
+            Message().send_welcome_message(user.email)
+
+            # Forward to login page
             return redirect(url_for('login', email=email))
+
         # Fall through to form below
 
     # Need a form
@@ -335,6 +340,10 @@ def validate_email():
 
     # Detect form submission
     if form.validate_on_submit():
+
+        # ----------------------------------------------------------- #
+        # Method 2: They manually filled the form in
+        # ----------------------------------------------------------- #
 
         # Grab credentials from form
         new_user = User()
@@ -349,8 +358,8 @@ def validate_email():
 
             # Already verified
             if user.verified():
-                Event().log_event("Validate Fail", f"User '{user.email}' is already validated.")
-                print("validate_email(): Email has already been verified! Log in with your password.")
+                app.logger.debug(f"validate_email(): Form, user '{user.email}' is already validated.")
+                Event().log_event("Validate Fail", f"Form, user '{user.email}' is already validated.")
                 flash("Email has already been verified! Log in with your password.")
                 return redirect(url_for('login', email=new_user.email))
 
@@ -359,25 +368,28 @@ def validate_email():
 
                 # Debug
                 user = User().find_user_from_email(form.email.data)
-                print(f"User {user.email} validate status = {user.verified()}, admin status = {user.admin()}")
 
                 # Go to login page
-                Event().log_event("Validate Pass", f"User '{user.email}' has been validated.")
-                print("validate_email(): Email verified, please now log in!")
+                app.logger.debug(f"validate_email(): Form, user '{user.email}' has been validated.")
+                Event().log_event("Validate Pass", f"Form, user '{user.email}' has been validated.")
                 flash("Email verified, please now log in!")
+
                 # Send welcome email
                 Message().send_welcome_message(new_user.email)
+
+                # Forward to login page
                 return redirect(url_for('login', email=new_user.email))
+
             else:
-                # Wrong code
-                Event().log_event("Validate Fail", f"Code didn't work for user '{user.email}'.")
-                print("validate_email(): Incorrect code (or code has expired), please try again!")
+                # Wrong code entered, or it's expired
+                app.logger.debug(f"validate_email(): Form, code didn't work for user '{user.email}'.")
+                Event().log_event("Validate Fail", f"Form, code didn't work for user '{user.email}'.")
                 flash("Incorrect code (or code has expired), please try again!")
                 return render_template("user_validate.html", form=form, year=current_year)
 
         # Invalid email
-        Event().log_event("Validate Fail", f"Unrecognised email '{user.email}'.")
-        print("validate_email(): Unrecognised email, please try again!")
+        app.logger.debug(f"validate_email(): Form, unrecognised email '{new_user.email}'.")
+        Event().log_event("Validate Fail", f"Form, unrecognised email '{new_user.email}'.")
         flash("Unrecognised email, please try again!")
 
     # Show register page / form
@@ -406,12 +418,12 @@ def reset_password():
         email = email.strip('"').strip("'")
         user = User().find_user_from_email(email)
         if not user:
-            Event().log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
-            print(f"reset_password(): Invalid email = '{email}'.")
+            app.logger.debug(f"reset_password(): URL route, invalid email = '{email}'.")
+            Event().log_event("Reset Fail",    f"URL route, invalid email = '{email}'.")
             abort(404)
         if not User().validate_reset_code(user.id, int(code)):
-            Event().log_event("Reset Fail", f"URL route, invalid email = '{code}'.")
-            print(f"reset_password(): Invalid code = '{code}', was expecting '{user.reset_code}'.")
+            app.logger.debug(f"reset_password(): URL route, invalid email = '{code}', for user = '{user.email}'.")
+            Event().log_event("Reset Fail",    f"URL route, invalid email = '{code}', for user = '{user.email}'.")
             abort(404)
 
     # ----------------------------------------------------------- #
@@ -426,22 +438,26 @@ def reset_password():
         # ----------------------------------------------------------- #
         # POST: reset password form completed
         # ----------------------------------------------------------- #
+        # This may have changed!
+        email = form.email.data
 
         if form.password1.data != form.password2.data:
-            Event().log_event("Reset Fail", f"Passwords don't match! Email = '{email}'.")
-            print("reset_password(): Passwords don't match!")
+            app.logger.debug(f"reset_password(): Form route, Passwords don't match! Email = '{email}'.")
+            Event().log_event("Reset Fail",    f"Form route, Passwords don't match! Email = '{email}'.")
             flash("Passwords don't match!")
+            # Back to the same page for another try
             return render_template("user_reset_password.html", form=form, year=current_year)
 
         if User().reset_password(email, form.password1.data):
-            Event().log_event("Reset Success", f"Email = '{email}'.")
-            print("reset_password(): Password has been reset, please login!")
+            app.logger.debug(f"reset_password(): Form route, Password has been reset, email = '{email}'.")
+            Event().log_event("Reset Success", f"Form route, Password has been reset, email = '{email}'.")
             flash("Password has been reset, please login!")
+            # Forward to login page
             return redirect(url_for('login', email=email))
-
         else:
-            Event().log_event("Reset Fail", f"Something went wrong! Email = '{email}'.")
-            print("reset_password(): Sorry, something went wrong!")
+            # Should never happen, but...
+            app.logger.debug(f"reset_password(): User().reset_password() failed! email = '{email}'.")
+            Event().log_event("Reset Fail",    f"User().reset_password() failed! email = '{email}'.")
             flash("Sorry, something went wrong!")
 
     return render_template("user_reset_password.html", form=form, year=current_year)
@@ -466,8 +482,8 @@ def user_page():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
-        Event().log_event("User Page Fail", f"Missing user_id.")
-        print(f"user_page(): missing user id!'.")
+        app.logger.debug(f"user_page(): Missing user_id!")
+        Event().log_event("User Page Fail", f"Missing user_id!")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -475,8 +491,8 @@ def user_page():
     # ----------------------------------------------------------- #
     user = User().find_user_from_id(user_id)
     if not user:
+        app.logger.debug(f"user_page(): Invalid user user_id = '{user_id}'!")
         Event().log_event("User Page Fail", f"Invalid user_id = '{user_id}'.")
-        print(f"user_page(): invalid user_id = '{user_id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -484,9 +500,10 @@ def user_page():
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
        not current_user.admin():
+        app.logger.debug(f"user_page(): Rejected request from current_user.id = '{current_user.id}', "
+                         f"for user_id = '{user_id}'.")
         Event().log_event("User Page Fail", f"Rejected request from current_user.id = '{current_user.id}', "
-                                            f"for user_id = '{user_id}' .")
-        print(f"user_page(): Rejected request from user {current_user.id} as no permissions")
+                                            f"for user_id = '{user_id}'.")
         abort(403)
 
     # ----------------------------------------------------------- #
@@ -592,14 +609,12 @@ def delete_user(user_id):
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
-        flash("missing user id")
+        app.logger.debug(f"delete_user(): Missing user_id!")
         Event().log_event("Delete User Fail", f"missing user id")
-        print(f"delete_user(): missing user id!'.")
         abort(400)
     elif not confirm:
-        flash("missing user confirmation")
-        Event().log_event("Delete User Fail", f"missing user confirmation")
-        print(f"delete_user(): missing user confirmation!'.")
+        app.logger.debug(f"delete_user(): Missing user confirmation!")
+        Event().log_event("Delete User Fail", f"Missing user confirmation")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -607,11 +622,12 @@ def delete_user(user_id):
     # ----------------------------------------------------------- #
     user = User().find_user_from_id(user_id)
     if not user:
-        Event().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'")
-        print(f"delete_user(): invalid user user_id = '{user_id}'.")
+        app.logger.debug(f"delete_user(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
         abort(404)
     elif confirm != "DELETE":
-        Event().log_event("Delete User Fail", f"Delete wasn't confirmed '{confirm}'")
+        app.logger.debug(f"delete_user(): Delete wasn't confirmed, confirm = '{confirm}'!")
+        Event().log_event("Delete User Fail", f"Delete wasn't confirmed, confirm = '{confirm}'!")
         flash(f"delete_user(): Delete wasn't confirmed '{confirm}'.")
         return redirect(url_for('user_page', user_id=user_id))
 
@@ -620,29 +636,33 @@ def delete_user(user_id):
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
        not current_user.admin():
+        app.logger.debug(f"delete_user(): User isn't allowed "
+                         f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         Event().log_event("Delete User Fail", f"User isn't allowed "
-                                              f"current_user.id='{current_user.id}', user_id='{user_id}'")
-        print("Delete user fail: user isn't permitted access!")
+                                              f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         abort(403)
 
     # ----------------------------------------------------------- #
     # Delete the user
     # ----------------------------------------------------------- #
     if User().delete_user(user_id):
+        app.logger.debug(f"delete_user(): Success, user '{user.email}' deleted.")
         Event().log_event("Delete User Success", f"User '{user.email}' deleted.")
         flash(f"User '{user.name}' successfully deleted.")
 
         if int(current_user.id) == int(user_id):
             # Deleted themselves so just log them out
             return redirect(url_for('logout'))
+        elif current_user.admin():
+            # Admin deleting someone, so back to admin
+            return redirect(url_for('admin_page'))
         else:
-            # Admin deleting someone, so back to home
             return redirect(url_for('home'))
 
     else:
-        Event().log_event("Delete User Fail", f"Not sure why, but failed.")
-        flash("User delete failed.")
-        print(f"delete_user(): delete failed for user {user.id}")
+        app.logger.debug(f"delete_user(): User().delete_user() failed for user_id = '{user_id}'.")
+        Event().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
+        flash("Sorry, something went wrong.")
         return redirect(url_for('user_page', user_id=user_id))
 
 
@@ -665,12 +685,12 @@ def block_user(user_id):
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"block_user(): Missing user_id!")
         Event().log_event("Block User Fail", f"missing user id.")
-        print(f"block_user(): missing user id!'.")
         abort(400)
     elif not confirm:
+        app.logger.debug(f"block_user(): Missing user confirmation!")
         Event().log_event("Block User Fail", f"missing confirmation.")
-        print(f"block_user(): missing user confirmation!'.")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -678,8 +698,8 @@ def block_user(user_id):
     # ----------------------------------------------------------- #
     user = User().find_user_from_id(user_id)
     if not user:
+        app.logger.debug(f"block_user(): Invalid user user_id = '{user_id}'!")
         Event().log_event("Block User Fail", f"invalid user user_id = '{user_id}'.")
-        print(f"block_user(): invalid user user_id = '{user_id}'.")
         abort(404)
     elif confirm != "BLOCK":
         Event().log_event("Block User Fail", f"Block wasn't confirmed '{confirm}'.")
@@ -719,8 +739,8 @@ def unblock_user():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"unblock_user(): Missing user_id!")
         Event().log_event("unBlock User Fail", f"missing user id.")
-        print(f"unblock_user(): missing user id!'.")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -728,8 +748,8 @@ def unblock_user():
     # ----------------------------------------------------------- #
     user = User().find_user_from_id(user_id)
     if not user:
+        app.logger.debug(f"unblock_user(): Invalid user user_id = '{user_id}'!")
         Event().log_event("unBlock User Fail", f"invalid user user_id = '{user_id}'.")
-        print(f"unblock_user(): invalid user user_id = '{user_id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -765,8 +785,8 @@ def reverify_user():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"reverify_user(): Missing user_id!")
         Event().log_event("Send Verify Fail", f"Missing user_id.")
-        print(f"reverify_user(): missing user id!'.")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -774,8 +794,8 @@ def reverify_user():
     # ----------------------------------------------------------- #
     user = User().find_user_from_id(user_id)
     if not user:
+        app.logger.debug(f"reverify_user(): Invalid user user_id = '{user_id}'!")
         Event().log_event("Send Verify Fail", f"Invalid user_id = '{user_id}'.")
-        print(f"reverify_user(): invalid user_id = '{user_id}'..")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -811,8 +831,8 @@ def password_reset_user():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
+        app.logger.debug(f"password_reset_user(): Missing user_id!")
         Event().log_event("Send Reset Fail", f"Missing user id!")
-        print(f"password_reset_user(): missing user id!'.")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -820,8 +840,8 @@ def password_reset_user():
     # ----------------------------------------------------------- #
     user = User().find_user_from_id(user_id)
     if not user:
+        app.logger.debug(f"password_reset_user(): Invalid user user_id = '{user_id}'!")
         Event().log_event("Send Reset Fail", f"Invalid user user_id = '{user_id}'.")
-        print(f"password_reset_user(): invalid user user_id = '{user_id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
