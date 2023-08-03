@@ -8,6 +8,8 @@ import gpxpy.gpx
 import mpu
 import os
 from threading import Thread
+from PIL import Image
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
