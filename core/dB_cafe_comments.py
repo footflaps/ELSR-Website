@@ -42,7 +42,7 @@ class CafeComment(db.Model):
                 # Return success
                 return True
             except Exception as e:
-                print(f"db_cafe_comment: Failed to add comment {new_comment}, error code was {e.args}.")
+                app.logger.debug(f"dB.add_comment(): Failed to add comment, error code was '{e.args}'.")
                 return False
 
     # Delete a comment
@@ -57,7 +57,7 @@ class CafeComment(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_cafe_comment: Failed to delete comment {comment}, error code was {e.args}.")
+                    app.logger.debug(f"dB.delete_comment(): Failed to delete comment, error code was '{e.args}'.")
                     return False
         return False
 
