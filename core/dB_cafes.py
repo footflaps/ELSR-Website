@@ -80,10 +80,9 @@ class Cafe(db.Model):
                 db.session.add(new_cafe)
                 db.session.commit()
                 # Return success
-                print(f"db_cafes: Successfully added cafe {new_cafe.name}.")
                 return True
             except Exception as e:
-                print(f"db_cafes: Failed to add cafe {new_cafe.name}, error code was {e.args}.")
+                app.logger.debug(f"dB.add_cafe(): Failed to add cafe '{new_cafe.name}', error code was '{e.args}'.")
                 return False
 
     # Update an existing cafe
@@ -102,9 +101,9 @@ class Cafe(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_cafes: Failed to update cafe {cafe.name}, error code was {e.args}.")
+                    app.logger.debug(f"dB.update_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
-        print(f"db_cafes: Failed to update cafe {cafe.name}, invalid cafe_id='{cafe_id}'.")
+        app.logger.debug(f"dB.update_cafe(): Failed to with cafe '{cafe.name}', invalid cafe_id='{cafe_id}'.")
         return False
 
     def update_photo(self, cafe_id, filename):
@@ -116,7 +115,7 @@ class Cafe(db.Model):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_cafes: Failed to update_photo {cafe.name}, error code was {e.args}.")
+                    app.logger.debug(f"dB.update_photo(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
         return False
 
@@ -129,11 +128,12 @@ class Cafe(db.Model):
                 try:
                     # Delete the cafe
                     cafe.active = None
-                    cafe.details = f"<b style='color:red'>{date.today().strftime('%B %d, %Y')} This cafe has been marked as closed or closing: {details}</b><br>{cafe.details}"
+                    cafe.details = f"<b style='color:red'>{date.today().strftime('%B %d, %Y')} " \
+                                   f"This cafe has been marked as closed or closing: {details}</b><br>{cafe.details}"
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_cafes: Failed to close_cafe {cafe.name}, error code was {e.args}.")
+                    app.logger.debug(f"dB.close_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
         return False
 
@@ -146,11 +146,12 @@ class Cafe(db.Model):
                 try:
                     # Delete the cafe
                     cafe.active = True
-                    cafe.details = f"<b style='color:red'>{date.today().strftime('%B %d, %Y')} Rejoice! This is no longer closing!</b><br>{cafe.details}"
+                    cafe.details = f"<b style='color:red'>{date.today().strftime('%B %d, %Y')} " \
+                                   f"Rejoice! This is no longer closing!</b><br>{cafe.details}"
                     db.session.commit()
                     return True
                 except Exception as e:
-                    print(f"db_cafes: Failed to unclose_cafe {cafe.name}, error code was {e.args}.")
+                    app.logger.debug(f"dB.unclose_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
         return False
 
@@ -163,7 +164,6 @@ class Cafe(db.Model):
         # This the cafe_passed JSON string from the GPX data base and from it, returns the details of the
         # Cafes which were referenced in the string (referenced by id).
 
-        print(f"cafes_passed = {cafes_passed}")
         cafes_json = json.loads(cafes_passed)
 
         # We will return this
