@@ -671,7 +671,6 @@ def delete_user(user_id):
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/block_user/<int:user_id>', methods=['GET'])
-@logout_barred_user
 @login_required
 @admin_only
 @update_last_seen
@@ -725,7 +724,6 @@ def block_user(user_id):
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/unblock_user', methods=['GET'])
-@logout_barred_user
 @login_required
 @admin_only
 @update_last_seen
@@ -771,7 +769,6 @@ def unblock_user():
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/send_verification', methods=['GET'])
-@logout_barred_user
 @login_required
 @admin_only
 @update_last_seen
@@ -817,7 +814,6 @@ def reverify_user():
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/send_password_reset', methods=['GET'])
-@logout_barred_user
 @login_required
 @admin_only
 @update_last_seen

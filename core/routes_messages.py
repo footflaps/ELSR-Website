@@ -376,7 +376,6 @@ def message_admin(user_id):
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/message_user/<int:user_id>', methods=['GET'])
-@logout_barred_user
 @login_required
 @admin_only
 @update_last_seen

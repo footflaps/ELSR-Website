@@ -32,7 +32,6 @@ from core.db_users import User, update_last_seen, logout_barred_user
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/delete_event', methods=['GET'])
-@logout_barred_user
 @login_required
 @admin_only
 @update_last_seen
@@ -99,7 +98,6 @@ def delete_event():
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/delete_events', methods=['GET'])
-@logout_barred_user
 @login_required
 @admin_only
 @update_last_seen

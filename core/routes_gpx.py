@@ -1395,5 +1395,3 @@ def route_download(gpx_id):
                                path=os.path.basename(gpx.filename),
                                download_name=download_name)
 
-
-
