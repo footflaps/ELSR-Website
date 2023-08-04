@@ -11,6 +11,8 @@ import sys
 import logging
 from datetime import date
 from time import sleep
+import sentry_sdk
+from sentry_sdk.integrations.flask import FlaskIntegration
 
 
 # We have our own hacked Gravatar
@@ -46,6 +48,23 @@ mMAP_STYLE = "height:500px;width:350px;margin:0;"
 # Flask only seems to allow one global upload folder, but we have two different end folders for GPX files and
 # cafe images. So, we upload to the same place and then move the file afterwards to it's final home.
 GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Initialise Sentry
+# -------------------------------------------------------------------------------------------------------------- #
+
+sentry_sdk.init(
+    dsn=os.environ['ELSR_SENTRY_DSN'],
+    integrations=[
+        FlaskIntegration(),
+    ],
+
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0
+)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
