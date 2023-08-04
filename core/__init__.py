@@ -134,7 +134,7 @@ GoogleMaps(app)
 # -------------------------------------------------------------------------------------------------------------- #
 
 # App is behind one proxy that sets the -For and -Host headers.
-app.wsgi_app = ProxyFix(app, x_for=1, x_host=1)
+#app.wsgi_app = ProxyFix(app, x_for=1, x_host=1)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
