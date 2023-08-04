@@ -98,6 +98,15 @@ def get_chaingang_top10():
     return rows
 
 
+def user_ip():
+    # Get user's IP
+    if request.headers.getlist("X-Forwarded-For"):
+        users_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        users_ip = request.remote_addr
+    return users_ip
+
+
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -276,10 +285,13 @@ def error():
 def bad_request(e):
     # What page were they looking for?
     requested_route = request.path
+    users_ip = user_ip()
 
     # Log error in event log
-    app.logger.debug(f"400: Bad request for '{requested_route}', previous page was '{request.referrer}'.")
-    Event().log_event("400", f"Bad request for '{requested_route}', previous page was '{request.referrer}'")
+    app.logger.debug(f"400: Bad request for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("400", f"Bad request for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 400 status explicitly
     return render_template('400.html', year=current_year), 400
@@ -289,10 +301,13 @@ def bad_request(e):
 def unauthorized(e):
     # What page were they looking for?
     requested_route = request.path
+    users_ip = user_ip()
 
     # Log error in event log
-    app.logger.debug(f"401: Unauthorized for '{requested_route}', previous page was '{request.referrer}'.")
-    Event().log_event("401", f"Unauthorized for '{requested_route}', previous page was '{request.referrer}'")
+    app.logger.debug(f"401: Unauthorized for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("401", f"Unauthorized for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 401 status explicitly
     # NB Don't have a 401 page, just re-use 403
@@ -303,10 +318,13 @@ def unauthorized(e):
 def forbidden(e):
     # What page were they looking for?
     requested_route = request.path
+    users_ip = user_ip()
 
     # Log error in event log
-    app.logger.debug(f"403: Forbidden for '{requested_route}', previous page was '{request.referrer}'.")
-    Event().log_event("403", f"Forbidden for '{requested_route}', previous page was '{request.referrer}'")
+    app.logger.debug(f"403: Forbidden for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("403", f"Forbidden for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
     return render_template('403.html', year=current_year), 403
@@ -316,10 +334,13 @@ def forbidden(e):
 def page_not_found(e):
     # What page were they looking for?
     requested_route = request.path
+    users_ip = user_ip()
 
     # Log error in event log
-    app.logger.debug(f"404: Not found for '{requested_route}', previous page was '{request.referrer}'.")
-    Event().log_event("404", f"Not found for '{requested_route}', previous page was '{request.referrer}'")
+    app.logger.debug(f"404: Not found for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("404", f"Not found for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 404 status explicitly
     return render_template('404.html', year=current_year), 404
@@ -328,11 +349,14 @@ def page_not_found(e):
 def file_too_large(e):
     # What page were they looking for?
     requested_route = request.path
+    users_ip = user_ip()
 
     # Log error in event log
     flash("The file was too large, limit is 10 MB.")
-    app.logger.debug(f"413: File too large for '{requested_route}', previous page was '{request.referrer}'.")
-    Event().log_event("413", f"File too large for '{requested_route}', previous page was '{request.referrer}'")
+    app.logger.debug(f"413: File too large for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("413", f"File too large for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 413 status explicitly
     return render_template('400.html', year=current_year), 413
@@ -342,10 +366,13 @@ def file_too_large(e):
 def internal_server_error(e):
     # What page were they looking for?
     requested_route = request.path
+    users_ip = user_ip()
 
     # Log error in event log
-    app.logger.debug(f"500: Internal server error for '{requested_route}', previous page was '{request.referrer}'.")
-    Event().log_event("500", f"Internal server error for '{requested_route}', previous page was '{request.referrer}'")
+    app.logger.debug(f"500: Internal server error for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("500", f"Internal server error for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
 
     # now you're handling non-HTTP exceptions only
     return render_template("500.html", e=e), 500
