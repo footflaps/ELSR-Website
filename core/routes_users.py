@@ -93,7 +93,10 @@ def login():
         password = form.password.data
 
         # Get user's IP
-        user_ip = request.remote_addr
+        if request.headers.getlist("X-Forwarded-For"):
+            user_ip = request.headers.getlist("X-Forwarded-For")[0]
+        else:
+            user_ip = request.remote_addr
 
         # See if user exists by looking up their email address
         user = User().find_user_from_email(email)
