@@ -225,7 +225,7 @@ def delete_message():
 # Reply message
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/reply_message/<int:message_id>', methods=['GET', 'POST'])
+@app.route('/reply_message/<int:message_id>', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -234,13 +234,6 @@ def reply_message(message_id):
     # Get details from the page
     # ----------------------------------------------------------- #
     body = request.args.get('body', None)
-
-    # Code from when POST used to work!
-    # message_id = request.args.get('message_id', None)
-    # try:
-    #     body = request.form['body']
-    # except exceptions.BadRequestKeyError:
-    #     body = None
 
     # ----------------------------------------------------------- #
     # Handle missing parameters

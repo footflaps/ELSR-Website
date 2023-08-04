@@ -141,7 +141,7 @@
 											1. gpx_id = request.args.get('gpx_id', None)
 					                        2. confirm = request.form['confirm']
 									-->
-									<form action="{{ url_for('reply_message', message_id=message.id) }}" method="post">
+									<form action="{{ url_for('reply_message', message_id=message.id) }}" method="GET">
 										
 										<div class="form-group">
 											<label for="body" class="col-form-label">
