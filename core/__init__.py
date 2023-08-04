@@ -11,6 +11,7 @@ import sys
 import logging
 from datetime import date
 from time import sleep
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 # We have our own hacked Gravatar
 from core.gravatar_hack import Gravatar
@@ -126,6 +127,14 @@ csrf = CSRFProtect(app)
 
 app.config['GOOGLEMAPS_KEY'] = GOOGLE_MAPS_API_KEY
 GoogleMaps(app)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add Proxy fix, so we can get source IP address from behind NGINX
+# -------------------------------------------------------------------------------------------------------------- #
+
+# App is behind one proxy that sets the -For and -Host headers.
+app.wsgi_app = ProxyFix(app, x_for=1, x_host=1)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
