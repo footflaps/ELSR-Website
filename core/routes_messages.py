@@ -283,6 +283,7 @@ def reply_message(message_id):
 
     # Try and send it
     if Message().add_message(new_message):
+        # Success!
         app.logger.debug(f"reply_message(): User '{current_user.email}' has sent message "
                          f"to '{message.from_email}', body = '{body}'.")
         Event().log_event("Message Reply Success", f" User '{current_user.name}' has sent message "
@@ -302,20 +303,15 @@ def reply_message(message_id):
 # Send message to Admin
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/message_admin', methods=['GET', 'POST'])
+@app.route('/message_admin/<int:user_id>', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def message_admin():
+def message_admin(user_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-
-    try:
-        body = request.form['message']
-    except exceptions.BadRequestKeyError:
-        body = None
+    body = request.args.get('admin_message', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -341,6 +337,15 @@ def message_admin():
         return abort(404)
 
     # ----------------------------------------------------------- #
+    # Check author is correct
+    # ----------------------------------------------------------- #
+    if user_id != current_user.id:
+        # Fraudulent attempt!
+        app.logger.debug(f"message_user(): User '{current_user.email}' attempted to spoor user '{user.email}'.")
+        Event().log_event("Message Admin Fail", f"User '{current_user.email}' attempted to spoor user '{user.email}'.")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
     # Send message to Admin
     # ----------------------------------------------------------- #
 
@@ -352,6 +357,7 @@ def message_admin():
     )
 
     if Message().add_message(message):
+        # Success!
         app.logger.debug(f"message_admin(): User '{user.email}' has sent message = '{body}'")
         Event().log_event("Message Admin Success", f"Message was sent successfully.")
         flash("Your message has been forwarded to the Admin Team")
@@ -369,21 +375,16 @@ def message_admin():
 # Send message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/message_user', methods=['GET', 'POST'])
+@app.route('/message_user/<int:user_id>', methods=['GET'])
 @logout_barred_user
 @login_required
 @admin_only
 @update_last_seen
-def message_user():
+def message_user(user_id):
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-
-    try:
-        body = request.form['message']
-    except exceptions.BadRequestKeyError:
-        body = None
+    body = request.args.get('user_message', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -414,8 +415,8 @@ def message_user():
 
     # Create a new message
     message = Message(
-        from_email=user.email,
-        to_email=ADMIN_EMAIL,
+        from_email=ADMIN_EMAIL,
+        to_email=user.email,
         body=body
     )
 

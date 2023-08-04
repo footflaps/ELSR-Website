@@ -1002,7 +1002,7 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('message_admin', user_id=user.id) }}" method="post">
+				<form action="{{ url_for('message_admin', user_id=user.id) }}" method="get">
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">
@@ -1010,7 +1010,7 @@
 						Please leave a message in the box below and someone will
 						eventually get back to you. <br>NB Response times will be in accordance with the service level you are
 						paying for.</label>
-						<textarea class="form-control" name="message" rows="6"></textarea>
+						<textarea class="form-control" id="admin_message" name="admin_message" rows="6"></textarea>
 					</div>
 					
 					<div class="modal-footer">
@@ -1046,12 +1046,12 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('message_user', user_id=user.id) }}" method="post">
+				<form action="{{ url_for('message_user', user_id=user.id) }}" method="get">
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">
 						Send them a message reminding them of club rules!</label>
-						<textarea class="form-control" name="message" rows="6"></textarea>
+						<textarea class="form-control" id="user_message" name="user_message" rows="6"></textarea>
 					</div>
 					
 					<div class="modal-footer">
