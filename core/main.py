@@ -57,7 +57,7 @@ CHAINGANG_MEET = [{
 
 
 # Getting chaingang leaders
-TARGET_URL = "https://www.strava.com/segments/25278818?filter=overall"
+TARGET_URL = "https://www.strava.com/segments/31554922?filter=overall"
 
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/113.0",
@@ -86,7 +86,7 @@ class ContactForm(FlaskForm):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def get_chaingang_top10():
-    # Male leader board
+    # Overall leader board
     response = requests.get(TARGET_URL, headers=headers)
     webpage = response.text
     soup = BeautifulSoup(webpage, "lxml")
