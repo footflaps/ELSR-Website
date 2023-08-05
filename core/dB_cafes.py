@@ -161,7 +161,7 @@ class Cafe(db.Model):
             return cafes
 
     def cafe_list(self, cafes_passed):
-        # This the cafe_passed JSON string from the GPX data base and from it, returns the details of the
+        # Take the cafe_passed JSON string from the GPX data base and from it, returns the details of the
         # Cafes which were referenced in the string (referenced by id).
 
         cafes_json = json.loads(cafes_passed)
@@ -172,15 +172,17 @@ class Cafe(db.Model):
         for cafe_json in cafes_json:
             cafe_id = cafe_json['cafe_id']
             cafe = self.one_cafe(cafe_id)
-            cafe_summary = {
-                'id': cafe_id,
-                'name': cafe.name,
-                'lat': cafe.lat,
-                'lon': cafe.lon,
-                'dist_km': cafe_json['dist_km'],
-                'range_km': cafe_json['range_km'],
-            }
-            cafe_list.append(cafe_summary)
+            if cafe:
+                cafe_summary = {
+                    'id': cafe_id,
+                    'name': cafe.name,
+                    'lat': cafe.lat,
+                    'lon': cafe.lon,
+                    'dist_km': cafe_json['dist_km'],
+                    'range_km': cafe_json['range_km'],
+                    'status': cafe.active,
+                }
+                cafe_list.append(cafe_summary)
 
         return sorted(cafe_list, key=lambda x: x['range_km'])
 

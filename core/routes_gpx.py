@@ -7,13 +7,15 @@ import mpu
 import os
 from time import sleep
 from threading import Thread
+import json
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists
+from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, dynamic_graph_size, current_year, delete_file_if_exists
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -47,6 +49,11 @@ GPX_MAX_RESOLUTION_KM = 0.05
 
 # How far we display along the route for trimming start and end
 TRIM_DISTANCE_KM = 2.0
+
+# Map icon
+# The icon gets located by its centre, but really needs to have it's lower point sat on the line,
+# so frig this by moving it up a bit.
+FUDGE_FACTOR_m = 10
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -542,6 +549,10 @@ def markers_for_gpx(filename):
     return markers
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Markers for a set of cafes
+# -------------------------------------------------------------------------------------------------------------- #
+
 def markers_for_cafes(cafes):
     markers = []
     for cafe_summary in cafes:
@@ -560,6 +571,10 @@ def markers_for_cafes(cafes):
         })
     return markers
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Generate the pair of maps for editing the start and end of a ride
+# -------------------------------------------------------------------------------------------------------------- #
 
 def start_and_end_maps(filename, gpx_id):
     # Creating two separate maps:
@@ -659,6 +674,94 @@ def start_and_end_maps(filename, gpx_id):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Generate a line graph of the route's elevation
+# -------------------------------------------------------------------------------------------------------------- #
+
+def get_elevation_data(filename):
+
+    # This is what we will populate from the GPX file
+    points = []
+
+    # open our file
+    with open(filename, 'r') as gpx_file:
+        gpx_track = gpxpy.parse(gpx_file)
+
+        # ----------------------------------------------------------- #
+        #   Generate our elevation graph data set
+        # ----------------------------------------------------------- #
+        for track in gpx_track.tracks:
+            for segment in track.segments:
+
+                # Need these for working out inter sample spacing
+                last_lat = segment.points[0].latitude
+                last_lon = segment.points[0].longitude
+                total_km = 0
+
+                for point in segment.points:
+                    # Work out how far we have travelled so far...
+                    total_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+
+                    points.append({
+                        'x': round(total_km, 1),
+                        'y': round(point.elevation, 1)
+                    })
+
+                    last_lat = point.latitude
+                    last_lon = point.longitude
+
+    return points
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Generate icons for the cafes which match route elevation
+# -------------------------------------------------------------------------------------------------------------- #
+
+def get_cafe_heights(cafe_list, elevation_data):
+    # This is what we will return
+    cafe_elevation_data = []
+
+    for cafe in cafe_list:
+        # Extract the name and distance
+        cafe_name = cafe['name']
+        cafe_dist = float(cafe['range_km'])
+
+        closet_km = 100
+        elevation = 0
+
+        # Now find elevation...
+        for point in elevation_data:
+            dist_km = abs(float(point['x']) - cafe_dist)
+            if dist_km < closet_km:
+                closet_km = dist_km
+                elevation = point['y']
+
+        cafe_elevation_data.append({
+            'name': cafe_name,
+            'coord':
+                {
+                    'x': cafe_dist,
+                    'y': elevation + FUDGE_FACTOR_m
+                }
+        })
+
+    # cafe_elevation_data = [{'name': 'cafe 1', 'coord': {'x':30, 'y':10}},
+    #                        {'name': 'cafe 2', 'coord': {'x':50, 'y':20}},
+    #                        {'name': 'cafe 3', 'coord': {'x':70, 'y':30}},
+    #                        {'name': 'cafe 4', 'coord': {'x':90, 'y':40}}]
+
+    return cafe_elevation_data
+
+# cafe_summary = {
+#                     'id': cafe_id,
+#                     'name': cafe.name,
+#                     'lat': cafe.lat,
+#                     'lon': cafe.lon,
+#                     'dist_km': cafe_json['dist_km'],
+#                     'range_km': cafe_json['range_km'],
+#                 }
+
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # html routes
@@ -709,17 +812,15 @@ def gpx_details(gpx_id):
     # Tortuous logic as a non logged-in user doesn't have any of our custom attributes eg email etc
     if not gpx.public() and \
        not current_user.is_authenticated:
-        app.logger.debug(
-            f"gpx_details(): Refusing permission for non logged in user to see hidden GPX route '{gpx.id}'.")
-        Event().log_event("One GPX Fail", f"Refusing permission for non logged in user to see "
-                                          f"hidden GPX route, gpx_id = '{gpx_id}'.")
+        app.logger.debug(f"gpx_details(): Refusing permission for non logged in user and hidden route '{gpx_id}'.")
+        Event().log_event("One GPX Fail", f"Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         return abort(403)
 
     elif not gpx.public() and \
          current_user.email != gpx.email and \
          not current_user.admin():
-        app.logger.debug(
-            f"gpx_details(): Refusing permission for user '{current_user.email}' to see hidden GPX route '{gpx.id}'!")
+        app.logger.debug(f"gpx_details(): Refusing permission for user '{current_user.email}' to see "
+                         f"hidden GPX route '{gpx.id}'!")
         Event().log_event("One GPX Fail", f"Refusing permission for user {current_user.email} to see "
                                           f"hidden GPX route, gpx_id = '{gpx_id}'.")
         return abort(403)
@@ -743,7 +844,7 @@ def gpx_details(gpx_id):
         app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
         Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
         flash("Sorry, we seem to have lost that GPX file!")
-        flash("Somebody should probably fire the web developer...")
+        flash("Someone should probably fire the web developer...")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -761,6 +862,13 @@ def gpx_details(gpx_id):
     )
 
     # ----------------------------------------------------------- #
+    # Get elevation data
+    # ----------------------------------------------------------- #
+    elevation_data = get_elevation_data(filename)
+    cafe_elevation_data = get_cafe_heights(cafe_list, elevation_data)
+    graph_width = dynamic_graph_size()
+
+    # ----------------------------------------------------------- #
     # Flag if hidden
     # ----------------------------------------------------------- #
     if not gpx.public():
@@ -768,7 +876,8 @@ def gpx_details(gpx_id):
 
     # Render in main index template
     return render_template("gpx_details.html", gpx=gpx, year=current_year, sndmap=sndmap,
-                           author=author, cafe_list=cafe_list)
+                           author=author, cafe_list=cafe_list, elevation_data=elevation_data,
+                           cafe_elevation_data=cafe_elevation_data, graph_width=graph_width)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

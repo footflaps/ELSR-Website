@@ -3,14 +3,22 @@
 
 {% block content %}
 
-<!---------------------------------------------------------------------------------------------------->
-<!--                                    Set up Google Maps                                          -->
-<!---------------------------------------------------------------------------------------------------->
-
 <head>
-	<!-- Google Maps -->
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                    Set up Google Maps                                          -->
+	<!---------------------------------------------------------------------------------------------------->
+	
 	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
 	{{sndmap.js}}
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                Load JavaScript for chart.js                                    -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	
 </head>
 
 
@@ -149,7 +157,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 	
-            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view of {{ gpx.name }} route</h2>
+            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view of route '{{ gpx.name }}'</h2>
             
             {{sndmap.html}}
 			
@@ -162,7 +170,83 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--               Owner / Admin control panel - Show after if public                               -->
+<!--                             Show elevation graph of the route                                  -->
+<!---------------------------------------------------------------------------------------------------->
+
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Elevation view of route '{{ gpx.name }}'</h2>
+			
+			<div style="height: 300px; width: {{ graph_width }};">
+				<canvas id="myChart"></canvas>
+			</div>
+			<script>
+			
+				var custom_icon = new Image();
+                custom_icon.src = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+		 
+		        const data = {
+		            datasets: [
+			           {% for cafe in cafe_elevation_data %}
+	                       {
+		                        label: '{{ cafe['name']  | tojson }}',
+		                        pointStyle: [custom_icon],
+		                        data: {{ [cafe['coord']] | tojson }},
+		                    },
+	                    {% endfor %}
+	                    {
+	                        label: 'Dist (km), Elevation (m)',
+	                        pointStyle: 'false',
+	                        radius: 0,
+	                        tension: 3,
+	                        showLine: true,
+	                        data: {{ elevation_data | tojson }},
+	                        backgroundColor: 'rgb(255, 99, 132)',
+	                        borderColor: 'rgb(255, 99, 132)'
+	                    },
+                    ],
+				};
+
+	            const config = {
+					  type: 'scatter',
+					  data: data,
+					  options: {
+					        maintainAspectRatio: false,
+					        scales: {
+					            x: {
+					                type: 'linear',
+					                position: 'bottom'
+					            },
+					        },
+					        plugins: {
+		                       legend: {
+	                                display: false
+                               }
+					        }
+					  }
+				};
+	        
+		        
+		        const myChart = new Chart(
+		            document.getElementById('myChart'),
+		            config
+		        );
+	         
+	        </script>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                     Owner / Admin control panel - Show after if public                         -->
 <!---------------------------------------------------------------------------------------------------->
 
 {% if not current_user.is_authenticated: %}
@@ -175,7 +259,6 @@
 {% elif (current_user.email == gpx.email or current_user.admin()) and gpx.public(): %}
 	
 	<!-- Logged in and either admin or owner and route is public -->
-
 
 	<div class="container">
 		<div class="row">
