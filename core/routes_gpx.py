@@ -711,11 +711,13 @@ def get_elevation_data(filename):
 
     return points
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Generate icons for the cafes which match route elevation
 # -------------------------------------------------------------------------------------------------------------- #
 
 def get_cafe_heights(cafe_list, elevation_data):
+
     # This is what we will return
     cafe_elevation_data = []
 
@@ -724,16 +726,22 @@ def get_cafe_heights(cafe_list, elevation_data):
         cafe_name = cafe['name']
         cafe_dist = float(cafe['range_km'])
 
+        # Find closest point in terms of distance along the route and then
+        # use the elevation of that point for the cafe icon.
         closet_km = 100
         elevation = 0
 
         # Now find elevation...
         for point in elevation_data:
-            dist_km = abs(float(point['x']) - cafe_dist)
-            if dist_km < closet_km:
-                closet_km = dist_km
+
+            # Delta between distance along route of this point and our cafe's distance along the route
+            delta_km = abs(float(point['x']) - cafe_dist)
+            if delta_km < closet_km:
+                # New closest point
+                closet_km = delta_km
                 elevation = point['y']
 
+        # Have all we need for this cafe's entry
         cafe_elevation_data.append({
             'name': cafe_name,
             'coord':
@@ -743,22 +751,7 @@ def get_cafe_heights(cafe_list, elevation_data):
                 }
         })
 
-    # cafe_elevation_data = [{'name': 'cafe 1', 'coord': {'x':30, 'y':10}},
-    #                        {'name': 'cafe 2', 'coord': {'x':50, 'y':20}},
-    #                        {'name': 'cafe 3', 'coord': {'x':70, 'y':30}},
-    #                        {'name': 'cafe 4', 'coord': {'x':90, 'y':40}}]
-
     return cafe_elevation_data
-
-# cafe_summary = {
-#                     'id': cafe_id,
-#                     'name': cafe.name,
-#                     'lat': cafe.lat,
-#                     'lon': cafe.lon,
-#                     'dist_km': cafe_json['dist_km'],
-#                     'range_km': cafe_json['range_km'],
-#                 }
-
 
 
 # -------------------------------------------------------------------------------------------------------------- #
