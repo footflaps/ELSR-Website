@@ -72,7 +72,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
-				<h2 style="font-size: 30px; margin-top: 10px; margin-bottom: 10px;">Route management</h2>
+				<h2 style="margin-top: 10px; margin-bottom: 10px;">Route management</h2>
 				
 				<div class="clearfix">
 				
@@ -112,7 +112,7 @@
 	
             <div class="clearfix">
                
-                <h2 style="font-size: 30px; text-align:left;float:left;">Route details</h2>
+                <h2 style="text-align:left;float:left;">Route details</h2>
 	            
 	            <!-- Download button -->
 	            {% if current_user.is_authenticated: %}
@@ -157,7 +157,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 	
-            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view of route '{{ gpx.name }}'</h2>
+            <h2 style="margin-top: 30px; margin-bottom: 10px;">Map view of route '{{ gpx.name }}'</h2>
             
             {{sndmap.html}}
 			
@@ -178,7 +178,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Elevation view of route '{{ gpx.name }}'</h2>
+			<h2 style="margin-top: 30px; margin-bottom: 10px;">Elevation view of route '{{ gpx.name }}'</h2>
 			
 			<div style="height: 300px; width: {{ graph_width }};">
 				<canvas id="myChart"></canvas>

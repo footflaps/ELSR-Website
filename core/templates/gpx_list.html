@@ -56,7 +56,7 @@
 			
 			<!-- Link to route planning guide -->
 			<h2 class="text-center"
-			    style="font-size: 30px; margin-bottom: 10px;">
+			    style="margin-bottom: 10px;">
 				<a href="{{ url_for('plan') }}">
 					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
 					How to choose a suitable route
@@ -71,7 +71,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto my-3">
 			
-			<h2 class="float-left pt-3" style="font-size: 30px;">Route List</h2>
+			<h2 class="float-left pt-3">Route List</h2>
    
 			<!-- Check they have permission -->
 			{% if current_user.is_authenticated and current_user.can_post_gpx() %}

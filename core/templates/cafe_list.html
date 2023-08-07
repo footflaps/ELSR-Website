@@ -59,7 +59,7 @@
 			
 			<!-- Link to route planning guide -->
 			<h2 class="text-center"
-			    style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">
+			    style="margin-top: 30px; margin-bottom: 10px;">
 				<a href="{{ url_for('plan') }}">
 					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
 					How to choose a suitable route
@@ -73,7 +73,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
     
-            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view of {{ cafes | count() }} cafes</h2>
+            <h2 style="margin-top: 30px; margin-bottom: 10px;">Map view of {{ cafes | count() }} cafes</h2>
             
             {{cafemap.html}}
 			

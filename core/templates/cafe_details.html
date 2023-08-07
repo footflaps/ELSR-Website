@@ -85,7 +85,7 @@
 	
 			
 			
-            <h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">Map view {{cafe.name}}</h2>
+            <h2 style="margin-top: 30px; margin-bottom: 10px;">Map view {{cafe.name}}</h2>
             
             {{cafemap.html}}
 			
@@ -224,7 +224,7 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 	
-				<h2 style="font-size: 30px; margin-top: 30px; margin-bottom: 10px;">
+				<h2 style="margin-top: 30px; margin-bottom: 10px;">
 					Map view of routes passing {{cafe.name}}
 				</h2>
 	            {{gpxmap.html}}
@@ -249,11 +249,11 @@
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto mb-3">
 	
 			{% if gpxes | count == 0 %}
-				<h2 class="float-left" style="font-size: 30px; margin-bottom: 10px;">Currently, no routes pass near cafe</h2>
+				<h2 class="float-left" style="margin-bottom: 10px;">Currently, no routes pass near cafe</h2>
             {% elif gpxes | count == 1 %}
-				<h2 class="float-left" style="font-size: 30px; margin-bottom: 10px;">{{ gpxes | count }} route passes cafe</h2>
+				<h2 class="float-left" style="margin-bottom: 10px;">{{ gpxes | count }} route passes cafe</h2>
             {% else %}
-				<h2 class="float-left" style="font-size: 30px; margin-bottom: 10px;">{{ gpxes | count }} routes pass cafe</h2>
+				<h2 class="float-left" style="margin-bottom: 10px;">{{ gpxes | count }} routes pass cafe</h2>
             {% endif %}
 			
 			{% if gpxes | count != 0 %}
@@ -336,7 +336,7 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 				
-				<h2 class="float-left" style="font-size: 30px;">No Comments</h2>
+				<h2 class="float-left">No Comments</h2>
 				
 				{% if current_user.is_authenticated: %}
 					<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseComment" role="button"
@@ -353,7 +353,7 @@
 		<!-- List the comments -->
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-				<h2 style="font-size: 30px;">Comments on {{cafe.name}}:</h2>
+				<h2>Comments on {{cafe.name}}:</h2>
 			</div>
 		</div>
 	
