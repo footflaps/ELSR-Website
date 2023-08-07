@@ -54,14 +54,14 @@
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                           CSS                                                  -->
+	<!--                                              CSS                                               -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	<!-- Standard Bootstrap 3 pack -->
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+	<!-- Bootstrap 4 CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css" />
 	
-	<!-- dataTables Bootstrap 3 pack -->
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap.min.css" />
+	<!-- dataTables Bootstrap 4 CSS -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css" />
 	
 	<!-- This is a customised Bootstrap pack which must be loaded last -->
 	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
@@ -99,7 +99,7 @@
 
 	
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                        Java scripts                                            -->
+	<!--                                        Java scripts        (NEW)                                    -->
 	<!---------------------------------------------------------------------------------------------------->
 	
 	<!-- jQuery -->
@@ -115,6 +115,16 @@
 	<!-- Custom scripts -->
 	<script src="{{ url_for('static', filename='js/clean-blog.min.js')}}"></script>
 	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                        Java scripts           (OLD)                                  -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<!-- Bootstrap pack -->
+	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+	
+	<!-- Custom styles -->
+	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
@@ -310,20 +320,6 @@
 	</footer>
 	
 	
-	<!---------------------------------------------------------------------------------------------------->
-	<!--                                  Bootstrap core JavaScript                                     -->
-	<!---------------------------------------------------------------------------------------------------->
-
-	
-<!--	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>-->
-	
-	<!---------------------------------------------------------------------------------------------------->
-	<!--                              Custom scripts for this template                                  -->
-	<!---------------------------------------------------------------------------------------------------->
-	
-	
-
-
 	<!---------------------------------------------------------------------------------------------------->
 	<!--                                   Page can insert scripts here                                 -->
 	<!---------------------------------------------------------------------------------------------------->

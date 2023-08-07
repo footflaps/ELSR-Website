@@ -38,140 +38,162 @@
 {% endwith %}
 
 
+
 <!---------------------------------------------------------------------------------------------------->
 <!--                                        Messages                                                -->
 <!---------------------------------------------------------------------------------------------------->
 
 {% if messages %}
-
-<a name="messages" ></a>
-<div class="container">
-	<div class="row">
-		<div class="col-10 mx-auto">
-			
-			<h2>Admin Messages</h2>
-			
-			<div class="accordion" id="accordionExample">
+	<div class="container">
+		<div class="row mb-3">
+			<div class="col-lg-8 col-md-10 mx-auto">
+		
+				{% if messages | count == 1 %}
+					<h2 class="post-title float-left">You have {{ messages | count }} Message:</h2>
+				{% else %}
+					<h2 class="post-title float-left">You have {{ messages | count }} Messages:</h2>
+				{% endif %}
 				
-				{% for message in messages %}
-				
-					<!------------------------------------------------------>
-					<!--                   One Message                    -->
-					<!------------------------------------------------------>
-					<div class="card">
-						
-						<!-- Header -->
-						<div class="card-header" id="heading{{loop.index}}">
-							<h5 class="mb-0">
-								<!-- Show different icon / button if read / unread -->
-								{% if message.been_read() %}
-									<button class="btn-sm btn-secondary mr-2" type="button" data-toggle="collapse" data-target="#collapse{{loop.index}}"
-								            aria-expanded="true" aria-controls="collapse{{loop.index}}">
-										<i class="fa-regular fa-envelope-open fa-xl"></i>
-										Message {{loop.index}}
-									</button>
-								{% else %}
-									<button class="btn-sm btn-primary mr-2" type="button" data-toggle="collapse" data-target="#collapse{{loop.index}}"
-								            aria-expanded="true" aria-controls="collapse{{loop.index}}">
-										<i class="fa-regular fa-envelope fa-xl"></i>
-										Message {{loop.index}}
-									</button>
-								{% endif %}
-							</h5>
-						</div>
-						
-						<!-- Body -->
-						<div id="collapse{{loop.index}}" class="collapse" aria-labelledby="heading{{loop.index}}"
-						     data-parent="#accordionExample">
-							<div class="card-body">
-								<strong>From: {{ message.from_name }}</strong><br>
-								<strong>Date: {{ message.sent_date }}</strong><br>
-								{{ message.body }}
-								
-								<hr>
-								
-								<!-- Reply Button -->
-								<a data-toggle="modal" data-target="#replyMessageModal{{message.id}}">
-									<button class="btn-sm btn-primary mr-2" type="button">Reply</button>
-								</a>
-								
-								<!-- Mark read / unread buttons -->
-								{% if message.been_read() %}
-									<a href="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
-										<button class="btn-sm btn-secondary mr-2" type="button">Mark as unRead</button>
-									</a>
-								{% else %}
-									<a href="{{ url_for('mark_read', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
-										<button class="btn-sm btn-secondary mr-2" type="button">Mark as Read</button>
-									</a>
-								{% endif %}
-								
-								<!-- Delete Button -->
-								<a href="{{ url_for('delete_message', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
-									<button class="btn-sm btn-danger float-right" type="button">Delete</button>
-								</a>
-								
-							</div>
-						</div>
-					
-					</div>
-
-					<!------------------------------------------------------>
-					<!--                 End of One Message               -->
-					<!------------------------------------------------------>
-				
-					<!---------------------------------------------------------------------------------------------------->
-					<!--                              Modal form for Reply to Message                                   -->
-					<!---------------------------------------------------------------------------------------------------->
-					
-					<div class="modal fade" id="replyMessageModal{{message.id}}" tabindex="-1" role="dialog"
-					     aria-labelledby="exampleModalLabel" aria-hidden="true">
-						<div class="modal-dialog" role="document">
-							<div class="modal-content">
-								<div class="modal-header">
-									<h5 class="modal-title" id="replyMessageLabel{{message.id}}">Can't let someone else have the last word?</h5>
-									
-									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-										<span aria-hidden="true">&times;</span>
-									</button>
-								</div>
-								<div class="modal-body">
-									<!--
-										NB To get the two parameters use:
-											1. gpx_id = request.args.get('gpx_id', None)
-					                        2. confirm = request.form['confirm']
-									-->
-									<form action="{{ url_for('reply_message', message_id=message.id) }}" method="GET">
-										
-										<div class="form-group">
-											<label for="body" class="col-form-label">
-												If you really must, enter your message here:
-											</label>
-											<textarea class="form-control" name="body" id="body" rows="6"></textarea>
-										</div>
-										
-										<div class="modal-footer">
-											<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-											<button type="submit" class="btn btn-primary">MUST HAVE LAST WORD</button>
-										</div>
-										
-									</form>
-								</div>
-							</div>
-						</div>
-					</div>  <!-- End of modal form -->
-				
-				{% endfor %}
+				<!-- Button to expose hidden table -->
+				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseMessageList"
+				   role="button" aria-expanded="false" aria-controls="collapseExample">
+	                   SHOW
+	            </a>
 				
 			</div>
-			
-			<!-- Break before next section -->
-			<hr>
+		</div>
+
+		<div class="collapse" id="collapseMessageList">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+	
+					<div class="accordion" id="accordionExample">
+				
+						{% for message in messages %}
+						
+							<!------------------------------------------------------>
+							<!--                   One Message                    -->
+							<!------------------------------------------------------>
+							<div class="card">
+								
+								<!-- Header -->
+								<div class="card-header" id="heading{{loop.index}}">
+									<h5 class="mb-0">
+										<!-- Show different icon / button if read / unread -->
+										{% if message.been_read() %}
+											<button class="btn-sm btn-secondary mr-2" type="button" data-toggle="collapse" data-target="#collapse{{loop.index}}"
+										            aria-expanded="true" aria-controls="collapse{{loop.index}}">
+												<i class="fa-regular fa-envelope-open fa-xl"></i>
+												Message {{loop.index}}
+											</button>
+										{% else %}
+											<button class="btn-sm btn-primary mr-2" type="button" data-toggle="collapse" data-target="#collapse{{loop.index}}"
+										            aria-expanded="true" aria-controls="collapse{{loop.index}}">
+												<i class="fa-regular fa-envelope fa-xl"></i>
+												Message {{loop.index}}
+											</button>
+										{% endif %}
+									</h5>
+								</div>
+								
+								<!-- Body -->
+								<div id="collapse{{loop.index}}" class="collapse" aria-labelledby="heading{{loop.index}}"
+								     data-parent="#accordionExample">
+									<div class="card-body">
+										<strong>From: {{ message.from_name }}</strong><br>
+										<strong>Date: {{ message.sent_date }}</strong><br>
+										{{ message.body }}
+										
+										<hr>
+										
+										<!-- Reply Button -->
+										<a data-toggle="modal" data-target="#replyMessageModal{{message.id}}">
+											<button class="btn-sm btn-primary mr-2" type="button">Reply</button>
+										</a>
+										
+										<!-- Mark read / unread buttons -->
+										{% if message.been_read() %}
+											<a href="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
+												<button class="btn-sm btn-secondary mr-2" type="button">Mark as unRead</button>
+											</a>
+										{% else %}
+											<a href="{{ url_for('mark_read', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
+												<button class="btn-sm btn-secondary mr-2" type="button">Mark as Read</button>
+											</a>
+										{% endif %}
+										
+										<!-- Delete Button -->
+										<a href="{{ url_for('delete_message', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
+											<button class="btn-sm btn-danger float-right" type="button">Delete</button>
+										</a>
+										
+									</div>
+								</div>
+							
+							</div>
+		
+							<!------------------------------------------------------>
+							<!--                 End of One Message               -->
+							<!------------------------------------------------------>
+						
+							<!---------------------------------------------------------------------------------------------------->
+							<!--                              Modal form for Reply to Message                                   -->
+							<!---------------------------------------------------------------------------------------------------->
+							
+							<div class="modal fade" id="replyMessageModal{{message.id}}" tabindex="-1" role="dialog"
+							     aria-labelledby="exampleModalLabel" aria-hidden="true">
+								<div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="replyMessageLabel{{message.id}}">Can't let someone else have the last word?</h5>
+											
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<div class="modal-body">
+											<!--
+												NB To get the two parameters use:
+													1. gpx_id = request.args.get('gpx_id', None)
+							                        2. confirm = request.form['confirm']
+											-->
+											<form action="{{ url_for('reply_message', message_id=message.id) }}" method="GET">
+												
+												<div class="form-group">
+													<label for="body" class="col-form-label">
+														If you really must, enter your message here:
+													</label>
+													<textarea class="form-control" name="body" id="body" rows="6"></textarea>
+												</div>
+												
+												<div class="modal-footer">
+													<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+													<button type="submit" class="btn btn-primary">MUST HAVE LAST WORD</button>
+												</div>
+												
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>  <!-- End of modal form -->
+						
+						{% endfor %}
+					
+					</div> <!-- end of accordian -->
+				</div> <!-- end of col -->
+			</div> <!-- row -->
 			
 		</div>
-	</div>
-</div>
+	
+		<!-- Separator before next section -->
+		<div class="row mb-3">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<hr>
+			</div>
+		</div>
 
+	</div>
+	
 {% endif %}
 
 

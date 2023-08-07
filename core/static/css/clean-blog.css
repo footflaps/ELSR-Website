@@ -408,6 +408,7 @@ footer .copyright {
 }
 
 
+/* Define style for the Find File box */
 
 input[type=file]::file-selector-button {
   color: #fff;
@@ -434,6 +435,7 @@ input[type=file]::file-selector-button:hover {
 }
 
 
+/* Format Bootstrap's button */
 
 .btn {
   font-size: 14px;
