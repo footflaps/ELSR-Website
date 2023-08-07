@@ -15,7 +15,7 @@ from PIL import Image
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists
+from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists, is_mobile
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -225,7 +225,7 @@ def cafe_list():
     )
 
     # Render in main index template
-    return render_template("cafe_list.html", year=current_year, cafes=cafes, cafemap=cafemap)
+    return render_template("cafe_list.html", year=current_year, cafes=cafes, cafemap=cafemap, mobile=is_mobile())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
