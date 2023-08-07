@@ -97,7 +97,9 @@
 				<!-- Header -->
 				<thead>
                     <tr>
-                        <th scope="col">#</th>
+	                    {% if not mobile %}
+                            <th scope="col">#</th>
+	                    {% endif %}
                         <th scope="col">Name</th>
                         <th scope="col">Length (km)</th>
                         <th scope="col">Ascent (m)</th>
@@ -133,7 +135,9 @@
 								<tr>
 							{% endif %}
 							
-							<td scope="row">{{loop.index}}</td>
+							{% if not mobile %}
+								<td scope="row">{{loop.index}}</td>
+							{% endif %}
 							<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{gpx.name}}</a></td>
 							<td scope="row">{{gpx.length_km}}</td>
                             <td scope="row">{{gpx.ascent_m}}</td>
