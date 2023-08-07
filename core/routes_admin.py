@@ -8,7 +8,7 @@ from werkzeug import exceptions
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year
+from core import app, current_year, is_mobile
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -110,11 +110,11 @@ def admin_page():
             or anchor == "eventLog":
         # Jump straight to the 'eventlog'
         return render_template("admin_page.html",  year=current_year, users=users, messages=messages,
-                               events=events, days=days, anchor="eventLog")
+                               events=events, days=days, mobile=is_mobile(), anchor="eventLog")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, users=users, messages=messages,
-                               events=events, days=days)
+                               events=events, days=days, mobile=is_mobile())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
