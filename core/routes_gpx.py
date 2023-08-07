@@ -15,7 +15,8 @@ import json
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, dynamic_graph_size, current_year, delete_file_if_exists
+from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, dynamic_graph_size, \
+                 current_year, delete_file_if_exists, is_mobile
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -775,7 +776,7 @@ def gpx_list():
     gpxes = Gpx().all_gpxes()
 
     # Render in gpx_list template
-    return render_template("gpx_list.html", year=current_year,  gpxes=gpxes)
+    return render_template("gpx_list.html", year=current_year,  gpxes=gpxes, mobile=is_mobile())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

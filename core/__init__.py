@@ -195,6 +195,13 @@ def dynamic_graph_size():
         graph_width = GRAPH_WIDTH
     return graph_width
 
+def is_mobile():
+    user_agent_details = request.user_agent.string
+    phones = ["iphone", "android", "mobile"]
+    if any(phone in user_agent_details.lower() for phone in phones):
+        return True
+    return False
+
 
 def delete_file_if_exists(filename):
     if os.path.exists(filename):
