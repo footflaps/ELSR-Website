@@ -578,6 +578,9 @@ def markers_for_cafes(cafes):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def start_and_end_maps(filename, gpx_id):
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
+
     # Creating two separate maps:
     start_markers = []
     end_markers = []
