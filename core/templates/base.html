@@ -60,6 +60,9 @@
 	<!-- Bootstrap pack -->
 	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 	
+	<!-- jQuery Tables -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+	
 	<!-- Custom styles -->
 	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
 	
@@ -91,6 +94,16 @@
 		  gtag('config', 'G-N0RJH2LSDC');
 	</script>
 
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                         Load jQuery                                            -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	
+	<!-- This does our tables -->
+	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+	
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
@@ -290,9 +303,9 @@
 	<!--                                  Bootstrap core JavaScript                                     -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	<script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>
+<!--	<script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>-->
+	
 	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
-
 	
 	<!---------------------------------------------------------------------------------------------------->
 	<!--                              Custom scripts for this template                                  -->
