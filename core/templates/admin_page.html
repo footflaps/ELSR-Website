@@ -267,8 +267,10 @@
 						<tr>
 							<th scope="col">ID</th>
 							<th scope="col">Name</th>
-							<th scope="col">Permissions</th>
-							<th scope="col">Start date</th>
+							<th scope="col">Perm.</th>
+							{% if not mobile %}
+								<th scope="col">Start date</th>
+							{% endif %}
 							<th scope="col">Last Login</th>
 						</tr>
 					</thead>
@@ -293,7 +295,9 @@
 								<td scope="row">{{user.id}}</td>
 								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
 								<td>{{user.permissions}}</td>
-								<td>{{user.start_date}}</td>
+								{% if not mobile %}
+									<td>{{user.start_date}}</td>
+								{% endif %}
 								<td>{{user.last_login}} ({{user.last_login_ip}})</td>
 							</tr>
 							
