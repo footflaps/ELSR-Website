@@ -275,17 +275,26 @@
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<div class="collapse" id="collapseRoutes">
 				
-			        <table class="table table-striped table-bordered table-sm table-condensed">
-			
-						<!-- Header -->
+					{% if mobile %}
+						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed">
+					{% else %}
+						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
+					                         style="width: 730px">
+					{% endif %}
+					
+			        	<!-- Header -->
 						<thead>
 	                        <tr>
-		                        <th scope="col">#</th>
+		                        {% if not mobile %}
+		                            <th scope="col">#</th>
+		                        {% endif %}
 	                            <th scope="col">Name</th>
 	                            <th scope="col">Length (km)</th>
 	                            <th scope="col">Ascent (m)</th>
 	                            <th scope="col">Cafe is at (km)</th>
-		                        <th scope="col">Deviation to cafe (km)</th>
+		                        {% if not mobile %}
+		                            <th scope="col">Deviation to cafe (km)</th>
+		                        {% endif %}
 		                    </tr>
 	                    </thead>
 				
@@ -296,12 +305,20 @@
 								{% else %}
 									<tr class="table-warning">
 								{% endif %}
-									<th scope="row">{{loop.index}}</th>
-									<td><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{gpx.name}}</a></td>
-									<th scope="row">{{gpx.length_km}}</th>
-	                                <td>{{gpx.ascent_m}}</td>
-	                                <td>{{gpx.cafes_passed['range_km']}}</td>
-									<td>{{gpx.cafes_passed['dist_km']}}</td>
+									{% if not mobile %}
+										<th scope="row">{{ loop.index }}</th>
+									{% endif %}
+									<td>
+										<a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">
+											{{ gpx.name }}
+										</a>
+									</td>
+									<th scope="row">{{ gpx.length_km }}</th>
+	                                <td>{{ gpx.ascent_m }}</td>
+	                                <td>{{ gpx.cafes_passed['range_km'] }}</td>
+									{% if not mobile %}
+										<td>{{ gpx.cafes_passed['dist_km'] }}</td>
+									{% endif %}
 						        </tr>
 					
 							{% endfor %}
@@ -549,6 +566,21 @@
 		</div>
 	</div>
 </div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                               Activate jQuery on the Table                                     -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	$(document).ready( function () {
+		$('#gpxTable').DataTable({
+			pageLength: 20
+		})
+	} );
+	
+</script>
 
 {% endblock %}
 
