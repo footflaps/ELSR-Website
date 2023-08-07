@@ -283,8 +283,12 @@
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">
 				
-					<table class="table table-striped table-bordered table-sm">
-		
+					{% if mobile %}
+						<table id="cafeTable" class="table table-striped table-bordered table-condensed">
+					{% else %}
+						<table id="cafeTable" class="table table-striped table-bordered" style="width: 730px">
+					{% endif %}
+					
 						<!-- Header row-->
 						<thead>
 		                    <tr>
@@ -370,8 +374,12 @@
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">
 				
-					<table class="table table-striped table-bordered table-sm">
-		
+					{% if mobile %}
+						<table id="gpxTable" class="table table-striped table-bordered table-condensed">
+					{% else %}
+						<table id="gpxTable" class="table table-striped table-bordered" style="width: 730px">
+					{% endif %}
+					
 						<!-- Header -->
 						<thead>
 		                    <tr>
@@ -458,7 +466,11 @@
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">
 				
-					<table class="table table-striped table-bordered table-sm">
+					{% if mobile %}
+						<table id="commentTable" class="table table-striped table-bordered table-condensed">
+					{% else %}
+						<table id="commentTable" class="table table-striped table-bordered" style="width: 730px">
+					{% endif %}
 				
 						<!-- Header -->
 						<thead>
@@ -589,7 +601,13 @@
 					
 				</div>
 				
-				<table class="table table-striped table-bordered table-sm">
+				<div class="col-lg-8 col-md-10 mx-auto">
+				
+				{% if mobile %}
+					<div id="eventTable" class="table table-striped table-bordered table-condensed">
+				{% else %}
+					<table id="eventTable" class="table table-striped table-bordered" style="width: 730px">
+				{% endif %}
 				
 					<!-- Header -->
 					<thead>
@@ -625,7 +643,9 @@
 					</tbody>
 				
 				</table>
-			
+				
+				</div>
+				
 			</div>
 		</div>
 		
@@ -788,6 +808,23 @@
 		// Jump to anchor
         window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
 	{% endif %}
+	
+	
+</script>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                               Activate jQuery on the Tables                                    -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	$(document).ready( function () {
+		$('#cafeTable').DataTable();
+		$('#gpxTable').DataTable();
+		$('#commentTable').DataTable();
+		$('#eventTable').DataTable()
+	} );
 	
 </script>
 

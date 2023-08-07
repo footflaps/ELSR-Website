@@ -11,7 +11,7 @@ import os
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, dynamic_map_size, current_year
+from core import app, dynamic_map_size, current_year, is_mobile
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -586,12 +586,12 @@ def user_page():
     if event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafemap=cafemap, cafe_comments=cafe_comments, messages=messages,
-                               events=events, days=days, anchor="eventLog")
+                               events=events, days=days, anchor="eventLog", mobile=is_mobile())
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafemap=cafemap, cafe_comments=cafe_comments, messages=messages,
-                               events=events, days=days)
+                               events=events, days=days, mobile=is_mobile())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
