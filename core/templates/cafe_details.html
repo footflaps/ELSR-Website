@@ -85,7 +85,7 @@
 	
 			
 			
-            <h2 style="margin-top: 30px; margin-bottom: 10px;">Map view {{cafe.name}}</h2>
+            <h2 class="my-3">Map view {{cafe.name}}</h2>
             
             {{cafemap.html}}
 			
@@ -224,7 +224,7 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 	
-				<h2 style="margin-top: 30px; margin-bottom: 10px;">
+				<h2 class="my-3">
 					Map view of routes passing {{cafe.name}}
 				</h2>
 	            {{gpxmap.html}}
@@ -249,11 +249,11 @@
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto mb-3">
 	
 			{% if gpxes | count == 0 %}
-				<h2 class="float-left" style="margin-bottom: 10px;">Currently, no routes pass near cafe</h2>
+				<h2 class="float-left mb-2">Currently, no routes pass near cafe</h2>
             {% elif gpxes | count == 1 %}
-				<h2 class="float-left" style="margin-bottom: 10px;">{{ gpxes | count }} route passes cafe</h2>
+				<h2 class="float-left mb-2">{{ gpxes | count }} route passes cafe</h2>
             {% else %}
-				<h2 class="float-left" style="margin-bottom: 10px;">{{ gpxes | count }} routes pass cafe</h2>
+				<h2 class="float-left mb-2">{{ gpxes | count }} routes pass cafe</h2>
             {% endif %}
 			
 			{% if gpxes | count != 0 %}
