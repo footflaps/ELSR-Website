@@ -125,7 +125,9 @@
 					<!-- Header -->
 					<thead>
 	                    <tr>
-		                    <th scope="col">#</th>
+		                    {% if not mobile %}
+		                        <th scope="col">#</th>
+		                    {% endif %}
 	                        <th scope="col">Name</th>
 	                        <th scope="col">Rating</th>
 	                        <th scope="col">Routes</th>
@@ -139,7 +141,9 @@
 						{% for cafe in cafes %}
 						
 							<tr>
-								<td scope="row">{{ cafe.id }}</td>
+								{% if not mobile %}
+		                        	<td scope="row">{{ cafe.id }}</td>
+								{% endif %}
 								<td scope="row">
 									<a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}">
 										{{ cafe.name }}
