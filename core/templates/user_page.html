@@ -753,11 +753,11 @@
 							<!-- Block / unBlock user -->
 							{% if user.blocked(): %}
 		                        <a href="{{ url_for('unblock_user', user_id=user.id) }}">
-									<button type="button" class="btn btn-warning my-2" >unBar</button>
+									<button type="button" class="btn btn-warning my-2" >unBan</button>
 		                        </a>
 							{% else: %}
 		                        <a data-toggle="modal" data-target="#blockUserModal">
-									<button type="button" class="btn btn-warning my-2" >Bar</button>
+									<button type="button" class="btn btn-warning my-2" >Ban User</button>
 		                        </a>
 							{% endif %}
 							
