@@ -397,7 +397,7 @@ def cafe_details(cafe_id):
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
-                               cafemap=cafemap, gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile()
+                               cafemap=cafemap, gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
