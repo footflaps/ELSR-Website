@@ -63,10 +63,10 @@
 	<!-- dataTables Bootstrap 4 CSS -->
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css" />
 	
-	<!-- This is a customised Bootstrap pack which must be loaded last -->
-	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+<!--	&lt;!&ndash; Bootstrap v4.5.0 (https://getbootstrap.com/)  &ndash;&gt;-->
+<!--	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">-->
 	
-	<!-- Custom styles -->
+	<!-- CleanBlog CSS Custom styles (must be loaded last) -->
 	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
 	
 	
@@ -99,7 +99,7 @@
 
 	
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                        Java scripts        (NEW)                                    -->
+	<!--                                        Java scripts                                            -->
 	<!---------------------------------------------------------------------------------------------------->
 	
 	<!-- jQuery -->
@@ -109,22 +109,16 @@
 	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 	<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap.min.js"></script>
 	
-	<!-- Bootstrap -->
+	
+	<!-- Bootstrap 4  doesn't work -->
+<!--	<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>-->
+	
+	<!-- Bootstrap custom from Udemy course -->
 	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
 	
-	<!-- Custom scripts -->
+	<!-- Custom scripts-->
 	<script src="{{ url_for('static', filename='js/clean-blog.min.js')}}"></script>
 	
-	
-	<!---------------------------------------------------------------------------------------------------->
-	<!--                                        Java scripts           (OLD)                                  -->
-	<!---------------------------------------------------------------------------------------------------->
-	
-	<!-- Bootstrap pack -->
-	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
-	
-	<!-- Custom styles -->
-	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
 	
 	
 	<!---------------------------------------------------------------------------------------------------->

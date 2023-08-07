@@ -198,63 +198,86 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--                                      User Tables                                               -->
+<!--                                      Admin Table                                               -->
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
+
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<!---------------------------------------------------------------------------------------->
-			<!--                               Admins                                               -->
-			<!---------------------------------------------------------------------------------------->
+			<h2 class="post-title float-left">Current Admins</h2>
 			
-			<h2>Current Admins</h2>
-			<table class="table table-bordered table-striped table-sm table-condensed">
-				
-				<!-- Header -->
-				<thead>
-					<tr>
-						<th scope="col">ID</th>
-						<th scope="col">Name</th>
-						<th scope="col">Perm.</th>
-						{% if not mobile %}
-							<th scope="col">Start date</th>
-						{% endif %}
-						<th scope="col">Last Login</th>
-					</tr>
-				</thead>
-				
-				<tbody>
-					{% for user in users: %}
-						{% if user.admin() %}
-						<tr>
-							<th scope="row">{{user.id}}</th>
-							<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
-							<td>{{user.permissions}}</td>
-							{% if not mobile %}
-								<td>{{user.start_date}}</td>
-							{% endif %}
-							<td>{{user.last_login}}  ({{user.last_login_ip}})</td>
-						</tr>
-						
-						{% endif %}
-					{% endfor %}
-				</tbody>
-			
-			</table>
-			
-			<!-- Seperator before next section -->
-			<hr>
+			<!-- Button to expose hidden table -->
+			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseAdminList"
+			   role="button" aria-expanded="false" aria-controls="collapseExample">
+	            SHOW
+	        </a>
 			
 		</div>
 	</div>
+	
+	<!-- Collapsed / Hidden table of users -->
+	<div class="collapse" id="collapseAdminList">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				
+				{% if mobile %}
+					<table id="adminTable" class="table table-striped table-bordered table-sm table-condensed">
+				{% else %}
+					<table id="asminTable" class="table table-striped table-bordered table-sm table-condensed"
+					       style="width: 730px">
+				{% endif %}
+			
+					<!-- Header -->
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">Name</th>
+							<th scope="col">Perm.</th>
+							{% if not mobile %}
+								<th scope="col">Start date</th>
+							{% endif %}
+							<th scope="col">Last Login</th>
+						</tr>
+					</thead>
+				
+					<tbody>
+						{% for user in users: %}
+							{% if user.admin() %}
+							<tr>
+								<th scope="row">{{user.id}}</th>
+								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
+								<td>{{user.permissions}}</td>
+								{% if not mobile %}
+									<td>{{user.start_date}}</td>
+								{% endif %}
+								<td>{{user.last_login}}  ({{user.last_login_ip}})</td>
+							</tr>
+							
+							{% endif %}
+						{% endfor %}
+					</tbody>
+			
+				</table>
+			
+			</div>
+		</div>
+	</div>
+	
+	<!-- Separator before next section -->
+	<div class="row mb-3">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<hr>
+		</div>
+	</div>
+	
 </div>
 
 	
-<!---------------------------------------------------------------------------------------->
-<!--                                Users                                               -->
-<!---------------------------------------------------------------------------------------->
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       User Table                                               -->
+<!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
 	
@@ -264,7 +287,7 @@
 			<h2 class="post-title float-left">Current Users</h2>
 			
 			<!-- Button to expose hidden table -->
-			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseCafeList"
+			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseUserList"
 			   role="button" aria-expanded="false" aria-controls="collapseExample">
 	            SHOW
 	        </a>
@@ -272,8 +295,8 @@
 		</div>
 	</div>
 
-	<!-- Collapsed / Hidden table of cafes -->
-	<div class="collapse" id="collapseCafeList">
+	<!-- Collapsed / Hidden table of users -->
+	<div class="collapse" id="collapseUserList">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
@@ -282,7 +305,6 @@
 				{% else %}
 					<table id="userTable" class="table table-striped table-bordered table-sm table-condensed" style="width: 730px">
 				{% endif %}
-				
 				
 					<!-- Header -->
 					<thead>
