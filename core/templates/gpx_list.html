@@ -73,7 +73,11 @@
 			{% if current_user.is_authenticated and current_user.can_post_gpx() %}
 				<a class="btn btn-primary float-right" href="{{ url_for('new_route') }}">
 					<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i>
-					Add
+					{% if mobile %}
+						Add
+					{% else %}
+						New Route
+					{% endif %}
 				</a>
 			{% endif %}
 	
@@ -153,7 +157,11 @@
 			{% if current_user.is_authenticated and current_user.can_post_gpx() %}
 				<a class="btn btn-primary float-right" href="{{ url_for('new_route') }}">
 					<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i>
-					new route
+					{% if mobile %}
+						Add
+					{% else %}
+						New Route
+					{% endif %}
 				</a>
 			{% else %}
 				<a class="btn btn-primary disabled float-right">Log in to add a route</a>
