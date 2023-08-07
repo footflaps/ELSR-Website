@@ -57,11 +57,14 @@
 	<!--                                           CSS                                                  -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	<!-- Bootstrap pack -->
-	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+	<!-- Standard Bootstrap 3 pack -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 	
-	<!-- jQuery Tables -->
-	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.css" />
+	<!-- dataTables Bootstrap 3 pack -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap.min.css" />
+	
+	<!-- This is a customised Bootstrap pack which must be loaded last -->
+	<link href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
 	
 	<!-- Custom styles -->
 	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
@@ -96,13 +99,21 @@
 
 	
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                         Load jQuery                                            -->
+	<!--                                        Java scripts                                            -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<!-- jQuery -->
+	<script src="https://code.jquery.com/jquery-3.7.0.js"></script>
 	
-	<!-- This does our tables -->
-	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.js"></script>
+	<!-- jQuery dataTables -->
+	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+	<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap.min.js"></script>
+	
+	<!-- Bootstrap -->
+	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+	
+	<!-- Custom scripts -->
+	<script src="{{ url_for('static', filename='js/clean-blog.min.js')}}"></script>
 	
 	
 	
@@ -302,16 +313,15 @@
 	<!---------------------------------------------------------------------------------------------------->
 	<!--                                  Bootstrap core JavaScript                                     -->
 	<!---------------------------------------------------------------------------------------------------->
+
 	
-<!--	<script src="{{ url_for('static', filename='vendor/jquery/jquery.min.js')}}"></script>-->
-	
-	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+<!--	<script src="{{ url_for('static', filename='vendor/bootstrap/js/bootstrap.bundle.min.js')}}"></script>-->
 	
 	<!---------------------------------------------------------------------------------------------------->
 	<!--                              Custom scripts for this template                                  -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	<script src="{{ url_for('static', filename='js/clean-blog.min.js')}}"></script>
+	
 
 
 	<!---------------------------------------------------------------------------------------------------->
