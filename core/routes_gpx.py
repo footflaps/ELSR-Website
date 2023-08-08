@@ -1513,7 +1513,7 @@ def route_download(gpx_id):
     download_name = f"ELSR_{gpx.name.replace(' ','_')}.gpx"
 
     app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
-    Event().log_event("GPX Download Success", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
+    Event().log_event("GPX Downloaded", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
     return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
                                path=os.path.basename(gpx.filename),
                                download_name=download_name)

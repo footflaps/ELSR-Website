@@ -161,7 +161,7 @@ def login():
             login_user(user, remember=True)
             # Log event after they've logged in, so current_user can have an email address
             app.logger.debug(f"login(): User logged in for '{email}'.")
-            Event().log_event("Login Success", f"User logged in, forwarding user '{user.email}' to '{session['url']}'.")
+            Event().log_event("Login", f"User logged in, forwarding user '{user.email}' to '{session['url']}'.")
 
             # Return back to cached page
             app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")

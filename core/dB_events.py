@@ -203,10 +203,6 @@ def flag_event(event_type):
     return False
 
 
-# Add this to jinja's environment, so we can use it within html templates
-app.jinja_env.globals.update(flag_event=flag_event)
-
-
 # Decide if an event is good or not (so we can colour it green in the table)
 def good_event(event_type):
     if "success" in event_type.lower():
@@ -214,8 +210,18 @@ def good_event(event_type):
     return False
 
 
+# Flag login and logout (so we can colour them yellow in the table)
+def toandfro_event(event_type):
+    if "login" in event_type.lower() \
+            or "logout" in event_type.lower():
+        return True
+    return False
+
+
 # Add this to jinja's environment, so we can use it within html templates
+app.jinja_env.globals.update(flag_event=flag_event)
 app.jinja_env.globals.update(good_event=good_event)
+app.jinja_env.globals.update(toandfro_event=toandfro_event)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
