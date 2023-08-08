@@ -365,6 +365,23 @@ def page_not_found(e):
     # note that we set the 404 status explicitly
     return render_template('404.html', year=current_year), 404
 
+
+@app.errorhandler(405)
+def method_not_allowed(e):
+    # What page were they looking for?
+    requested_route = request.path
+    users_ip = user_ip()
+
+    # Log error in event log
+    app.logger.debug(f"405: Not allowed for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("405", f"Not allowed for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
+
+    # note that we set the 405 status explicitly
+    return render_template('403.html', year=current_year), 405
+
+
 @app.errorhandler(413)
 def file_too_large(e):
     # What page were they looking for?

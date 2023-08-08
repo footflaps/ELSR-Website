@@ -206,6 +206,7 @@ app.jinja_env.globals.update(readable_date=readable_date)
 def flag_event(event_type):
     if "fail" in event_type.lower() \
             or event_type == "400" \
+            or event_type == "405" \
             or event_type == "500":
         return True
     else:
