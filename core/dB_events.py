@@ -109,6 +109,18 @@ class Event(db.Model):
             app.logger.error(f"dB.delete_events_all_days(): Failed with error code '{e.args}'.")
             return False
 
+    def delete_all_404s(self):
+        try:
+            with app.app_context():
+                events = db.session.query(Event).filter_by(type="404").all()
+                for event in events:
+                    db.session.delete(event)
+                db.session.commit()
+                return True
+        except Exception as e:
+            app.logger.error(f"dB.delete_all_404s(): Failed with error code '{e.args}'.")
+            return False
+
     def delete_event(self, event_id):
         with app.app_context():
             event = db.session.query(Event).filter_by(id=event_id).first()
@@ -181,7 +193,7 @@ with app.app_context():
 # Export some functions to jinja that we want to use inside html templates
 # -------------------------------------------------------------------------------------------------------------- #
 
-# Convert Unix timestamp to human readable date
+# Convert Unix timestamp to human-readable date
 def readable_date(timestamp):
     return datetime.utcfromtimestamp(int(timestamp)).strftime('%d%m%Y %H:%M:%S')
 

@@ -450,6 +450,13 @@
 						</button>
 					{% endif %}
 					
+					<!-- Delete 404s (Super Admin only) -->
+					{% if current_user.id == 1 %}
+						<button class="btn btn-sm btn-danger" data-toggle="modal" data-target="#delete404Modal">
+	                        Delete 404s
+						</button>
+					{% endif %}
+					
 				</div> <!-- End button group -->
 			</div> <!-- End column -->
 		</div> <!-- End row -->
@@ -581,6 +588,33 @@
 			<div class="modal-footer">
 				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
 				<a href="{{ url_for('delete_events', days=days, user_id='admin') }}" type="button" class="btn btn-danger">
+					DELETE
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                              Modal form for deleting 404s                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="delete404Modal" tabindex="-1" role="dialog" aria-labelledby="delete404Modal"
+     aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" >Delete all 404s</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				Delete all 404 events?
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+				<a href="{{ url_for('delete_404s', user_id='admin') }}" type="button" class="btn btn-danger">
 					DELETE
 				</a>
 			</div>

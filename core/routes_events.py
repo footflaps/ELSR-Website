@@ -168,3 +168,47 @@ def delete_events():
     else:
         # Should never get here, but just in case
         return redirect(request.referrer)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Delete all 404 events
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/delete_404s', methods=['GET'])
+@login_required
+@admin_only
+@update_last_seen
+def delete_404s():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    user_id = request.args.get('user_id', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"delete_404s(): Missing user_id!")
+        Event().log_event("Delete 404s Fail", f"Missing user_id!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Validate user_id (unless it's admin)
+    # ----------------------------------------------------------- #
+    if user_id != "admin":
+        app.logger.debug(f"delete_404s(): Invalid user_id = '{user_id}'.")
+        Event().log_event("Delete 404s Fail", f"Invalid user_id = '{user_id}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Delete 404 events
+    # ----------------------------------------------------------- #
+    if Event().delete_all_404s():
+        flash("Messages deleted!")
+    else:
+        # Should never get here, but...
+        app.logger.debug(f"delete_404s(): Event().delete_all_404s() failed.")
+        Event().log_event("Delete 404s Fail", f"Event().delete_all_404s() failed.")
+
+    # Back to Admin page
+    return redirect(url_for("admin_page", anchor="eventLog"))
