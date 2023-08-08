@@ -135,7 +135,6 @@ class User(UserMixin, db.Model):
     # Phone number
     phone_number = db.Column(db.String(25), unique=False)
 
-
     # ---------------------------------------------------------------------------------------------------------- #
     # User permissions
     # ---------------------------------------------------------------------------------------------------------- #
@@ -468,7 +467,6 @@ class User(UserMixin, db.Model):
 
     def make_admin(self, user_id):
         with app.app_context():
-            # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
                 try:
@@ -483,7 +481,6 @@ class User(UserMixin, db.Model):
 
     def unmake_admin(self, user_id):
         with app.app_context():
-            # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
                 if user.email in PROTECTED_USERS:
@@ -499,6 +496,17 @@ class User(UserMixin, db.Model):
                     return False
         return False
 
+    def set_phone_number(self, user_id, phone_number):
+        user = db.session.query(User).filter_by(id=user_id).first()
+        if user:
+            try:
+                user.phone_number = phone_number
+                db.session.commit()
+                return True
+            except Exception as e:
+                app.logger.error(f"dB.set_phone_number(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                return False
+        return False
 
     # Optional: this will allow each user object to be identified by its name when printed.
     # NB Names are not unique, but emails are, hence added in brackets

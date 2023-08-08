@@ -855,3 +855,65 @@ def password_reset_user():
 
     # Back to user page
     return redirect(url_for('user_page', user_id=user_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add a phone number
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/add_phone_number', methods=['POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def add_phone_number():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    user_id = request.args.get('user_id', None)
+    phone_number = request.form['phone_number']
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"add_phone_number(): Missing user_id!")
+        Event().log_event("Add Phone Fail", f"Missing user id!")
+        abort(400)
+    if not phone_number:
+        app.logger.debug(f"add_phone_number(): Missing user_id!")
+        Event().log_event("Add Phone Fail", f"Missing user id!")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(user_id)
+    if not user:
+        app.logger.debug(f"add_phone_number(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("Add Phone Fail", f"Invalid user user_id = '{user_id}'.")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access (Admin or user themselves)
+    # ----------------------------------------------------------- #
+    if int(current_user.id) != int(user_id) and \
+            not current_user.admin():
+        app.logger.debug(f"add_phone_number(): User isn't allowed "
+                         f"current_user.id='{current_user.id}', user_id='{user_id}'.")
+        Event().log_event("Add Phone Fail", f"User isn't allowed "
+                                              f"current_user.id='{current_user.id}', user_id='{user_id}'.")
+        abort(403)
+
+    # ----------------------------------------------------------- #
+    # Update phone number
+    # ----------------------------------------------------------- #
+    if User().set_phone_number(user_id, phone_number):
+        Event().log_event("Add Phone Pass", f"Phone updated for user_id='{user_id}'.")
+        flash("Your phone number has been updated.")
+    else:
+        app.logger.debug(f"add_phone_number(): User().set_phone_number() failed, user_id='{user_id}'.")
+        Event().log_event("Add Phone Fail", f"User().set_phone_number() failed, user_id='{user_id}'.")
+        flash("Sorry, something went wrong!")
+
+    # Back to user page
+    return redirect(url_for('user_page', user_id=user_id))

@@ -807,6 +807,11 @@
 						
 						{% if current_user.id == user.id : %}
 						
+		                    <!-- Update phone number -->
+			                <a data-toggle="modal" data-target="#addPhoneModal">
+			                    <button type="button" class="btn btn-secondary mx-2 my-2">Add Phone #</button>
+							</a>
+		                
 		                    <!-- Contact an admin -->
 							<a data-toggle="modal" data-target="#contactAdminModal">
 								<button type="button" class="btn btn-primary float-left my-2">Contact an Admin</button>
@@ -1153,6 +1158,50 @@
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 						<button type="submit" class="btn btn-primary">Cut that tube!</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>  <!-- End of modal form -->
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                              Modal form for add phone number                                   -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="addPhoneModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="addPhoneLabel">Add your phone number</h5>
+				
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!--
+					NB To get the two parameters use:
+						1. gpx_id = request.args.get('gpx_id', None)
+                        2. confirm = request.form['confirm']
+				-->
+				<form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
+					<div class="form-group">
+						<label for="confirm" class="col-form-label">
+						If you want SMS alerts, add your phone number!</label>
+						<textarea class="form-control" id="phone_number" name="phone_number" rows="1">{{ user.phone_number }}
+						</textarea>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+						<button type="submit" class="btn btn-primary">Fax me baby!</button>
 					</div>
 					
 				</form>
