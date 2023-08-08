@@ -132,6 +132,10 @@ class User(UserMixin, db.Model):
     reset_code = db.Column(db.Integer, unique=False)
     reset_code_timestamp = db.Column(db.Integer, unique=False)
 
+    # Phone number
+    phone_number = db.Column(db.String(25), unique=False)
+
+
     # ---------------------------------------------------------------------------------------------------------- #
     # User permissions
     # ---------------------------------------------------------------------------------------------------------- #
