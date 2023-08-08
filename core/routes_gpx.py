@@ -384,8 +384,14 @@ def check_route_name(gpx):
     # Use absolute path
     # ----------------------------------------------------------- #
     filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
+    # ----------------------------------------------------------- #
+    # Params we will add
+    # ----------------------------------------------------------- #
+
     # This is the name which will appear in the Garmin etc
     route_name = f"ELSR: {gpx.name}"
+    route_link = f"https://www.elsr.co.uk/route/{gpx.id}"
 
     # ----------------------------------------------------------- #
     # Open the file
@@ -393,17 +399,18 @@ def check_route_name(gpx):
     with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
         gpx_track = gpx_file.tracks[0]
-        current_name = gpx_track.name
-        gpx_track.name = route_name
 
-    # ----------------------------------------------------------- #
-    # Overwrite the existing file
-    # ----------------------------------------------------------- #
-    if current_name != route_name:
-        update_existing_gpx(gpx_file, filename)
-        app.logger.debug(f"check_route_name(): Updated name for GPX '{filename}' to '{route_name}'.")
-    else:
-        app.logger.debug(f"check_route_name(): No need to update name for GPX '{filename}' to '{route_name}'.")
+    # Update our params
+    gpx_file.author_name = "ELSR website"
+    gpx_file.author_link = route_link
+    gpx_file.name = route_name
+    gpx_track.name = route_name
+    gpx_track.link = route_link
+    gpx_track.type = "cycling"
+
+    # Refresh the file
+    update_existing_gpx(gpx_file, filename)
+    app.logger.debug(f"check_route_name(): Updated name for GPX '{filename}' to '{route_name}'.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
