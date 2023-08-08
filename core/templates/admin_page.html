@@ -487,27 +487,28 @@
 					
 					<tbody>
 						{% for event in events: %}
-						
-							{% if flag_event(event.type) %}
-								<tr class="table-danger">
-							{% elif good_event(event.type) %}
-								<tr class="table-success">
-							{% elif toandfro_event(event.type) %}
-								<tr class="table-warning">
-							{% else %}
-								<tr>
+							{% if not mobile or event.type != "404" %}
+							
+								{% if flag_event(event.type) %}
+									<tr class="table-danger">
+								{% elif good_event(event.type) %}
+									<tr class="table-success">
+								{% elif toandfro_event(event.type) %}
+									<tr class="table-warning">
+								{% else %}
+									<tr>
+								{% endif %}
+							
+									<td scope="row" class="small">
+										{{ event.id }}
+										<a href="{{ url_for('delete_event', event_id=event.id) }}">✘ </a>
+									</td>
+									<td class="small">{{ get_user_name(event.email) }}</td>
+									<td class="small">{{ readable_date(event.date) }}</td>
+									<td class="small">{{ event.type }}</td>
+									<td class="small">{{ event.details }}</td>
+								</tr>
 							{% endif %}
-						
-								<td scope="row" class="small">
-									{{ event.id }}
-									<a href="{{ url_for('delete_event', event_id=event.id) }}">✘ </a>
-								</td>
-								<td class="small">{{ get_user_name(event.email) }}</td>
-								<td class="small">{{ readable_date(event.date) }}</td>
-								<td class="small">{{ event.type }}</td>
-								<td class="small">{{ event.details }}</td>
-							</tr>
-						
 						{% endfor %}
 					</tbody>
 			
@@ -530,6 +531,10 @@
 	
 </div>
 
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Open page at Events anchor                                     -->
+<!---------------------------------------------------------------------------------------------------->
 
 <script>
 
