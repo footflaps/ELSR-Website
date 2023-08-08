@@ -67,7 +67,7 @@
 
 {% if messages %}
 	<div class="container">
-		<div class="row mb-3">
+		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 		
 				{% if mobile %}
@@ -223,7 +223,7 @@
 		</div>
 	
 		<!-- Separator before next section -->
-		<div class="row mb-3">
+		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<hr>
 			</div>
@@ -240,9 +240,13 @@
 	
 {% if cafes | count > 0: %}
 	<div class="container">
-		<div class="row my-3">
+		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
-		        <h2 class="mb-4">Map of your cafes:</h2>
+				{% if mobile %}
+		            <h2 class="mb-4">Map of your cafes:</h2>
+				{% else %}
+					<h2 class="mb-4">Map view of your {{ cafes | count }} cafes:</h2>
+				{% endif %}
 	            {{cafemap.html}}
 				<hr>
 			</div>
@@ -256,7 +260,7 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
-	<div class="row mb-3">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 	
 			{% if mobile %}
@@ -345,7 +349,7 @@
 	{% endif %}
 	
 	<!-- Separator before next section -->
-	<div class="row mb-3">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			<hr>
 		</div>
@@ -365,7 +369,7 @@
 {% set ns = namespace(hidden="") %}
 	
 <div class="container">
-	<div class="row my-3">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			{% if mobile %}
@@ -455,7 +459,7 @@
 	{% endif %}
 	
 	<!-- Separator before next section -->
-	<div class="row mb-3">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			<hr>
 		</div>
@@ -468,7 +472,7 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
-	<div class="row my-3">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 
 			{% if mobile %}
@@ -549,7 +553,7 @@
 	{% endif %}
 	
 	<!-- Separator before next section -->
-	<div class="row mb-3">
+	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			<hr>
 		</div>
@@ -569,7 +573,13 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
-				<h2 class="post-title float-left">{{ events|count }} events in {{ days }} days:</h2>
+				{% if mobile %}
+					<h2 class="post-title float-left">{{ events|count }} events in {{ days }} days:</h2>
+				{% elif current_user.id == user.id %}
+					<h2 class="post-title float-left">You have {{ events|count }} events in {{ days }} days:</h2>
+				{% else %}
+					<h2 class="post-title float-left">User has {{ events|count }} events in {{ days }} days:</h2>
+				{% endif %}
 				
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseEventList"
@@ -579,7 +589,6 @@
 				
 			</div>
 		</div>
-		
 		
 		<!-- Collapsed / Hidden table of cafes -->
 		<div class="collapse" id="collapseEventList">
