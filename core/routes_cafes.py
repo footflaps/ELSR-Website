@@ -726,7 +726,7 @@ def close_cafe(cafe_id):
     if Cafe().close_cafe(cafe.id, details):
         # Success
         app.logger.debug(f"close_cafe(): Successfully closed the cafe, cafe.id = '{cafe.id}'.")
-        Event().log_event("Close Cafe Pass", f"Cafe marked as closed. cafe.id = '{cafe.id}'.")
+        Event().log_event("Close Cafe Success", f"Cafe marked as closed. cafe.id = '{cafe.id}'.")
         flash("Cafe marked as closed.")
     else:
         # Should never get here, but....
