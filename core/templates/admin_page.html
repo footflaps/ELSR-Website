@@ -546,8 +546,13 @@
 <script>
 
 	{% if anchor %}
-		// Jump to anchor
+		
+		// Open collapsed section
+		$("#collapseEventList").collapse('show');
+        
+        // Jump to anchor
         window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	    
 	{% endif %}
 	
 </script>
