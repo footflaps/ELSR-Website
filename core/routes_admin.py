@@ -71,7 +71,8 @@ def admin_page():
     # ----------------------------------------------------------- #
     # List of all users (for admin page table)
     # ----------------------------------------------------------- #
-    users = User().all_users()
+    admins = User().all_admins()
+    non_admins = User().all_non_admins()
 
     # ----------------------------------------------------------- #
     # All messages for Admin (for admin page table)
@@ -109,12 +110,12 @@ def admin_page():
     if event_period \
             or anchor == "eventLog":
         # Jump straight to the 'eventlog'
-        return render_template("admin_page.html",  year=current_year, users=users, messages=messages,
-                               events=events, days=days, mobile=is_mobile(), anchor="eventLog")
+        return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
+                               messages=messages, events=events, days=days, mobile=is_mobile(), anchor="eventLog")
     else:
         # No jumping, just display the page from the top
-        return render_template("admin_page.html", year=current_year, users=users, messages=messages,
-                               events=events, days=days, mobile=is_mobile())
+        return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
+                               messages=messages, events=events, days=days, mobile=is_mobile())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

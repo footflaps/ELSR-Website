@@ -45,13 +45,13 @@
 
 {% if messages %}
 	<div class="container">
-		<div class="row mb-3">
+		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 		
 				{% if messages | count == 1 %}
-					<h2 class="post-title float-left">You have {{ messages | count }} Message:</h2>
+					<h2 class="post-title float-left">{{ messages | count }} Message</h2>
 				{% else %}
-					<h2 class="post-title float-left">You have {{ messages | count }} Messages:</h2>
+					<h2 class="post-title float-left">{{ messages | count }} Messages</h2>
 				{% endif %}
 				
 				<!-- Button to expose hidden table -->
@@ -64,7 +64,7 @@
 		</div>
 
 		<div class="collapse" id="collapseMessageList">
-			<div class="row">
+			<div class="row mt-3">
 				<div class="col-lg-8 col-md-10 mx-auto">
 	
 					<div class="accordion" id="accordionExample">
@@ -206,7 +206,11 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<h2 class="post-title float-left">Current Admins</h2>
+			{% if admins | count == 1 %}
+				<h2 class="post-title float-left">{{ admins | count }} Admin</h2>
+			{% else %}
+				<h2 class="post-title float-left">{{ admins | count }} Admins</h2>
+			{% endif %}
 			
 			<!-- Button to expose hidden table -->
 			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseAdminList"
@@ -219,7 +223,7 @@
 	
 	<!-- Collapsed / Hidden table of users -->
 	<div class="collapse" id="collapseAdminList">
-		<div class="row">
+		<div class="row mt-3">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
 				{% if mobile %}
@@ -243,7 +247,7 @@
 					</thead>
 				
 					<tbody>
-						{% for user in users: %}
+						{% for user in admins: %}
 							{% if user.admin() %}
 							<tr>
 								<th scope="row">{{user.id}}</th>
@@ -284,7 +288,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<h2 class="post-title float-left">Current Users</h2>
+			<h2 class="post-title float-left">{{ non_admins | count }} Users</h2>
 			
 			<!-- Button to expose hidden table -->
 			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseUserList"
@@ -297,7 +301,7 @@
 
 	<!-- Collapsed / Hidden table of users -->
 	<div class="collapse" id="collapseUserList">
-		<div class="row">
+		<div class="row mt-3">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
 				{% if mobile %}
@@ -321,32 +325,30 @@
 					</thead>
 					
 					<tbody>
-						{% for user in users: %}
-							{% if not user.admin() %}
+						{% for user in non_admins: %}
 							
-								<!--
-									Colour code according to status
-									Yellow      Not verified
-									Read        Barred
-								-->
-								{% if user.blocked() %}
-									<tr class="table-danger">
-								{% elif not user.verified() %}
-									<tr class="table-warning">
-								{% else %}
-									<tr>
-								{% endif %}
-								
-									<td scope="row">{{user.id}}</td>
-									<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
-									<td>{{user.permissions}}</td>
-									{% if not mobile %}
-										<td>{{user.start_date}}</td>
-									{% endif %}
-									<td>{{user.last_login}} ({{user.last_login_ip}})</td>
-								</tr>
-							
+							<!--
+								Colour code according to status
+								Yellow      Not verified
+								Read        Barred
+							-->
+							{% if user.blocked() %}
+								<tr class="table-danger">
+							{% elif not user.verified() %}
+								<tr class="table-warning">
+							{% else %}
+								<tr>
 							{% endif %}
+							
+								<td scope="row">{{user.id}}</td>
+								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
+								<td>{{user.permissions}}</td>
+								{% if not mobile %}
+									<td>{{user.start_date}}</td>
+								{% endif %}
+								<td>{{user.last_login}} ({{user.last_login_ip}})</td>
+							</tr>
+							
 						{% endfor %}
 					</tbody>
 				

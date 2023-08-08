@@ -93,6 +93,12 @@ def load_user(user_id):
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+def test_admin(permissions):
+    if permissions & MASK_ADMIN > 0:
+        return True
+    else:
+        return False
+
 class User(UserMixin, db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
     # Define the SQL Table
@@ -191,6 +197,16 @@ class User(UserMixin, db.Model):
         with app.app_context():
             users = db.session.query(User).all()
             return users
+
+    def all_admins(self):
+        with app.app_context():
+            admins = db.session.query(User).filter(User.permissions == MASK_ADMIN + MASK_VERIFIED).all()
+            return admins
+
+    def all_non_admins(self):
+        with app.app_context():
+            non_admins = db.session.query(User).filter(User.permissions != MASK_ADMIN + MASK_VERIFIED).all()
+            return non_admins
 
     def create_user(self, new_user, raw_password):
         # Hash password before adding to dB
@@ -453,7 +469,7 @@ class User(UserMixin, db.Model):
             if user:
                 try:
                     if user.permissions & MASK_ADMIN == 0:
-                        user.permissions = user.permissions | MASK_ADMIN
+                        user.permissions = MASK_ADMIN + MASK_VERIFIED
                         db.session.commit()
                     return True
                 except Exception as e:
@@ -471,7 +487,7 @@ class User(UserMixin, db.Model):
                     return False
                 try:
                     if user.permissions & MASK_ADMIN == 1:
-                        user.permissions = user.permissions - MASK_ADMIN
+                        user.permissions = DEFAULT_PERMISSIONS + MASK_VERIFIED
                         db.session.commit()
                     return True
                 except Exception as e:
@@ -486,6 +502,9 @@ class User(UserMixin, db.Model):
         return f'<User {self.name} ({self.email})>'
 
 
+
+print(User().all_admins())
+print(User().all_non_admins())
 # -------------------------------------------------------------------------------------------------------------- #
 # Create the actual dB
 # -------------------------------------------------------------------------------------------------------------- #
