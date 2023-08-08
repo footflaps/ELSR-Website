@@ -8,7 +8,7 @@ import os
 from time import sleep
 from threading import Thread
 import json
-
+from datetime import datetime, timedelta
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -399,6 +399,12 @@ def check_route_name(gpx):
     with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
         gpx_track = gpx_file.tracks[0]
+
+        # Looks like we need to add the time stamps back in!
+        for track in gpx_file.tracks:
+            for segment in track.segments:
+                for point in segment.points:
+                    point.time = datetime.now()
 
     # Update our params
     gpx_file.author_name = "ELSR website"
