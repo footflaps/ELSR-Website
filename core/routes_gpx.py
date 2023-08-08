@@ -135,7 +135,7 @@ def check_new_gpx_with_all_cafes(gpx_id):
     # Make sure gpx_id is valid
     if not gpx:
         app.logger.debug(f"check_new_gpx_with_all_cafes(): Failed to locate GPX: gpx_id = '{gpx_id}'.")
-        Event().log_event("Update GPX", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        Event().log_event("GPX Fail", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
         return False
 
     app.logger.debug(f"check_new_gpx_with_all_cafes(): Updating GPX '{gpx.name}' for closeness to all cafes.")
@@ -231,7 +231,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         except Exception as e:
             app.logger.debug(f"update_existing_gpx(): Failed to delete existing file '{tmp_filename}', "
                              f"error code was '{e.args}'.")
-            Event().log_event("GPX update",
+            Event().log_event("GPX Fail",
                               f"Failed to delete existing file '{tmp_filename}', error code was '{e.args}'.")
             return False
 
@@ -242,7 +242,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         with open(tmp_filename, 'w') as file_ref2:
             file_ref2.write(gpx_file.to_xml())
     except Exception as e:
-        Event().log_event("GPX update", f"Failed to write file '{tmp_filename}', error code was '{e.args}'.")
+        Event().log_event("GPX Fail", f"Failed to write file '{tmp_filename}', error code was '{e.args}'.")
         app.logger.debug(f"update_existing_file: Failed to write file '{tmp_filename}', error code was '{e.args}'.")
         return False
 
@@ -254,7 +254,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         # We need this as remove seems to keep the file locked for a short period
         sleep(0.5)
     except Exception as e:
-        Event().log_event("GPX update", f"Failed to delete existing file '{old_filename}', error code was '{e.args}'.")
+        Event().log_event("GPX Fail", f"Failed to delete existing file '{old_filename}', error code was '{e.args}'.")
         app.logger.debug(f"update_existing_file: Failed to delete existing file '{old_filename}', "
                          f"error code was '{e.args}'.")
         return False
@@ -265,7 +265,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
     try:
         os.rename(tmp_filename, old_filename)
     except Exception as e:
-        Event().log_event("GPX update", f"Failed to rename existing file '{tmp_filename}', error code was '{e.args}'.")
+        Event().log_event("GPX Fail", f"Failed to rename existing file '{tmp_filename}', error code was '{e.args}'.")
         app.logger.debug(f"update_existing_file: Failed to rename existing file '{tmp_filename}', "
                          f"error code was '{e.args}'.")
         return False

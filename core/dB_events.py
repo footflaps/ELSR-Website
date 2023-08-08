@@ -192,7 +192,9 @@ app.jinja_env.globals.update(readable_date=readable_date)
 
 # Decide if an event is bad or not (so we can colour it red in the table)
 def flag_event(event_type):
-    if "fail" in event_type.lower():
+    if "fail" in event_type.lower() \
+            or event_type == "400" \
+            or event_type == "500":
         return True
     else:
         for error in range(400, 404):
@@ -207,8 +209,7 @@ app.jinja_env.globals.update(flag_event=flag_event)
 
 # Decide if an event is good or not (so we can colour it green in the table)
 def good_event(event_type):
-    if "success" in event_type.lower() \
-            or "pass" in event_type.lower():
+    if "success" in event_type.lower():
         return True
     return False
 
