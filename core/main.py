@@ -290,7 +290,8 @@ def csrf_error(e):
     users_ip = user_ip()
 
     # Log error in event log
-    flash("CSRF Error with form submission.")
+    flash("Detected a potential Cross Site Request Forgery (CSRF) with the form.")
+    flash("NB Forms time out after 60 minutes.")
     app.logger.debug(f"400: CSRF Error '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}'.")
     Event().log_event("400", f"CSRF Error for '{requested_route}', previous page was "
