@@ -2,9 +2,11 @@ from flask import render_template, url_for, request, flash, abort
 from flask_login import current_user
 from flask_googlemaps import Map
 from flask_wtf import FlaskForm
+from flask_wtf.csrf import CSRFError
 from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
+
 from threading import Thread
 import os
 import requests
@@ -279,6 +281,23 @@ def uncut():
 def error():
     test = 1/0
     return render_template("uncut_steerertubes.html", year=current_year)
+
+
+@app.errorhandler(CSRFError)
+def csrf_error(e):
+    # What page were they looking for?
+    requested_route = request.path
+    users_ip = user_ip()
+
+    # Log error in event log
+    flash("CSRF Error with form submission.")
+    app.logger.debug(f"400: CSRF Error '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}'.")
+    Event().log_event("400", f"CSRF Error for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
+
+    # note that we set the 400 status explicitly
+    return render_template('400.html', year=current_year), 400
 
 
 @app.errorhandler(400)

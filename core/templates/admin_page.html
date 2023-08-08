@@ -303,7 +303,8 @@
 				{% if mobile %}
 					<table id="userTable" class="table table-striped table-bordered table-sm table-condensed">
 				{% else %}
-					<table id="userTable" class="table table-striped table-bordered table-sm table-condensed" style="width: 730px">
+					<table id="userTable" class="table table-striped table-bordered table-sm table-condensed"
+					       style="width: 730px">
 				{% endif %}
 				
 					<!-- Header -->
@@ -336,14 +337,14 @@
 									<tr>
 								{% endif %}
 								
-								<td scope="row">{{user.id}}</td>
-								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
-								<td>{{user.permissions}}</td>
-								{% if not mobile %}
-									<td>{{user.start_date}}</td>
-								{% endif %}
-								<td>{{user.last_login}} ({{user.last_login_ip}})</td>
-							</tr>
+									<td scope="row">{{user.id}}</td>
+									<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
+									<td>{{user.permissions}}</td>
+									{% if not mobile %}
+										<td>{{user.start_date}}</td>
+									{% endif %}
+									<td>{{user.last_login}} ({{user.last_login_ip}})</td>
+								</tr>
 							
 							{% endif %}
 						{% endfor %}
@@ -465,7 +466,8 @@
 				{% if mobile %}
 					<table id="eventTable" class="table table-striped table-bordered table-sm table-condensed">
 				{% else %}
-					<table id="eventTable" class="table table-striped table-bordered table-sm table-condensed" style="width: 730px">
+					<table id="eventTable" class="table table-striped table-bordered table-sm table-condensed"
+					       style="width: 730px">
 				{% endif %}
 				
 					<!-- Header -->
@@ -490,13 +492,15 @@
 								<tr>
 							{% endif %}
 						
-							<td scope="row" class="small">{{ event.id }}
-							<a href="{{ url_for('delete_event', event_id=event.id) }}">✘ </a></td>
-							<td class="small">{{ get_user_name(event.email) }}</td>
-							<td class="small">{{ readable_date(event.date) }}</td>
-							<td class="small">{{ event.type }}</td>
-							<td class="small">{{ event.details }}</td>
-						</tr>
+								<td scope="row" class="small">
+									{{ event.id }}
+									<a href="{{ url_for('delete_event', event_id=event.id) }}">✘ </a>
+								</td>
+								<td class="small">{{ get_user_name(event.email) }}</td>
+								<td class="small">{{ readable_date(event.date) }}</td>
+								<td class="small">{{ event.type }}</td>
+								<td class="small">{{ event.details }}</td>
+							</tr>
 						
 						{% endfor %}
 					</tbody>
