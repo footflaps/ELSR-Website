@@ -49,9 +49,9 @@
 			<div class="col-lg-8 col-md-10 mx-auto">
 		
 				{% if messages | count == 1 %}
-					<h2 class="post-title float-left">{{ messages | count }} Message</h2>
+					<h2 class="post-title float-left">{{ messages | count }} Message:</h2>
 				{% else %}
-					<h2 class="post-title float-left">{{ messages | count }} Messages</h2>
+					<h2 class="post-title float-left">{{ messages | count }} Messages:</h2>
 				{% endif %}
 				
 				<!-- Button to expose hidden table -->
@@ -207,9 +207,9 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			{% if admins | count == 1 %}
-				<h2 class="post-title float-left">{{ admins | count }} Admin</h2>
+				<h2 class="post-title float-left">{{ admins | count }} Admin:</h2>
 			{% else %}
-				<h2 class="post-title float-left">{{ admins | count }} Admins</h2>
+				<h2 class="post-title float-left">{{ admins | count }} Admins:</h2>
 			{% endif %}
 			
 			<!-- Button to expose hidden table -->
@@ -288,7 +288,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<h2 class="post-title float-left">{{ non_admins | count }} Users</h2>
+			<h2 class="post-title float-left">{{ non_admins | count }} Users:</h2>
 			
 			<!-- Button to expose hidden table -->
 			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseUserList"
@@ -383,7 +383,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<h2 class="post-title float-left">Event Log</h2>
+			<h2 class="post-title float-left">Event Log:</h2>
 			
 			<!-- Button to expose hidden table -->
 			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseEventList"
