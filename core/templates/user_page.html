@@ -72,9 +72,9 @@
 		
 				{% if mobile %}
 					{% if messages | count == 1 %}
-						<h2 class="post-title float-left">{{ messages | count }} Message</h2>
+						<h2 class="post-title float-left">{{ messages | count }} Message:</h2>
 					{% else %}
-						<h2 class="post-title float-left">{{ messages | count }} Messages</h2>
+						<h2 class="post-title float-left">{{ messages | count }} Messages:</h2>
 					{% endif %}
 				{% else %}
 					{% if messages | count == 1 %}
@@ -260,7 +260,7 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 	
 			{% if mobile %}
-				<h2 class="post-title float-left">{{ cafes|length }} cafes</h2>
+				<h2 class="post-title float-left">{{ cafes|length }} cafes:</h2>
 			{% else %}
 				{% if user.id == current_user.id: %}
 					<h2 class="post-title float-left">You have {{cafes|length}} cafes:</h2>
@@ -369,7 +369,7 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			{% if mobile %}
-				<h2 class="post-title float-left">{{ gpxes|length }} routes</h2>
+				<h2 class="post-title float-left">{{ gpxes|length }} routes:</h2>
 			{% else %}
 				{% if user.id == current_user.id: %}
 					<h2 class="post-title float-left">You have {{ gpxes|length }} routes:</h2>
@@ -472,7 +472,7 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 
 			{% if mobile %}
-				<h2 class="post-title float-left">{{cafe_comments|length}} comments</h2>
+				<h2 class="post-title float-left">{{cafe_comments|length}} comments:</h2>
 			{% else %}
 				{% if user.id == current_user.id: %}
 					<h2 class="post-title float-left">You have {{cafe_comments|length}} comments:</h2>
@@ -711,7 +711,7 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			{% if mobile %}
-				<h2 class="post-title float-left">Account</h2>
+				<h2 class="post-title float-left">Account:</h2>
 			{% else %}
 				{% if current_user.id == user.id %}
 					<h2 class="post-title float-left">Manage my account:</h2>
