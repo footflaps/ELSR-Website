@@ -5,6 +5,7 @@ from werkzeug import exceptions
 from urllib.parse import urlparse
 from threading import Thread
 import os
+import re
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -894,6 +895,28 @@ def add_phone_number():
         abort(404)
 
     # ----------------------------------------------------------- #
+    # Check phone number
+    # ----------------------------------------------------------- #
+    # Strip all spaces
+    phone_number = phone_number.strip().replace(" ", "")
+    print(f"'{phone_number}', '{phone_number[0:2]}'")
+
+    # Check for UK code
+    if phone_number[0:3] != "+44":
+        flash("Phone number must start with '+44'!")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # Strip any non digits (inc leading '+')
+    phone_number = re.sub('[^0-9]', '', phone_number)
+    if len(phone_number) != 12:
+        flash("Phone number must be 12 digis long eg '+44 1234 123456'!")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # Add back leading '+'
+    phone_number = "+" + phone_number
+    print(f"'{phone_number}'")
+
+    # ----------------------------------------------------------- #
     # Restrict access (Admin or user themselves)
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
@@ -907,9 +930,9 @@ def add_phone_number():
     # ----------------------------------------------------------- #
     # Update phone number
     # ----------------------------------------------------------- #
-    if User().set_phone_number(user_id, phone_number):
+    if User().set_phone_number(user_id, "uv" + phone_number):
         Event().log_event("Add Phone Pass", f"Phone updated for user_id='{user_id}'.")
-        flash("Your phone number has been updated.")
+        flash(f"A verification code has been sent to '{phone_number}'.")
     else:
         app.logger.debug(f"add_phone_number(): User().set_phone_number() failed, user_id='{user_id}'.")
         Event().log_event("Add Phone Fail", f"User().set_phone_number() failed, user_id='{user_id}'.")
@@ -917,3 +940,4 @@ def add_phone_number():
 
     # Back to user page
     return redirect(url_for('user_page', user_id=user_id))
+
