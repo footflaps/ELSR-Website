@@ -70,10 +70,18 @@
 		<div class="row mb-3">
 			<div class="col-lg-8 col-md-10 mx-auto">
 		
-				{% if messages | count == 1 %}
-					<h2 class="post-title float-left">You have {{ messages | count }} Message:</h2>
+				{% if mobile %}
+					{% if messages | count == 1 %}
+						<h2 class="post-title float-left">{{ messages | count }} Message</h2>
+					{% else %}
+						<h2 class="post-title float-left">{{ messages | count }} Messages</h2>
+					{% endif %}
 				{% else %}
-					<h2 class="post-title float-left">You have {{ messages | count }} Messages:</h2>
+					{% if messages | count == 1 %}
+						<h2 class="post-title float-left">You have {{ messages | count }} Message:</h2>
+					{% else %}
+						<h2 class="post-title float-left">You have {{ messages | count }} Messages:</h2>
+					{% endif %}
 				{% endif %}
 				
 				<!-- Button to expose hidden table -->
@@ -251,12 +259,16 @@
 	<div class="row mb-3">
 		<div class="col-lg-8 col-md-10 mx-auto">
 	
-			{% if user.id == current_user.id: %}
-				<h2 class="post-title float-left">You have {{cafes|length}} cafes:</h2>
+			{% if mobile %}
+				<h2 class="post-title float-left">{{ cafes|length }} cafes</h2>
 			{% else %}
-				<h2 class="post-title float-left">{{user.name}} has {{cafes|length}} cafes:</h2>
+				{% if user.id == current_user.id: %}
+					<h2 class="post-title float-left">You have {{cafes|length}} cafes:</h2>
+				{% else %}
+					<h2 class="post-title float-left">{{user.name}} has {{cafes|length}} cafes:</h2>
+				{% endif %}
 			{% endif %}
-	
+			
 			{% if cafes | count > 0: %}
 			
 				<!-- Button to expose hidden table -->
@@ -356,10 +368,14 @@
 	<div class="row my-3">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			{% if user.id == current_user.id: %}
-				<h2 class="post-title float-left">You have {{ gpxes|length }} routes:</h2>
+			{% if mobile %}
+				<h2 class="post-title float-left">{{ gpxes|length }} routes</h2>
 			{% else %}
-				<h2 class="post-title float-left">{{ user.name }} has {{ gpxes|length }} routes:</h2>
+				{% if user.id == current_user.id: %}
+					<h2 class="post-title float-left">You have {{ gpxes|length }} routes:</h2>
+				{% else %}
+					<h2 class="post-title float-left">{{ user.name }} has {{ gpxes|length }} routes:</h2>
+				{% endif %}
 			{% endif %}
 			
 			{% if gpxes | count > 0: %}
@@ -455,12 +471,16 @@
 	<div class="row my-3">
 		<div class="col-lg-8 col-md-10 mx-auto">
 
-			{% if user.id == current_user.id: %}
-				<h2 class="post-title float-left">You have {{cafe_comments|length}} comments:</h2>
+			{% if mobile %}
+				<h2 class="post-title float-left">{{cafe_comments|length}} comments</h2>
 			{% else %}
-				<h2 class="post-title float-left">{{user.name}} has {{cafe_comments|length}} comments:</h2>
+				{% if user.id == current_user.id: %}
+					<h2 class="post-title float-left">You have {{cafe_comments|length}} comments:</h2>
+				{% else %}
+					<h2 class="post-title float-left">{{user.name}} has {{cafe_comments|length}} comments:</h2>
+				{% endif %}
 			{% endif %}
-
+			
 			{% if cafe_comments | count > 0: %}
 			
 				<!-- Button to expose hidden table -->
@@ -690,10 +710,14 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			{% if current_user.id == user.id %}
-				<h2 class="post-title float-left">Manage my account:</h2>
+			{% if mobile %}
+				<h2 class="post-title float-left">Account</h2>
 			{% else %}
-				<h2 class="post-title float-left">Manage account:</h2>
+				{% if current_user.id == user.id %}
+					<h2 class="post-title float-left">Manage my account:</h2>
+				{% else %}
+					<h2 class="post-title float-left">Manage account:</h2>
+				{% endif %}
 			{% endif %}
 			
 			<!-- Button to expose hidden options -->
