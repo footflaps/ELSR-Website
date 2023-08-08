@@ -1,3 +1,4 @@
+import random
 from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory
 from flask_login import login_required, current_user
 from flask_googlemaps import Map
@@ -400,11 +401,14 @@ def check_route_name(gpx):
         gpx_file = gpxpy.parse(file_ref)
         gpx_track = gpx_file.tracks[0]
 
-        # Looks like we need to add the time stamps back in!
+        # Looks like we need to add the time stamps back in otherwise Strava won't import it
+        # But Strava is fussy about timestamps, so not too fast, not too slow and it appears
+        # they need to have a random element.
         for track in gpx_file.tracks:
             for segment in track.segments:
+                last_time = datetime.now()
                 for point in segment.points:
-                    point.time = datetime.now()
+                    point.time = last_time + timedelta(minutes=3, seconds=random.randint(0, 120))
 
     # Update our params
     gpx_file.author_name = "ELSR website"
