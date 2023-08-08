@@ -679,6 +679,8 @@
 									<tr class="table-danger">
 								{% elif good_event(event.type) %}
 									<tr class="table-success">
+								{% elif toandfro_event(event.type) %}
+									<tr class="table-warning">
 								{% else %}
 									<tr>
 								{% endif %}
