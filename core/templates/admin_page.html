@@ -250,13 +250,18 @@
 						{% for user in admins: %}
 							{% if user.admin() %}
 							<tr>
-								<th scope="row">{{user.id}}</th>
-								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
-								<td>{{user.permissions}}</td>
+								<th scope="row">{{ user.id }}</th>
+								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{ user.name }}</a></td>
+								<td>
+									{{ user.permissions }}
+									{% if user.has_valid_phone_number() %}
+										<i class="fa-solid fa-user-lock"></i>
+									{% endif %}
+								</td>
 								{% if not mobile %}
-									<td>{{user.start_date}}</td>
+									<td>{{ user.start_date }}</td>
 								{% endif %}
-								<td>{{user.last_login}}  ({{user.last_login_ip}})</td>
+								<td>{{ user.last_login }}  ({{ user.last_login_ip }})</td>
 							</tr>
 							
 							{% endif %}
@@ -340,13 +345,18 @@
 								<tr>
 							{% endif %}
 							
-								<td scope="row">{{user.id}}</td>
-								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{user.name}}</a></td>
-								<td>{{user.permissions}}</td>
+								<td scope="row">{{ user.id }}</td>
+								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{ user.name }}</a></td>
+								<td>
+									{{ user.permissions }}
+									{% if user.has_valid_phone_number() %}
+										<i class="fa-solid fa-user-lock"></i>
+									{% endif %}
+								</td>
 								{% if not mobile %}
-									<td>{{user.start_date}}</td>
+									<td>{{ user.start_date }}</td>
 								{% endif %}
-								<td>{{user.last_login}} ({{user.last_login_ip}})</td>
+								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
 							</tr>
 							
 						{% endfor %}

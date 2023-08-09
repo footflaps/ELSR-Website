@@ -1,12 +1,12 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
 from flask_login import login_user, current_user, logout_user, login_required, fresh_login_required
 from flask_googlemaps import Map
+from twilio.rest.pricing.v1 import phone_number
 from werkzeug import exceptions
 from urllib.parse import urlparse
 from threading import Thread
 import os
 import re
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -14,20 +14,19 @@ import re
 
 from core import app, dynamic_map_size, current_year, is_mobile
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
-                          admin_only, update_last_seen, logout_barred_user
+    admin_only, update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
+    TwoFactorLoginForm
 from core.dB_cafes import Cafe, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.send_emails import send_reset_email, send_verfication_email
-
+from core.send_emails import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -37,6 +36,7 @@ DEFAULT_EVENT_DAYS = 7
 
 # This is the admin email address
 admin_email_address = os.environ['ELSR_ADMIN_EMAIL']
+admin_phone_number = os.environ['ELSR_TWILIO_NUMBER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -48,10 +48,35 @@ def same_origin(current_uri, compare_uri):
     compare = urlparse(compare_uri)
 
     return (
-        current.scheme == compare.scheme
-        and current.hostname == compare.hostname
-        and current.port == compare.port
+            current.scheme == compare.scheme
+            and current.hostname == compare.hostname
+            and current.port == compare.port
     )
+
+
+def validate_phone_number(phone_number):
+    # ----------------------------------------------------------- #
+    # Check phone number
+    # ----------------------------------------------------------- #
+    # Strip all spaces
+    phone_number = phone_number.strip().replace(" ", "")
+    print(f"'{phone_number}', '{phone_number[0:2]}'")
+
+    # Check for UK code
+    if phone_number[0:3] != "+44":
+        flash("Phone number must start with '+44'!")
+        return None
+
+    # Strip any non digits (inc leading '+')
+    phone_number = re.sub('[^0-9]', '', phone_number)
+    if len(phone_number) != 12:
+        flash("Phone number must be 12 digis long eg '+44 1234 123456'!")
+        return None
+
+    # Add back leading '+'
+    phone_number = "+" + phone_number
+    return phone_number
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -133,7 +158,7 @@ def login():
             # Find the user to get the details
             user = User().find_user_from_email(email)
             # Send an email
-            Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
+            Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
             # Tell user to expect an email
             flash("If your email address is registered, a new verification code has been sent.")
             return redirect(url_for('validate_email'))
@@ -155,18 +180,28 @@ def login():
 
         # Test 6: Check password
         if User().validate_password(user, password, user_ip):
-            # Success - User can now log the user in!
-            # Setting "remember=True" means that:
-            # "A cookie will be saved on the user’s computer, and then Flask-Login will automatically
-            # restore the user ID from that cookie if it is not in the session."
-            login_user(user, remember=True)
-            # Log event after they've logged in, so current_user can have an email address
-            app.logger.debug(f"login(): User logged in for '{email}'.")
-            Event().log_event("Login", f"User logged in, forwarding user '{user.email}' to '{session['url']}'.")
+            # Admins require 2FA and we'll offer it to anyone with a phone number validated
+            if user.admin() or \
+                    user.has_valid_phone_number():
+                # Admins must use 2FA via SMS
+                User().generate_sms_code(user.id)
+                flash(f"2FA code has been sent to '{user.phone_number}'.")
+                user = User().find_user_from_id(user.id)
+                send_2fa_sms(user)
+                return redirect(url_for('twofa_login'))
 
-            # Return back to cached page
-            app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
-            return redirect(session['url'])
+            else:
+                # Non Admin, so we can login now
+                login_user(user, remember=True)
+
+                # Log event after they've logged in
+                flash(f"Welcome back {user.name}!")
+                app.logger.debug(f"login(): User logged in for '{email}'.")
+                Event().log_event("Login", f"User logged in, forwarding user '{email}' to '{session['url']}'.")
+
+                # Return back to cached page
+                app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
+                return redirect(session['url'])
 
         else:
             # Login failed
@@ -204,7 +239,6 @@ def login():
 @app.route('/logout')
 @update_last_seen
 def logout():
-
     # Have to log the event before we log out, so we still have their email address
     app.logger.debug(f"logout(): Logging user '{current_user.email}' out now...")
     Event().log_event("Logout", f"User '{current_user.email}' logged out.")
@@ -231,7 +265,6 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 @update_last_seen
 def register():
-
     # Need a form
     form = CreateUserForm()
 
@@ -242,7 +275,8 @@ def register():
         new_user = User()
         new_user.name = form.name.data
         new_user.email = form.email.data
-        app.logger.debug(f"register(): new_user = '{new_user}', new_user.name = '{new_user.name}', new_user.email = '{new_user.email}'")
+        app.logger.debug(f"register(): new_user = '{new_user}', new_user.name = '{new_user.name}', "
+                         f"new_user.email = '{new_user.email}'")
 
         # Does the user already exist?
         if User().find_user_from_email(new_user.email):
@@ -274,7 +308,7 @@ def register():
             Event().log_event("Register Pass", f"Verification code sent to '{user.email}'.")
             flash("Please validate your email address with the code you have been sent.")
             # User threading as sending an email can take a while and we want a snappy website
-            Thread(target=send_verfication_email, args=(user.email, user.name, user.verification_code,)).start()
+            Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
             return redirect(url_for('validate_email'))
 
         else:
@@ -283,11 +317,17 @@ def register():
             Event().log_event("Register Error", f"User().create_user() failed for '{new_user.email}'.")
             flash("Sorry, something went wrong!")
             return render_template("user_register.html", form=form, year=current_year,
-                                   admin_email_address=admin_email_address)
+                                   admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
+
+    elif request.method == 'POST':
+        flash("Something was missing in the registration form, see below!")
+        return render_template("user_register.html", form=form, year=current_year,
+                               admin_email_address=admin_email_address, admin_phone_number=admin_phone_number,
+                               anchor="registration_form")
 
     # Show register page / form
     return render_template("user_register.html", form=form, year=current_year,
-                           admin_email_address=admin_email_address)
+                           admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -299,7 +339,7 @@ def register():
 def validate_email():
     # We support two entry modes to this page
     #  1. They click on a link in their email and it makes a request with code and email fulfilled
-    #  2. They go to this page and enter the details manuall via the form
+    #  2. They go to this page and enter the details manually via the form
 
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -401,13 +441,111 @@ def validate_email():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# 2FA verification
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/twofa_login', methods=['GET', 'POST'])
+@update_last_seen
+def twofa_login():
+    # We support two entry modes to this page
+    #  1. They click on a link in their email and it makes a request with code and email fulfilled
+    #  2. They go to this page and enter the details manually via the form
+
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    code = request.args.get('code', None)
+    email = request.args.get('email', None)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    # Only validate if we were actually sent them
+    if email and code:
+
+        # ----------------------------------------------------------- #
+        # Method 1: the URL in the email passed through their params
+        # ----------------------------------------------------------- #
+
+        email = email.strip('"').strip("'")
+        user = User().find_user_from_email(email)
+        if not user:
+            # User doesn't exist
+            app.logger.debug(f"twofa_login(): URL route, can't find user email = '{email}'.")
+            Event().log_event("2FA login Fail", f"URL route, can't find user email = '{email}'.")
+            abort(404)
+
+        if User().validate_sms(user, code):
+            # Success, user validated!
+            login_user(user, remember=True)
+            flash(f"Welcome back {user.name}!")
+
+            # Log event after they've logged in, so current_user can have an email address
+            app.logger.debug(f"twofa_login(): User logged in for '{email}'.")
+            Event().log_event("Login", f"User logged in via 2FA, forwarding user '{user.email}' to '{session['url']}'.")
+
+            # Return back to cached page
+            app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
+            return redirect(session['url'])
+
+        # Fall through to form below
+
+    # Need a form
+    form = TwoFactorLoginForm()
+
+    # Detect form submission
+    if form.validate_on_submit():
+
+        # ----------------------------------------------------------- #
+        # Method 2: They manually filled the form in
+        # ----------------------------------------------------------- #
+
+        # Is that a valid email address?
+        user = User().find_user_from_email(form.email.data)
+
+        # Did we find that email address
+        if user:
+
+            # Verify their SMS code
+            code = form.verification_code.data
+
+            if User().validate_sms(user, code):
+                # Success, 2FA complete!
+                login_user(user, remember=True)
+                flash(f"Welcome back {user.name}!")
+
+                # Log event after they've logged in, so current_user can have an email address
+                app.logger.debug(f"twofa_login(): User logged in for '{email}'.")
+                Event().log_event("Login",
+                                  f"User logged in via 2FA, forwarding user '{user.email}' to '{session['url']}'.")
+
+                # Return back to cached page
+                app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
+                return redirect(session['url'])
+
+            else:
+                # Wrong code entered, or it's expired
+                app.logger.debug(f"twofa_login(): Form, code didn't work for user '{user.email}'.")
+                Event().log_event("2FA login Fail", f"Form, code didn't work for user '{user.email}'.")
+                flash("Incorrect code (or code has expired), please try again!")
+                return render_template("sms_login.html", form=form, year=current_year)
+
+        # Invalid email
+        app.logger.debug(f"twofa_login(): Form, unrecognised email '{form.email.data}'.")
+        Event().log_event("2FA login Fail", f"Form, unrecognised email '{form.email.data}'.")
+        flash("Unrecognised email, please try again!")
+
+    # Show register page / form
+    return render_template("sms_login.html", form=form, year=current_year)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Reset password
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/reset', methods=['GET', 'POST'])
 @update_last_seen
 def reset_password():
-
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -423,11 +561,11 @@ def reset_password():
         user = User().find_user_from_email(email)
         if not user:
             app.logger.debug(f"reset_password(): URL route, invalid email = '{email}'.")
-            Event().log_event("Reset Fail",    f"URL route, invalid email = '{email}'.")
+            Event().log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
             abort(404)
         if not User().validate_reset_code(user.id, int(code)):
             app.logger.debug(f"reset_password(): URL route, invalid email = '{code}', for user = '{user.email}'.")
-            Event().log_event("Reset Fail",    f"URL route, invalid email = '{code}', for user = '{user.email}'.")
+            Event().log_event("Reset Fail", f"URL route, invalid email = '{code}', for user = '{user.email}'.")
             abort(404)
 
     # ----------------------------------------------------------- #
@@ -447,7 +585,7 @@ def reset_password():
 
         if form.password1.data != form.password2.data:
             app.logger.debug(f"reset_password(): Form route, Passwords don't match! Email = '{email}'.")
-            Event().log_event("Reset Fail",    f"Form route, Passwords don't match! Email = '{email}'.")
+            Event().log_event("Reset Fail", f"Form route, Passwords don't match! Email = '{email}'.")
             flash("Passwords don't match!")
             # Back to the same page for another try
             return render_template("user_reset_password.html", form=form, year=current_year)
@@ -461,7 +599,7 @@ def reset_password():
         else:
             # Should never happen, but...
             app.logger.debug(f"reset_password(): User().reset_password() failed! email = '{email}'.")
-            Event().log_event("Reset Fail",    f"User().reset_password() failed! email = '{email}'.")
+            Event().log_event("Reset Fail", f"User().reset_password() failed! email = '{email}'.")
             flash("Sorry, something went wrong!")
 
     return render_template("user_reset_password.html", form=form, year=current_year)
@@ -478,9 +616,9 @@ def user_page():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)         # Mandatory
-    event_period = request.args.get('days', None)       # Optional
-    anchor = request.args.get('anchor', None)           # Optional
+    user_id = request.args.get('user_id', None)  # Mandatory
+    event_period = request.args.get('days', None)  # Optional
+    anchor = request.args.get('anchor', None)  # Optional
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -503,7 +641,7 @@ def user_page():
     # Restrict access
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
-       not current_user.admin():
+            not current_user.admin():
         app.logger.debug(f"user_page(): Rejected request from current_user.id = '{current_user.id}', "
                          f"for user_id = '{user_id}'.")
         Event().log_event("User Page Fail", f"Rejected request from current_user.id = '{current_user.id}', "
@@ -639,7 +777,7 @@ def delete_user(user_id):
     # Restrict access
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
-       not current_user.admin():
+            not current_user.admin():
         app.logger.debug(f"delete_user(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         Event().log_event("Delete User Fail", f"User isn't allowed "
@@ -664,6 +802,7 @@ def delete_user(user_id):
             return redirect(url_for('home'))
 
     else:
+        # Should never get here, but...
         app.logger.debug(f"delete_user(): User().delete_user() failed for user_id = '{user_id}'.")
         Event().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
         flash("Sorry, something went wrong.")
@@ -705,6 +844,7 @@ def block_user(user_id):
         Event().log_event("Block User Fail", f"invalid user user_id = '{user_id}'.")
         abort(404)
     elif confirm != "BLOCK":
+        app.logger.debug(f"block_user(): Block wasn't confirmed '{confirm}'.")
         Event().log_event("Block User Fail", f"Block wasn't confirmed '{confirm}'.")
         flash(f"lock_user(): Block wasn't confirmed '{confirm}'.")
         return redirect(url_for('user_page', user_id=user_id))
@@ -713,11 +853,14 @@ def block_user(user_id):
     # Block user
     # ----------------------------------------------------------- #
     if User().block_user(user_id):
+        app.logger.debug(f"block_user(): User '{user_id}' is now blocked.")
         Event().log_event("Block User Success", f"User '{user_id}' is now blocked.")
         flash("User Blocked.")
     else:
-        Event().log_event("Block User Fail", f"Something went wrong.")
-        flash("Something went wrong...")
+        # Should never get here, but...
+        app.logger.debug(f"block_user(): User().block_user() failed, user_id = '{user_id}'!")
+        Event().log_event("Block User Fail", f"User().block_user() failed, user_id = '{user_id}'!")
+        flash("Sorry, something went wrong...")
 
     # Back to user page
     return redirect(url_for('user_page', user_id=user_id))
@@ -758,10 +901,13 @@ def unblock_user():
     # Unblock user
     # ----------------------------------------------------------- #
     if User().unblock_user(user_id):
+        app.logger.debug(f"unblock_user(): User '{user_id}' is now unblocked.")
         Event().log_event("unBlock User Success", f"User '{user_id}' is now unblocked.")
         flash("User unblocked.")
     else:
-        Event().log_event("unBlock User Fail", f"Something went wrong.")
+        # Should never get here, but...
+        app.logger.debug(f"unblock_user(): User().unblock_user() failed, user_id = '{user_id}'!")
+        Event().log_event("unBlock User Fail", f"User().unblock_user() failed, user_id = '{user_id}'!")
         flash("Sorry, something went wrong...")
 
     # Back to user page
@@ -803,10 +949,13 @@ def reverify_user():
     # Send verification code
     # ----------------------------------------------------------- #
     if User().create_new_verification(user_id):
+        app.logger.debug(f"reverify_user(): Verification code sent user_id = '{user_id}'.")
         Event().log_event("Send Verify Pass", f"Verification code sent user_id = '{user_id}'.")
         flash("Verification code sent!")
     else:
-        Event().log_event("Send Verify Fail", f"Something went wrong.")
+        # Should never get here, but...
+        app.logger.debug(f"reverify_user(): User().create_new_verification() failed, user_id = '{user_id}'!")
+        Event().log_event("Send Verify Fail", f"User().create_new_verification() failed, user_id = '{user_id}'!")
         flash("Sorry, something went wrong!")
 
     # Back to user page
@@ -848,11 +997,14 @@ def password_reset_user():
     # Send reset
     # ----------------------------------------------------------- #
     if User().create_new_reset_code(user.email):
+        app.logger.debug(f"password_reset_user(): Invalid user user_id = '{user_id}'!")
         Event().log_event("Send Reset Pass", f"Reset code sent to '{user.email}'.")
         flash("Reset code sent!")
     else:
-        Event().log_event("Send Reset Fail", f"Something went wrong.")
-        flash("Something went wrong!")
+        # Should never get here, but...
+        app.logger.debug(f"password_reset_user(): User().create_new_reset_code failed, user_id = '{user_id}'!")
+        Event().log_event("Send Reset Fail", f"User().create_new_reset_code failed, user_id = '{user_id}'!")
+        flash("Sorry, something went wrong!")
 
     # Back to user page
     return redirect(url_for('user_page', user_id=user_id))
@@ -899,7 +1051,10 @@ def add_phone_number():
     # ----------------------------------------------------------- #
     # Strip all spaces
     phone_number = phone_number.strip().replace(" ", "")
-    print(f"'{phone_number}', '{phone_number[0:2]}'")
+
+    # Strip off UNVERIFIED_PHONE_PREFIX
+    if phone_number[0:len(UNVERIFIED_PHONE_PREFIX)] == UNVERIFIED_PHONE_PREFIX:
+        phone_number = phone_number[len(UNVERIFIED_PHONE_PREFIX):len(phone_number)]
 
     # Check for UK code
     if phone_number[0:3] != "+44":
@@ -924,20 +1079,99 @@ def add_phone_number():
         app.logger.debug(f"add_phone_number(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         Event().log_event("Add Phone Fail", f"User isn't allowed "
-                                              f"current_user.id='{current_user.id}', user_id='{user_id}'.")
+                                            f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         abort(403)
 
     # ----------------------------------------------------------- #
     # Update phone number
     # ----------------------------------------------------------- #
-    if User().set_phone_number(user_id, "uv" + phone_number):
-        Event().log_event("Add Phone Pass", f"Phone updated for user_id='{user_id}'.")
-        flash(f"A verification code has been sent to '{phone_number}'.")
+    if User().set_phone_number(user_id, UNVERIFIED_PHONE_PREFIX + phone_number):
+
+        # Now generate a verification code
+        if User().generate_sms_code(user_id):
+            # Reacquire user
+            user = User().find_user_from_id(user_id)
+            # Send the code to the user
+            send_sms_verif_code(user)
+            app.logger.debug(f"add_phone_number(): SMS code sent, user_id='{user_id}'.")
+            Event().log_event("Add Phone Pass", f"SMS code sent, user_id='{user_id}'.")
+            flash(f"A verification code has been sent to '{phone_number}'.")
+            return redirect(url_for('mobile_verify', user_id=user_id))
+
+        else:
+            # Should never get here, but...
+            app.logger.debug(f"add_phone_number(): User().generate_sms_code() failed, user_id='{user_id}'.")
+            Event().log_event("Add Phone Fail", f"User().generate_sms_code() failed, user_id='{user_id}'.")
+            flash("Sorry, something went wrong!")
     else:
+        # Should never get here, but...
         app.logger.debug(f"add_phone_number(): User().set_phone_number() failed, user_id='{user_id}'.")
         Event().log_event("Add Phone Fail", f"User().set_phone_number() failed, user_id='{user_id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to user page
     return redirect(url_for('user_page', user_id=user_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Verify phone number
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/mobile_verify', methods=['GET', 'POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def mobile_verify():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    user_id = request.args.get('user_id', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"mobile_verify(): Missing user_id!")
+        Event().log_event("Verify Mobile Fail", f"Missing user id!")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(user_id)
+    if not user:
+        app.logger.debug(f"mobile_verify(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("Verify Mobile Fail", f"Invalid user user_id = '{user_id}'.")
+        abort(404)
+
+    # Need a form
+    form = VerifySMSForm()
+
+    # Detect form submission
+    if form.validate_on_submit():
+        # ----------------------------------------------------------- #
+        # POST:
+        # ----------------------------------------------------------- #
+        # Get code from the form
+        code = form.verification_code.data
+
+        if User().validate_sms(user, code):
+            # Success, user validated!
+            login_user(user, remember=True)
+            flash(f"Mobile number has been verified!")
+
+            # Log event after they've logged in, so current_user can have an email address
+            app.logger.debug(f"mobile_verify(): Mobile verified for user_id = '{user_id}'.")
+            Event().log_event("Verify Mobile Pass", f"Mobile verified for user_id = '{user_id}'.")
+
+            # Return back to user page
+            return redirect(url_for('user_page', user_id=user_id))
+
+        else:
+            # Incorrect code...
+            flash("Sorry, that code is either wrong or has expired.")
+            # Fal back to the GET option
+
+    # Back to user page
+    return render_template("phone_verification.html", year=current_year, form=form)
 

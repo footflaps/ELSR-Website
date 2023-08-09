@@ -38,6 +38,14 @@
 
 					<!-- Member since -->
 					<span class="subheading">Member since {{user.start_date}}</span>
+					
+					<!-- 2FA -->
+					{% if user.has_valid_phone_number() %}
+						<span class="subheading">
+							<i class="fa-solid fa-user-lock"></i>
+							Using 2FA to secure this account.
+						</span>
+					{% endif %}
 
 				</div>
 			</div>
@@ -807,10 +815,28 @@
 						
 						{% if current_user.id == user.id : %}
 						
-		                    <!-- Update phone number -->
-			                <a data-toggle="modal" data-target="#addPhoneModal">
-			                    <button type="button" class="btn btn-secondary mx-2 my-2">Add Phone #</button>
-							</a>
+		                    <!-- Manage phone number -->
+		                    {% if user.has_valid_phone_number() %}
+		                        <!-- Edit existing phone number -->
+								{% if not user.admin() %}
+					                <!-- NB An Admin can't change their phone number whilst an admin -->
+			                        <a data-toggle="modal" data-target="#editPhoneModal">
+					                    <button type="button" class="btn btn-secondary mx-2 my-2">Edit Phone #</button>
+									</a>
+		                        {% endif %}
+		                    {% elif user.has_unvalidated_phone_number() %}
+		                        <!-- Validate existing phone number -->
+		                        <form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
+									<input type="hidden" name="phone_number" value="{{ user.phone_number }}"/>
+									<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+									<button type="submit" class="btn btn-secondary mx-2 my-2">Verify Phone #</button>
+								</form>
+		                    {% else %}
+		                        <!-- Add phone number -->
+		                        <a data-toggle="modal" data-target="#addPhoneModal">
+				                    <button type="button" class="btn btn-secondary mx-2 my-2">Add Phone #</button>
+								</a>
+		                    {% endif %}
 		                
 		                    <!-- Contact an admin -->
 							<a data-toggle="modal" data-target="#contactAdminModal">
@@ -944,7 +970,6 @@
 	} );
 	
 </script>
-
 
 
 
@@ -1265,5 +1290,50 @@
 	</div>
 </div>  <!-- End of modal form -->
 
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                             Modal form for edit phone number                                   -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="editPhoneModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="editPhoneLabel">Add your phone number</h5>
+				
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!--
+					NB To get the two parameters use:
+						1. gpx_id = request.args.get('gpx_id', None)
+                        2. confirm = request.form['confirm']
+				-->
+				<form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
+					<div class="form-group">
+						<label for="confirm" class="col-form-label">
+						Edit your existing phone number! Format should be +44xxxxxxxxxx.
+						NB. The new number will have to be verified.</label>
+						<textarea class="form-control"  name="phone_number" rows="1">{{ user.phone_number }}
+						<textarea class="form-control"  name="phone_number" rows="1">{{ user.phone_number }}
+						</textarea>
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+						<button type="submit" class="btn btn-primary">Fax me baby!</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>  <!-- End of modal form -->
 
 {% endblock %}

@@ -147,11 +147,11 @@
 			<div class="collapse" id="collapseRegister">
 				<div class="card card-body my-3">
 	                <div class="clearfix">
-		                
+		    
 		                <h3>Register on www.elsr.co.uk</h3>
 		                <p>NB Registration is a two step process, you need to verify your email address with a code
 		                   which will be emailed to you by <b>{{ admin_email_address }}</b>.
-		                   The verification code will expire after 24 hours.</p>
+		                <p>NB Verification codes will expire after 24 hours.</p>
 						
 		                {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
 		                
@@ -159,11 +159,33 @@
 				</div>
 			</div>
 			
+			<!-- Tag for jumping right to the open form -->
+			<a name="registration_form" ></a>
 			<hr>
 			
 		</div>
 	</div>
 </div>
+
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Open page at Events anchor                                     -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+
+	{% if anchor %}
+		
+		/* Open collapsed section */
+		$("#collapseRegister").collapse('show');
+        
+        /* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	    
+	{% endif %}
+	
+</script>
 
 
 {% endblock %}

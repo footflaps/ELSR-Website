@@ -1,7 +1,10 @@
+from flask import url_for
 import smtplib
 import os
 from core import app
-
+from twilio.rest import Client
+from core.dB_events import Event
+from core.db_users import User, UNVERIFIED_PHONE_PREFIX
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -11,6 +14,10 @@ admin_email = os.environ['ELSR_ADMIN_EMAIL']
 admin_password = os.environ['ELSR_ADMIN_EMAIL_PASSWORD']
 my_email = os.environ['ELSR_CONTACT_EMAIL']
 
+# Twilio
+twilio_account_sid = os.environ['ELSR_TWILIO_SID']
+twilio_auth_token = os.environ['ELSR_TWILIO_TOKEN']
+twilio_mobile_number = os.environ['ELSR_TWILIO_NUMBER']
 
 VERIFICATION_BODY = "Dear [USER], \n\n" \
                     "This is a verification email from www.elsr.co.uk. \n\n" \
@@ -26,7 +33,6 @@ VERIFICATION_BODY = "Dear [USER], \n\n" \
                     "Thanks, \n\n" \
                     "The Admin Team\n\n" \
                     "NB: Please do not reply to this email, the account is not monitored."
-
 
 RESET_BODY = "Dear [USER], \n\n" \
              "This is a password rest email from www.elsr.co.uk. \n\n" \
@@ -49,7 +55,7 @@ RESET_BODY = "Dear [USER], \n\n" \
 # -------------------------------------------------------------------------------------------------------------- #
 
 # Send an email
-def send_verfication_email(target_email, user_name, code):
+def send_verification_email(target_email, user_name, code):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=admin_email, password=admin_password)
         subject = "Verification email."
@@ -65,8 +71,10 @@ def send_verfication_email(target_email, user_name, code):
             app.logger.debug(f"Email(): sent verification email to '{target_email}'")
             return True
         except Exception as e:
-            app.logger.debug(f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
+            app.logger.debug(
+                f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
             return False
+
 
 def send_reset_email(target_email, user_name, code):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
@@ -88,6 +96,7 @@ def send_reset_email(target_email, user_name, code):
                 f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
             return False
 
+
 def contact_form_email(from_name, from_email, body):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=admin_email, password=admin_password)
@@ -104,3 +113,39 @@ def contact_form_email(from_name, from_email, body):
             app.logger.debug(
                 f"Email(): Failed to send message to '{my_email}', error code was '{e.args}'.")
             return False
+
+
+def send_2fa_sms(user):
+    client = Client(twilio_account_sid, twilio_auth_token)
+    message = client.messages.create(
+        body=f"2FA URL: https://www.elsr.co.uk/{url_for('twofa_login')}?code={user.verification_code}"
+             f"&email='{user.email}'  Code is {user.verification_code}",
+        from_=twilio_mobile_number,
+        to=user.phone_number
+    )
+    Event().log_event("SMS", f"SMS 2FA sent to '{user.id}'. Status is '{message.status}'.")
+    app.logger.debug(f"send_sms(): SMS 2FA sent to '{user.id}'. Status is '{message.status}'.")
+
+
+def send_sms_verif_code(user):
+    client = Client(twilio_account_sid, twilio_auth_token)
+    message = client.messages.create(
+        body=f"Mobile verification URL: https://www.elsr.co.uk{url_for('mobile_verify')}?code={user.verification_code}"
+             f"&email='{user.email}'   Code is {user.verification_code}",
+        from_=twilio_mobile_number,
+        to=user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number )]
+    )
+    Event().log_event("SMS", f"SMS code sent to '{user.id}'. Status is '{message.status}'.")
+    app.logger.debug(f"send_sms(): SMS code sent to '{user.id}'. Status is '{message.status}'.")
+
+
+def send_sms(user, message):
+    client = Client(twilio_account_sid, twilio_auth_token)
+    message = client.messages.create(
+        body=f"Message from www.elsr.co.uk: {message}",
+        from_=twilio_mobile_number,
+        to=user.phone_number
+    )
+    Event().log_event("SMS", f"Sent SMS to '{user.id}'. Status is '{message.status}'.")
+    app.logger.debug(f"send_sms(): Sent SMS to '{user.id}'. Status is '{message.status}'.")
+

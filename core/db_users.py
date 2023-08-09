@@ -54,9 +54,12 @@ DEFAULT_PERMISSIONS = MASK_POST_CAFE \
                       + MASK_COMMENT_CAFE \
                       + MASK_COMMENT_GPX
 
-# One day time out
+# One day time out for email
 VERIFICATION_TIMEOUT_SECS = 60 * 60 * 24
 RESET_TIMEOUT_SECS = 60 * 60 * 24
+
+# 15 min time out for SMS
+SMS_VERIFICATION_TIMEOUT_SECS = 60 * 15
 
 # Protected users (can't be deleted)
 PROTECTED_USERS = os.environ['ELSR_PROTECTED_USERS']
@@ -66,6 +69,9 @@ SUPER_ADMIN_USER_ID = 1
 
 # Num digits for Verification / Password Reset Codes
 NUM_DIGITS_CODES = 6
+
+# We prefix unverified phone numbers with this code
+UNVERIFIED_PHONE_PREFIX = "uv"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -92,12 +98,6 @@ def load_user(user_id):
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
-
-def test_admin(permissions):
-    if permissions & MASK_ADMIN > 0:
-        return True
-    else:
-        return False
 
 class User(UserMixin, db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
@@ -192,6 +192,30 @@ class User(UserMixin, db.Model):
         else:
             return False
 
+    def has_valid_phone_number(self):
+        if not self.phone_number:
+            return False
+        # Check for UK code
+        elif self.phone_number[0:3] != "+44":
+            return False
+        # Check valid length ('+' and 12 digits)
+        if len(self.phone_number) != 13:
+            return False
+        # Looks OK
+        return True
+
+    def has_unvalidated_phone_number(self):
+        if not self.phone_number:
+            return False
+        # Check for UK code
+        elif self.phone_number[0:3+len(UNVERIFIED_PHONE_PREFIX)] != UNVERIFIED_PHONE_PREFIX + "+44":
+            return False
+        # Check valid length ('+' and 12 digits)
+        if len(self.phone_number) != len(UNVERIFIED_PHONE_PREFIX) + 13:
+            return False
+        # Looks OK
+        return True
+
     # ---------------------------------------------------------------------------------------------------------- #
     # User functions
     # ---------------------------------------------------------------------------------------------------------- #
@@ -215,7 +239,7 @@ class User(UserMixin, db.Model):
         # Hash password before adding to dB
         new_user.password = self.hash_password(raw_password)
 
-        # By default new users are not admin and not verified
+        # By default new users are not verified and have no permissions until verified
         new_user.verification_code = random_code(NUM_DIGITS_CODES)
         new_user.verification_code_timestamp = time.time()
         new_user.start_date = date.today().strftime("%B %d, %Y")
@@ -247,6 +271,24 @@ class User(UserMixin, db.Model):
                     return True
                 except Exception as e:
                     app.logger.error(f"dB.create_new_verification(): Failed with error code '{e.args}' "
+                                     f"for user_id = '{user_id}'.")
+                    return False
+        return False
+
+    def generate_sms_code(self, user_id):
+        with app.app_context():
+            user = db.session.query(User).filter_by(id=user_id).first()
+            if user:
+                try:
+                    user.verification_code = random_code(NUM_DIGITS_CODES)
+                    user.verification_code_timestamp = time.time()
+                    app.logger.debug(f"dB.generate_sms_code(): User '{user.email}' "
+                                     f"issued with code '{user.verification_code}'")
+                    # Write to dB
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"dB.generate_sms_code(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
         return False
@@ -344,6 +386,47 @@ class User(UserMixin, db.Model):
 
             else:
                 app.logger.debug(f"dB.validate_email(): Verification code doesn't match, user.email = '{user.email}'.")
+                return False
+
+    def validate_sms(self, user, code):
+        with app.app_context():
+
+            # For some reason we need to re-acquire the user within this context
+            user = db.session.query(User).filter_by(id=user.id).first()
+            now = time.time()
+
+            # Debug
+            app.logger.debug(f"dB.validate_sms(): Verifying user.id = '{user.id}', user.email = '{user.email}'")
+            app.logger.debug(f"dB.validate_sms(): Received code = '{code}', "
+                             f"user.verification_code = '{user.verification_code}'")
+            app.logger.debug(f"dB.validate_sms(): user.verification_code_timestamp = "
+                             f"'{user.verification_code_timestamp}', now = '{now}'")
+
+            # Has the code timed out
+            if now - user.verification_code_timestamp > SMS_VERIFICATION_TIMEOUT_SECS:
+                # Code has time out
+                app.logger.debug(f"dB.validate_email(): Verification code has timed out, user.email = '{user.email}'.")
+                return False
+
+            if int(code) == int(user.verification_code):
+                # Clear verification data, so it can't be used again
+                user.verification_code = int(0)
+                user.verification_code_timestamp = 0
+
+                # Remove prefix from phone number
+                if user.phone_number[0:len(UNVERIFIED_PHONE_PREFIX)] == UNVERIFIED_PHONE_PREFIX:
+                    user.phone_number = user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number)]
+
+                # Commit to dB
+                try:
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"dB.validate_sms(): Failed with error code '{e.args}'.")
+                    return False
+
+            else:
+                app.logger.debug(f"dB.validate_sms(): Verification code doesn't match, user.email = '{user.email}'.")
                 return False
 
     def create_new_reset_code(self, email):
@@ -632,27 +715,52 @@ app.jinja_env.globals.update(get_user_name=get_user_name)
 # Create User Registration form
 # -------------------------------------------------------------------------------------------------------------- #
 class CreateUserForm(FlaskForm):
-    name = StringField("Name (this will appear on the website)", validators=[InputRequired("Please enter your name.")])
-    email = EmailField("Email address (this will be kept hidden)", validators=[InputRequired("Please enter your email address."), Email()])
-    password = PasswordField("Password", validators=[InputRequired("Please enter a password.")])
+    name = StringField("Name (this will appear on the website)",
+                       validators=[InputRequired("Please enter your name.")])
+    email = EmailField("Email address (this will be kept hidden)",
+                       validators=[InputRequired("Please enter your email address."), Email()])
+    password = PasswordField("Password",
+                             validators=[InputRequired("Please enter a password.")])
     submit = SubmitField("Register")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Verify User form
+# Verify User email form
 # -------------------------------------------------------------------------------------------------------------- #
 class VerifyUserForm(FlaskForm):
-    email = EmailField("Email address", validators=[InputRequired("Please enter your email address."), Email()])
+    email = EmailField("Email address",
+                       validators=[InputRequired("Please enter your email address."), Email()])
     verification_code = IntegerField("Verification code",
                                       validators=[InputRequired("Please enter the six digit code emailed to you.")])
     submit = SubmitField("Verify email address")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Verify User SMS form
+# -------------------------------------------------------------------------------------------------------------- #
+class TwoFactorLoginForm(FlaskForm):
+    email = EmailField("Email address",
+                       validators=[InputRequired("Please enter your email address."), Email()])
+    verification_code = IntegerField("Verification code",
+                                      validators=[InputRequired("Please enter the six digit code SMSed to you.")])
+    submit = SubmitField("2FA Login")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Verify User SMS form
+# -------------------------------------------------------------------------------------------------------------- #
+class VerifySMSForm(FlaskForm):
+    verification_code = IntegerField("Verification code",
+                                      validators=[InputRequired("Please enter the six digit code SMSed to you.")])
+    submit = SubmitField("Verify Mobile")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Login User form
 # -------------------------------------------------------------------------------------------------------------- #
 class LoginUserForm(FlaskForm):
-    email = EmailField("Email address", validators=[InputRequired("Please enter your email address."), Email()])
+    email = EmailField("Email address",
+                       validators=[InputRequired("Please enter your email address."), Email()])
     # Don't require a password in the form as they might have forgotten it...
     password = PasswordField("Password")
 
