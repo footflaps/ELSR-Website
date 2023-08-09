@@ -95,7 +95,7 @@
 	
 			<!-- Button to expose hidden options -->
 			<a class="btn btn-primary float-left" data-toggle="collapse" href="#collapseCafeList" role="button"
-			   aria-expanded="false" aria-controls="collapseExample">
+			   aria-expanded="false" aria-controls="collapseExample" id="show_cafes">
 				List view
 	        </a>
 			
@@ -205,9 +205,19 @@
 <script>
 	
 	$(document).ready( function () {
+		
 		$('#cafeTable').DataTable({
 			pageLength: 20
 		})
+		
+		/* Cafes - Hide <-> Show buttons name change */
+		$("#collapseCafeList").on("shown.bs.collapse", function(){
+            document.getElementById('show_cafes').innerHTML = 'HIDE list';
+        });
+       $("#collapseCafeList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_cafes').innerHTML = 'List view';
+        });
+		
 	} );
 	
 </script>
