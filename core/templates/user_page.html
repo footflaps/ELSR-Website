@@ -86,7 +86,7 @@
 				
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseMessageList"
-				   role="button" aria-expanded="false" aria-controls="collapseExample">
+				   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_messages">
 	                   SHOW
 	            </a>
 				
@@ -277,7 +277,7 @@
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseCafeList"
-				   role="button" aria-expanded="false" aria-controls="collapseExample">
+				   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_cafes">
 	                   SHOW
 	            </a>
 			
@@ -386,7 +386,7 @@
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseGPXList"
-				   role="button" aria-expanded="false" aria-controls="collapseExample">
+				   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_gpx">
 	                   SHOW
 	            </a>
 			
@@ -489,7 +489,7 @@
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseCommentList"
-				   role="button" aria-expanded="false" aria-controls="collapseExample">
+				   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_comments">
 	                   SHOW
 	            </a>
 			
@@ -583,7 +583,7 @@
 				
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseEventList"
-				   role="button" aria-expanded="false" aria-controls="collapseExample">
+				   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_events">
 	                   SHOW
 	            </a>
 				
@@ -734,8 +734,8 @@
 			{% endif %}
 			
 			<!-- Button to expose hidden options -->
-			<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseAdminTools" role="button"
-			   aria-expanded="false" aria-controls="collapseExample">
+			<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseAccount" role="button"
+			   aria-expanded="false" aria-controls="collapseExample" id="show_account">
                    SHOW
             </a>
 	
@@ -746,7 +746,7 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			<!-- Collapsed button tab -->
-			<div class="collapse" id="collapseAdminTools">
+			<div class="collapse" id="collapseAccount">
 				<div class="card card-body my-3">
 	                <div class="clearfix">
 		
@@ -879,18 +879,73 @@
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                               Activate jQuery on the Tables                                    -->
+<!--                                SHOW <-> HIDE Button labels                                     -->
 <!---------------------------------------------------------------------------------------------------->
 
 <script>
 	
 	$(document).ready( function () {
+	
+		/* jQuery on our tables where we want dataTables to run */
 		$('#cafeTable').DataTable();
 		$('#gpxTable').DataTable();
 		$('#commentTable').DataTable();
 		$('#eventTable').DataTable()
+		
+		
+		/* Messages - Hide <-> Show buttons name change */
+		$("#collapseMessageList").on("shown.bs.collapse", function(){
+            document.getElementById('show_messages').innerHTML = 'HIDE';
+        });
+       $("#collapseMessageList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_messages').innerHTML = 'SHOW';
+        });
+				
+		/* Cafes - Hide <-> Show buttons name change */
+		$("#collapseCafeList").on("shown.bs.collapse", function(){
+            document.getElementById('show_cafes').innerHTML = 'HIDE';
+        });
+       $("#collapseCafeList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_cafes').innerHTML = 'SHOW';
+        });
+        
+        /* GPX - Hide <-> Show buttons name change */
+		$("#collapseGPXList").on("shown.bs.collapse", function(){
+            document.getElementById('show_gpx').innerHTML = 'HIDE';
+        });
+       $("#collapseGPXList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_gpx').innerHTML = 'SHOW';
+        });
+        
+        /* Comments - Hide <-> Show buttons name change */
+		$("#collapseCommentList").on("shown.bs.collapse", function(){
+            document.getElementById('show_comments').innerHTML = 'HIDE';
+        });
+       $("#collapseCommentList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_comments').innerHTML = 'SHOW';
+        });
+        
+       /* Events - Hide <-> Show buttons name change */
+		$("#collapseEventList").on("shown.bs.collapse", function(){
+            document.getElementById('show_events').innerHTML = 'HIDE';
+        });
+       $("#collapseEventList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_events').innerHTML = 'SHOW';
+        });
+        
+        /* Account - Hide <-> Show buttons name change */
+		$("#collapseAccount").on("shown.bs.collapse", function(){
+            document.getElementById('show_account').innerHTML = 'HIDE';
+        });
+       $("#collapseAccount").on("hidden.bs.collapse", function(){
+            document.getElementById('show_account').innerHTML = 'SHOW';
+        });
+        
 	} );
 	
 </script>
+
+
 
 
 <!---------------------------------------------------------------------------------------------------->

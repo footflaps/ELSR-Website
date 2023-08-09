@@ -539,29 +539,6 @@
 </div>
 
 
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                 SHOW <-> HIDE Button labels                                    -->
-<!---------------------------------------------------------------------------------------------------->
-
-<!--	function change_name() {-->
-<!--	-->
-<!--		window.alert( document.getElementById('collapseEventList').collapse);-->
-<!--		-->
-<!--		if ( document.getElementById('show_events').innerHTML = 'SHOW' ) {-->
-<!--			window.alert('it says show');-->
-<!--			document.getElementById('show_events').innerHTML = 'HIDE';-->
-<!--		} else {-->
-<!--			window.alert('it says hide');-->
-<!--			document.getElementById('show_events').innerHTML = 'SHOW';-->
-<!--		}-->
-<!--	}-->
-<!--	-->
-
-
-
-
 <!---------------------------------------------------------------------------------------------------->
 <!--                                 Open page at Events anchor                                     -->
 <!---------------------------------------------------------------------------------------------------->
@@ -583,6 +560,7 @@
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                               Activate jQuery on the Tables                                    -->
+<!--                                SHOW <-> HIDE Button labels                                     -->
 <!---------------------------------------------------------------------------------------------------->
 
 <script>
@@ -593,23 +571,15 @@
 		$('#userTable').DataTable();
 		$('#eventTable').DataTable()
 		
-		/* Hide <-> Show buttons name change */
-		$("#collapseEventList").on("shown.bs.collapse", function(){
-            document.getElementById('show_events').innerHTML = 'HIDE';
+		/* Messages - Hide <-> Show buttons name change */
+		$("#collapseMessageList").on("shown.bs.collapse", function(){
+            document.getElementById('show_messages').innerHTML = 'HIDE';
         });
-       $("#collapseEventList").on("hidden.bs.collapse", function(){
-            document.getElementById('show_events').innerHTML = 'SHOW';
+       $("#collapseMessageList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_messages').innerHTML = 'SHOW';
         });
-        
-        /* Hide <-> Show buttons name change */
-		$("#collapseUserList").on("shown.bs.collapse", function(){
-            document.getElementById('show_users').innerHTML = 'HIDE';
-        });
-       $("#collapseUserList").on("hidden.bs.collapse", function(){
-            document.getElementById('show_users').innerHTML = 'SHOW';
-        });
-        
-        /* Hide <-> Show buttons name change */
+		
+		/* Admins - Hide <-> Show buttons name change */
 		$("#collapseAdminList").on("shown.bs.collapse", function(){
             document.getElementById('show_admins').innerHTML = 'HIDE';
         });
@@ -617,18 +587,25 @@
             document.getElementById('show_admins').innerHTML = 'SHOW';
         });
         
-        /* Hide <-> Show buttons name change */
-		$("#collapseMessageList").on("shown.bs.collapse", function(){
-            document.getElementById('show_messages').innerHTML = 'HIDE';
+        /* Users - Hide <-> Show buttons name change */
+		$("#collapseUserList").on("shown.bs.collapse", function(){
+            document.getElementById('show_users').innerHTML = 'HIDE';
         });
-       $("#collapseMessageList").on("hidden.bs.collapse", function(){
-            document.getElementById('show_messages').innerHTML = 'SHOW';
+       $("#collapseUserList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_users').innerHTML = 'SHOW';
         });
         
+		/* Events - Hide <-> Show buttons name change */
+		$("#collapseEventList").on("shown.bs.collapse", function(){
+            document.getElementById('show_events').innerHTML = 'HIDE';
+        });
+       $("#collapseEventList").on("hidden.bs.collapse", function(){
+            document.getElementById('show_events').innerHTML = 'SHOW';
+        });
+       
 	} );
 	
 </script>
-
 
 
 <!---------------------------------------------------------------------------------------------------->
