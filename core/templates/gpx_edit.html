@@ -102,9 +102,23 @@
 			<div class="clearfix">
 				
 				{% if not gpx.public(): %}
-					<a class="btn btn-primary float-left" href="{{ url_for('publish_route', gpx_id=gpx.id) }}">Publish Route</a>
+				
+					<!-- Mini form to publish route -->
+					<form action="{{ url_for('publish_route', gpx_id=gpx.id) }}"
+					      method="post">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+						<button type="submit" class="btn btn-primary float-left">Publish Route</button>
+					</form>
+			
 				{% else: %}
-					<a class="btn btn-warning float-left" href="{{ url_for('hide_route', gpx_id=gpx.id) }}">Hide route</a>
+
+					<!-- Mini form to hide route -->
+					<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
+					      method="post">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+						<button type="submit" class="btn btn-warning float-left">Hide Route</button>
+					</form>
+				
 				{% endif %}
 			
 				<!-- Delete button -->

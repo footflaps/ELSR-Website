@@ -898,7 +898,7 @@ def gpx_details(gpx_id):
 # Make a route public
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/publish_route', methods=['GET'])
+@app.route('/publish_route', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -975,7 +975,7 @@ def publish_route():
 # Make a route private
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/hide_route', methods=['GET'])
+@app.route('/hide_route', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
