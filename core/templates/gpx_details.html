@@ -87,7 +87,7 @@
 					{% endif %}
 				
 					<!-- Delete button -->
-					<a class="btn btn-danger float-right" href="{{ url_for('route_delete', gpx_id=gpx.id) }}"
+					<a class="btn btn-danger float-right"
 					   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
 					
 				</div>
@@ -286,7 +286,7 @@
 							{% endif %}
 						
 							<!-- Delete button -->
-							<a class="btn btn-danger float-right" href="{{ url_for('route_delete', gpx_id=gpx.id) }}"
+							<a class="btn btn-danger float-right"
 							   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
 				
 						</div>
@@ -346,7 +346,10 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('route_delete', gpx_id=gpx.id) }}" method="get">
+				<form action="{{ url_for('route_delete', gpx_id=gpx.id) }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					<input type="hidden" name="return_page" value="{{ url_for('gpx_details', gpx_id=gpx.id) }}"/>
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">Please enter "DELETE" in the box below:</label>

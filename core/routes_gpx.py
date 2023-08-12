@@ -2,6 +2,7 @@ import random
 from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory
 from flask_login import login_required, current_user
 from flask_googlemaps import Map
+from werkzeug import exceptions
 import gpxpy
 import gpxpy.gpx
 import mpu
@@ -1380,15 +1381,33 @@ def gpx_cut_end():
 # Delete a GPX route
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/gpx_delete/<int:gpx_id>', methods=['GET'])
+@app.route('/gpx_delete', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def route_delete(gpx_id):
+def route_delete():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    confirm = request.args.get('confirm', None)
+    gpx_id = request.args.get('gpx_id', None)
+    try:
+        return_page = request.form['return_page']
+    except exceptions.BadRequestKeyError:
+        return_page = None
+    try:
+        confirm = request.form['confirm']
+    except exceptions.BadRequestKeyError:
+        confirm = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if confirm == "":
+        confirm = " "
+
+    print("")
+    print("")
+    print(f"return_page = '{return_page}'")
+    print("")
+    print("")
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -1432,7 +1451,8 @@ def route_delete(gpx_id):
         app.logger.debug(f"route_delete(): Delete wasn't confirmed, gpx_id = '{gpx_id}', confirm = '{confirm}'!")
         Event().log_event("GPX Delete Fail", f"Delete wasn't confirmed, gpx_id = '{gpx_id}', confirm = '{confirm}'!")
         flash("Delete wasn't confirmed!")
-        return redirect(url_for('edit_route', gpx_id=gpx_id))
+        if return_page:
+            return redirect(return_page)
 
     # ----------------------------------------------------------- #
     # Delete #1: Remove from dB
