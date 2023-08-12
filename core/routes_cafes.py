@@ -33,13 +33,6 @@ from core.send_emails import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import our modal forms
-# -------------------------------------------------------------------------------------------------------------- #
-
-# These are needed, used in html templates, but PyCharm can't see that
-from core.modal_forms import delete_comment_modal_form, delete_post_modal_form
-
-# -------------------------------------------------------------------------------------------------------------- #
 # Constants used to verify sensible cafe coordinates
 # -------------------------------------------------------------------------------------------------------------- #
 
