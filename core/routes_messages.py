@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_user, current_user, logout_user, login_required
 from datetime import date
 from werkzeug import exceptions
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -18,6 +19,7 @@ from core import app
 from core.db_users import User, admin_only, update_last_seen, logout_barred_user
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
+from core.send_emails import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -295,6 +297,15 @@ def reply_message(message_id):
         Event().log_event("Message Reply Fail", f"Failed to send message.")
         flash("Sorry, something went wrong")
 
+    # ----------------------------------------------------------- #
+    # Alert Admin (if recipient)
+    # ----------------------------------------------------------- #
+
+    if message.from_email == ADMIN_EMAIL:
+        # Threading won't have access to current_user, so need to acquire persistent user to pass on
+        user = User().find_user_from_id(current_user.id)
+        Thread(target=alert_admin_via_sms, args=(user, f"Reply Message: {body}",)).start()
+
     # Back to calling page
     return redirect(request.referrer.split('#')[0] + "#messages")
 
@@ -341,8 +352,8 @@ def message_admin(user_id):
     # ----------------------------------------------------------- #
     if user_id != current_user.id:
         # Fraudulent attempt!
-        app.logger.debug(f"message_user(): User '{current_user.email}' attempted to spoor user '{user.email}'.")
-        Event().log_event("Message Admin Fail", f"User '{current_user.email}' attempted to spoor user '{user.email}'.")
+        app.logger.debug(f"message_user(): User '{current_user.email}' attempted to spoof user '{user.email}'.")
+        Event().log_event("Message Admin Fail", f"User '{current_user.email}' attempted to spoof user '{user.email}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -366,6 +377,11 @@ def message_admin(user_id):
         app.logger.debug(f"message_admin(): Message().add_message() failed user.email = '{user.email}'.")
         Event().log_event("Message Admin Fail", f"Message send failed!")
         flash("Sorry, something went wrong")
+
+    # ----------------------------------------------------------- #
+    # Alert admin via SMS
+    # ----------------------------------------------------------- #
+    Thread(target=alert_admin_via_sms, args=(user, body,)).start()
 
     # Back to calling page
     return redirect(request.referrer)

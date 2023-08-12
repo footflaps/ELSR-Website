@@ -192,7 +192,7 @@ class User(UserMixin, db.Model):
         else:
             return False
 
-    def _(self):
+    def has_valid_phone_number(self):
         if not self.phone_number:
             return False
         # Check for UK code

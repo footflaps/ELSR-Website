@@ -28,7 +28,9 @@ from core.dB_gpx import Gpx
 from core.routes_gpx import MIN_DISPLAY_STEP_KM
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.db_users import update_last_seen, logout_barred_user
+from core.db_users import User, update_last_seen, logout_barred_user
+from core.send_emails import alert_admin_via_sms
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our modal forms
@@ -856,6 +858,13 @@ def flag_cafe(cafe_id):
         app.logger.debug(f"flag_cafe(): Message().add_message failed, cafe_id = '{cafe_id}'.")
         Event().log_event("Flag Cafe Fail", f"Message().add_message failed, cafe_id = '{cafe_id}'.")
         flash("Sorry, something went wrong.")
+
+    # ----------------------------------------------------------- #
+    # Alert admin via SMS
+    # ----------------------------------------------------------- #
+    # Threading won't have access to current_user, so need to acquire persistent user to pass on
+    user = User().find_user_from_id(current_user.id)
+    Thread(target=alert_admin_via_sms, args=(user, f"Cafe '{cafe.name}', Reason: '{reason}'",)).start()
 
     # Back to cafe details page
     return redirect(url_for('cafe_details', cafe_id=cafe_id))

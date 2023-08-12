@@ -51,7 +51,11 @@ RESET_BODY = "Dear [USER], \n\n" \
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Email Functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
 # Send an email
@@ -115,6 +119,18 @@ def contact_form_email(from_name, from_email, body):
             return False
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# SMS Functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Send SMS for Two Factor Authentication
+# -------------------------------------------------------------------------------------------------------------- #
 def send_2fa_sms(user):
     client = Client(twilio_account_sid, twilio_auth_token)
     message = client.messages.create(
@@ -127,25 +143,46 @@ def send_2fa_sms(user):
     app.logger.debug(f"send_sms(): SMS 2FA sent to user_id = '{user.id}'. Status is '{message.status}'.")
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Send SMS to verify phone number is correct
+# -------------------------------------------------------------------------------------------------------------- #
 def send_sms_verif_code(user):
     client = Client(twilio_account_sid, twilio_auth_token)
     message = client.messages.create(
         body=f"Mobile verification URL: https://www.elsr.co.uk{url_for('mobile_verify')}?code={user.verification_code}"
              f"&email='{user.email}'   Code is {user.verification_code}",
         from_=twilio_mobile_number,
-        to=user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number )]
+        to=user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number)]
     )
     Event().log_event("SMS", f"SMS code sent to user_id = '{user.id}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): SMS code sent to user_id = '{user.id}'. Status is '{message.status}'.")
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Generic send SMS
+# -------------------------------------------------------------------------------------------------------------- #
 def send_sms(user, message):
     client = Client(twilio_account_sid, twilio_auth_token)
     message = client.messages.create(
-        body=f"Message from www.elsr.co.uk: {message}",
+        body=message,
         from_=twilio_mobile_number,
         to=user.phone_number
     )
     Event().log_event("SMS", f"Sent SMS to '{user.id}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): Sent SMS to '{user.id}'. Status is '{message.status}'.")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Alert Admin
+# -------------------------------------------------------------------------------------------------------------- #
+def alert_admin_via_sms(from_user: User, message: str):
+    admins = User().all_admins()
+    for admin in admins:
+        # All admins should have a valid phone number...
+        if admin.has_valid_phone_number():
+            send_sms(admin, f"ELSR Admin alert from '{from_user.name}': {message}")
+        else:
+            # Should never get here, but..
+            Event().log_event("SMS admin alert", f"Admin '{admin.email}' doesn't appear to have a valid mobile number.")
+            app.logger.debug(f"alert_admin_sms(): Admin '{admin.email}' doesn't appear to have a valid mobile number.")
 
