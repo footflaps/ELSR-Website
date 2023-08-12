@@ -583,7 +583,9 @@
 	$(document).ready( function () {
 	
 		/* jQuery on our tables where we want dataTables to run */
-		$('#userTable').DataTable();
+		$('#userTable').DataTable({
+			pageLength: 25
+		});
 		$('#eventTable').DataTable()
 		
 		/* Messages - Hide <-> Show buttons name change */

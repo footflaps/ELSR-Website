@@ -175,9 +175,11 @@
 									<!--    unClosed button      -->
 									<!----------------------------->
 								
-									<a class="btn btn-warning float-left"
-									   href="{{url_for('unclose_cafe', cafe_id=cafe.id)}}">unClose Cafe</a>
-								
+									<form action="{{ url_for('unclose_cafe', cafe_id=cafe.id) }}" method="post">
+										<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+										<button type="submit" class="btn btn-warning float-left">unClose Cafe</button>
+									</form>
+
 								{% endif %}
 								
 							</div>
@@ -497,12 +499,8 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--                                       Modal forms                                              -->
+<!--                                  Close Cafe Modal form                                         -->
 <!---------------------------------------------------------------------------------------------------->
-
-<!----------------------------->
-<!--   Closed modal form     -->
-<!----------------------------->
 
 <div class="modal fade" id="closedCafe" tabindex="-1" role="dialog"
      aria-labelledby="exampleModalLabel2" aria-hidden="true">
@@ -515,7 +513,9 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<form action="{{url_for('close_cafe', cafe_id=cafe.id)}}" method="get">
+				<form action="{{url_for('close_cafe', cafe_id=cafe.id)}}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
 						<label for="reason" class="col-form-label">Please say when the cafe closed or is going to close:</label>
@@ -534,9 +534,10 @@
 </div>
 
 
-<!----------------------------->
-<!--     FLAG modal form     -->
-<!----------------------------->
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                   Flag Cafe Modal form                                         -->
+<!---------------------------------------------------------------------------------------------------->
 
 <div class="modal fade" id="flagCafe" tabindex="-1" role="dialog"
      aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -585,4 +586,3 @@
 </script>
 
 {% endblock %}
-
