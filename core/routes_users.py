@@ -813,15 +813,16 @@ def delete_user(user_id):
 # Block user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/block_user/<int:user_id>', methods=['GET'])
+@app.route('/block_user', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
-def block_user(user_id):
+def block_user():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    confirm = request.args.get('confirm', None)
+    user_id = request.args.get('user_id', None)
+    confirm = request.form['confirm']
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -870,7 +871,7 @@ def block_user(user_id):
 # unBlock user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/unblock_user', methods=['GET'])
+@app.route('/unblock_user', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
@@ -879,6 +880,7 @@ def unblock_user():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
+    confirm = request.form['unblock_confirm']
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -886,6 +888,10 @@ def unblock_user():
     if not user_id:
         app.logger.debug(f"unblock_user(): Missing user_id!")
         Event().log_event("unBlock User Fail", f"missing user id.")
+        abort(400)
+    elif not confirm:
+        app.logger.debug(f"unblock_user(): Missing user confirmation!")
+        Event().log_event("unBlock User Fail", f"missing confirmation.")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -896,6 +902,11 @@ def unblock_user():
         app.logger.debug(f"unblock_user(): Invalid user user_id = '{user_id}'!")
         Event().log_event("unBlock User Fail", f"invalid user user_id = '{user_id}'.")
         abort(404)
+    elif confirm != "UNBLOCK":
+        app.logger.debug(f"unblock_user(): unBlock wasn't confirmed '{confirm}'.")
+        Event().log_event("unBlock User Fail", f"unBlock wasn't confirmed '{confirm}'.")
+        flash(f"lock_user(): unblock wasn't confirmed '{confirm}'.")
+        return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
     # Unblock user
