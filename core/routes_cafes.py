@@ -436,8 +436,9 @@ def new_cafe():
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year)
 
         # Create a new Cafe object
+        cafe_name = form.name.data.strip()
         new_cafe = Cafe(
-            name=form.name.data.strip(),
+            name=cafe_name,
             lat=form.lat.data,
             lon=form.lon.data,
             website_url=form.website_url.data,
@@ -461,13 +462,13 @@ def new_cafe():
         #   Try to add the cafe
         # ----------------------------------------------------------- #
         if Cafe().add_cafe(new_cafe):
-            app.logger.debug(f"new_cafe(): Success, cafe '{new_cafe.name}' has been added!")
-            Event().log_event("New Cafe Success", f"Cafe '{new_cafe.name}' has been added!")
-            flash(f"Cafe {new_cafe.name} has been added!")
+            app.logger.debug(f"new_cafe(): Success, cafe '{cafe_name}' has been added!")
+            Event().log_event("New Cafe Success", f"Cafe '{cafe_name}' has been added!")
+            flash(f"Cafe {cafe_name} has been added!")
         else:
             # Should never get here, but....
-            app.logger.debug(f"new_cafe(): Cafe add failed '{new_cafe.name}'.")
-            Event().log_event("New Cafe Fail", f"Something went wrong! '{new_cafe.name}'.")
+            app.logger.debug(f"new_cafe(): Cafe add failed '{cafe_name}'.")
+            Event().log_event("New Cafe Fail", f"Something went wrong! '{cafe_name}'.")
             flash("Sorry, something went wrong.")
             # Back to edit form
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year)
@@ -476,7 +477,7 @@ def new_cafe():
         #   Look up our new cafe
         # ----------------------------------------------------------- #
         # Look up our new cafe in the dB as we can't know its ID until after it's been added
-        cafe = Cafe().find_by_name(new_cafe.name)
+        cafe = Cafe().find_by_name(cafe_name)
         app.logger.debug(f"new_cafe(): Cafe added, cafe_id = '{cafe.id}'.")
 
         # ----------------------------------------------------------- #
