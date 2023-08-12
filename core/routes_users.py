@@ -737,15 +737,16 @@ def user_page():
 # Delete user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_user/<int:user_id>', methods=['GET'])
+@app.route('/delete_user', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def delete_user(user_id):
+def delete_user():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    confirm = request.args.get('confirm', None)
+    user_id = request.args.get('user_id', None)
+    confirm = request.form['confirm']
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
