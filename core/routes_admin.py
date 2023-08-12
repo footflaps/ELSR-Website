@@ -122,15 +122,16 @@ def admin_page():
 # Make a user admin
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/make_admin/<int:user_id>', methods=['GET'])
+@app.route('/make_admin', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
-def make_admin(user_id):
+def make_admin():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    confirmation = request.args.get('admin_confirm', None)
+    user_id = request.args.get('user_id', None)
+    confirmation = request.form['admin_confirm']
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -173,6 +174,18 @@ def make_admin(user_id):
         return abort(403)
 
     # ----------------------------------------------------------- #
+    # Admins must have validated phone number for 2FA login
+    # ----------------------------------------------------------- #
+    if not user.has_valid_phone_number():
+        # Can't mak admin
+        flash("Sorry, user doesn't have a validated mobile number, so can't use 2FA which is mandatory for Admins!")
+        app.logger.debug(f"make_admin(): Rejected request to made user_id = '{user_id}' admin as doesn't have 2FA.")
+        Event().log_event(f"Make Admin Fail", f"Rejected request to made user_id = '{user_id}' "
+                                              f"admin as doesn't have 2FA.")
+        # Back to calling page
+        return redirect(request.referrer)
+
+    # ----------------------------------------------------------- #
     # Make admin
     # ----------------------------------------------------------- #
     if User().make_admin(user_id):
@@ -194,15 +207,16 @@ def make_admin(user_id):
 # Remove admin privileges
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/unmake_admin/<int:user_id>', methods=['GET'])
+@app.route('/unmake_admin', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
-def unmake_admin(user_id):
+def unmake_admin():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    confirmation = request.args.get('unadmin_confirm', None)
+    user_id = request.args.get('user_id', None)
+    confirmation = request.form['unadmin_confirm']
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
