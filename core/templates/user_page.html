@@ -1023,6 +1023,8 @@
 				-->
 				<form action="{{ url_for('delete_user', user_id=user.id) }}" method="get">
 					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">
 							If you really have had enough and are not prepared to cut down your steerer tube, you
@@ -1066,6 +1068,8 @@
                         2. confirm = request.form['confirm']
 				-->
 				<form action="{{ url_for('block_user', user_id=user.id) }}" method="get">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">Please enter "BLOCK" in the box below:</label>
@@ -1187,14 +1191,15 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('message_admin', user_id=user.id) }}" method="get">
+				<form action="{{ url_for('message_admin', user_id=user.id) }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">
 						Either get that steerer tube cut down, or ask an Admin to make them stop. <br>
 						Please leave a message in the box below and someone will
-						eventually get back to you. <br>NB Response times will be in accordance with the service level you are
-						paying for.</label>
+						eventually get back to you.</label>
 						<textarea class="form-control" id="admin_message" name="admin_message" rows="6"></textarea>
 					</div>
 					
@@ -1231,7 +1236,9 @@
 						1. gpx_id = request.args.get('gpx_id', None)
                         2. confirm = request.form['confirm']
 				-->
-				<form action="{{ url_for('message_user', user_id=user.id) }}" method="get">
+				<form action="{{ url_for('message_user', user_id=user.id) }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">

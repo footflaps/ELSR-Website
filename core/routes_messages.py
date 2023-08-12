@@ -314,15 +314,16 @@ def reply_message(message_id):
 # Send message to Admin
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/message_admin/<int:user_id>', methods=['GET'])
+@app.route('/message_admin', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def message_admin(user_id):
+def message_admin():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    body = request.args.get('admin_message', None)
+    user_id = request.args.get('user_id', None)
+    body = request.form['admin_message']
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -343,16 +344,17 @@ def message_admin(user_id):
 
     # Check id is valid
     if not user:
-        app.logger.debug(f"message_user(): FAILED to locate user user_id = '{user_id}'.")
+        app.logger.debug(f"message_admin(): FAILED to locate user user_id = '{user_id}'.")
         Event().log_event("Message Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
     # Check author is correct
     # ----------------------------------------------------------- #
-    if user_id != current_user.id:
+    if user.id != current_user.id:
         # Fraudulent attempt!
-        app.logger.debug(f"message_user(): User '{current_user.email}' attempted to spoof user '{user.email}'.")
+        print(f"user_id = '{user_id}', current_user.id = '{current_user.id}' ")
+        app.logger.debug(f"message_admin(): User '{current_user.email}' attempted to spoof user '{user.email}'.")
         Event().log_event("Message Admin Fail", f"User '{current_user.email}' attempted to spoof user '{user.email}'.")
         return abort(403)
 
@@ -391,15 +393,16 @@ def message_admin(user_id):
 # Send message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/message_user/<int:user_id>', methods=['GET'])
+@app.route('/message_user', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
-def message_user(user_id):
+def message_user():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    body = request.args.get('user_message', None)
+    user_id = request.args.get('user_id', None)
+    body = request.form['user_message']
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
