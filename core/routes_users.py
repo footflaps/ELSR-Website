@@ -608,7 +608,7 @@ def reset_password():
 # User home page
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/user_page', methods=['GET', 'POST'])
+@app.route('/user_page', methods=['GET'])
 @login_required
 @update_last_seen
 def user_page():

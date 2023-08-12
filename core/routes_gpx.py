@@ -802,7 +802,7 @@ def gpx_list():
 # Display a single GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/route/<int:gpx_id>', methods=['GET', 'POST'])
+@app.route('/route/<int:gpx_id>', methods=['GET'])
 @update_last_seen
 def gpx_details(gpx_id):
 
@@ -1173,7 +1173,7 @@ def new_route():
 # Allow the user to edit a GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/edit_route', methods=['GET', 'POST'])
+@app.route('/edit_route', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
