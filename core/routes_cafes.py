@@ -813,7 +813,11 @@ def flag_cafe():
     # Get details from the page
     # ----------------------------------------------------------- #
     cafe_id = request.args.get('cafe_id', None)
-    reason = request.form['reason']
+    try:
+        reason = request.form['reason']
+    except exceptions.BadRequestKeyError:
+        reason = None
+
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if reason == "":
         reason = " "

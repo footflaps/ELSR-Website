@@ -8,7 +8,6 @@ import mpu
 import os
 from time import sleep
 from threading import Thread
-import json
 from datetime import datetime, timedelta
 
 

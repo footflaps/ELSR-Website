@@ -1,6 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort
-from flask_login import login_user, current_user, logout_user, login_required
-from datetime import date
+from flask_login import current_user, login_required
 from werkzeug import exceptions
 from threading import Thread
 
@@ -323,7 +322,10 @@ def message_admin():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
-    body = request.form['admin_message']
+    try:
+        body = request.form['admin_message']
+    except exceptions.BadRequestKeyError:
+        body = None
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -402,7 +404,10 @@ def message_user():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
-    body = request.form['user_message']
+    try:
+        body = request.form['user_message']
+    except exceptions.BadRequestKeyError:
+        body = None
 
     # ----------------------------------------------------------- #
     # Handle missing parameters

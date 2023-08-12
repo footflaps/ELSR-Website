@@ -1,5 +1,6 @@
 from flask import request, abort, flash, redirect, url_for
 from flask_login import login_required, current_user
+from werkzeug import exceptions
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -107,7 +108,11 @@ def delete_events():
     # ----------------------------------------------------------- #
     days = request.args.get('days', None)
     user_id = request.args.get('user_id', None)
-    confirm = request.form['confirm_ev']
+    try:
+        confirm = request.form['confirm_ev']
+    except exceptions.BadRequestKeyError:
+        confirm = None
+
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if confirm == "":
         confirm = " "
@@ -201,7 +206,11 @@ def delete_404s():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    confirm = request.form['confirm_404']
+    try:
+        confirm = request.form['confirm_404']
+    except exceptions.BadRequestKeyError:
+        confirm = None
+
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if confirm == "":
         confirm = " "

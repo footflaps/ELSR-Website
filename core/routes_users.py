@@ -1,7 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
-from flask_login import login_user, current_user, logout_user, login_required, fresh_login_required
+from flask_login import login_user, current_user, logout_user, login_required
 from flask_googlemaps import Map
-from twilio.rest.pricing.v1 import phone_number
 from werkzeug import exceptions
 from urllib.parse import urlparse
 from threading import Thread
@@ -746,7 +745,11 @@ def delete_user():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
-    confirm = request.form['confirm']
+    try:
+        confirm = request.form['confirm']
+    except exceptions.BadRequestKeyError:
+        confirm = None
+
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if confirm == "":
         confirm = " "
@@ -826,7 +829,11 @@ def block_user():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
-    confirm = request.form['confirm']
+    try:
+        confirm = request.form['confirm']
+    except exceptions.BadRequestKeyError:
+        confirm = None
+
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if confirm == "":
         confirm = " "
@@ -887,7 +894,11 @@ def unblock_user():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
-    confirm = request.form['unblock_confirm']
+    try:
+        confirm = request.form['unblock_confirm']
+    except exceptions.BadRequestKeyError:
+        confirm = None
+
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if confirm == "":
         confirm = " "
@@ -1044,7 +1055,10 @@ def add_phone_number():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
-    phone_number = request.form['phone_number']
+    try:
+        phone_number = request.form['phone_number']
+    except exceptions.BadRequestKeyError:
+        phone_number = None
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
