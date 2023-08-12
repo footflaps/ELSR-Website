@@ -880,7 +880,7 @@ def flag_cafe():
 # Delete a comment
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route("/delete_comment", methods=['GET'])
+@app.route("/delete_comment", methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen

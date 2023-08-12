@@ -402,7 +402,6 @@
 						{{ comment.body|safe }}
 					</div>
 					
-					
 					<!-- Author & date -->
 					<div>
 						<span class="date sub-text">{{comment.name}},  {{comment.date}}
@@ -419,15 +418,7 @@
 								-->
 								<a href="#"
 								   data-toggle="modal" data-target="#deleteCommentModal{{comment.id}}">✘ </a>
-						                    
-		                        <!--
-									This is our modal pop up form.
-									The html is returned by the function "delete_comment_modal_form" and '|safe' converts
-									the returned text into html in place.
-									Note that each modal form has both a unique id and a unique target url.
-								-->
-						        {{ delete_comment_modal_form( url_for("delete_comment", comment_id=comment.id, cafe_id=cafe.id) , comment.id)|safe }}
-							
+						     
 						    {% endif %}
 								
 						</span>
@@ -442,7 +433,38 @@
 				</div>
 			
 			</div> <!-- End of row per comment -->
-			
+		
+			<!------------------------------------------------------------------------------------------------------->
+			<!--                                  Delete Comment Modal form                                        -->
+			<!------------------------------------------------------------------------------------------------------->
+		
+	        <div class="modal fade" id="deleteCommentModal{{comment.id}}" tabindex="-1" role="dialog">
+	              <div class="modal-dialog modal-dialog-centered" role="document">
+	                    <div class="modal-content">
+		                    
+		                    <div class="modal-header">
+	                            <h5 class="modal-title">Delete Comment</h5>
+	                            <button type="button" class="close" data-dismiss="modal">
+	                                <span aria-hidden="true">&times;</span>
+	                            </button>
+	                        </div>
+		                    
+		                    <form action="{{ url_for('delete_comment', comment_id=comment.id, cafe_id=cafe.id) }}"
+		                          method="post">
+		                    
+			                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+			                    
+			                    <div class="modal-body">Do you really want to delete this comment?</div>
+			                    <div class="modal-footer">
+		                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+		                            <button type="submit" class="btn btn-danger">DELETE</button>
+			                     </div>
+			                    
+		                    </form>
+		                </div>
+	              </div>
+	        </div>
+		
 		{% endfor %}
 	
 	{% endif %}
