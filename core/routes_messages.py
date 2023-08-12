@@ -33,7 +33,7 @@ from core.send_emails import alert_admin_via_sms
 # Mark message as read
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/mark_read', methods=['GET'])
+@app.route('/mark_read', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -98,7 +98,7 @@ def mark_read():
 # Mark message as unread
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/mark_unread', methods=['GET'])
+@app.route('/mark_unread', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen

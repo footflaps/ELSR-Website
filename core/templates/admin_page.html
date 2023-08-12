@@ -114,15 +114,25 @@
 										
 										<!-- Mark read / unread buttons -->
 										{% if message.been_read() %}
-											<a href="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
-												<button class="btn-sm btn-secondary mr-2 float-left mb-3"
-												        type="button">Mark as unRead</button>
-											</a>
+
+											<!-- Mini form to mark a message unread -->
+											<form class="form-group"
+											      action="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}"
+											      method="post">
+												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+												<button type="submit" class="btn-sm btn-secondary mr-2 float-left mb-3">Mark as unRead</button>
+											</form>
+
 										{% else %}
-											<a href="{{ url_for('mark_read', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
-												<button class="btn-sm btn-secondary mr-2 float-left mb-3"
-												        type="button">Mark as Read</button>
-											</a>
+
+											<!-- Mini form to mark a message read -->
+											<form class="form-group"
+											      action="{{ url_for('mark_read', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}"
+											      method="post">
+												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+												<button type="submit" class="btn-sm btn-secondary mr-2 float-left mb-3">Mark as Read</button>
+											</form>
+
 										{% endif %}
 
 										<!-- Mini form to delete a message -->
