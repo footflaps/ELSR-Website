@@ -97,7 +97,7 @@ def delete_event():
 # Delete a block of events
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_events', methods=['GET'])
+@app.route('/delete_events', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
@@ -107,6 +107,9 @@ def delete_events():
     # ----------------------------------------------------------- #
     days = request.args.get('days', None)
     user_id = request.args.get('user_id', None)
+    confirm = request.form['confirm_ev']
+    if confirm == "":
+        confirm = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -119,9 +122,13 @@ def delete_events():
         app.logger.debug(f"delete_events(): Missing user_id!")
         Event().log_event("Delete Events Fail", f"Missing user_id!")
         return abort(400)
+    elif not confirm:
+        app.logger.debug(f"delete_events(): Missing confirm!")
+        Event().log_event("Delete Events Fail", f"Missing confirm!")
+        return abort(400)
 
     # ----------------------------------------------------------- #
-    # Validate user_id (unless it's admin)
+    # Validate user_id (unless it's admin) & Confirm
     # ----------------------------------------------------------- #
     if user_id != "admin":
         user = User().find_user_from_id(user_id)
@@ -129,6 +136,17 @@ def delete_events():
             app.logger.debug(f"delete_events(): Invalid user_id = '{user_id}'.")
             Event().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'.")
             return abort(404)
+
+    if confirm != "DELETE":
+        app.logger.debug(f"delete_events(): Delete wasn't confirmed, confirm = '{confirm}'!")
+        Event().log_event("Delete events FAIL", f"Delete wasn't confirmed, confirm = '{confirm}'!")
+        flash(f"Delete wasn't confirmed '{confirm}'.")
+        if user_id == "admin":
+            # Back to Admin page
+            return redirect(url_for('admin_page'))
+        else:
+            # Back to user page
+            return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
     # Delete events
