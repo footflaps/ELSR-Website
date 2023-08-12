@@ -518,7 +518,12 @@
 							
 									<td scope="row" class="small">
 										{{ event.id }}
-										<a href="{{ url_for('delete_event', event_id=event.id) }}">✘ </a>
+										
+										<form action="{{ url_for('delete_event', event_id=event.id) }}" method="post">
+											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+											<button type="submit" style="background: none; border: none;">✘</button>
+										</form>
+										
 									</td>
 									<td class="small">{{ get_user_name(event.email) }}</td>
 									<td class="small">{{ readable_date(event.date) }}</td>

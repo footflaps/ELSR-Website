@@ -693,8 +693,15 @@
 									<tr>
 								{% endif %}
 							
-									<td scope="row" class="small">{{ event.id }}
-										<a href="{{ url_for('delete_event', event_id=event.id, user_id=user.id) }}">✘ </a></td>
+									<td scope="row" class="small">
+										{{ event.id }}
+
+										<form action="{{ url_for('delete_event', event_id=event.id, user_id=user.id) }}" method="post">
+											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+											<button type="submit" style="background: none; border: none;">✘</button>
+										</form>
+									
+									</td>
 									<td class="small">{{ get_user_name(event.email) }}</td>
 									<td class="small">{{ readable_date(event.date) }}</td>
 									<td class="small">{{ event.type }}</td>

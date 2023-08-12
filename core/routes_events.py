@@ -31,7 +31,7 @@ from core.db_users import User, update_last_seen
 # Delete a single Event
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_event', methods=['GET'])
+@app.route('/delete_event', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
