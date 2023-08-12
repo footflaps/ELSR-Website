@@ -147,35 +147,33 @@
 										{{ message.body }}
 										
 										<hr>
-										
-										<div class="clearfix">
-											
-											<!-- Read / unread buttons -->
-											{% if message.been_read() %}
-												<a href="{{ url_for('mark_unread', message_id=message.id) }}">
-													<button class="btn-sm btn-secondary mr-2 mb-2 float-left "
-													        type="button">Mark as unRead</button>
-												</a>
-											{% else %}
-												<a href="{{ url_for('mark_read', message_id=message.id) }}">
-													<button class="btn-sm btn-secondary mr-2 mb-2 float-left"
-													        type="button">Mark as Read</button>
-												</a>
-											{% endif %}
-											
-											<!-- Delete button -->
-											<a href="{{ url_for('delete_message', message_id=message.id) }}">
-												<button class="btn-sm btn-danger float-right mb-2 ml-2"
-												        type="button">Delete</button>
+								
+										<!-- Read / unread buttons -->
+										{% if message.been_read() %}
+											<a href="{{ url_for('mark_unread', message_id=message.id) }}">
+												<button class="btn-sm btn-secondary mr-2 mb-3 float-left "
+												        type="button">Mark as unRead</button>
 											</a>
-											
-											<!-- Reply button -->
-												<button class="btn-sm btn-primary mr-2 mb-2 float-right"
-												        data-toggle="modal" data-target="#replyModal{{message.id}}"
-											            type="button">Reply</button>
-											
-										</div>
+										{% else %}
+											<a href="{{ url_for('mark_read', message_id=message.id) }}">
+												<button class="btn-sm btn-secondary mr-2 mb-3 float-left"
+												        type="button">Mark as Read</button>
+											</a>
+										{% endif %}
 										
+										<!-- Mini form to delete a message -->
+										<form class="form-group"
+										      action="{{ url_for('delete_message', message_id=message.id) }}"
+										      method="post">
+											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+											<button type="submit" class="btn-sm btn-danger float-right mb-3 ">Delete</button>
+										</form>
+										
+										<!-- Reply button -->
+										<button class="btn-sm btn-primary mr-2 mb-3 float-right"
+										        data-toggle="modal" data-target="#replyModal{{message.id}}"
+									            type="button">Reply</button>
+				
 									</div>
 								</div>
 							

@@ -163,7 +163,7 @@ def mark_unread():
 # Delete message
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_message', methods=['GET'])
+@app.route('/delete_message', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
