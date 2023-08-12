@@ -721,10 +721,15 @@ def user_page():
     )
 
     # Show user page
-    if event_period or anchor == "eventLog":
+    if anchor == "messages":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafemap=cafemap, cafe_comments=cafe_comments, messages=messages,
-                               events=events, days=days, anchor="eventLog", mobile=is_mobile())
+                               events=events, days=days, mobile=is_mobile(), anchor="messages")
+
+    elif event_period or anchor == "eventLog":
+        return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
+                               cafemap=cafemap, cafe_comments=cafe_comments, messages=messages,
+                               events=events, days=days, mobile=is_mobile(), anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,

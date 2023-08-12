@@ -111,6 +111,10 @@ def admin_page():
         # Jump straight to the 'eventlog'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), anchor="eventLog")
+    elif anchor == "messages":
+        # Jump straight to the 'messages'
+        return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
+                               messages=messages, events=events, days=days, mobile=is_mobile(), anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,

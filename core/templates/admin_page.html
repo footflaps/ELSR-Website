@@ -43,6 +43,7 @@
 <!--                                        Messages                                                -->
 <!---------------------------------------------------------------------------------------------------->
 
+<a name="messages" ></a>
 {% if messages %}
 	<div class="container">
 		<div class="row">
@@ -117,7 +118,7 @@
 
 											<!-- Mini form to mark a message unread -->
 											<form class="form-group"
-											      action="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}"
+											      action="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('admin_page', anchor='messages')) }}"
 											      method="post">
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												<button type="submit" class="btn-sm btn-secondary mr-2 float-left mb-3">Mark as unRead</button>
@@ -127,7 +128,7 @@
 
 											<!-- Mini form to mark a message read -->
 											<form class="form-group"
-											      action="{{ url_for('mark_read', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}"
+											      action="{{ url_for('mark_read', message_id=message.id, return_to=url_for('admin_page', anchor='messages')) }}"
 											      method="post">
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												<button type="submit" class="btn-sm btn-secondary mr-2 float-left mb-3">Mark as Read</button>
@@ -137,7 +138,7 @@
 
 										<!-- Mini form to delete a message -->
 										<form class="form-group"
-										      action="{{ url_for('delete_message', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}"
+										      action="{{ url_for('delete_message', message_id=message.id, return_to=url_for('admin_page', anchor='messages')) }}"
 										      method="post">
 											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 											<button type="submit" class="btn-sm btn-danger float-right mb-3">Delete</button>
@@ -173,7 +174,7 @@
 													1. gpx_id = request.args.get('gpx_id', None)
 							                        2. confirm = request.form['confirm']
 											-->
-											<form action="{{ url_for('reply_message', message_id=message.id) }}" method="POST">
+											<form action="{{ url_for('reply_message', message_id=message.id, return_to=url_for('admin_page', anchor='messages')) }}" method="POST">
 												
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												
@@ -496,7 +497,6 @@
 			</div>
 		</div>
 		
-		
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 	
@@ -578,15 +578,23 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <script>
-
-	{% if anchor %}
+	
+	{% if anchor == 'messages' %}
 		
 		/* Open collapsed section */
-		$("#collapseEventList").collapse('show');
+		$("#collapseMessageList").collapse('show');
         
         /* Jump to anchor */
         window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
 	    
+	{% elif anchor == 'eventLog'%}
+	
+		/* Open collapsed section */
+		$("#collapseEventList").collapse('show');
+  
+		/* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	
 	{% endif %}
 	
 </script>
