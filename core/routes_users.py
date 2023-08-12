@@ -747,6 +747,9 @@ def delete_user():
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
     confirm = request.form['confirm']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if confirm == "":
+        confirm = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -824,6 +827,9 @@ def block_user():
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
     confirm = request.form['confirm']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if confirm == "":
+        confirm = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -882,6 +888,9 @@ def unblock_user():
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
     confirm = request.form['unblock_confirm']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if confirm == "":
+        confirm = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters

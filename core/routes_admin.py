@@ -132,6 +132,9 @@ def make_admin():
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
     confirmation = request.form['admin_confirm']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if confirmation == "":
+        confirmation = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -217,6 +220,9 @@ def unmake_admin():
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
     confirmation = request.form['unadmin_confirm']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if confirmation == "":
+        confirmation = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters

@@ -1,5 +1,5 @@
 from flask import request, abort, flash, redirect, url_for
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -15,7 +15,7 @@ from core import app
 
 from core.dB_events import Event
 from core.db_users import admin_only
-from core.db_users import User, update_last_seen, logout_barred_user
+from core.db_users import User, update_last_seen
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -108,6 +108,7 @@ def delete_events():
     days = request.args.get('days', None)
     user_id = request.args.get('user_id', None)
     confirm = request.form['confirm_ev']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if confirm == "":
         confirm = " "
 
@@ -192,7 +193,7 @@ def delete_events():
 # Delete all 404 events
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_404s', methods=['GET'])
+@app.route('/delete_404s', methods=['POST'])
 @login_required
 @admin_only
 @update_last_seen
@@ -200,29 +201,38 @@ def delete_404s():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
+    confirm = request.form['confirm_404']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if confirm == "":
+        confirm = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
     # ----------------------------------------------------------- #
-    if not user_id:
-        app.logger.debug(f"delete_404s(): Missing user_id!")
-        Event().log_event("Delete 404s Fail", f"Missing user_id!")
+    if not confirm:
+        app.logger.debug(f"delete_404s(): Missing confirm!")
+        Event().log_event("Delete 404s Fail", f"Missing confirm!")
         return abort(400)
 
     # ----------------------------------------------------------- #
-    # Validate user_id (unless it's admin)
+    # Validate user_id and confirm
     # ----------------------------------------------------------- #
-    if user_id != "admin":
-        app.logger.debug(f"delete_404s(): Invalid user_id = '{user_id}'.")
-        Event().log_event("Delete 404s Fail", f"Invalid user_id = '{user_id}'.")
-        return abort(404)
+    if not current_user.admin():
+        app.logger.debug(f"delete_404s(): Invalid user_id = '{current_user.id}'.")
+        Event().log_event("Delete 404s Fail", f"Invalid user_id = '{current_user.id}'.")
+        return abort(403)
+    if confirm != "DELETE":
+        flash(f"Delete not confirmed: '{confirm}'")
+        app.logger.debug(f"delete_404s(): Delete not confirmed: '{confirm}'.")
+        Event().log_event("Delete 404s Fail", f"Delete not confirmed: '{confirm}'.")
+        # Back to Admin page
+        return redirect(url_for("admin_page"))
 
     # ----------------------------------------------------------- #
     # Delete 404 events
     # ----------------------------------------------------------- #
     if Event().delete_all_404s():
-        flash("Messages deleted!")
+        flash("404 Events deleted!")
     else:
         # Should never get here, but...
         app.logger.debug(f"delete_404s(): Event().delete_all_404s() failed.")
@@ -230,3 +240,4 @@ def delete_404s():
 
     # Back to Admin page
     return redirect(url_for("admin_page", anchor="eventLog"))
+
