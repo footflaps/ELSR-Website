@@ -805,16 +805,19 @@ def unclose_cafe():
 # Flag a cafe to an admin
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route("/flag_cafe/<int:cafe_id>", methods=['GET'])
+@app.route("/flag_cafe", methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def flag_cafe(cafe_id):
+def flag_cafe():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    reason = request.args.get('reason', None)
-
+    cafe_id = request.args.get('cafe_id', None)
+    reason = request.form['reason']
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if reason == "":
+        reason = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -851,12 +854,12 @@ def flag_cafe(cafe_id):
     if Message().add_message(message):
         # Success
         app.logger.debug(f"flag_cafe(): Flagged cafe, cafe_id = '{cafe_id}'.")
-        Event().log_event("Flag Cafe Success", f"Flagged cafe, cafe_id = '{cafe_id}'")
+        Event().log_event("Flag Cafe Success", f"Flagged cafe, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Your message has been forwarded to an admin.")
     else:
         # Should never get here, but....
         app.logger.debug(f"flag_cafe(): Message().add_message failed, cafe_id = '{cafe_id}'.")
-        Event().log_event("Flag Cafe Fail", f"Message().add_message failed, cafe_id = '{cafe_id}'.")
+        Event().log_event("Flag Cafe Fail", f"Message().add_message failed, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Sorry, something went wrong.")
 
     # ----------------------------------------------------------- #

@@ -549,7 +549,9 @@
 				</button>
 			</div>
 			<div class="modal-body">
-				<form action="{{url_for('flag_cafe', cafe_id=cafe.id)}}" method="get">
+				<form action="{{url_for('flag_cafe', cafe_id=cafe.id)}}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
 						<label for="reason" class="col-form-label">Please explain why you object to this content:</label>
