@@ -1225,10 +1225,10 @@ def edit_route():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Crop the start of a GPX
+# Crop the start of a GPX  (called from within the google map via hyperlinked icons)
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/gpx_cut_start', methods=['GET', 'POST'])
+@app.route('/gpx_cut_start', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -1302,10 +1302,10 @@ def gpx_cut_start():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Crop the start of a GPX
+# Crop the start of a GPX (called from within the google map via hyperlinked icons)
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/gpx_cut_end', methods=['GET', 'POST'])
+@app.route('/gpx_cut_end', methods=['GET'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -1402,12 +1402,6 @@ def route_delete():
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if confirm == "":
         confirm = " "
-
-    print("")
-    print("")
-    print(f"return_page = '{return_page}'")
-    print("")
-    print("")
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
