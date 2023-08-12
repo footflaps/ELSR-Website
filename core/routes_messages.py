@@ -226,15 +226,23 @@ def delete_message():
 # Reply message
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/reply_message/<int:message_id>', methods=['GET'])
+@app.route('/reply_message', methods=['POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
-def reply_message(message_id):
+def reply_message():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    body = request.args.get('body', None)
+    message_id = request.args.get('message_id', None)
+    try:
+        body = request.form['body']
+    except exceptions.BadRequestKeyError:
+        body = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if body == "":
+        body = " "
 
     # ----------------------------------------------------------- #
     # Handle missing parameters

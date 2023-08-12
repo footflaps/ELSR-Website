@@ -108,17 +108,20 @@
 										
 										<!-- Reply Button -->
 										<a data-toggle="modal" data-target="#replyMessageModal{{message.id}}">
-											<button class="btn-sm btn-primary mr-2 float-left mb-3" type="button">Reply</button>
+											<button class="btn-sm btn-primary mr-2 float-left mb-3"
+											        type="button">Reply</button>
 										</a>
 										
 										<!-- Mark read / unread buttons -->
 										{% if message.been_read() %}
 											<a href="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
-												<button class="btn-sm btn-secondary mr-2 float-left mb-3" type="button">Mark as unRead</button>
+												<button class="btn-sm btn-secondary mr-2 float-left mb-3"
+												        type="button">Mark as unRead</button>
 											</a>
 										{% else %}
 											<a href="{{ url_for('mark_read', message_id=message.id, return_to=url_for('admin_page', _anchor='messages')) }}">
-												<button class="btn-sm btn-secondary mr-2 float-left mb-3" type="button">Mark as Read</button>
+												<button class="btn-sm btn-secondary mr-2 float-left mb-3"
+												        type="button">Mark as Read</button>
 											</a>
 										{% endif %}
 
@@ -160,7 +163,9 @@
 													1. gpx_id = request.args.get('gpx_id', None)
 							                        2. confirm = request.form['confirm']
 											-->
-											<form action="{{ url_for('reply_message', message_id=message.id) }}" method="GET">
+											<form action="{{ url_for('reply_message', message_id=message.id) }}" method="POST">
+												
+												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												
 												<div class="form-group">
 													<label for="body" class="col-form-label">
