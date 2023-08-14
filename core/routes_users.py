@@ -813,8 +813,7 @@ def delete_user():
         # Validate against current_user's (admins) password
         if not user.validate_password(current_user, password, user_ip):
             app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
-            Event().log_event("Delete User Fail", f"Delete failed, incorrect password for "
-                                                  f"user_id = '{current_user.id}'!")
+            Event().log_event("Delete User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
             flash(f"Incorrect password for Admin.")
             return redirect(url_for('user_page', user_id=user_id))
 

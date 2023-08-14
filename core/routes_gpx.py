@@ -1395,13 +1395,21 @@ def route_delete():
     except exceptions.BadRequestKeyError:
         return_page = None
     try:
-        confirm = request.form['confirm']
+        password = request.form['password']
     except exceptions.BadRequestKeyError:
-        confirm = None
+        password = None
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirm == "":
-        confirm = " "
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -1410,9 +1418,9 @@ def route_delete():
         app.logger.debug(f"route_delete(): Missing gpx_id!")
         Event().log_event("GPX Delete Fail", f"Missing gpx_id!")
         return abort(400)
-    elif not confirm:
-        app.logger.debug(f"route_delete(): Missing confirm!")
-        Event().log_event("GPX Delete Fail", f"Missing confirm!")
+    elif not password:
+        app.logger.debug(f"route_delete(): Missing Password!")
+        Event().log_event("GPX Delete Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -1439,14 +1447,18 @@ def route_delete():
         return abort(403)
 
     # ----------------------------------------------------------- #
-    # Confirm Delete
+    #  Validate password
     # ----------------------------------------------------------- #
-    if confirm != "DELETE":
-        app.logger.debug(f"route_delete(): Delete wasn't confirmed, gpx_id = '{gpx_id}', confirm = '{confirm}'!")
-        Event().log_event("GPX Delete Fail", f"Delete wasn't confirmed, gpx_id = '{gpx_id}', confirm = '{confirm}'!")
-        flash("Delete wasn't confirmed!")
-        if return_page:
-            return redirect(return_page)
+    # Need current user
+    user = User().find_user_from_id(current_user.id)
+
+    # Validate against current_user's password
+    if not user.validate_password(user, password, user_ip):
+        app.logger.debug(f"route_delete(): Delete failed, incorrect password for user_id = '{user.id}'!")
+        Event().log_event("GPX Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
+        flash(f"Incorrect password for user {user.name}!")
+        # Go back to route detail page
+        return redirect(url_for('gpx_details', gpx_id=gpx_id))
 
     # ----------------------------------------------------------- #
     # Delete #1: Remove from dB

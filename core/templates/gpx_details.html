@@ -380,8 +380,9 @@
 					<input type="hidden" name="return_page" value="{{ url_for('gpx_details', gpx_id=gpx.id) }}"/>
 					
 					<div class="form-group">
-						<label for="confirm" class="col-form-label">Please enter "DELETE" in the box below:</label>
-						<textarea class="form-control" id="confirm" name="confirm"></textarea>
+						<label class="col-form-label">
+							Please enter <strong>your password</strong> in the box below:</label>
+						<input type="password" class="form-control" name="password">
 					</div>
 					
 					<div class="modal-footer">
