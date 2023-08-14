@@ -16,6 +16,9 @@ from core import app, db
 
 SECONDS_IN_DAY = 60 * 60 * 24
 
+# Hack for converting 'all' to days (10 years will probably be enough)
+ALL_DAYS = 365 * 10
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -48,7 +51,9 @@ class Event(db.Model):
             return event
 
     def all_events_days(self, days):
-        timestamp = time.time() - SECONDS_IN_DAY * days
+        if days == "all":
+            days = ALL_DAYS
+        timestamp = time.time() - SECONDS_IN_DAY * int(days)
         with app.app_context():
             events = db.session.query(Event).filter(Event.date > timestamp).all()
             return events
@@ -61,7 +66,9 @@ class Event(db.Model):
             return events
 
     def all_events_email_days(self, email, days):
-        timestamp = time.time() - SECONDS_IN_DAY * days
+        if days == "all":
+            days = ALL_DAYS
+        timestamp = time.time() - SECONDS_IN_DAY * int(days)
         with app.app_context():
             events = db.session.query(Event).filter(Event.date > timestamp).filter_by(email=email).all()
             return events
@@ -84,10 +91,12 @@ class Event(db.Model):
                 return False
 
     def delete_events_email_days(self, email, days):
+        if days == "all":
+            days = ALL_DAYS
         timestamp = time.time() - SECONDS_IN_DAY * int(days)
         try:
             with app.app_context():
-                events = db.session.query(Event).filter(Event.date > timestamp).filter_by(email=email).all()
+                events = db.session.query(Event).filter_by(email=email).filter(Event.date > timestamp).all()
                 for event in events:
                     db.session.delete(event)
                 db.session.commit()
@@ -97,6 +106,8 @@ class Event(db.Model):
             return False
 
     def delete_events_all_days(self, days):
+        if days == "all":
+            days = ALL_DAYS
         timestamp = time.time() - SECONDS_IN_DAY * int(days)
         try:
             with app.app_context():

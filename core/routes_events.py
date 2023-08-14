@@ -109,13 +109,21 @@ def delete_events():
     days = request.args.get('days', None)
     user_id = request.args.get('user_id', None)
     try:
-        confirm = request.form['confirm_ev']
+        password = request.form['password']
     except exceptions.BadRequestKeyError:
-        confirm = None
+        password = None
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirm == "":
-        confirm = " "
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -128,9 +136,9 @@ def delete_events():
         app.logger.debug(f"delete_events(): Missing user_id!")
         Event().log_event("Delete Events Fail", f"Missing user_id!")
         return abort(400)
-    elif not confirm:
-        app.logger.debug(f"delete_events(): Missing confirm!")
-        Event().log_event("Delete Events Fail", f"Missing confirm!")
+    elif not password:
+        app.logger.debug(f"delete_events(): Missing password!")
+        Event().log_event("Delete Events Fail", f"Missing password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -143,13 +151,16 @@ def delete_events():
             Event().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'.")
             return abort(404)
 
-    if confirm != "DELETE":
-        app.logger.debug(f"delete_events(): Delete wasn't confirmed, confirm = '{confirm}'!")
-        Event().log_event("Delete events FAIL", f"Delete wasn't confirmed, confirm = '{confirm}'!")
-        flash(f"Delete wasn't confirmed '{confirm}'.")
+    # ----------------------------------------------------------- #
+    # Validate current_user's (admins) password
+    # ----------------------------------------------------------- #
+    if not current_user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"delete_events(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("Delete Events Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for {current_user.name}.")
         if user_id == "admin":
             # Back to Admin page
-            return redirect(url_for('admin_page'))
+            return redirect(url_for('admin_page', anchor="eventLog"))
         else:
             # Back to user page
             return redirect(url_for('user_page', user_id=user_id))
@@ -207,20 +218,28 @@ def delete_404s():
     # Get details from the page
     # ----------------------------------------------------------- #
     try:
-        confirm = request.form['confirm_404']
+        password = request.form['password']
     except exceptions.BadRequestKeyError:
-        confirm = None
+        password = None
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirm == "":
-        confirm = " "
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
     # ----------------------------------------------------------- #
-    if not confirm:
-        app.logger.debug(f"delete_404s(): Missing confirm!")
-        Event().log_event("Delete 404s Fail", f"Missing confirm!")
+    if not password:
+        app.logger.debug(f"delete_404s(): Missing password!")
+        Event().log_event("Delete 404s Fail", f"Missing password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -230,12 +249,16 @@ def delete_404s():
         app.logger.debug(f"delete_404s(): Invalid user_id = '{current_user.id}'.")
         Event().log_event("Delete 404s Fail", f"Invalid user_id = '{current_user.id}'.")
         return abort(403)
-    if confirm != "DELETE":
-        flash(f"Delete not confirmed: '{confirm}'")
-        app.logger.debug(f"delete_404s(): Delete not confirmed: '{confirm}'.")
-        Event().log_event("Delete 404s Fail", f"Delete not confirmed: '{confirm}'.")
+
+    # ----------------------------------------------------------- #
+    # Validate current_user's (admins) password
+    # ----------------------------------------------------------- #
+    if not current_user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"delete_events(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("Delete Events Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for {current_user.name}.")
         # Back to Admin page
-        return redirect(url_for("admin_page"))
+        return redirect(url_for('admin_page', anchor="eventLog"))
 
     # ----------------------------------------------------------- #
     # Delete 404 events
