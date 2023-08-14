@@ -135,13 +135,21 @@ def make_admin():
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
     try:
-        confirmation = request.form['admin_confirm']
+        password = request.form['password']
     except exceptions.BadRequestKeyError:
-        confirmation = None
+        password = None
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirmation == "":
-        confirmation = " "
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -150,9 +158,9 @@ def make_admin():
         app.logger.debug(f"make_admin(): Missing user_id!.")
         Event().log_event("Make Admin Fail", f"Missing user_id")
         return abort(400)
-    elif not confirmation:
-        app.logger.debug(f"make_admin(): Missing confirmation!.")
-        Event().log_event("Make Admin Fail", f"Missing confirmation")
+    elif not password:
+        app.logger.debug(f"make_admin(): Missing Admin's password!")
+        Event().log_event("Make Admin Fail", f"Missing Admin's password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -167,12 +175,14 @@ def make_admin():
         Event().log_event("Make Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
-    if confirmation != "ADMIN":
-        # Failed authentication
-        app.logger.debug(f"make_admin(): Rejected request as no confirmation, user_id = '{user_id}'.")
-        Event().log_event("Make Admin Fail", f"Rejected request as no confirmation, user_id = '{user_id}'")
-        flash("Admin was not confirmed!")
-        return redirect(request.referrer)
+    # ----------------------------------------------------------- #
+    # Validate password against current_user's (admins)
+    # ----------------------------------------------------------- #
+    if not current_user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"make_admin(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("Make Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for {current_user.name}.")
+        return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
     # Restrict access
@@ -226,15 +236,22 @@ def unmake_admin():
     # Get details from the page
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
-
     try:
-        confirmation = request.form['unadmin_confirm']
+        password = request.form['password']
     except exceptions.BadRequestKeyError:
-        confirmation = None
+        password = None
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirmation == "":
-        confirmation = " "
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -243,9 +260,9 @@ def unmake_admin():
         app.logger.debug(f"unmake_admin(): Missing user_id!.")
         Event().log_event("unMake Admin Fail", f"Missing user_id")
         return abort(400)
-    elif not confirmation:
-        app.logger.debug(f"unmake_admin(): Missing confirmation")
-        Event().log_event("unMake Admin Fail", f"Missing confirmation")
+    elif not password:
+        app.logger.debug(f"unmake_admin(): Missing Admin's password!")
+        Event().log_event("unMake Admin Fail", f"Missing Admin's password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -259,12 +276,14 @@ def unmake_admin():
         Event().log_event("unMake Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
-    if confirmation != "REMOVE":
-        # Failed authentication
-        app.logger.debug(f"unmake_admin(): Invalid confirmation for user_id = '{user_id}'.")
-        Event().log_event("unMake Admin Fail", f"Invalid confirmation for user_id = '{user_id}'.")
-        flash("Admin was not confirmed properly!")
-        return redirect(request.referrer)
+    # ----------------------------------------------------------- #
+    # Validate password against current_user's (admins)
+    # ----------------------------------------------------------- #
+    if not current_user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"unmake_admin(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("unMake Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for {current_user.name}.")
+        return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
     # Restrict access
@@ -292,6 +311,159 @@ def unmake_admin():
     # Back to calling page
     return redirect(request.referrer)
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Block user
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/block_user', methods=['POST'])
+@login_required
+@admin_only
+@update_last_seen
+def block_user():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    user_id = request.args.get('user_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"block_user(): Missing user_id!")
+        Event().log_event("Block User Fail", f"missing user id.")
+        abort(400)
+    elif not password:
+        app.logger.debug(f"block_user(): Missing Admin's password!")
+        Event().log_event("Block User Fail", f"Missing Admin's password!")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(user_id)
+    if not user:
+        app.logger.debug(f"block_user(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("Block User Fail", f"invalid user user_id = '{user_id}'.")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Validate password against current_user's (admins)
+    # ----------------------------------------------------------- #
+    if not current_user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"block_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("Block User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for {current_user.name}.")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # ----------------------------------------------------------- #
+    # Block user
+    # ----------------------------------------------------------- #
+    if User().block_user(user_id):
+        app.logger.debug(f"block_user(): User '{user_id}' is now blocked.")
+        Event().log_event("Block User Success", f"User '{user_id}' is now blocked.")
+        flash("User Blocked.")
+    else:
+        # Should never get here, but...
+        app.logger.debug(f"block_user(): User().block_user() failed, user_id = '{user_id}'!")
+        Event().log_event("Block User Fail", f"User().block_user() failed, user_id = '{user_id}'!")
+        flash("Sorry, something went wrong...")
+
+    # Back to user page
+    return redirect(url_for('user_page', user_id=user_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# unBlock user
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/unblock_user', methods=['POST'])
+@login_required
+@admin_only
+@update_last_seen
+def unblock_user():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    user_id = request.args.get('user_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"unblock_user(): Missing user_id!")
+        Event().log_event("unBlock User Fail", f"missing user id.")
+        abort(400)
+    elif not password:
+        app.logger.debug(f"unblock_user(): Missing Admin's password!")
+        Event().log_event("unBlock User Fail", f"Missing Admin's password!")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(user_id)
+    if not user:
+        app.logger.debug(f"unblock_user(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("unBlock User Fail", f"invalid user user_id = '{user_id}'.")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Validate password against current_user's (admins)
+    # ----------------------------------------------------------- #
+    if not current_user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"unblock_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("unBlock User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for {current_user.name}.")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # ----------------------------------------------------------- #
+    # Unblock user
+    # ----------------------------------------------------------- #
+    if User().unblock_user(user_id):
+        app.logger.debug(f"unblock_user(): User '{user_id}' is now unblocked.")
+        Event().log_event("unBlock User Success", f"User '{user_id}' is now unblocked.")
+        flash("User unblocked.")
+    else:
+        # Should never get here, but...
+        app.logger.debug(f"unblock_user(): User().unblock_user() failed, user_id = '{user_id}'!")
+        Event().log_event("unBlock User Fail", f"User().unblock_user() failed, user_id = '{user_id}'!")
+        flash("Sorry, something went wrong...")
+
+    # Back to user page
+    return redirect(url_for('user_page', user_id=user_id))
 
 
 

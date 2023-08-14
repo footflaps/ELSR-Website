@@ -807,14 +807,14 @@ def delete_user():
         if not user.validate_password(user, password, user_ip):
             app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{user.id}'!")
             Event().log_event("Delete User Fail", f"Delete failed, incorrect password for user_id = '{user.id}'!")
-            flash(f"Incorrect password for user.")
+            flash(f"Incorrect password for {user.name}.")
             return redirect(url_for('user_page', user_id=user_id))
     else:
         # Validate against current_user's (admins) password
         if not user.validate_password(current_user, password, user_ip):
             app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
             Event().log_event("Delete User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
-            flash(f"Incorrect password for Admin.")
+            flash(f"Incorrect password for {current_user.name}.")
             return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
@@ -852,136 +852,6 @@ def delete_user():
         Event().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
         flash("Sorry, something went wrong.")
         return redirect(url_for('user_page', user_id=user_id))
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Block user
-# -------------------------------------------------------------------------------------------------------------- #
-
-@app.route('/block_user', methods=['POST'])
-@login_required
-@admin_only
-@update_last_seen
-def block_user():
-    # ----------------------------------------------------------- #
-    # Get details from the page
-    # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-    try:
-        confirm = request.form['confirm']
-    except exceptions.BadRequestKeyError:
-        confirm = None
-
-    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirm == "":
-        confirm = " "
-
-    # ----------------------------------------------------------- #
-    # Handle missing parameters
-    # ----------------------------------------------------------- #
-    if not user_id:
-        app.logger.debug(f"block_user(): Missing user_id!")
-        Event().log_event("Block User Fail", f"missing user id.")
-        abort(400)
-    elif not confirm:
-        app.logger.debug(f"block_user(): Missing user confirmation!")
-        Event().log_event("Block User Fail", f"missing confirmation.")
-        abort(400)
-
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
-    if not user:
-        app.logger.debug(f"block_user(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("Block User Fail", f"invalid user user_id = '{user_id}'.")
-        abort(404)
-    elif confirm != "BLOCK":
-        app.logger.debug(f"block_user(): Block wasn't confirmed '{confirm}'.")
-        Event().log_event("Block User Fail", f"Block wasn't confirmed '{confirm}'.")
-        flash(f"lock_user(): Block wasn't confirmed '{confirm}'.")
-        return redirect(url_for('user_page', user_id=user_id))
-
-    # ----------------------------------------------------------- #
-    # Block user
-    # ----------------------------------------------------------- #
-    if User().block_user(user_id):
-        app.logger.debug(f"block_user(): User '{user_id}' is now blocked.")
-        Event().log_event("Block User Success", f"User '{user_id}' is now blocked.")
-        flash("User Blocked.")
-    else:
-        # Should never get here, but...
-        app.logger.debug(f"block_user(): User().block_user() failed, user_id = '{user_id}'!")
-        Event().log_event("Block User Fail", f"User().block_user() failed, user_id = '{user_id}'!")
-        flash("Sorry, something went wrong...")
-
-    # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# unBlock user
-# -------------------------------------------------------------------------------------------------------------- #
-
-@app.route('/unblock_user', methods=['POST'])
-@login_required
-@admin_only
-@update_last_seen
-def unblock_user():
-    # ----------------------------------------------------------- #
-    # Get details from the page
-    # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-    try:
-        confirm = request.form['unblock_confirm']
-    except exceptions.BadRequestKeyError:
-        confirm = None
-
-    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirm == "":
-        confirm = " "
-
-    # ----------------------------------------------------------- #
-    # Handle missing parameters
-    # ----------------------------------------------------------- #
-    if not user_id:
-        app.logger.debug(f"unblock_user(): Missing user_id!")
-        Event().log_event("unBlock User Fail", f"missing user id.")
-        abort(400)
-    elif not confirm:
-        app.logger.debug(f"unblock_user(): Missing user confirmation!")
-        Event().log_event("unBlock User Fail", f"missing confirmation.")
-        abort(400)
-
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
-    if not user:
-        app.logger.debug(f"unblock_user(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("unBlock User Fail", f"invalid user user_id = '{user_id}'.")
-        abort(404)
-    elif confirm != "UNBLOCK":
-        app.logger.debug(f"unblock_user(): unBlock wasn't confirmed '{confirm}'.")
-        Event().log_event("unBlock User Fail", f"unBlock wasn't confirmed '{confirm}'.")
-        flash(f"lock_user(): unblock wasn't confirmed '{confirm}'.")
-        return redirect(url_for('user_page', user_id=user_id))
-
-    # ----------------------------------------------------------- #
-    # Unblock user
-    # ----------------------------------------------------------- #
-    if User().unblock_user(user_id):
-        app.logger.debug(f"unblock_user(): User '{user_id}' is now unblocked.")
-        Event().log_event("unBlock User Success", f"User '{user_id}' is now unblocked.")
-        flash("User unblocked.")
-    else:
-        # Should never get here, but...
-        app.logger.debug(f"unblock_user(): User().unblock_user() failed, user_id = '{user_id}'!")
-        Event().log_event("unBlock User Fail", f"User().unblock_user() failed, user_id = '{user_id}'!")
-        flash("Sorry, something went wrong...")
-
-    # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
