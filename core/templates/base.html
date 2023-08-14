@@ -60,13 +60,15 @@
 	<!-- Bootstrap v4.5.2 CSS -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.5.2/css/bootstrap.css">
 	
-	<!-- Bootstrap v4.5.0 (according to file header)  -->
-	<link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">
+	
+	<!-- Don't need this as already loaded 4.5.2 above -->
+<!--	 Bootstrap v4.5.0 (according to file header)  -->
+<!--	<link rel="stylesheet" href="{{ url_for('static', filename='vendor/bootstrap/css/bootstrap.min.css') }}">-->
 	
 	<!-- dataTables Bootstrap 4 CSS -->
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
 	
-	<!-- CleanBlog CSS Custom styles (must be loaded last) -->
+	<!-- Clean Blog v5.0.9 Custom styles (load last) -->
 	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
 	
 	
@@ -93,7 +95,6 @@
 		  window.dataLayer = window.dataLayer || [];
 		  function gtag(){dataLayer.push(arguments);}
 		  gtag('js', new Date());
-		
 		  gtag('config', 'G-N0RJH2LSDC');
 	</script>
 
