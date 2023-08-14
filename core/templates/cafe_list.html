@@ -226,10 +226,10 @@
 		})
 		
 		/* Cafes - Hide <-> Show buttons name change */
-		$("#collapseCafeList").on("shown.bs.collapse", function(){
+		$("#collapseCafeList").on("show.bs.collapse", function(){
             document.getElementById('show_cafes').innerHTML = 'HIDE list';
         });
-       $("#collapseCafeList").on("hidden.bs.collapse", function(){
+       $("#collapseCafeList").on("hide.bs.collapse", function(){
             document.getElementById('show_cafes').innerHTML = 'List view';
         });
 		
