@@ -473,3 +473,12 @@ input[type=file]::file-selector-button:hover {
   padding: 25px 35px;
 }
 
+/* Style WTForm error messages to stand out a bit */
+.help-block {
+    color: red;
+    font-weight: 700;
+}
+
+.control-label {
+    font-weight: 600;
+}
