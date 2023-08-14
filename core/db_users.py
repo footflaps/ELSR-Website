@@ -273,6 +273,8 @@ class User(UserMixin, db.Model):
                     app.logger.error(f"dB.create_new_verification(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
+            else:
+                app.logger.error(f"dB.create_new_verification(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def generate_sms_code(self, user_id):
@@ -291,6 +293,8 @@ class User(UserMixin, db.Model):
                     app.logger.error(f"dB.generate_sms_code(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
+            else:
+                app.logger.error(f"dB.generate_sms_code(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def find_user_from_id(self, id):
@@ -443,6 +447,8 @@ class User(UserMixin, db.Model):
                 except Exception as e:
                     app.logger.error(f"dB.create_new_reset_code(): Failed with error code '{e.args}'.")
                     return False
+            else:
+                app.logger.error(f"dB.create_new_reset_code(): Called with invalid email = '{email}'.")
         return False
 
     def validate_reset_code(self, user_id, code):
@@ -465,7 +471,8 @@ class User(UserMixin, db.Model):
                         app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}' "
                                          f"and in date ({age_hours} hours old).")
                         return True
-
+            else:
+                app.logger.error(f"dB.validate_reset_code(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def reset_password(self, email, password):
@@ -481,6 +488,8 @@ class User(UserMixin, db.Model):
                 except Exception as e:
                     app.logger.error(f"dB.reset_password(): Failed with error code '{e.args}' with email = '{email}'.")
                     return False
+            else:
+                app.logger.error(f"dB.reset_password(): Called with invalid email = '{email}'.")
         return False
 
     def delete_user(self, user_id):
@@ -506,6 +515,8 @@ class User(UserMixin, db.Model):
                 except Exception as e:
                     app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
+            else:
+                app.logger.error(f"dB.delete_user(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def block_user(self, user_id):
@@ -531,6 +542,8 @@ class User(UserMixin, db.Model):
                 except Exception as e:
                     app.logger.error(f"dB.block_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
+            else:
+                app.logger.error(f"dB.block_user(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def unblock_user(self, user_id):
@@ -546,6 +559,8 @@ class User(UserMixin, db.Model):
                 except Exception as e:
                     app.logger.error(f"dB.unblock_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
+            else:
+                app.logger.error(f"dB.unblock_user(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def make_admin(self, user_id):
@@ -560,6 +575,8 @@ class User(UserMixin, db.Model):
                 except Exception as e:
                     app.logger.error(f"dB.make_admin(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
+            else:
+                app.logger.error(f"dB.make_admin(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def unmake_admin(self, user_id):
@@ -577,6 +594,8 @@ class User(UserMixin, db.Model):
                 except Exception as e:
                     app.logger.error(f"dB.unmake_admin(): Failed with error code '{e.args}' for user '{user.email}'.")
                     return False
+            else:
+                app.logger.error(f"dB.unmake_admin(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def set_phone_number(self, user_id, phone_number):
@@ -589,7 +608,9 @@ class User(UserMixin, db.Model):
             except Exception as e:
                 app.logger.error(f"dB.set_phone_number(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                 return False
-        return False
+        else:
+            app.logger.error(f"dB.set_phone_number(): Called with invalid user_id = '{user_id}'.")
+            return False
 
     # Optional: this will allow each user object to be identified by its name when printed.
     # NB Names are not unique, but emails are, hence added in brackets
