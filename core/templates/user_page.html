@@ -943,50 +943,50 @@
 		
 		
 		/* Messages - Hide <-> Show buttons name change */
-		$("#collapseMessageList").on("shown.bs.collapse", function(){
+		$("#collapseMessageList").on("show.bs.collapse", function(){
             document.getElementById('show_messages').innerHTML = 'HIDE';
         });
-       $("#collapseMessageList").on("hidden.bs.collapse", function(){
+       $("#collapseMessageList").on("hide.bs.collapse", function(){
             document.getElementById('show_messages').innerHTML = 'SHOW';
         });
 				
 		/* Cafes - Hide <-> Show buttons name change */
-		$("#collapseCafeList").on("shown.bs.collapse", function(){
+		$("#collapseCafeList").on("show.bs.collapse", function(){
             document.getElementById('show_cafes').innerHTML = 'HIDE';
         });
-       $("#collapseCafeList").on("hidden.bs.collapse", function(){
+       $("#collapseCafeList").on("hide.bs.collapse", function(){
             document.getElementById('show_cafes').innerHTML = 'SHOW';
         });
         
         /* GPX - Hide <-> Show buttons name change */
-		$("#collapseGPXList").on("shown.bs.collapse", function(){
+		$("#collapseGPXList").on("show.bs.collapse", function(){
             document.getElementById('show_gpx').innerHTML = 'HIDE';
         });
-       $("#collapseGPXList").on("hidden.bs.collapse", function(){
+       $("#collapseGPXList").on("hide.bs.collapse", function(){
             document.getElementById('show_gpx').innerHTML = 'SHOW';
         });
         
         /* Comments - Hide <-> Show buttons name change */
-		$("#collapseCommentList").on("shown.bs.collapse", function(){
+		$("#collapseCommentList").on("show.bs.collapse", function(){
             document.getElementById('show_comments').innerHTML = 'HIDE';
         });
-       $("#collapseCommentList").on("hidden.bs.collapse", function(){
+       $("#collapseCommentList").on("hide.bs.collapse", function(){
             document.getElementById('show_comments').innerHTML = 'SHOW';
         });
         
        /* Events - Hide <-> Show buttons name change */
-		$("#collapseEventList").on("shown.bs.collapse", function(){
+		$("#collapseEventList").on("show.bs.collapse", function(){
             document.getElementById('show_events').innerHTML = 'HIDE';
         });
-       $("#collapseEventList").on("hidden.bs.collapse", function(){
+       $("#collapseEventList").on("hide.bs.collapse", function(){
             document.getElementById('show_events').innerHTML = 'SHOW';
         });
         
         /* Account - Hide <-> Show buttons name change */
-		$("#collapseAccount").on("shown.bs.collapse", function(){
+		$("#collapseAccount").on("show.bs.collapse", function(){
             document.getElementById('show_account').innerHTML = 'HIDE';
         });
-       $("#collapseAccount").on("hidden.bs.collapse", function(){
+       $("#collapseAccount").on("hide.bs.collapse", function(){
             document.getElementById('show_account').innerHTML = 'SHOW';
         });
         
@@ -1063,7 +1063,7 @@
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
-						<label for="confirm" class="col-form-label">
+						<label class="col-form-label">
 							If you really have had enough and are not prepared to cut down your steerer tube, you
 							can make it all stop by entering <strong>your password</strong> in the box below.
 						</label>
@@ -1285,7 +1285,7 @@
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
-						<label for="confirm" class="col-form-label">
+						<label class="col-form-label">
 						Either get that steerer tube cut down, or ask an Admin to make them stop. <br>
 						Please leave a message in the box below and someone will
 						eventually get back to you.</label>
@@ -1330,7 +1330,7 @@
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
-						<label for="confirm" class="col-form-label">
+						<label class="col-form-label">
 						Send them a message reminding them of club rules!</label>
 						<textarea class="form-control" id="user_message" name="user_message" rows="6"></textarea>
 					</div>
@@ -1373,7 +1373,7 @@
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
-						<label for="confirm" class="col-form-label">
+						<label class="col-form-label">
 						If you want SMS alerts, add your phone number! Format should be +44xxxxxxxxxx.</label>
 						<textarea class="form-control" id="phone_number" name="phone_number" rows="1">{{ user.phone_number }}
 						</textarea>
@@ -1417,7 +1417,7 @@
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 					
 					<div class="form-group">
-						<label for="confirm" class="col-form-label">
+						<label class="col-form-label">
 						Edit your existing phone number! Format should be +44xxxxxxxxxx.
 						NB. The new number will have to be verified.</label>
 						<textarea class="form-control"  name="phone_number" rows="1">{{ user.phone_number }}
