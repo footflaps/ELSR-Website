@@ -283,9 +283,9 @@
 				<h2 class="post-title float-left">{{ cafes|length }} cafes:</h2>
 			{% else %}
 				{% if user.id == current_user.id: %}
-					<h2 class="post-title float-left">You have {{cafes|length}} cafes:</h2>
+					<h2 class="post-title float-left">You have {{ cafes|length }} cafes:</h2>
 				{% else %}
-					<h2 class="post-title float-left">{{user.name}} has {{cafes|length}} cafes:</h2>
+					<h2 class="post-title float-left">{{ user.name }} has {{ cafes|length }} cafes:</h2>
 				{% endif %}
 			{% endif %}
 			
@@ -1065,16 +1065,19 @@
 					<div class="form-group">
 						<label for="confirm" class="col-form-label">
 							If you really have had enough and are not prepared to cut down your steerer tube, you
-							can make it all stop by entering "DELETE" in the box below (sans quotes). Obviously,
-							you'll regret it. Your account will be deleted immediately. NB You can always rejoin
-							when you change your mind...
+							can make it all stop by entering <strong>your password</strong> in the box below.
 						</label>
-						<textarea class="form-control" id="confirm" name="confirm"></textarea>
+						<input type="password" class="form-control" name="password"></input>
 					</div>
 					
 					<div class="modal-footer">
-						<button type="button" class="btn btn-primary" data-dismiss="modal">I'll stay</button>
-						<button type="submit" class="btn btn-danger">I can't take it anymore</button>
+						{% if user.id == current_user.id %}
+							<button type="button" class="btn btn-primary" data-dismiss="modal">I'll stay</button>
+							<button type="submit" class="btn btn-danger">I can't take it anymore</button>
+						{% else %}
+							<button type="button" class="btn btn-primary" data-dismiss="modal">CLOSE</button>
+							<button type="submit" class="btn btn-danger">DELETE USER</button>
+						{% endif %}
 					</div>
 					
 				</form>

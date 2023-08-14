@@ -751,13 +751,21 @@ def delete_user():
     # ----------------------------------------------------------- #
     user_id = request.args.get('user_id', None)
     try:
-        confirm = request.form['confirm']
+        password = request.form['password']
     except exceptions.BadRequestKeyError:
-        confirm = None
+        password = None
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
-    if confirm == "":
-        confirm = " "
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -766,9 +774,9 @@ def delete_user():
         app.logger.debug(f"delete_user(): Missing user_id!")
         Event().log_event("Delete User Fail", f"missing user id")
         abort(400)
-    elif not confirm:
-        app.logger.debug(f"delete_user(): Missing user confirmation!")
-        Event().log_event("Delete User Fail", f"Missing user confirmation")
+    elif not password:
+        app.logger.debug(f"delete_user(): Missing user password!")
+        Event().log_event("Delete User Fail", f"Missing user password")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -779,11 +787,6 @@ def delete_user():
         app.logger.debug(f"delete_user(): Invalid user user_id = '{user_id}'!")
         Event().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
         abort(404)
-    elif confirm != "DELETE":
-        app.logger.debug(f"delete_user(): Delete wasn't confirmed, confirm = '{confirm}'!")
-        Event().log_event("Delete User Fail", f"Delete wasn't confirmed, confirm = '{confirm}'!")
-        flash(f"delete_user(): Delete wasn't confirmed '{confirm}'.")
-        return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
     # Restrict access
@@ -795,6 +798,25 @@ def delete_user():
         Event().log_event("Delete User Fail", f"User isn't allowed "
                                               f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         abort(403)
+
+    # ----------------------------------------------------------- #
+    #  Validate user / Admin password
+    # ----------------------------------------------------------- #
+    if int(current_user.id) == int(user_id):
+        # Validate against their own password
+        if not user.validate_password(user, password, user_ip):
+            app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{user.id}'!")
+            Event().log_event("Delete User Fail", f"Delete failed, incorrect password for user_id = '{user.id}'!")
+            flash(f"Incorrect password for user.")
+            return redirect(url_for('user_page', user_id=user_id))
+    else:
+        # Validate against current_user's (admins) password
+        if not user.validate_password(current_user, password, user_ip):
+            app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+            Event().log_event("Delete User Fail", f"Delete failed, incorrect password for "
+                                                  f"user_id = '{current_user.id}'!")
+            flash(f"Incorrect password for Admin.")
+            return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
     # Delete the user
