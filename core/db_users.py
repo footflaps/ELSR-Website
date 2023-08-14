@@ -73,6 +73,9 @@ NUM_DIGITS_CODES = 6
 # We prefix unverified phone numbers with this code
 UNVERIFIED_PHONE_PREFIX = "uv"
 
+# For soft deleting users, we change their name to
+DELETED_NAME = "DELETED"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # User loader function
@@ -232,7 +235,8 @@ class User(UserMixin, db.Model):
 
     def all_non_admins(self):
         with app.app_context():
-            non_admins = db.session.query(User).filter(User.permissions != MASK_ADMIN + MASK_VERIFIED).all()
+            non_admins = db.session.query(User).filter(User.permissions != MASK_ADMIN + MASK_VERIFIED).\
+                filter(User.name != DELETED_NAME).all()
             return non_admins
 
     def create_user(self, new_user, raw_password):
@@ -516,8 +520,8 @@ class User(UserMixin, db.Model):
                     user.admin_notes = f"User '{user.name}' ({user.email}) deleted " \
                                        f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
                     user.password = None
-                    user.email = f"DELETED_{user.id}"
-                    user.name = "DELETED"
+                    user.email = f"{DELETED_NAME}_{user.id}"
+                    user.name = DELETED_NAME
                     user.permissions = 0
                     db.session.commit()
                     return True
