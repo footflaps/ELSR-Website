@@ -325,20 +325,22 @@ class User(UserMixin, db.Model):
 
     def validate_password(self, user, raw_password, user_ip):
         with app.app_context():
-            if check_password_hash(user.password, raw_password):
-                try:
-                    # Update last login details
-                    user = db.session.query(User).filter_by(id=user.id).first()
-                    user.last_login = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                    user.last_login_ip = user_ip
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"dB.validate_password(): Failed with error code '{e.args}'.")
-                    return False
-
+            if user.password:
+                if check_password_hash(user.password, raw_password):
+                    try:
+                        # Update last login details
+                        user = db.session.query(User).filter_by(id=user.id).first()
+                        user.last_login = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                        user.last_login_ip = user_ip
+                        db.session.commit()
+                        return True
+                    except Exception as e:
+                        app.logger.error(f"dB.validate_password(): Failed with error code '{e.args}'.")
+                        return False
             else:
+                app.logger.error(f"dB.validate_password(): Called for user without password, user.id = '{user.id}'.")
                 return False
+        return False
 
     def log_activity(self, user_id):
         with app.app_context():
@@ -508,8 +510,15 @@ class User(UserMixin, db.Model):
 
             if user:
                 try:
-                    # Delete the user
-                    db.session.delete(user)
+                    # We no longer delete users, we invalidate them. This is because even though we have
+                    # auto-incrementing IDs, if the last entry is deleted, the next user to register gets the next ID,
+                    # which may have valid cookies stored from the previous owner!
+                    user.admin_notes = f"User '{user.name}' ({user.email}) deleted " \
+                                       f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+                    user.password = None
+                    user.email = f"DELETED_{user.id}"
+                    user.name = "DELETED"
+                    user.permissions = 0
                     db.session.commit()
                     return True
                 except Exception as e:
