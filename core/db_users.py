@@ -108,7 +108,7 @@ class User(UserMixin, db.Model):
     __bind_key__ = 'users'
 
     # Unique references
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), unique=True)
 
     # Details

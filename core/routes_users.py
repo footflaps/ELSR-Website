@@ -804,14 +804,26 @@ def delete_user():
         Event().log_event("Delete User Success", f"User '{user.email}' deleted.")
         flash(f"User '{user.name}' successfully deleted.")
 
-        if int(current_user.id) == int(user_id):
-            # Deleted themselves so just log them out
-            return redirect(url_for('logout'))
-        elif current_user.admin():
+        if current_user.admin \
+                and int(current_user.id) != int(user_id):
             # Admin deleting someone, so back to admin
             return redirect(url_for('admin_page'))
-        else:
-            return redirect(url_for('home'))
+
+        # ----------------------------------------------------------- #
+        # User deleting themselves, so try and clean up
+        # ----------------------------------------------------------- #
+        # Log them out
+        logout_user()
+
+        # Clear the session
+        session.clear()
+
+        # Delete the user's "remember me" cookie as apparently logout doesn't do that
+        # From: https://stackoverflow.com/questions/25144092/flask-login-still-logged-in-after-use-logouts-when-using-remember-me
+        # This seems to work now....
+        response = make_response(redirect(url_for('home')))
+        response.delete_cookie(app.config['REMEMBER_COOKIE_NAME'])
+        return response
 
     else:
         # Should never get here, but...
