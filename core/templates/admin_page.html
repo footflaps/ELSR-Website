@@ -502,10 +502,10 @@
 	
 				{% if mobile %}
 					<table id="eventTable" class="table table-striped table-bordered table-sm table-condensed"
-						data-order='[[ 0, "dec" ]]' data-page-length='25'>
+						data-order='[[ 0, "dec" ]]' data-page-length="20">
 				{% else %}
 					<table id="eventTable" class="table table-striped table-bordered table-sm table-condensed"
-					       data-order='[[ 0, "dec" ]]' data-page-length='25'
+					       data-order='[[ 0, "dec" ]]' data-page-length="20"
 						   style="width: 730px">
 				{% endif %}
 				
@@ -611,9 +611,40 @@
 	
 		/* jQuery on our tables where we want dataTables to run */
 		$('#userTable').DataTable({
-			pageLength: 25
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
 		});
-		$('#eventTable').DataTable()
+		
+		$('#eventTable').DataTable({
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
+		})
 		
 		/* Messages - Hide <-> Show buttons name change */
 		$("#collapseMessageList").on("show.bs.collapse", function(){
