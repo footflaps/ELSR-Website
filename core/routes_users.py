@@ -643,8 +643,13 @@ def user_page():
     # ----------------------------------------------------------- #
     # Restrict access
     # ----------------------------------------------------------- #
+    # Rules:
+    #  1. Admin can see any user's page
+    #  2. A user can see their page
+    #  3. Deleted users pages are denied
     if int(current_user.id) != int(user_id) and \
-            not current_user.admin():
+            not current_user.admin() or \
+            user.name == DELETED_NAME:
         app.logger.debug(f"user_page(): Rejected request from current_user.id = '{current_user.id}', "
                          f"for user_id = '{user_id}'.")
         Event().log_event("User Page Fail", f"Rejected request from current_user.id = '{current_user.id}', "
