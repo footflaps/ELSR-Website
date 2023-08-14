@@ -207,7 +207,21 @@
 	$(document).ready( function () {
 		
 		$('#cafeTable').DataTable({
-			pageLength: 20
+		
+			/* Default table length */
+			pageLength: 20,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
 		})
 		
 		/* Cafes - Hide <-> Show buttons name change */
