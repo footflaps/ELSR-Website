@@ -1,7 +1,54 @@
 {% extends "base.html" %}
 
-<!-- Add import for bootstrap wtf quickform support -->
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Bootstrap WTForm Support                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
 {% import "bootstrap/wtf.html" as wtf %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                         Google Map JS                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!--&lt;!&ndash; Pulling external JS file &ndash;&gt;-->
+<!--<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>-->
+
+<!--&lt;!&ndash; Page specific JS &ndash;&gt;-->
+<!--<script>-->
+<!--function initMap() {-->
+<!--  const myLatlng = { lat: -25.363, lng: 131.044 };-->
+<!--  const map = new google.maps.Map(document.getElementById("map"), {-->
+<!--    zoom: 4,-->
+<!--    center: myLatlng,-->
+<!--  });-->
+<!--  // Create the initial InfoWindow.-->
+<!--  let infoWindow = new google.maps.InfoWindow({-->
+<!--    content: "Click the map to get Lat/Lng!",-->
+<!--    position: myLatlng,-->
+<!--  });-->
+
+<!--  infoWindow.open(map);-->
+<!--  // Configure the click listener.-->
+<!--  map.addListener("click", (mapsMouseEvent) => {-->
+<!--    // Close the current InfoWindow.-->
+<!--    infoWindow.close();-->
+<!--    // Create a new InfoWindow.-->
+<!--    infoWindow = new google.maps.InfoWindow({-->
+<!--      position: mapsMouseEvent.latLng,-->
+<!--    });-->
+<!--    infoWindow.setContent(-->
+<!--      JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2),-->
+<!--    );-->
+<!--    infoWindow.open(map);-->
+<!--  });-->
+<!--}-->
+
+<!--window.initMap = initMap;-->
+
+
+<!--</script>-->
+
 
 
 {% block content %}
@@ -13,16 +60,18 @@
 
 {% if cafe.image_name: %}
 
-<header class="masthead"
-        style="background-image: url( {{cafe.image_name}} )">
+	<!-- Cafe specific photo -->
+	<header class="masthead"
+	        style="background-image: url( {{cafe.image_name}} )">
 
 {% else %}
 
-<header  class="masthead"
-         style="background-image: url({{ url_for('static', filename='img/cafe-bg.jpg')}})">
+	<!-- Generic photo -->
+	<header  class="masthead"
+	         style="background-image: url({{ url_for('static', filename='img/cafe-bg.jpg') }})">
 
 {% endif %}
-	
+
 	<div class="overlay"></div>
 	<div class="container">
 		<div class="row">
@@ -58,6 +107,38 @@
 {% endwith %}
 
 
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Locate cafe using GM                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!--<div class="container">-->
+<!--	<div class="row">-->
+<!--		<div class="col-lg-8 col-md-10 mx-auto">-->
+<!--	-->
+<!--			<h2 class="mb-5">Locate the cafe on the map</h2>-->
+<!--			-->
+<!--		    <div id="map" style="height: 100%"></div>-->
+
+<!--	        &lt;!&ndash;-->
+<!--		      The `defer` attribute causes the callback to execute after the full HTML-->
+<!--		      document has been parsed. For non-blocking uses, avoiding race conditions,-->
+<!--		      and consistent behavior across browsers, consider loading using Promises.-->
+<!--		      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api-->
+<!--		      for more information.-->
+<!--	        &ndash;&gt;-->
+<!--	        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpvpfytPlvdOpd6cGzRk_27Pqo6pelqHE&callback=initMap&v=weekly"-->
+<!--	                defer>-->
+<!--		       -->
+<!--	        </script>-->
+
+<!--			-->
+<!--			&lt;!&ndash; Break before next section &ndash;&gt;-->
+<!--			<hr>-->
+<!--	-->
+<!--		</div>-->
+<!--	</div>-->
+<!--</div>-->
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                       Cafe Edit form                                           -->
@@ -79,11 +160,11 @@
 			<!-- Load ckeditor -->
 			{{ ckeditor.load() }}
 			
-			<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
-			{{ ckeditor.config(name='body') }}
-			
 			<!-- This is where the form will go -->
 			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+			
+			<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
+			{{ ckeditor.config(name='detail') }}
 			
 		</div>
 	</div>
