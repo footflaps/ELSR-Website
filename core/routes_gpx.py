@@ -24,7 +24,9 @@ from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.subs_gpx import allowed_file, cut_start_gpx, cut_end_gpx, check_route_name, markers_for_gpx,\
                           markers_for_cafes, start_and_end_maps, get_elevation_data, get_cafe_heights,\
-                          strip_excess_info_from_gpx, check_new_gpx_with_all_cafes
+                          strip_excess_info_from_gpx, check_new_gpx_with_all_cafes, polyline_json,\
+                          markers_for_cafes_native
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -113,18 +115,14 @@ def gpx_details(gpx_id):
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Need a map of the route and nearby cafes
+    # Need path as weird Google proprietary JSON string thing
     # ----------------------------------------------------------- #
-    markers = markers_for_gpx(gpx.filename)
-    markers += markers_for_cafes(cafe_list)
-    sndmap = Map(
-        identifier="cafemap",
-        lat=52.211001,
-        lng=0.117207,
-        fit_markers_to_bounds=True,
-        style=dynamic_map_size(),
-        markers=markers
-    )
+    polyline = polyline_json(filename)
+
+    # ----------------------------------------------------------- #
+    # Need cafe markers as weird Google proprietary JSON string
+    # ----------------------------------------------------------- #
+    cafe_markers = markers_for_cafes_native(cafe_list)
 
     # ----------------------------------------------------------- #
     # Get elevation data
@@ -140,9 +138,10 @@ def gpx_details(gpx_id):
         flash("This route is not public yet!")
 
     # Render in main index template
-    return render_template("gpx_details.html", gpx=gpx, year=current_year, sndmap=sndmap,
+    return render_template("gpx_details.html", gpx=gpx, year=current_year, cafe_markers=cafe_markers,
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
-                           cafe_elevation_data=cafe_elevation_data, graph_width=graph_width)
+                           cafe_elevation_data=cafe_elevation_data, graph_width=graph_width,
+                           polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'])
 
 
 # -------------------------------------------------------------------------------------------------------------- #

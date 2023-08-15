@@ -7,6 +7,7 @@ import mpu
 import os
 from time import sleep
 from datetime import datetime, timedelta
+import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -513,7 +514,7 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Markers for the complete GPX file (we subsample the file for Google Maps)
+# Markers for the complete GPX file (for flask_googlemaps)
 # -------------------------------------------------------------------------------------------------------------- #
 
 def markers_for_gpx(filename):
@@ -555,7 +556,56 @@ def markers_for_gpx(filename):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Markers for a set of cafes
+# GPX coordinates (native GoogleMaps variant)
+# -------------------------------------------------------------------------------------------------------------- #
+
+def polyline_json(filename):
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
+
+    # This is the list we will return
+    polyline = []
+
+    # Also need mid lat and min lon
+    mid_lat = 0
+    mid_lon = 0
+    num_points = 0
+
+    with open(filename, 'r') as gpx_file:
+
+        gpx_track = gpxpy.parse(gpx_file)
+
+        for track in gpx_track.tracks:
+            for segment in track.segments:
+
+                for point in segment.points:
+
+                    polyline.append({
+                        'lat': point.latitude,
+                        'lng': point.longitude
+                    })
+
+                    mid_lat += point.latitude
+                    mid_lon += point.longitude
+                    num_points += 1
+
+    # Required format is a string with no quotes:
+    # const    flightPlanCoordinates = [
+    #     {lat: 37.772, lng: -122.214},
+    #     {lat: 21.291, lng: -157.821},
+    #     {lat: -18.142, lng: 178.431},
+    #     {lat: -27.467, lng: 153.027},
+    # ];
+
+    return {
+        'polyline': json.dumps(polyline).replace('"', ''),
+        'midlat': mid_lat / num_points,
+        'midlon': mid_lon / num_points,
+    }
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Markers for a set of cafes (for flask_googlemaps)
 # -------------------------------------------------------------------------------------------------------------- #
 
 def markers_for_cafes(cafes):
@@ -574,6 +624,29 @@ def markers_for_cafes(cafes):
             'lng': cafe_summary['lon'],
             'infobox': f'<a href="{url_for("cafe_details", cafe_id=cafe_summary["id"])}">{cafe_summary["name"]}</a>'
         })
+    return markers
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Markers for a set of cafes (native Google Map variant)
+# -------------------------------------------------------------------------------------------------------------- #
+
+def markers_for_cafes_native(cafes):
+    markers = []
+    for cafe_summary in cafes:
+
+        # Need to look up current cafe open / closed status
+        if Cafe().one_cafe(cafe_summary["id"]).active:
+            icon_colour = '#2196f3'
+        else:
+            icon_colour = '#ff0000'
+
+        markers.append({
+            "position": {"lat": cafe_summary['lat'], "lng": cafe_summary['lon']},
+            "title": f'<a href="{url_for("cafe_details", cafe_id=cafe_summary["id"])}">{cafe_summary["name"]}</a>',
+            "color": icon_colour
+        })
+
     return markers
 
 
