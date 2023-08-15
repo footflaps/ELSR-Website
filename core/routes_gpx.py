@@ -129,7 +129,6 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     elevation_data = get_elevation_data(filename)
     cafe_elevation_data = get_cafe_heights(cafe_list, elevation_data)
-    graph_width = dynamic_graph_size()
 
     # ----------------------------------------------------------- #
     # Flag if hidden
