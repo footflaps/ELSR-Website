@@ -81,8 +81,9 @@
 	
 	$(document).ready( function () {
 		
-        document.getElementById("lat").value = "Click on map above to populate";
-        document.getElementById("lon").value = "Click on map above to populate";
+		if ( document.getElementById("lat").value == "" ) {
+            document.getElementById("lat").value = "Click on map above to populate";
+            document.getElementById("lon").value = "Click on map above to populate"; }
         
 	})
 	
