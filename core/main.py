@@ -27,7 +27,7 @@ from core import app, dynamic_map_size, current_year, GPX_UPLOAD_FOLDER_ABS
 
 from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_ICON
 from core.db_users import update_last_seen
-
+from core.subs_gpx import markers_for_cafes_native
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import the other pages
@@ -131,25 +131,17 @@ def home():
 
     cafe = Cafe().one_cafe(ESPRESSO_LIBRARY_INDEX)
 
-    # Create a list of markers
+    # Need cafe markers as weird Google proprietary JSON string
     cafe_marker = [{
-            'icon': OPEN_CAFE_ICON,
-            'lat': cafe.lat,
-            'lng': cafe.lon,
-            'infobox': f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>'
+        "position": {"lat": cafe.lat, "lng": cafe.lon},
+        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+        "color": '#2196f3',
     }]
 
-    cafemap = Map(
-        identifier="cafemap",
-        lat=cafe.lat,
-        lng=cafe.lon,
-        zoom=16,
-        style=dynamic_map_size(),
-        markers=cafe_marker
-    )
+    map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
     # Render home page
-    return render_template("main_home.html", year=current_year, cafemap=cafemap)
+    return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
