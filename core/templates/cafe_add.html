@@ -11,44 +11,8 @@
 <!--                                         Google Map JS                                          -->
 <!---------------------------------------------------------------------------------------------------->
 
-<!--&lt;!&ndash; Pulling external JS file &ndash;&gt;-->
-<!--<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>-->
-
-<!--&lt;!&ndash; Page specific JS &ndash;&gt;-->
-<!--<script>-->
-<!--function initMap() {-->
-<!--  const myLatlng = { lat: -25.363, lng: 131.044 };-->
-<!--  const map = new google.maps.Map(document.getElementById("map"), {-->
-<!--    zoom: 4,-->
-<!--    center: myLatlng,-->
-<!--  });-->
-<!--  // Create the initial InfoWindow.-->
-<!--  let infoWindow = new google.maps.InfoWindow({-->
-<!--    content: "Click the map to get Lat/Lng!",-->
-<!--    position: myLatlng,-->
-<!--  });-->
-
-<!--  infoWindow.open(map);-->
-<!--  // Configure the click listener.-->
-<!--  map.addListener("click", (mapsMouseEvent) => {-->
-<!--    // Close the current InfoWindow.-->
-<!--    infoWindow.close();-->
-<!--    // Create a new InfoWindow.-->
-<!--    infoWindow = new google.maps.InfoWindow({-->
-<!--      position: mapsMouseEvent.latLng,-->
-<!--    });-->
-<!--    infoWindow.setContent(-->
-<!--      JSON.stringify(mapsMouseEvent.latLng.toJSON(), null, 2),-->
-<!--    );-->
-<!--    infoWindow.open(map);-->
-<!--  });-->
-<!--}-->
-
-<!--window.initMap = initMap;-->
-
-
-<!--</script>-->
-
+<!-- Pulling external JS file -->
+<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
 
 
 {% block content %}
@@ -111,33 +75,90 @@
 <!--                                     Locate cafe using GM                                       -->
 <!---------------------------------------------------------------------------------------------------->
 
-<!--<div class="container">-->
-<!--	<div class="row">-->
-<!--		<div class="col-lg-8 col-md-10 mx-auto">-->
-<!--	-->
-<!--			<h2 class="mb-5">Locate the cafe on the map</h2>-->
-<!--			-->
-<!--		    <div id="map" style="height: 100%"></div>-->
+<!-- Page specific JS -->
+<script>
 
-<!--	        &lt;!&ndash;-->
-<!--		      The `defer` attribute causes the callback to execute after the full HTML-->
-<!--		      document has been parsed. For non-blocking uses, avoiding race conditions,-->
-<!--		      and consistent behavior across browsers, consider loading using Promises.-->
-<!--		      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api-->
-<!--		      for more information.-->
-<!--	        &ndash;&gt;-->
-<!--	        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpvpfytPlvdOpd6cGzRk_27Pqo6pelqHE&callback=initMap&v=weekly"-->
-<!--	                defer>-->
-<!--		       -->
-<!--	        </script>-->
+	
+	$(document).ready( function () {
+		
+        document.getElementById("lat").value = "Click on map above to populate";
+        document.getElementById("lon").value = "Click on map above to populate";
+        
+	})
+	
+	function initMap() {
+        const myLatlng = { lat: 52.202232, lng: 0.128228 };
+        const map = new google.maps.Map(
+            document.getElementById("map"), {
+                zoom: 10,
+                center: myLatlng,
+            }
+        );
+  
+        // Create the initial InfoWindow.
+        let infoWindow = new google.maps.InfoWindow({
+            content: "Locate the cafe on the map and click to transfer the coordinates to the form below.",
+            position: myLatlng,
+        });
 
-<!--			-->
-<!--			&lt;!&ndash; Break before next section &ndash;&gt;-->
-<!--			<hr>-->
-<!--	-->
-<!--		</div>-->
-<!--	</div>-->
-<!--</div>-->
+        infoWindow.open(map);
+  
+        // Configure the click listener.
+        map.addListener("click", (mapsMouseEvent) => {
+            
+            // Close the current InfoWindow.
+            infoWindow.close();
+            
+            // Populate the form
+            document.getElementById("lat").value = mapsMouseEvent.latLng.lat();
+            document.getElementById("lon").value = mapsMouseEvent.latLng.lng();
+            
+            // Create a new InfoWindow.
+            infoWindow = new google.maps.InfoWindow({
+                position: mapsMouseEvent.latLng,
+            });
+        
+            infoWindow.setContent(
+                "Form has been updated",
+            );
+            
+            infoWindow.open(map);
+  
+        });
+        
+	}
+
+	window.initMap = initMap;
+
+</script>
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+	
+			<h2>Locate the cafe on the map</h2>
+			
+		    <div id="map" style="height: 500px"></div>
+
+	        <!--
+		      The `defer` attribute causes the callback to execute after the full HTML
+		      document has been parsed. For non-blocking uses, avoiding race conditions,
+		      and consistent behavior across browsers, consider loading using Promises.
+		      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+		      for more information.
+	        -->
+	        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpvpfytPlvdOpd6cGzRk_27Pqo6pelqHE&callback=initMap&v=weekly"
+	                defer>
+		       
+	        </script>
+
+			
+			<!-- Break before next section -->
+			<hr>
+	
+		</div>
+	</div>
+</div>
 
 
 <!---------------------------------------------------------------------------------------------------->
@@ -148,14 +169,8 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<h2 class="mb-5">Edit the cafe details</h2>
-			<h3 class="mb-2">NB The cafe must be within 100 km of Cambridge.</h3>
-			<h4 class="mb-5">
-				<a href="https://earth.google.com/web/@52.20327792,0.13156968,29.63102727a,133.80598466d,35y,0h,0t,0r"
-				   target="_blank">
-					<i class="fa fa-external-link fa-2xs"></i> Use Google Earth To Find Lat and Lon
-				</a>
-			</h4>
+			<h2 class="mb-3">Edit the cafe details</h2>
+			<h3 class="mb-3">NB The cafe must be within 100 km of Cambridge.</h3>
 			
 			<!-- Load ckeditor -->
 			{{ ckeditor.load() }}
