@@ -140,7 +140,7 @@ def gpx_details(gpx_id):
     # Render in main index template
     return render_template("gpx_details.html", gpx=gpx, year=current_year, cafe_markers=cafe_markers,
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
-                           cafe_elevation_data=cafe_elevation_data, graph_width=graph_width,
+                           cafe_elevation_data=cafe_elevation_data,
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'])
 
 
