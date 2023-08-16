@@ -3,6 +3,16 @@
 
 {% block content %}
 
+<head>
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                Load JavaScript for chart.js                                    -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	
+</head>
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                     Page Header                                                -->
@@ -159,10 +169,24 @@
 				    36 km long and the faster groups will finish in approx. 45 minutes, with slower groups around 65 mins.
 			</p>
 			
+			<!-- Separator before next section -->
+			<hr>
 			
-			<!---------------------------------------------------------------------------------------------------->
-			<!--                                Native Google Maps HTML                                         -->
-			<!---------------------------------------------------------------------------------------------------->
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                Native Google Maps HTML                                         -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<h2>Map view of route</h2>
+			
 			<div id="map" style="height: 500px"></div>
 
 	        <!--
@@ -176,8 +200,91 @@
 	                defer>
 	        </script>
 			
+			<!-- Separator before next section -->
+			<hr>
 			
-			<h2 class="mt-5">Start time? <i class="fa-regular fa-clock"></i></h2>
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                             Show elevation graph of the route                                  -->
+<!---------------------------------------------------------------------------------------------------->
+
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="my-3">Elevation view of route</h2>
+			
+			<div style="height: 300px; width: 100%;">
+				<canvas id="myChart"></canvas>
+			</div>
+			<script>
+			
+				var custom_icon = new Image();
+          
+		        const data = {
+		            datasets: [
+			            {
+	                        label: 'Dist (km), Elevation (m)',
+	                        pointStyle: 'false',
+	                        radius: 0,
+	                        tension: 3,
+	                        showLine: true,
+	                        data: {{ elevation_data | tojson }},
+	                        backgroundColor: 'rgb(255, 99, 132)',
+	                        borderColor: 'rgb(255, 99, 132)'
+	                    },
+                    ],
+				};
+
+	            const config = {
+					  type: 'scatter',
+					  data: data,
+					  options: {
+					        maintainAspectRatio: false,
+					        scales: {
+					            x: {
+					                type: 'linear',
+					                position: 'bottom'
+					            },
+					        },
+					        plugins: {
+		                       legend: {
+	                                display: false
+                               }
+					        }
+					  }
+				};
+	        
+		        
+		        const myChart = new Chart(
+		            document.getElementById('myChart'),
+		            config
+		        );
+	         
+	        </script>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                         Start Times                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>Start time? <i class="fa-regular fa-clock"></i></h2>
 			<p>Start times vary throughout the year with daylight, for 2023 we have:</p>
 			<ul>
 				
@@ -188,6 +295,22 @@
 			</ul>
 			
 			<p>Please bring front & rear lights all year round.</p>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                        Leader Board                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			<h2>Overall Leader board (from Strava)</h2>
 			

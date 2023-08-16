@@ -23,7 +23,7 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 
 from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR
 from core.db_users import update_last_seen
-from core.subs_gpx import polyline_json
+from core.subs_gpx import polyline_json, get_elevation_data
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -174,8 +174,12 @@ def chaingang():
     # ----------------------------------------------------------- #
     # Need cafe markers as weird Google proprietary JSON string
     # ----------------------------------------------------------- #
-    # Need cafe markers as weird Google proprietary JSON string
     cafe_markers = CHAINGANG_MEET_NEW
+
+    # ----------------------------------------------------------- #
+    # Get elevation data
+    # ----------------------------------------------------------- #
+    elevation_data = get_elevation_data(filename)
 
     # ----------------------------------------------------------- #
     # Leader boards from Strava
@@ -184,8 +188,8 @@ def chaingang():
 
     # Render home page
     return render_template("main_chaingang.html", year=current_year, leader_table=leader_table,
-                           cafe_markers=cafe_markers, polyline=polyline['polyline'],
-                           midlat=polyline['midlat'], midlon=polyline['midlon'])
+                           cafe_markers=cafe_markers, elevation_data=elevation_data,
+                           polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'])
 
 
 # -------------------------------------------------------------------------------------------------------------- #
