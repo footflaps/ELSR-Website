@@ -25,7 +25,7 @@ from core.dB_events import Event
 from core.subs_gpx import allowed_file, cut_start_gpx, cut_end_gpx, check_route_name, markers_for_gpx,\
                           markers_for_cafes, start_and_end_maps, get_elevation_data, get_cafe_heights,\
                           strip_excess_info_from_gpx, check_new_gpx_with_all_cafes, polyline_json,\
-                          markers_for_cafes_native
+                          markers_for_cafes_native, start_and_end_maps_native_gm
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -468,9 +468,11 @@ def edit_route():
     # ----------------------------------------------------------- #
     #   Generate Start and Finish maps
     # ----------------------------------------------------------- #
-    maps = start_and_end_maps(gpx.filename, gpx_id)
+    maps = start_and_end_maps_native_gm(gpx.filename, gpx_id)
 
-    return render_template("gpx_edit.html", year=current_year, startmap=maps[0], endmap=maps[1], gpx=gpx)
+    return render_template("gpx_edit.html", year=current_year, gpx=gpx,
+                           start_markers=maps[0], start_map_coords=maps[1],
+                           end_markers=maps[2], end_map_coords=maps[3])
 
 
 # -------------------------------------------------------------------------------------------------------------- #

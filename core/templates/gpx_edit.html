@@ -3,17 +3,6 @@
 {% block content %}
 
 
-<!---------------------------------------------------------------------------------------------------->
-<!--                                    Set up Google Maps                                          -->
-<!---------------------------------------------------------------------------------------------------->
-
-<head>
-	<!-- Google Maps -->
-	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
-	{{startmap.js}}
-	{{endmap.js}}
-</head>
-
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                       Page Header                                              -->
@@ -53,6 +42,123 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                              JavaScript for culling a route                                    -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+	    key: "AIzaSyDpvpfytPlvdOpd6cGzRk_27Pqo6pelqHE",
+	    v: "weekly",
+	    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+	    // Add other bootstrap parameters as needed, using camel case.
+    });
+
+	let map1;
+	
+	async function startMap() {
+        
+        // Request needed libraries.
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+        
+        /* Define the map view */
+        const map1 = new Map(document.getElementById("start_map"), {
+            zoom: 15,
+            center: { lat: {{ start_map_coords['lat'] }}, lng: {{ start_map_coords['lng'] }} },
+            mapId: "7499929d658a3166",
+        });
+
+		/* This is the red round thing we use as a marker */
+		const image = "http://maps.google.com/mapfiles/kml/pal4/icon49.png";
+
+     	/* This is our set of cafes */
+		const start_markers = {{ start_markers | tojson }};
+	    
+	    // Create an info window to share between markers.
+	    const infoWindow = new InfoWindow();
+					
+        // Create the markers.
+        start_markers.forEach( ({ position, title }, i) => {
+            const pin = new PinElement({
+            glyph: `${i + 1}`,
+            });
+            
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map1,
+                title: `${title}`,
+                icon: image,
+            });
+            
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
+        });
+	}
+
+	startMap();
+	
+	
+
+	let map2;
+	
+	async function endMap() {
+        
+        // Request needed libraries.
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+        
+        /* Define the map view */
+        const map2 = new Map(document.getElementById("end_map"), {
+            zoom: 15,
+            center: { lat: {{ end_map_coords['lat'] }}, lng: {{ end_map_coords['lng'] }} },
+            mapId: "7499929d658a3166",
+        });
+
+		/* This is the red round thing we use as a marker */
+		const image = "http://maps.google.com/mapfiles/kml/pal4/icon49.png";
+
+     	/* This is our set of cafes */
+		const end_markers = {{ end_markers | tojson }};
+	    
+	    // Create an info window to share between markers.
+	    const infoWindow = new InfoWindow();
+					
+        // Create the markers.
+        end_markers.forEach( ({ position, title }, i) => {
+            const pin = new PinElement({
+            glyph: `${i + 1}`,
+            });
+            
+            const marker = new google.maps.Marker({
+                position: position,
+                map: map2,
+                title: `${title}`,
+                icon: image,
+            });
+            
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
+        });
+	}
+
+	endMap();
+
+
+</script>
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                 Show the map of the start                                      -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -63,7 +169,12 @@
             <h2 class="mb-2">Edit the start of your route</h2>
 			<p>Click on a point in the map to start the route at that point i.e. delete all previous points.</p>
             
-            {{startmap.html}}
+			
+            <!---------------------------------------------------------------------------------------------------->
+			<!--                                      Insert Google Map                                         -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			<div id="start_map" style="height: 500px"></div>
 			
 			<hr>
 		</div>
@@ -82,8 +193,12 @@
             <h2 class="my-2">Edit the end of your route</h2>
 			<p>Click on a point in the map to end the route at that point i.e. delete all subsequent points.</p>
             
-            {{endmap.html}}
+            <!---------------------------------------------------------------------------------------------------->
+			<!--                                      Insert Google Map                                         -->
+			<!---------------------------------------------------------------------------------------------------->
 			
+			<div id="end_map" style="height: 500px"></div>
+	
 			<hr>
 		</div>
 	</div>

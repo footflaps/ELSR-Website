@@ -9,13 +9,11 @@ from time import sleep
 from datetime import datetime, timedelta
 import json
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -24,7 +22,6 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size
 from core.dB_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
 from core.dB_cafes import Cafe, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
 from core.dB_events import Event
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used to verify sensible cafe coordinates
@@ -188,8 +185,8 @@ def check_new_gpx_with_all_cafes(gpx_id):
         # ----------------------------------------------------------- #
         for cafe in cafes:
             if min_distance_km[cafe.id - 1] <= MIN_DIST_TO_CAFE_KM:
-                app.logger.debug(f"-- Route passes within {round(min_distance_km[cafe.id - 1],1)} km of {cafe.name} "
-                                 f"after {round(min_distance_path_km[cafe.id - 1],1)} km.")
+                app.logger.debug(f"-- Route passes within {round(min_distance_km[cafe.id - 1], 1)} km of {cafe.name} "
+                                 f"after {round(min_distance_path_km[cafe.id - 1], 1)} km.")
                 # Push update to GPX file
                 Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
                                        min_distance_path_km[cafe.id - 1])
@@ -200,7 +197,6 @@ def check_new_gpx_with_all_cafes(gpx_id):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def update_existing_gpx(gpx_file, gpx_filename):
-
     # This is the full path to the existing GPX file we are going to over write
     old_filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
 
@@ -368,7 +364,6 @@ def new_gpx(route_name):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def check_route_name(gpx):
-
     # ----------------------------------------------------------- #
     # Use absolute path
     # ----------------------------------------------------------- #
@@ -486,7 +481,6 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
                     inter_dist_km = mpu.haversine_distance((saved_lat, saved_lon), (point.latitude, point.longitude))
 
                     if inter_dist_km >= GPX_MAX_RESOLUTION_KM:
-
                         # Create a new point, using just the data we want
                         new_point = gpxpy.gpx.GPXTrackPoint(point.latitude,
                                                             point.longitude,
@@ -579,7 +573,6 @@ def polyline_json(filename):
             for segment in track.segments:
 
                 for point in segment.points:
-
                     polyline.append({
                         'lat': point.latitude,
                         'lng': point.longitude
@@ -755,11 +748,120 @@ def start_and_end_maps(filename, gpx_id):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Edit Map Start and Finish Map Points for Native Google Maps
+# -------------------------------------------------------------------------------------------------------------- #
+
+def start_and_end_maps_native_gm(filename, gpx_id):
+    # Use absolute path for filename
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
+
+    # Creating two separate maps:
+    start_markers = []
+    end_markers = []
+
+    # Where we will centre the start map
+    start_lat = 0
+    start_lon = 0
+    num_start_points = 0
+
+    # Where we will centre the end map
+    end_lat = 0
+    end_lon = 0
+    num_end_points = 0
+
+    # open our file
+    with open(filename, 'r') as gpx_file:
+        gpx_track = gpxpy.parse(gpx_file)
+
+        # ----------------------------------------------------------- #
+        #   Markers for 1st 2km
+        # ----------------------------------------------------------- #
+        for track in gpx_track.tracks:
+            for segment in track.segments:
+
+                # Need these for working out inter sample spacing
+                last_lat = segment.points[0].latitude
+                last_lon = segment.points[0].longitude
+                total_km = 0
+                index = 0
+
+                for point in segment.points:
+
+                    # Work out how far we have travelled so far...
+                    total_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+
+                    index += 1
+
+                    # We only want the first km or so
+                    if total_km < TRIM_DISTANCE_KM:
+                        start_markers.append({
+                            "position": {"lat": point.latitude, "lng": point.longitude},
+                            "title": f'<a href="{url_for("gpx_cut_start", gpx_id=gpx_id, index=index)}">Start Here! (Point {index})</a>',
+                        })
+
+                        start_lat += point.latitude
+                        start_lon += point.longitude
+                        num_start_points += 1
+
+                    else:
+                        break
+
+                    last_lat = point.latitude
+                    last_lon = point.longitude
+
+        if num_start_points > 0:
+            start_map_coords = {"lat": start_lat / num_start_points, "lng": start_lon / num_start_points}
+        else:
+            start_map_coords = {"lat": 0, "lng": 0}
+
+        # ----------------------------------------------------------- #
+        #   Markers for last 2km
+        # ----------------------------------------------------------- #
+        for track in gpx_track.tracks:
+            for segment in track.segments:
+
+                # Need these for working out inter sample spacing
+                last_lat = segment.points[-1].latitude
+                last_lon = segment.points[-1].longitude
+                total_km = 0
+                index = len(segment.points)
+
+                for point in segment.points[::-1]:
+
+                    # Work out how far we have travelled so far...
+                    total_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+
+                    # We only want the last km or so
+                    if total_km < TRIM_DISTANCE_KM:
+                        end_markers.append({
+                            "position": {"lat": point.latitude, "lng": point.longitude},
+                            "title": f'<a href="{url_for("gpx_cut_end", gpx_id=gpx_id, index=index)}">Finish Here! (Point {index})</a>',
+                        })
+
+                        end_lat += point.latitude
+                        end_lon += point.longitude
+                        num_end_points += 1
+
+                    else:
+                        break
+
+                    last_lat = point.latitude
+                    last_lon = point.longitude
+                    index -= 1
+
+            if num_end_points > 0:
+                end_map_coords = {"lat": end_lat / num_end_points, "lng": end_lon / num_end_points}
+            else:
+                end_map_coords = {"lat": 0, "lng": 0}
+
+    return [start_markers, start_map_coords, end_markers, end_map_coords]
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Generate a line graph of the route's elevation
 # -------------------------------------------------------------------------------------------------------------- #
 
 def get_elevation_data(filename):
-
     # This is what we will populate from the GPX file
     points = []
 
@@ -798,7 +900,6 @@ def get_elevation_data(filename):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def get_cafe_heights(cafe_list, elevation_data):
-
     # This is what we will return
     cafe_elevation_data = []
 
@@ -833,4 +934,3 @@ def get_cafe_heights(cafe_list, elevation_data):
         })
 
     return cafe_elevation_data
-
