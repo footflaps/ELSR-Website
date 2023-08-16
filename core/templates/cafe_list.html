@@ -48,10 +48,10 @@
 	const ELSR_HOME = { lat: 52.203292, lng: 0.131839 };
 	
 	const ELSR_BOUNDS = {
-        north: 52.8,
-        south: 51.6,
-        west: -0.8,
-        east: 1.3,
+        north: ELSR_HOME['lat'] + 0.5,
+        south: ELSR_HOME['lat'] - 0.5,
+        west: ELSR_HOME['lng'] - 0.5,
+        east: ELSR_HOME['lng'] + 0.5,
 	};
 	
 	async function initMap() {
