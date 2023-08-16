@@ -22,6 +22,10 @@ ESPRESSO_LIBRARY_INDEX = 1
 OPEN_CAFE_ICON = "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
 CLOSED_CAFE_ICON = "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
 
+OPEN_CAFE_COLOUR = "#2196f3"
+CLOSED_CAFE_COLOUR = "#922b21"
+
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Define Cafe Class

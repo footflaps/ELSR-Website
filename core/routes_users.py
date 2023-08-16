@@ -20,7 +20,7 @@ from core import app, dynamic_map_size, current_year, is_mobile
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
     admin_only, update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
     TwoFactorLoginForm, DELETED_NAME
-from core.dB_cafes import Cafe, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
+from core.dB_cafes import Cafe, OPEN_CAFE_ICON, CLOSED_CAFE_ICON, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
@@ -700,51 +700,54 @@ def user_page():
             flash(f"You have {count} unread messages")
 
     # -------------------------------------------------------------------------------------------- #
-    # Map for of user's cafes
+    # Markers for Google Map of User's Cafes
     # -------------------------------------------------------------------------------------------- #
-
-    # Create a list of markers
     cafe_markers = []
+    mean_lat = 0
+    mean_lon = 0
+    num_cafes = 0
 
     for cafe in cafes:
         if cafe.active:
-            icon = OPEN_CAFE_ICON
+            colour = OPEN_CAFE_COLOUR
         else:
-            icon = CLOSED_CAFE_ICON
+            colour = CLOSED_CAFE_COLOUR
 
-        marker = {
-            'icon': icon,
-            'lat': cafe.lat,
-            'lng': cafe.lon,
-            'infobox': f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>'
+        cafe_marker = {
+            "position": {"lat": cafe.lat, "lng": cafe.lon},
+            "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+            "color": colour,
         }
-        cafe_markers.append(marker)
+        # Add to list
+        cafe_markers.append(cafe_marker)
 
-    cafemap = Map(
-        identifier="cafemap",
-        lat=52.211001,
-        lng=0.117207,
-        fit_markers_to_bounds=True,
-        style=dynamic_map_size(),
-        markers=cafe_markers
-    )
+        # Need central position for map view
+        mean_lat += cafe.lat
+        mean_lon += cafe.lon
+        num_cafes += 1
 
+    if num_cafes > 0:
+        map_coords = {"lat": mean_lat/num_cafes, "lng": mean_lon/num_cafes}
+    else:
+        map_coords = {"lat": 0, "lng": 0}
+
+    # -------------------------------------------------------------------------------------------- #
     # Show user page
+    # -------------------------------------------------------------------------------------------- #
     if anchor == "messages":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
-                               cafemap=cafemap, cafe_comments=cafe_comments, messages=messages,
-                               events=events, days=days, mobile=is_mobile(), anchor="messages")
+                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
+                               cafe_markers=cafe_markers, map_coords=map_coords, anchor="messages")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
-                               cafemap=cafemap, cafe_comments=cafe_comments, messages=messages,
-                               events=events, days=days, mobile=is_mobile(), anchor="eventLog")
+                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
+                               cafe_markers=cafe_markers, map_coords=map_coords, anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
-                               cafemap=cafemap, cafe_comments=cafe_comments, messages=messages,
-                               events=events, days=days, mobile=is_mobile())
-
+                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
+                               cafe_markers=cafe_markers, map_coords=map_coords)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
