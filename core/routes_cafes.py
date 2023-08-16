@@ -21,7 +21,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, del
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_ICON, CLOSED_CAFE_ICON
+from core.dB_cafes import Cafe, CreateCafeForm, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes, MIN_DISPLAY_STEP_KM
 from core.dB_gpx import Gpx
@@ -197,29 +197,24 @@ def cafe_list():
 
     for cafe in cafes:
         if cafe.active:
-            icon = OPEN_CAFE_ICON
+            colour = OPEN_CAFE_COLOUR
         else:
-            icon = CLOSED_CAFE_ICON
+            colour = CLOSED_CAFE_COLOUR
 
         marker = {
-            'icon': icon,
-            'lat': cafe.lat,
-            'lng': cafe.lon,
-            'infobox': f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>'
+            "position": {"lat": cafe.lat, "lng": cafe.lon},
+            "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+            "color": colour,
         }
         cafe_markers.append(marker)
 
-    cafemap = Map(
-        identifier="cafemap",
-        lat=52.211001,
-        lng=0.117207,
-        fit_markers_to_bounds=True,
-        style=dynamic_map_size(),
-        markers=cafe_markers
-    )
+    map_coords = {"lat": ELSR_LAT, "lng": ELSR_LON}
+
+    print(f"map_coords = {map_coords}")
 
     # Render in main index template
-    return render_template("cafe_list.html", year=current_year, cafes=cafes, cafemap=cafemap, mobile=is_mobile())
+    return render_template("cafe_list.html", year=current_year, cafes=cafes,
+                           cafe_markers=cafe_markers, map_coords=map_coords)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -261,7 +256,7 @@ def cafe_details(cafe_id):
     cafe_marker = [{
         "position": {"lat": cafe.lat, "lng": cafe.lon},
         "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-        "color": '#2196f3',
+        "color": OPEN_CAFE_COLOUR,
     }]
 
     map_coords = {"lat": cafe.lat, "lng": cafe.lon}

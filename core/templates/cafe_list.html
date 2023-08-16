@@ -4,16 +4,6 @@
 
 {% block content %}
 
-<!---------------------------------------------------------------------------------------------------->
-<!--                                    Set up Google Maps                                          -->
-<!---------------------------------------------------------------------------------------------------->
-
-<head>
-	<!-- Google Maps -->
-	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
-	{{cafemap.js}}
-</head>
-
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                       Page Header                                              -->
@@ -50,6 +40,64 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                   JavaScript for Google Maps (one or more cafes)                               -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	async function initMap() {
+        
+        // Request needed libraries.
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+        
+        /* Define the map view */
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 9,
+            center: { lat: {{ map_coords['lat'] }}, lng: {{ map_coords['lng'] }} },
+            mapId: "7499929d658a3166",
+        });
+
+     	/* This is our set of cafes */
+		const cafes = {{ cafe_markers | tojson }}
+	    
+	    // Create an info window to share between markers.
+	    const infoWindow = new InfoWindow();
+					
+        // Create the markers.
+        cafes.forEach( ({ position, title, color }, i) => {
+            const pin = new PinElement({
+            glyph: `${i + 1}`,
+            });
+            
+            const marker = new AdvancedMarkerElement({
+                position,
+                map,
+                title: `${title}`,
+                content: new PinElement({
+                                background: color,
+                                borderColor: "black",
+                                glyphColor: "black",
+							}).element
+            });
+            
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
+        });
+	}
+
+	window.initMap = initMap;
+
+</script>
+
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                       Map View of Cafes                                        -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -74,8 +122,25 @@
     
             <h2  class="mt-5 mb-3">Map view of {{ cafes | count() }} cafes</h2>
             
-            {{cafemap.html}}
 			
+            <!---------------------------------------------------------------------------------------------------->
+			<!--                                      Insert Google Map                                         -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			<div id="map" style="height: 500px"></div>
+
+	        <!--
+			      The `defer` attribute causes the callback to execute after the full HTML
+			      document has been parsed. For non-blocking uses, avoiding race conditions,
+			      and consistent behavior across browsers, consider loading using Promises.
+			      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+			      for more information.
+	        -->
+	        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpvpfytPlvdOpd6cGzRk_27Pqo6pelqHE&callback=initMap&v=weekly"
+	                defer>
+	        </script>
+			
+			<!-- Break before next section -->
 			<hr>
 			
 		</div>
