@@ -3,16 +3,6 @@
 
 {% block content %}
 
-<!---------------------------------------------------------------------------------------------------->
-<!--                                    Set up Google Maps                                          -->
-<!---------------------------------------------------------------------------------------------------->
-
-<head>
-	<!-- Google Maps -->
-	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
-	{{chaingang_map.js}}
-</head>
-
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                     Page Header                                                -->
@@ -49,6 +39,95 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--             JavaScript for Google Map showing a single GPX plus one of more Cafes              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	async function initMap() {
+        
+        // Request needed libraries.
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+        
+        /* Define the map view */
+        const map = new google.maps.Map(document.getElementById("map"), {
+            zoom: 12,
+            center: { lat: {{ midlat }}, lng: {{ midlon }} },
+            mapId: "7499929d658a3166",
+        });
+        
+        /* Define our polyline */
+        const flightPath = new google.maps.Polyline({
+            path: {{ polyline }},
+            geodesic: true,
+            strokeColor: "#FF0000",
+            strokeOpacity: 1.0,
+            strokeWeight: 4,
+        });
+
+		/* We want a pop up info box for thr GPX route */
+		google.maps.event.addListener(flightPath, 'mouseover', function(event) {
+            current_lat = event.latLng.lat();
+            current_lon = event.latLng.lng();
+            
+            // Create a new InfoWindow.
+            gpxInfoWindow = new google.maps.InfoWindow({
+                content: "Route: ELSR Chaingang",
+                position: event.latLng,
+            });
+            
+            gpxInfoWindow.open(map);
+		});
+
+		/* and close the info box when they move elsewhere */
+		google.maps.event.addListener(flightPath, 'mouseout', function() {
+            gpxInfoWindow.close();
+		});
+
+		/* Add the path to the map */
+        flightPath.setMap(map);
+     	
+     	/* This is our set of cafes */
+		const cafes = {{ cafe_markers | tojson }}
+	    
+	    // Create an info window to share between markers.
+	    const infoWindow = new InfoWindow();
+					
+        // Create the markers.
+        cafes.forEach( ({ position, title, color }, i) => {
+            const pin = new PinElement({
+            glyph: `${i + 1}`,
+            });
+            
+            const marker = new AdvancedMarkerElement({
+                position,
+                map,
+                title: `${title}`,
+                content: new PinElement({
+                                background: color,
+                                borderColor: "black",
+                                glyphColor: "black",
+							}).element
+            });
+            
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
+        });
+	}
+
+	window.initMap = initMap;
+
+</script>
+
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                      Main Content                                              -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -80,7 +159,23 @@
 				    36 km long and the faster groups will finish in approx. 50 minutes, with slower groups around 65 mins.
 			</p>
 			
-			{{chaingang_map.html}}
+			
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                Native Google Maps HTML                                         -->
+			<!---------------------------------------------------------------------------------------------------->
+			<div id="map" style="height: 500px"></div>
+
+	        <!--
+			      The `defer` attribute causes the callback to execute after the full HTML
+			      document has been parsed. For non-blocking uses, avoiding race conditions,
+			      and consistent behavior across browsers, consider loading using Promises.
+			      See https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+			      for more information.
+	        -->
+	        <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDpvpfytPlvdOpd6cGzRk_27Pqo6pelqHE&callback=initMap&v=weekly"
+	                defer>
+	        </script>
+			
 			
 			<h2 class="mt-5">Start time? <i class="fa-regular fa-clock"></i></h2>
 			<p>Start times vary throughout the year with daylight, for 2023 we have:</p>

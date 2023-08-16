@@ -1,33 +1,30 @@
 from flask import render_template, url_for, request, flash, abort
-from flask_login import current_user
-from flask_googlemaps import Map
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFError
 from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
-
 from threading import Thread
 import os
 import requests
 from bs4 import BeautifulSoup
-import lxml
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, dynamic_map_size, current_year, GPX_UPLOAD_FOLDER_ABS
+from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our Cafe class for Home page
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_ICON
+from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR
 from core.db_users import update_last_seen
-from core.subs_gpx import markers_for_cafes_native
+from core.subs_gpx import polyline_json
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import the other pages
@@ -50,13 +47,11 @@ from core.dB_events import Event
 
 CHAINGANG_GPX_FILENAME = "gpx_el_cg_2023.gpx"
 
-CHAINGANG_MEET = [{
-            'icon': OPEN_CAFE_ICON,
-            'lat': 52.22528,
-            'lng': 0.043116,
-            'infobox': f'<a href="https://threehorseshoesmadingley.co.uk/">Three Horseshoes</a>'
+CHAINGANG_MEET_NEW =  [{
+        "position": {"lat": 52.22528, "lng": 0.043116},
+        "title": f'<a href="https://threehorseshoesmadingley.co.uk/">Three Horseshoes</a>',
+        "color": OPEN_CAFE_COLOUR,
     }]
-
 
 # Getting chaingang leaders
 TARGET_URL = "https://www.strava.com/segments/31554922?filter=overall"
@@ -135,7 +130,7 @@ def home():
     cafe_marker = [{
         "position": {"lat": cafe.lat, "lng": cafe.lon},
         "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-        "color": '#2196f3',
+        "color": OPEN_CAFE_COLOUR,
     }]
 
     map_coords = {"lat": cafe.lat, "lng": cafe.lon}
@@ -172,18 +167,15 @@ def chaingang():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Need a map of the route and nearby cafes
+    # Need path as weird Google proprietary JSON string thing
     # ----------------------------------------------------------- #
-    markers = markers_for_gpx(filename)
-    markers += CHAINGANG_MEET
-    chaingang_map = Map(
-        identifier="cafemap",
-        lat=52.211001,
-        lng=0.117207,
-        fit_markers_to_bounds=True,
-        style=dynamic_map_size(),
-        markers=markers
-    )
+    polyline = polyline_json(filename)
+
+    # ----------------------------------------------------------- #
+    # Need cafe markers as weird Google proprietary JSON string
+    # ----------------------------------------------------------- #
+    # Need cafe markers as weird Google proprietary JSON string
+    cafe_markers = CHAINGANG_MEET_NEW
 
     # ----------------------------------------------------------- #
     # Leader boards from Strava
@@ -191,8 +183,9 @@ def chaingang():
     leader_table = get_chaingang_top10()
 
     # Render home page
-    return render_template("main_chaingang.html", year=current_year, chaingang_map=chaingang_map,
-                           leader_table=leader_table)
+    return render_template("main_chaingang.html", year=current_year, leader_table=leader_table,
+                           cafe_markers=cafe_markers, polyline=polyline['polyline'],
+                           midlat=polyline['midlat'], midlon=polyline['midlon'])
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -1,6 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
 from flask_login import login_user, current_user, logout_user, login_required
-from flask_googlemaps import Map
+
 from werkzeug import exceptions
 from urllib.parse import urlparse
 from threading import Thread
@@ -20,7 +20,7 @@ from core import app, dynamic_map_size, current_year, is_mobile
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
     admin_only, update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
     TwoFactorLoginForm, DELETED_NAME
-from core.dB_cafes import Cafe, OPEN_CAFE_ICON, CLOSED_CAFE_ICON, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
