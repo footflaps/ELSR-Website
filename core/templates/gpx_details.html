@@ -161,6 +161,13 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <script>
+
+	const BOUNDS = {
+        north: {{ midlat + 0.3 }},
+        south: {{ midlat - 0.3 }},
+        west: {{ midlon - 0.3 }},
+        east: {{ midlon + 0.3 }},
+	};
 	
 	async function initMap() {
         
@@ -170,6 +177,10 @@
         
         /* Define the map view */
         const map = new google.maps.Map(document.getElementById("map"), {
+            restriction: {
+                latLngBounds: BOUNDS,
+                strictBounds: false,
+            },
             zoom: 10,
             center: { lat: {{ midlat }}, lng: {{ midlon }} },
             mapId: "7499929d658a3166",
