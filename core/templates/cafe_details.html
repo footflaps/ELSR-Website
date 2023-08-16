@@ -45,11 +45,15 @@
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<div class="post-heading">
 	
-					<h1>{{cafe.name}}</h1>
-					<h2>{{cafe.summary}}</h2>
-					<h2>{{gpxes | count}} routes pass this cafe</h2>
-					<h2 class="subheading">ELSR Rating &nbsp;&nbsp; {{cafe.rating}}</h2>
-					<span class="meta">Posted by {{get_user_name(cafe.added_email)}} on {{cafe.added_date}}</span>
+					<h1>{{ cafe.name }}</h1>
+					<h2>{{ cafe.summary }}</h2>
+					{% if gpxes | count == 1 %}
+						<h2>{{ gpxes | count }} route passes this cafe</h2>
+					{% else %}
+						<h2>{{ gpxes | count }} routes pass this cafe</h2>
+					{% endif %}
+					<h2 class="subheading">ELSR Rating &nbsp;&nbsp; {{ cafe.rating }}</h2>
+					<span class="meta">Posted by {{ get_user_name(cafe.added_email) }} on {{ cafe.added_date }}</span>
 				
 				</div>
 			</div>
