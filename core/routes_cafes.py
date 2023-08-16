@@ -253,34 +253,25 @@ def cafe_details(cafe_id):
     # Get all GPX routes which pass this cafe and that can be seen by current_user
     gpxes = Gpx().find_all_gpx_for_cafe(cafe_id, current_user)
 
-    # ----------------------------------------------------------- #
+    # -------------------------------------------------------------------------------------------- #
     # Map for where the cafe is
-    # ----------------------------------------------------------- #
+    # -------------------------------------------------------------------------------------------- #
 
-    cafe_marker = []
-    cafe_marker.append({
-        'icon': 'http://maps.google.com/mapfiles/ms/icons/blue-dot.png',
-        'lat': cafe.lat,
-        'lng': cafe.lon,
-        'infobox': cafe.name
-    })
+    # Need cafe markers as weird Google proprietary JSON string
+    cafe_marker = [{
+        "position": {"lat": cafe.lat, "lng": cafe.lon},
+        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+        "color": '#2196f3',
+    }]
 
-    # Create a Google Map for this cafe
-    cafemap = Map(
-        identifier="cafemap",
-        lat=cafe.lat,
-        lng=cafe.lon,
-        zoom=14,
-        style=dynamic_map_size(),
-        markers=cafe_marker
-    )
+    map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
     # ----------------------------------------------------------- #
     # Map for the possible routes
     # ----------------------------------------------------------- #
 
     # Create a list of markers
-    gpx_markers = cafe_marker
+    gpx_markers = []
     track_num = 0
 
     for gpx in gpxes:
@@ -372,7 +363,8 @@ def cafe_details(cafe_id):
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
-                               cafemap=cafemap, gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile())
+                               gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile(),
+                               cafes=cafe_marker, map_coords=map_coords)
 
     else:
 
@@ -391,7 +383,8 @@ def cafe_details(cafe_id):
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
-                               cafemap=cafemap, gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile())
+                               gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile(),
+                               cafes=cafe_marker, map_coords=map_coords)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
