@@ -21,7 +21,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, del
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_cafes import Cafe, CreateCafeForm, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes, MIN_DISPLAY_STEP_KM
 from core.dB_gpx import Gpx
@@ -185,7 +185,6 @@ def cafe_list():
     # ----------------------------------------------------------- #
     # Get all known cafes
     # ----------------------------------------------------------- #
-
     cafes = Cafe().all_cafes()
 
     # ----------------------------------------------------------- #
@@ -208,9 +207,8 @@ def cafe_list():
         }
         cafe_markers.append(marker)
 
+    # Map will launch centered here
     map_coords = {"lat": ELSR_LAT, "lng": ELSR_LON}
-
-    print(f"map_coords = {map_coords}")
 
     # Render in main index template
     return render_template("cafe_list.html", year=current_year, cafes=cafes,
@@ -259,6 +257,7 @@ def cafe_details(cafe_id):
         "color": OPEN_CAFE_COLOUR,
     }]
 
+    # Map will launch centered here
     map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
     # ----------------------------------------------------------- #

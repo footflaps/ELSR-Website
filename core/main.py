@@ -133,6 +133,7 @@ def home():
         "color": OPEN_CAFE_COLOUR,
     }]
 
+    # Map will launch centered here
     map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
     # Render home page

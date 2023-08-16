@@ -726,6 +726,7 @@ def user_page():
         mean_lon += cafe.lon
         num_cafes += 1
 
+    # Map will launch centered here
     if num_cafes > 0:
         map_coords = {"lat": mean_lat/num_cafes, "lng": mean_lon/num_cafes}
     else:
