@@ -146,13 +146,11 @@
 	initCafeMap();
 
 
-
-
 	const gpx_BOUNDS = {
-        north: {{ midlat + 0.3 }},
-        south: {{ midlat - 0.3 }},
-        west: {{ midlon - 0.3 }},
-        east: {{ midlon + 0.3 }},
+        north: {{ midlat + 1 }},
+        south: {{ midlat - 1 }},
+        west: {{ midlon - 1 }},
+        east: {{ midlon + 1 }},
 	};
 	
 	let gpx_map;
