@@ -11,7 +11,7 @@ from threading import Thread
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, dynamic_graph_size, \
-                 current_year, delete_file_if_exists, is_mobile
+                 current_year, delete_file_if_exists, is_mobile, GOOGLE_MAPS_API_KEY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -190,7 +190,7 @@ def gpx_details(gpx_id):
     # Render in main index template
     return render_template("gpx_details.html", gpx=gpx, year=current_year, cafe_markers=cafe_markers,
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
-                           cafe_elevation_data=cafe_elevation_data,
+                           cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'])
 
 
@@ -534,7 +534,7 @@ def edit_route():
     # ----------------------------------------------------------- #
     maps = start_and_end_maps_native_gm(gpx.filename, gpx_id)
 
-    return render_template("gpx_edit.html", year=current_year, gpx=gpx,
+    return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
                            start_markers=maps[0], start_map_coords=maps[1],
                            end_markers=maps[2], end_map_coords=maps[3])
 
