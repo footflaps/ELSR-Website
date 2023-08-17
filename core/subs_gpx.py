@@ -50,6 +50,11 @@ TRIM_DISTANCE_KM = 2.0
 # so frig this by moving it up a bit.
 FUDGE_FACTOR_m = 10
 
+# For displaying multiple GPX traces
+#               Red        Blue      Black      Green      Fuschia    Maroon     Yellow     Lime       Aqua
+#               Purple     Navy      Teal       Olive      Grey
+GPX_COLOURS = ["#FF0000", "#0000FF", "#000000", "#008000", "#FF00FF", "#800000", "#FFFF00", "#00FF00", "#00FFFF",
+               "#800080", "#000080", "#008080", "#808000", "#808080"]
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Ensure only GPX files get uploaded
@@ -550,7 +555,7 @@ def markers_for_gpx(filename):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# GPX coordinates (native GoogleMaps variant)
+# GPX coordinates (native GoogleMaps variant) for single GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
 def polyline_json(filename):
@@ -596,6 +601,46 @@ def polyline_json(filename):
         'midlon': mid_lon / num_points,
     }
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Markers for a set of routes
+# -------------------------------------------------------------------------------------------------------------- #
+
+def create_polyline_set(gpxes):
+    # This is what we return
+    polyline_set = []
+
+    # Need to average out the routes
+    mid_lat = 0
+    mid_lon = 0
+    num_routes = 0
+
+    for gpx in gpxes:
+        filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+        if os.path.exists(filename):
+            tmp = polyline_json(filename)
+            polyline = {
+                'polyline': tmp['polyline'],
+                'name': gpx.name,
+                'color': GPX_COLOURS[num_routes % len(GPX_COLOURS)],
+            }
+            polyline_set.append(polyline)
+            mid_lat += tmp['midlat']
+            mid_lon += tmp['midlon']
+            num_routes += 1
+
+    if num_routes > 0:
+        return {
+            'polylines': polyline_set,
+            'midlat': mid_lat / num_routes,
+            'midlon': mid_lon / num_routes,
+        }
+    else:
+        return {
+            'polylines': [],
+            'midlat': 0,
+            'midlon': 0,
+        }
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Markers for a set of cafes (for flask_googlemaps)

@@ -24,7 +24,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, del
 
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
-from core.subs_gpx import check_new_cafe_with_all_gpxes, MIN_DISPLAY_STEP_KM
+from core.subs_gpx import check_new_cafe_with_all_gpxes, create_polyline_set
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
@@ -252,65 +252,22 @@ def cafe_details(cafe_id):
     # -------------------------------------------------------------------------------------------- #
 
     # Need cafe markers as weird Google proprietary JSON string
-    cafe_marker = [{
+    cafe_markers = [{
         "position": {"lat": cafe.lat, "lng": cafe.lon},
         "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
         "color": OPEN_CAFE_COLOUR,
     }]
 
     # Map will launch centered here
-    map_coords = {"lat": cafe.lat, "lng": cafe.lon}
+    cafe_map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
     # ----------------------------------------------------------- #
     # Map for the possible routes
     # ----------------------------------------------------------- #
+    polylines = create_polyline_set(gpxes)
 
-    # Create a list of markers
-    gpx_markers = []
-    track_num = 0
 
-    for gpx in gpxes:
 
-        # Need absolute path
-        abs_filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
-
-        # Add the GPX route to markers
-        gpx_file = open(abs_filename, 'r')
-        gpx_track = gpxpy.parse(gpx_file)
-        track_num += 1
-
-        for track in gpx_track.tracks:
-            for segment in track.segments:
-
-                # Need these for working out inter sample spacing
-                last_lat = segment.points[0].latitude
-                last_lon = segment.points[0].longitude
-
-                for point in segment.points:
-
-                    # We sub-sample the raw GPX file as if you plot all the points, the map looks a complete mess.
-                    # 0.5km spacing seems to work ok.
-                    if mpu.haversine_distance((last_lat, last_lon),
-                                              (point.latitude, point.longitude)) > MIN_DISPLAY_STEP_KM * 2:
-                        gpx_markers.append({
-                            'icon': map_icon(track_num),
-                            'lat': point.latitude,
-                            'lng': point.longitude,
-                            'infobox': f'<a href="{url_for("gpx_details", gpx_id=gpx.id)}">Route: "{gpx.name}"</a>'
-                        })
-
-                        last_lat = point.latitude
-                        last_lon = point.longitude
-
-    # Create the Google Map config
-    gpxmap = Map(
-        identifier="gpxmap",
-        lat=52.211001,
-        lng=0.117207,
-        fit_markers_to_bounds=True,
-        style=dynamic_map_size(),
-        markers=gpx_markers
-    )
 
     # Are we posting the completed comment form?
     if form.validate_on_submit():
@@ -358,8 +315,8 @@ def cafe_details(cafe_id):
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
-                               gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile(),
-                               cafes=cafe_marker, map_coords=map_coords, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
+                               gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, polylines=polylines)
 
     else:
 
@@ -378,8 +335,9 @@ def cafe_details(cafe_id):
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
-                               gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile(),
-                               cafes=cafe_marker, map_coords=map_coords, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
+                               gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
+                               polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
 
 
 # -------------------------------------------------------------------------------------------------------------- #

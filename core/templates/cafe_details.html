@@ -5,17 +5,6 @@
 
 {% block content %}
 
-<!---------------------------------------------------------------------------------------------------->
-<!--                                    Set up Google Maps                                          -->
-<!---------------------------------------------------------------------------------------------------->
-
-<head>
-	<!-- Google Maps -->
-	{{"decoupled-map"|googlemap_js(37.4419, -122.1419)}}
-	{{gpxmap.js}}
-	
-</head>
-
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                       Page Header                                              -->
@@ -82,6 +71,10 @@
 <!--                   JavaScript for Google Maps (one or more cafes)                               -->
 <!---------------------------------------------------------------------------------------------------->
 
+<!---------------------------------------------------------------------------------------------------->
+<!--             JavaScript for Google Map showing a single GPX plus one of more Cafes              -->
+<!---------------------------------------------------------------------------------------------------->
+
 <script>
 
 	(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
@@ -91,16 +84,16 @@
 	    // Add other bootstrap parameters as needed, using camel case.
     });
 
-	const BOUNDS = {
-        north: {{ map_coords['lat'] + 0.1 }},
-        south: {{ map_coords['lat'] - 0.1 }},
-        west: {{ map_coords['lng'] - 0.1 }},
-        east: {{ map_coords['lng'] + 0.1 }},
+	const cafe_BOUNDS = {
+        north: {{ cafe_map_coords['lat'] + 0.1 }},
+        south: {{ cafe_map_coords['lat'] - 0.1 }},
+        west: {{ cafe_map_coords['lng'] - 0.1 }},
+        east: {{ cafe_map_coords['lng'] + 0.1 }},
 	};
 
 	let cafe_map;
 
-	async function initMap() {
+	async function initCafeMap() {
         
         // Request needed libraries.
         const { Map, InfoWindow } = await google.maps.importLibrary("maps");
@@ -109,11 +102,11 @@
         /* Define the map view */
         const cafe_map = new Map(document.getElementById("cafe_map"), {
             restriction: {
-                latLngBounds: BOUNDS,
+                latLngBounds: cafe_BOUNDS,
                 strictBounds: false,
             },
             zoom: 16,
-            center: { lat: {{ map_coords['lat'] }}, lng: {{ map_coords['lng'] }} },
+            center: { lat: {{ cafe_map_coords['lat'] }}, lng: {{ cafe_map_coords['lng'] }} },
             mapId: "7499929d658a3166",
         });
 
@@ -150,7 +143,113 @@
         });
 	}
 
-	initMap();
+	initCafeMap();
+
+
+
+
+	const gpx_BOUNDS = {
+        north: {{ midlat + 0.3 }},
+        south: {{ midlat - 0.3 }},
+        west: {{ midlon - 0.3 }},
+        east: {{ midlon + 0.3 }},
+	};
+	
+	let gpx_map;
+	
+	async function initGpxMap() {
+        
+        /* Request needed libraries */
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+        
+        /* Define the map view */
+        const map = new Map(document.getElementById("gpx_map"), {
+            restriction: {
+                latLngBounds: gpx_BOUNDS,
+                strictBounds: false,
+            },
+            zoom: 10,
+            center: { lat: {{ midlat }}, lng: {{ midlon }} },
+            mapId: "7499929d658a3166",
+        });
+        
+        /* Loop over Polylines */
+        {% for polyline in polylines %}
+        
+	        /* Define our polyline */
+	        const flightPath{{loop.index}} = new google.maps.Polyline({
+	            path: {{ polyline['polyline'] }},
+	            geodesic: true,
+	            strokeColor: "{{ polyline['color'] }}",
+	            strokeOpacity: 1.0,
+	            strokeWeight: 4,
+	        });
+	
+			/* We want a pop up info box for thr GPX route */
+			google.maps.event.addListener(flightPath{{loop.index}}, 'mouseover', function(event) {
+	            current_lat = event.latLng.lat();
+	            current_lon = event.latLng.lng();
+	            
+	            // Create a new InfoWindow.
+	            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
+	                content: "Route: {{ polyline['name'] }}",
+	                position: event.latLng,
+	            });
+	            
+	            gpxInfoWindow{{loop.index}}.open(map);
+			});
+	
+			/* and close the info box when they move elsewhere */
+			google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
+	            gpxInfoWindow{{loop.index}}.close();
+			});
+	
+			/* Add the path to the map */
+	        flightPath{{loop.index}}.setMap(map);
+     	
+     	{% endfor %}
+     	
+     	/* This is our set of cafes */
+		const cafes = {{ cafes | tojson }}
+	    
+	    // Create an info window to share between markers.
+	    const infoWindow = new InfoWindow();
+					
+        // Create the markers.
+        cafes.forEach( ({ position, title, color }, i) => {
+            const pin = new PinElement({
+            glyph: `${i + 1}`,
+            });
+            
+            const marker = new AdvancedMarkerElement({
+                position,
+                map,
+                title: `${title}`,
+                content: new PinElement({
+                                background: color,
+                                borderColor: "black",
+                                glyphColor: "black",
+							}).element
+            });
+            
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
+        });
+	}
+
+	initGpxMap();
+	
+
+
+
+
+
 
 </script>
 
@@ -309,11 +408,15 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 	
-				<h2 class="my-3">
-					Map view of routes passing {{cafe.name}}
-				</h2>
-	            {{gpxmap.html}}
+				<h2 class="my-3">Map view of routes passing {{cafe.name}}</h2>
 				
+				<!---------------------------------------------------------------------------------------------------->
+				<!--                                      Insert Google Map                                         -->
+				<!---------------------------------------------------------------------------------------------------->
+			
+				<div id="gpx_map" style="height: 500px"></div>
+				
+				<!-- Break before next section -->
 				<hr>
 	
 			</div>
