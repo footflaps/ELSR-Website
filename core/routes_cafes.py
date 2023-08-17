@@ -2,8 +2,6 @@ from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from datetime import date
 from werkzeug import exceptions
-import gpxpy
-import gpxpy.gpx
 import mpu
 import os
 from threading import Thread
@@ -14,8 +12,7 @@ from PIL import Image
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists, is_mobile,\
-                 GOOGLE_MAPS_API_KEY
+from core import app, current_year, delete_file_if_exists, GOOGLE_MAPS_API_KEY
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -23,7 +20,8 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
-from core.subs_gpx import check_new_cafe_with_all_gpxes, create_polyline_set
+from core.subs_gpx import check_new_cafe_with_all_gpxes
+from core.subs_google_maps import create_polyline_set
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event

@@ -23,7 +23,8 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, GOOGLE_MAPS_API_KEY
 
 from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR
 from core.db_users import update_last_seen
-from core.subs_gpx import polyline_json, get_elevation_data
+from core.subs_graphjs import get_elevation_data
+from core.subs_google_maps import polyline_json
 
 
 # -------------------------------------------------------------------------------------------------------------- #

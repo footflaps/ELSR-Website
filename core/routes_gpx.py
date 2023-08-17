@@ -21,9 +21,10 @@ from core.dB_gpx import Gpx, UploadGPXForm
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_cafes import Cafe
 from core.dB_events import Event
-from core.subs_gpx import allowed_file, cut_start_gpx, cut_end_gpx, check_route_name,get_elevation_data, \
-                          get_cafe_heights, strip_excess_info_from_gpx, check_new_gpx_with_all_cafes, \
-                          polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm
+from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes
+from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm
+from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
+from core.subs_graphjs import get_elevation_data, get_cafe_heights
 
 
 # -------------------------------------------------------------------------------------------------------------- #
