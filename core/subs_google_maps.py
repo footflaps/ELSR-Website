@@ -28,6 +28,7 @@ from core.dB_cafes import Cafe
 TRIM_DISTANCE_KM = 2.0
 
 # For displaying multiple GPX traces
+# based on https://loading.io/color/feature/Spectral-10/
 GPX_COLOURS = ["#9e0142", "#5e4fa2", "#d53e4f", "#3288bd", "#f46d43", "#66c2a5", "#fdae61", "#e6f598"]
 
 
