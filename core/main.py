@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
+from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, GOOGLE_MAPS_API_KEY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -137,7 +137,8 @@ def home():
     map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
     # Render home page
-    return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords)
+    return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,
+                           GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -190,7 +191,8 @@ def chaingang():
     # Render home page
     return render_template("main_chaingang.html", year=current_year, leader_table=leader_table,
                            cafe_markers=cafe_markers, elevation_data=elevation_data,
-                           polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'])
+                           polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
+                           GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
