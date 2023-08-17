@@ -20,7 +20,7 @@ from core import app, current_year, GOOGLE_MAPS_API_KEY
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes
-from core.subs_google_maps import create_polyline_set
+from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
@@ -140,8 +140,11 @@ def cafe_details(cafe_id):
     # ----------------------------------------------------------- #
     polylines = create_polyline_set(gpxes)
 
-
-
+    # Warn if we skipped any
+    if len(gpxes) > MAX_NUM_GPX_PER_GRAPH:
+        warning = f"NB: Only showing first {MAX_NUM_GPX_PER_GRAPH} routes on map."
+    else:
+        warning = None
 
     # Are we posting the completed comment form?
     if form.validate_on_submit():
@@ -190,7 +193,7 @@ def cafe_details(cafe_id):
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, polylines=polylines)
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, polylines=polylines, warning=warning)
 
     else:
 
@@ -210,7 +213,7 @@ def cafe_details(cafe_id):
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, warning=warning,
                                polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
 
 

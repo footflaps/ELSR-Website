@@ -169,7 +169,7 @@
                 latLngBounds: gpx_BOUNDS,
                 strictBounds: false,
             },
-            zoom: 10,
+            zoom: 9,
             center: { lat: {{ midlat }}, lng: {{ midlon }} },
             mapId: "7499929d658a3166",
         });
@@ -408,13 +408,17 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 	
-				<h2 class="my-3">Map view of routes passing {{cafe.name}}</h2>
+				<h2 class="my-3">Map view of routes passing {{ cafe.name }}</h2>
 				
 				<!---------------------------------------------------------------------------------------------------->
 				<!--                                      Insert Google Map                                         -->
 				<!---------------------------------------------------------------------------------------------------->
 			
 				<div id="gpx_map" style="height: 500px"></div>
+				
+				{% if warning: %}
+					<h4 class="my-3">{{ warning }}</h4>
+				{% endif %}
 				
 				<!-- Break before next section -->
 				<hr>

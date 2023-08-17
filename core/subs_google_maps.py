@@ -31,6 +31,9 @@ TRIM_DISTANCE_KM = 2.0
 # based on https://loading.io/color/feature/Spectral-10/
 GPX_COLOURS = ["#9e0142", "#5e4fa2", "#d53e4f", "#3288bd", "#f46d43", "#66c2a5", "#fdae61", "#e6f598"]
 
+# Don't display 100s on a map as total mess
+MAX_NUM_GPX_PER_GRAPH = 10
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -115,19 +118,30 @@ def create_polyline_set(gpxes):
     num_routes = 0
 
     for gpx in gpxes:
+        # Absolute path
         filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
+        # File should always be there, but....
         if os.path.exists(filename):
+
+            # Get results for a single GPX file
             tmp = polyline_json(filename)
             polyline = {
                 'polyline': tmp['polyline'],
                 'name': gpx.name,
                 'color': gpx_colour(num_routes),
             }
+
+            # Add to our set
             polyline_set.append(polyline)
             mid_lat += tmp['midlat']
             mid_lon += tmp['midlon']
             num_routes += 1
 
+        if num_routes > MAX_NUM_GPX_PER_GRAPH:
+            break
+
+    # Avoid /0
     if num_routes > 0:
         return {
             'polylines': polyline_set,
