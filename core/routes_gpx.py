@@ -48,8 +48,32 @@ def gpx_list():
     # Grab all our routes
     gpxes = Gpx().all_gpxes()
 
+    # Double check we have all the files present
+    missing_files = []
+
+    for gpx in gpxes:
+        # Absolute path name
+        filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
+        # Check the file is actually there, before we try and parse it etc
+        if not os.path.exists(filename):
+            missing_files.append(gpx.id)
+
+    # Need different path for Admin
+    if not current_user.is_authenticated:
+        admin = False
+    elif current_user.admin():
+        admin = True
+    else:
+        admin = False
+
+    if admin:
+        for missing in missing_files:
+            flash(f"We are missing the GPX file for route {missing}!")
+
     # Render in gpx_list template
-    return render_template("gpx_list.html", year=current_year,  gpxes=gpxes, mobile=is_mobile())
+    return render_template("gpx_list.html", year=current_year,  gpxes=gpxes, mobile=is_mobile(),
+                           missing_files=missing_files)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

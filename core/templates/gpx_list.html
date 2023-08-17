@@ -129,12 +129,14 @@
 					
 						{% elif gpx.public() or current_user.admin() or gpx.email == current_user.email: %}
 							
-							{% if not gpx.public(): %}
+							{% if gpx.id in missing_files: %}
+								<tr class="table-danger">
+							{% elif not gpx.public(): %}
 								<!-- We have hidden rows for non public routes -->
 								<tr class="table-warning">
 								{% set ns.hidden = "NB Routes in yellow have not been made public yet by their owner and are only visible to Admins
 				                                 and the owner. Only the owner can publish the route and make it public." %}
-							{% else: %}
+							{% else %}
 								<tr>
 							{% endif %}
 							
