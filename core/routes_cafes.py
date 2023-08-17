@@ -15,7 +15,8 @@ from PIL import Image
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists, is_mobile
+from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists, is_mobile,\
+                 GOOGLE_MAPS_API_KEY
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -211,7 +212,7 @@ def cafe_list():
     map_coords = {"lat": ELSR_LAT, "lng": ELSR_LON}
 
     # Render in main index template
-    return render_template("cafe_list.html", year=current_year, cafes=cafes,
+    return render_template("cafe_list.html", year=current_year, cafes=cafes, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
                            cafe_markers=cafe_markers, map_coords=map_coords)
 
 
@@ -358,7 +359,7 @@ def cafe_details(cafe_id):
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile(),
-                               cafes=cafe_marker, map_coords=map_coords)
+                               cafes=cafe_marker, map_coords=map_coords, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
     else:
 
@@ -378,7 +379,7 @@ def cafe_details(cafe_id):
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, gpxmap=gpxmap, mobile=is_mobile(),
-                               cafes=cafe_marker, map_coords=map_coords)
+                               cafes=cafe_marker, map_coords=map_coords, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -419,7 +420,8 @@ def new_cafe():
             app.logger.debug(f"new_cafe(): Fail, Lat and Lon are {round(range_km, 1)} km from Cambridge.")
             Event().log_event("New Cafe Fail", f"Lat and Lon are {round(range_km, 1)} km from Cambridge.")
             flash(f"Lat and Lon are {round(range_km, 1)} km from Cambridge!")
-            return render_template("cafe_add.html", form=form, cafe=None, year=current_year)
+            return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
+                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
         # Create a new Cafe object
         cafe_name = form.name.data.strip()
@@ -442,7 +444,8 @@ def new_cafe():
             Event().log_event("New Cafe Fail", f"Detected duplicate cafe name '{new_cafe.name}'.")
             flash("Sorry, that name is already in use, choose another!")
             # Back to edit form
-            return render_template("cafe_add.html", form=form, cafe=None, year=current_year)
+            return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
+                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
         # ----------------------------------------------------------- #
         #   Try to add the cafe
@@ -457,7 +460,8 @@ def new_cafe():
             Event().log_event("New Cafe Fail", f"Something went wrong! '{cafe_name}'.")
             flash("Sorry, something went wrong.")
             # Back to edit form
-            return render_template("cafe_add.html", form=form, cafe=None, year=current_year)
+            return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
+                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
         # ----------------------------------------------------------- #
         #   Look up our new cafe
@@ -492,7 +496,8 @@ def new_cafe():
         #   GET - Show blank edit form                                                                           #
         # ----------------------------------------------------------- #
 
-        return render_template("cafe_add.html", form=form, cafe=None, year=current_year)
+        return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
