@@ -192,9 +192,11 @@
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 	
 		        {% if mobile %}
-					<table id="cafeTable" class="table table-striped table-bordered table-condensed">
+					<table id="cafeTable" class="table table-striped table-bordered table-condensed table-sm"
+					       style="width: 100%">
 				{% else %}
-					<table id="cafeTable" class="table table-striped table-bordered" style="width: 730px">
+					<table id="cafeTable" class="table table-striped table-bordered"
+					       style="width: 100%">
 				{% endif %}
 			
 					<!-- Header -->
@@ -286,6 +288,8 @@
 		
 			/* Default table length */
 			pageLength: 20,
+			
+			"autoWidth": false,
 			
 			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
 			"pagingType": "simple_numbers",

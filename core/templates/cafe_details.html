@@ -466,10 +466,11 @@
 				<div class="collapse" id="collapseRoutes">
 				
 					{% if mobile %}
-						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed">
+						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
+						       style="width: 100%">
 					{% else %}
 						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
-					                         style="width: 730px">
+					           style="width: 100%">
 					{% endif %}
 					
 			        	<!-- Header -->
@@ -789,7 +790,11 @@
 	
 	$(document).ready( function () {
 		$('#gpxTable').DataTable({
-			pageLength: 20
+			
+			pageLength: 20,
+			
+			"autoWidth": false,
+			
 		})
 	} );
 	

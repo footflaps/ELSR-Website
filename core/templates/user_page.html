@@ -385,10 +385,11 @@
 				<div class="col-lg-8 col-md-10 mx-auto">
 				
 					{% if mobile %}
-						<table id="cafeTable" class="table table-striped table-bordered table-sm table-condensed">
+						<table id="cafeTable" class="table table-striped table-bordered table-sm table-condensed"
+						       style="width: 100%">
 					{% else %}
 						<table id="cafeTable" class="table table-striped table-bordered table-sm table-condensed"
-						       style="width: 730px">
+						       style="width: 100%">
 					{% endif %}
 					
 						<!-- Header row-->
@@ -494,10 +495,11 @@
 				<div class="col-lg-8 col-md-10 mx-auto">
 				
 					{% if mobile %}
-						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed">
+						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
+						       style="width: 100%">
 					{% else %}
 						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
-						       style="width: 730px">
+						       style="width: 100%">
 					{% endif %}
 					
 						<!-- Header -->
@@ -597,10 +599,11 @@
 				<div class="col-lg-8 col-md-10 mx-auto">
 				
 					{% if mobile %}
-						<table id="commentTable" class="table table-striped table-bordered table-sm table-condensed">
+						<table id="commentTable" class="table table-striped table-bordered table-sm table-condensed"
+						       style="width: 100%">
 					{% else %}
 						<table id="commentTable" class="table table-striped table-bordered table-sm table-condensed"
-						       style="width: 730px">
+						       style="width: 100%">
 					{% endif %}
 				
 						<!-- Header -->
@@ -745,11 +748,12 @@
 				
 					{% if mobile %}
 						<table id="eventTable" class="table table-striped table-bordered table-sm table-condensed"
-						       data-order='[[ 0, "dec" ]]' data-page-length="20">
+						       data-order='[[ 0, "dec" ]]' data-page-length="20"
+						       style="width: 100%">
 					{% else %}
 						<table id="eventTable" class="table table-striped table-bordered table-sm table-condensed"
 						       data-order='[[ 0, "dec" ]]' data-page-length="20"
-						       style="width: 730px">
+						       style="width: 100%">
 					{% endif %}
 					
 						<!-- Header -->
@@ -1016,6 +1020,8 @@
 			/* Default table length */
 			pageLength: 20,
 			
+			"autoWidth": false,
+			
 			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
 			"pagingType": "simple_numbers",
 			
@@ -1033,6 +1039,8 @@
 			
 			/* Default table length */
 			pageLength: 20,
+			
+			"autoWidth": false,
 			
 			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
 			"pagingType": "simple_numbers",
@@ -1052,6 +1060,8 @@
 			/* Default table length */
 			pageLength: 20,
 			
+			"autoWidth": false,
+			
 			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
 			"pagingType": "simple_numbers",
 			
@@ -1069,6 +1079,8 @@
 			
 			/* Default table length */
 			pageLength: 20,
+			
+			"autoWidth": false,
 			
 			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
 			"pagingType": "simple_numbers",
