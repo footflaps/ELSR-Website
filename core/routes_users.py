@@ -1,20 +1,21 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
 from flask_login import login_user, current_user, logout_user, login_required
-
 from werkzeug import exceptions
 from urllib.parse import urlparse
 from threading import Thread
 import os
 import re
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, dynamic_map_size, current_year, is_mobile
+from core import app, current_year, GOOGLE_MAPS_API_KEY
+
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import our three database classes and associated forms, decorators etc
+# Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
@@ -26,6 +27,7 @@ from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.send_emails import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -738,17 +740,20 @@ def user_page():
     if anchor == "messages":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, anchor="messages")
+                               cafe_markers=cafe_markers, map_coords=map_coords,
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, anchor="messages")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, anchor="eventLog")
+                               cafe_markers=cafe_markers, map_coords=map_coords,
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords)
+                               cafe_markers=cafe_markers, map_coords=map_coords,
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
