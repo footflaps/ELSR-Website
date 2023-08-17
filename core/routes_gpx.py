@@ -108,16 +108,39 @@ def gpx_details(gpx_id):
     # Check the file is actually there, before we try and parse it etc
     if not os.path.exists(filename):
         # Should never happen, but may as well handle it cleanly
-        app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
-        Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
-        flash("Sorry, we seem to have lost that GPX file!")
-        flash("Someone should probably fire the web developer...")
-        return abort(404)
+
+        # Need different path for Admin
+        if not current_user.is_authenticated:
+            admin = False
+        elif current_user.admin():
+            admin = True
+        else:
+            admin = False
+
+        if admin:
+            # Admin needs to be able to rectify the situation
+            app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
+            Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
+            flash("Sorry, we seem to have lost that GPX file!")
+        else:
+            # Non admin just gets a Dear John...
+            app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
+            Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
+            flash("Sorry, we seem to have lost that GPX file!")
+            flash("Someone should probably fire the web developer...")
+            return abort(404)
 
     # ----------------------------------------------------------- #
     # Need path as weird Google proprietary JSON string thing
     # ----------------------------------------------------------- #
-    polyline = polyline_json(filename)
+    if os.path.exists(filename):
+        polyline = polyline_json(filename)
+    else:
+        polyline = {
+            'polyline': [],
+            'midlat': 52.2,
+            'midlon': 0.13,
+        }
 
     # ----------------------------------------------------------- #
     # Need cafe markers as weird Google proprietary JSON string
@@ -127,8 +150,12 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     # Get elevation data
     # ----------------------------------------------------------- #
-    elevation_data = get_elevation_data(filename)
-    cafe_elevation_data = get_cafe_heights(cafe_list, elevation_data)
+    if os.path.exists(filename):
+        elevation_data = get_elevation_data(filename)
+        cafe_elevation_data = get_cafe_heights(cafe_list, elevation_data)
+    else:
+        elevation_data = []
+        cafe_elevation_data = []
 
     # ----------------------------------------------------------- #
     # Flag if hidden
