@@ -34,7 +34,7 @@ from core.subs_gpx import polyline_json, get_elevation_data
 # saying they are not actually used!
 from core.routes_users import login
 from core.routes_cafes import cafe_list
-from core.routes_gpx import gpx_list, markers_for_gpx, markers_for_cafes
+from core.routes_gpx import gpx_list
 from core.routes_admin import admin_page
 from core.routes_messages import mark_read
 from core.routes_events import delete_event

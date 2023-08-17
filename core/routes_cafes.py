@@ -1,7 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import login_required, current_user
 from datetime import date
-from flask_googlemaps import Map
 from werkzeug import exceptions
 import gpxpy
 import gpxpy.gpx
@@ -15,7 +14,7 @@ from PIL import Image
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, current_year, delete_file_if_exists, is_mobile,\
+from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists, is_mobile,\
                  GOOGLE_MAPS_API_KEY
 
 # -------------------------------------------------------------------------------------------------------------- #

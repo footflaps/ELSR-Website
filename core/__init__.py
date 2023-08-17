@@ -42,14 +42,6 @@ mMAP_STYLE = "height:500px;width:350px;margin:0;"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Elevation Graph Widths
-# -------------------------------------------------------------------------------------------------------------- #
-
-GRAPH_WIDTH = "730px"
-mGRAPH_WIDTH = "350px"
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # File upload constants
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -171,29 +163,6 @@ gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=Fa
 
 # Year for (C)
 current_year = date.today().year
-
-
-# Get map size for desktop / mobile
-def dynamic_map_size():
-    user_agent_details = request.user_agent.string
-    phones = ["iphone", "android", "mobile"]
-    if any(phone in user_agent_details.lower() for phone in phones):
-        map_style = mMAP_STYLE
-        app.logger.debug(f"Detected mobile: '{user_agent_details}'.")
-    else:
-        map_style = MAP_STYLE
-        app.logger.debug(f"Detected desktop: '{user_agent_details}'.")
-    return map_style
-
-
-def dynamic_graph_size():
-    user_agent_details = request.user_agent.string
-    phones = ["iphone", "android", "mobile"]
-    if any(phone in user_agent_details.lower() for phone in phones):
-        graph_width = mGRAPH_WIDTH
-    else:
-        graph_width = GRAPH_WIDTH
-    return graph_width
 
 def is_mobile():
     user_agent_details = request.user_agent.string

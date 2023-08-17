@@ -1,6 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory
 from flask_login import login_required, current_user
-from flask_googlemaps import Map
 from werkzeug import exceptions
 import os
 from threading import Thread
@@ -10,7 +9,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size, dynamic_graph_size, \
+from core import app, GPX_UPLOAD_FOLDER_ABS, \
                  current_year, delete_file_if_exists, is_mobile, GOOGLE_MAPS_API_KEY
 
 
@@ -22,10 +21,9 @@ from core.dB_gpx import Gpx, UploadGPXForm
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_cafes import Cafe
 from core.dB_events import Event
-from core.subs_gpx import allowed_file, cut_start_gpx, cut_end_gpx, check_route_name, markers_for_gpx,\
-                          markers_for_cafes, start_and_end_maps, get_elevation_data, get_cafe_heights,\
-                          strip_excess_info_from_gpx, check_new_gpx_with_all_cafes, polyline_json,\
-                          markers_for_cafes_native, start_and_end_maps_native_gm
+from core.subs_gpx import allowed_file, cut_start_gpx, cut_end_gpx, check_route_name,get_elevation_data, \
+                          get_cafe_heights, strip_excess_info_from_gpx, check_new_gpx_with_all_cafes, \
+                          polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm
 
 
 # -------------------------------------------------------------------------------------------------------------- #

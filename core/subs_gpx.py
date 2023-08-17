@@ -13,7 +13,7 @@ import json
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, dynamic_map_size
+from core import app, GPX_UPLOAD_FOLDER_ABS
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -513,48 +513,6 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Markers for the complete GPX file (for flask_googlemaps)
-# -------------------------------------------------------------------------------------------------------------- #
-
-def markers_for_gpx(filename):
-    # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
-
-    # This is the list we will return
-    markers = []
-    with open(filename, 'r') as gpx_file:
-
-        gpx_track = gpxpy.parse(gpx_file)
-
-        for track in gpx_track.tracks:
-            for segment in track.segments:
-
-                # Need these for working out inter sample spacing
-                last_lat = 0
-                last_lon = 0
-                count = 0
-
-                for point in segment.points:
-
-                    # We sub-sample the raw GPX file as if you plot all the points, the map looks a complete mess.
-                    if mpu.haversine_distance((last_lat, last_lon),
-                                              (point.latitude, point.longitude)) > MIN_DISPLAY_STEP_KM or \
-                            point == segment.points[-1]:
-                        count += 1
-
-                        markers.append({
-                            'icon': 'http://maps.google.com/mapfiles/kml/pal4/icon49.png',
-                            'lat': point.latitude,
-                            'lng': point.longitude,
-                            'infobox': f'Point {count}'
-                        })
-
-                        last_lat = point.latitude
-                        last_lon = point.longitude
-    return markers
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # GPX coordinates (native GoogleMaps variant) for single GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -642,28 +600,6 @@ def create_polyline_set(gpxes):
             'midlon': 0,
         }
 
-# -------------------------------------------------------------------------------------------------------------- #
-# Markers for a set of cafes (for flask_googlemaps)
-# -------------------------------------------------------------------------------------------------------------- #
-
-def markers_for_cafes(cafes):
-    markers = []
-    for cafe_summary in cafes:
-
-        # Need to look up current cafe open / closed status
-        if Cafe().one_cafe(cafe_summary["id"]).active:
-            icon = OPEN_CAFE_ICON
-        else:
-            icon = CLOSED_CAFE_ICON
-
-        markers.append({
-            'icon': icon,
-            'lat': cafe_summary['lat'],
-            'lng': cafe_summary['lon'],
-            'infobox': f'<a href="{url_for("cafe_details", cafe_id=cafe_summary["id"])}">{cafe_summary["name"]}</a>'
-        })
-    return markers
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Markers for a set of cafes (native Google Map variant)
@@ -686,110 +622,6 @@ def markers_for_cafes_native(cafes):
         })
 
     return markers
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Generate the pair of maps for editing the start and end of a ride
-# -------------------------------------------------------------------------------------------------------------- #
-
-def start_and_end_maps(filename, gpx_id):
-    # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
-
-    # Creating two separate maps:
-    start_markers = []
-    end_markers = []
-
-    # open our file
-    with open(filename, 'r') as gpx_file:
-        gpx_track = gpxpy.parse(gpx_file)
-
-        # ----------------------------------------------------------- #
-        #   Markers for 1st 2km
-        # ----------------------------------------------------------- #
-        for track in gpx_track.tracks:
-            for segment in track.segments:
-
-                # Need these for working out inter sample spacing
-                last_lat = segment.points[0].latitude
-                last_lon = segment.points[0].longitude
-                total_km = 0
-                index = 0
-
-                for point in segment.points:
-
-                    # Work out how far we have travelled so far...
-                    total_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
-
-                    index += 1
-
-                    # We only want the first km or so
-                    if total_km < TRIM_DISTANCE_KM:
-                        start_markers.append({
-                            'icon': 'http://maps.google.com/mapfiles/kml/pal4/icon49.png',
-                            'lat': point.latitude,
-                            'lng': point.longitude,
-                            'infobox': f'<a href="{url_for("gpx_cut_start", gpx_id=gpx_id, index=index)}">Start Here! (Point {index})</a>'
-                        })
-                    else:
-                        break
-
-                    last_lat = point.latitude
-                    last_lon = point.longitude
-
-        # ----------------------------------------------------------- #
-        #   Markers for last 2km
-        # ----------------------------------------------------------- #
-        for track in gpx_track.tracks:
-            for segment in track.segments:
-
-                # Need these for working out inter sample spacing
-                last_lat = segment.points[-1].latitude
-                last_lon = segment.points[-1].longitude
-                total_km = 0
-                index = len(segment.points)
-
-                for point in segment.points[::-1]:
-
-                    # Work out how far we have travelled so far...
-                    total_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
-
-                    # We only want the last km or so
-                    if total_km < TRIM_DISTANCE_KM:
-                        end_markers.append({
-                            'icon': 'http://maps.google.com/mapfiles/kml/pal4/icon49.png',
-                            'lat': point.latitude,
-                            'lng': point.longitude,
-                            'infobox': f'<a href="{url_for("gpx_cut_end", gpx_id=gpx_id, index=index)}">Finish Here! (Point {index})</a>'
-                        })
-                    else:
-                        break
-
-                    last_lat = point.latitude
-                    last_lon = point.longitude
-                    index -= 1
-
-    # Create the Google Map config
-    startmap = Map(
-        identifier="startmap",
-        lat=52.211001,
-        lng=0.117207,
-        fit_markers_to_bounds=True,
-        style=dynamic_map_size(),
-        markers=start_markers
-    )
-
-    # Create the Google Map config
-    endmap = Map(
-        identifier="endmap",
-        lat=52.211001,
-        lng=0.117207,
-        fit_markers_to_bounds=True,
-        style=dynamic_map_size(),
-        markers=end_markers
-    )
-
-    return [startmap, endmap]
 
 
 # -------------------------------------------------------------------------------------------------------------- #
