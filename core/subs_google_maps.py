@@ -27,12 +27,8 @@ from core.dB_cafes import Cafe
 # How far we display along the route for trimming start and end
 TRIM_DISTANCE_KM = 2.0
 
-
 # For displaying multiple GPX traces
-#               Red        Blue      Black      Green      Fuschia    Maroon     Yellow     Lime       Aqua
-#               Purple     Navy      Teal       Olive      Grey
-GPX_COLOURS = ["#FF0000", "#0000FF", "#000000", "#008000", "#FF00FF", "#800000", "#FFFF00", "#00FF00", "#00FFFF",
-               "#800080", "#000080", "#008080", "#808000", "#808080"]
+GPX_COLOURS = ["#9e0142", "#5e4fa2", "#d53e4f", "#3288bd", "#f46d43", "#66c2a5", "#fdae61", "#e6f598"]
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -43,6 +39,13 @@ GPX_COLOURS = ["#FF0000", "#0000FF", "#000000", "#008000", "#FF00FF", "#800000",
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+
+def gpx_colour(number):
+
+    while number >= len(GPX_COLOURS):
+        number -= len(GPX_COLOURS)
+
+    return GPX_COLOURS[number]
 
 # -------------------------------------------------------------------------------------------------------------- #
 # GPX coordinates (native GoogleMaps variant) for single GPX file
@@ -112,7 +115,7 @@ def create_polyline_set(gpxes):
             polyline = {
                 'polyline': tmp['polyline'],
                 'name': gpx.name,
-                'color': GPX_COLOURS[num_routes % len(GPX_COLOURS)],
+                'color': gpx_colour(num_routes),
             }
             polyline_set.append(polyline)
             mid_lat += tmp['midlat']
