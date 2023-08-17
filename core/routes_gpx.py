@@ -479,6 +479,19 @@ def edit_route():
         return abort(404)
 
     # ----------------------------------------------------------- #
+    # Check the file exist
+    # ----------------------------------------------------------- #
+    # This is the absolute path to the file
+    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+
+    # Check the file is actually there, before we try and parse it etc
+    if not os.path.exists(filename):
+        app.logger.debug(f"edit_route(): Failed to locate GPX file for gpx_id = '{gpx_id}'.")
+        Event().log_event("Edit GPX Fail", f"Failed to locate GPX file for gpx_id = '{gpx_id}'.")
+        flash(f"We seem to have lost the GPX file for route #{gpx_id} ({gpx.name})!")
+        return redirect(url_for('gpx_list'))
+
+    # ----------------------------------------------------------- #
     # Restrict access
     # ----------------------------------------------------------- #
     # Rules:
