@@ -80,7 +80,7 @@
         // Create the markers.
         cafes.forEach( ({ position, title, color }, i) => {
             const pin = new PinElement({
-            glyph: `${i + 1}`,
+                glyph: `${i + 1}`,
             });
             
             const marker = new AdvancedMarkerElement({
@@ -91,6 +91,7 @@
                                 background: color,
                                 borderColor: "black",
                                 glyphColor: "black",
+                                scale: 1.5,
 							}).element
             });
             
