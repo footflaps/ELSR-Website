@@ -177,7 +177,7 @@
 	            
 	            // Create a new InfoWindow.
 	            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
-	                content: "Route: {{ polyline['name'] }}",
+	                content: '{{ polyline['name'] | safe }}',
 	                position: event.latLng,
 	            });
 	            
@@ -228,11 +228,6 @@
 	}
 
 	initGpxMap();
-	
-
-
-
-
 
 
 </script>

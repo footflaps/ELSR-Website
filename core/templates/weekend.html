@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Page Header                                                -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/calendar-bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Ride Schedule</h1>
+					<span class="subheading">Something for the weekend Sir?</span>
+					
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--             JavaScript for Google Map showing multiple GPX plus one of more Cafes              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+
+	(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+	    key: "{{ GOOGLE_MAPS_API_KEY }}",
+	    v: "weekly",
+	    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+	    // Add other bootstrap parameters as needed, using camel case.
+    });
+
+
+	let saturday_map;
+	
+	async function initSaturdayMap() {
+        
+        /* Request needed libraries */
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+        
+        /* Define the map view */
+        const saturday_map = new Map(document.getElementById("saturday_map"), {
+            restriction: {
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
+                strictBounds: false,
+            },
+            zoom: 9,
+            center: {{ ELSR_HOME | tojson }},
+            mapId: "7499929d658a3166",
+        });
+        
+        /* Loop over Polylines */
+        {% for polyline in saturday_polylines['polylines'] %}
+        
+	        /* Define our polyline */
+	        const flightPath{{ loop.index }} = new google.maps.Polyline({
+	            path: {{ polyline['polyline'] }},
+	            geodesic: true,
+	            strokeColor: "{{ polyline['color'] }}",
+	            strokeOpacity: 1.0,
+	            strokeWeight: 4,
+	        });
+	
+			/* We want a pop up info box for thr GPX route */
+			google.maps.event.addListener(flightPath{{ loop.index }}, 'mouseover', function(event) {
+	            current_lat = event.latLng.lat();
+	            current_lon = event.latLng.lng();
+	            
+	            // Create a new InfoWindow.
+	            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
+	                content: '{{ polyline['name'] | safe }}',
+	                position: event.latLng,
+	            });
+	            
+	            gpxInfoWindow{{loop.index}}.open(saturday_map);
+			});
+	
+			/* and close the info box when they move elsewhere */
+			google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
+	            gpxInfoWindow{{loop.index}}.close();
+			});
+	
+			/* Add the path to the map */
+	        flightPath{{loop.index}}.setMap(saturday_map);
+     	
+     	{% endfor %}
+     	
+     	
+     	/* This is our set of cafes */
+		const cafes = {{ saturday_cafes | tojson }}
+	    
+	    // Create an info window to share between markers.
+	    const infoWindow = new InfoWindow();
+					
+        // Create the markers.
+        cafes.forEach( ({ position, title, color }, i) => {
+            const pin = new PinElement({
+            glyph: `${i + 1}`,
+            });
+            
+            const marker = new AdvancedMarkerElement({
+                position,
+                map: saturday_map,
+                title: `${title}`,
+                content: new PinElement({
+                                background: color,
+                                borderColor: "black",
+                                glyphColor: "black",
+							}).element
+            });
+            
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
+        });
+     	
+     
+	}
+
+	initSaturdayMap();
+	
+	let sunday_map;
+	
+	async function initSundayMap() {
+        
+        /* Request needed libraries */
+        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+        
+        /* Define the map view */
+        const sunday_map = new Map(document.getElementById("sunday_map"), {
+            restriction: {
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
+                strictBounds: false,
+            },
+            zoom: 9,
+            center: {{ ELSR_HOME | tojson }},
+            mapId: "7499929d658a3166",
+        });
+        
+        /* Loop over Polylines */
+        {% for polyline in sunday_polylines['polylines'] %}
+        
+	        /* Define our polyline */
+	        const flightPath{{ loop.index }} = new google.maps.Polyline({
+	            path: {{ polyline['polyline'] }},
+	            geodesic: true,
+	            strokeColor: "{{ polyline['color'] }}",
+	            strokeOpacity: 1.0,
+	            strokeWeight: 4,
+	        });
+	
+			/* We want a pop up info box for thr GPX route */
+			google.maps.event.addListener(flightPath{{ loop.index }}, 'mouseover', function(event) {
+	            current_lat = event.latLng.lat();
+	            current_lon = event.latLng.lng();
+	            
+	            // Create a new InfoWindow.
+	            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
+	                content: '{{ polyline['name'] | safe }}',
+	                position: event.latLng,
+	            });
+	            
+	            gpxInfoWindow{{loop.index}}.open(sunday_map);
+			});
+	
+			/* and close the info box when they move elsewhere */
+			google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
+	            gpxInfoWindow{{loop.index}}.close();
+			});
+	
+			/* Add the path to the map */
+	        flightPath{{loop.index}}.setMap(sunday_map);
+     	
+     	{% endfor %}
+     	
+     	
+     	/* This is our set of cafes */
+		const cafes = {{ sunday_cafes | tojson }}
+	    
+	    // Create an info window to share between markers.
+	    const infoWindow = new InfoWindow();
+					
+        // Create the markers.
+        cafes.forEach( ({ position, title, color }, i) => {
+            const pin = new PinElement({
+            glyph: `${i + 1}`,
+            });
+            
+            const marker = new AdvancedMarkerElement({
+                position,
+                map: sunday_map,
+                title: `${title}`,
+                content: new PinElement({
+                                background: color,
+                                borderColor: "black",
+                                glyphColor: "black",
+							}).element
+            });
+            
+            // Add a click listener for each marker, and set up the info window.
+            marker.addListener("click", ({ domEvent, latLng }) => {
+                const { target } = domEvent;
+                infoWindow.close();
+                infoWindow.setContent(marker.title);
+                infoWindow.open(marker.map, marker);
+            });
+        });
+     	
+     
+	}
+
+	initSundayMap();
+
+</script>
+
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                   Saturday ride List                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<h2 class="mb-3">Group rides for {{ saturday }}</h2>
+			
+			<ul>
+		
+				{% for ride in saturday_rides %}
+				
+					<li class="my-3">
+					
+						{% if ride.group == "Decaff" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="--fa-animation-duration: 10s;">
+					        </i> &nbsp;
+						{% elif ride.group == "Mixed" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="--fa-animation-duration: 7s;">
+							</i>  &nbsp;
+						{% elif ride.group == "Espresso" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="--fa-animation-duration: 5s;">
+							</i>  &nbsp;
+						{% elif ride.group == "Doppio" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="">
+							</i>  &nbsp;
+						{% endif %}
+					
+				        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
+						     {{ ride.distance }}km, {{ ride.elevation }}m
+						
+					</li>
+				
+				{% endfor %}
+				
+			</ul>
+
+			<!-- Break before footer -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Saturday routes map                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row mt-2">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<h2>Map of rides for {{ saturday }}</h2>
+			
+
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                      Insert Google Map                                         -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			<div id="saturday_map" style="height: 500px"></div>
+			
+			<!-- Break before footer -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Sunday ride List                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row mt-3">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<h2>Group rides for {{ sunday }}</h2>
+			<ul>
+		
+				{% for ride in sunday_rides %}
+				
+					<li class="my-2">
+					
+						{% if ride.group == "Decaff" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="--fa-animation-duration: 10s;">
+					        </i>  &nbsp;
+						{% elif ride.group == "Mixed" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="--fa-animation-duration: 7s;">
+							</i>  &nbsp;
+						{% elif ride.group == "Espresso" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="--fa-animation-duration: 5s;">
+							</i>  &nbsp;
+						{% elif ride.group == "Doppio" %}
+							<i class="fa-solid fa-cog fa-spin fa-xl"
+					           style="">
+							</i>  &nbsp;
+						{% endif %}
+					
+				        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
+						     {{ ride.distance }}km, {{ ride.elevation }}m
+						
+					</li>
+				
+				{% endfor %}
+				
+			</ul>
+			
+			<!-- Break before footer -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Sunday routes map                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row mt-2">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<h2>Map of rides for {{ sunday }}</h2>
+			
+
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                      Insert Google Map                                         -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			<div id="sunday_map" style="height: 500px"></div>
+			
+			<!-- Break before footer -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

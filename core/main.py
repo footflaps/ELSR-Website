@@ -41,6 +41,8 @@ from core.routes_messages import mark_read
 from core.routes_events import delete_event
 from core.send_emails import contact_form_email
 from core.dB_events import Event
+from core.routes_weekend import calendar
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants

@@ -142,7 +142,7 @@ def create_polyline_set(gpxes):
             tmp = polyline_json(filename)
             polyline = {
                 'polyline': tmp['polyline'],
-                'name': gpx.name,
+                'name': f'<a href="{url_for("gpx_details", gpx_id=gpx.id)}">Route: {gpx.name}</a>',
                 'color': gpx_colour(num_routes),
             }
 
