@@ -24,7 +24,7 @@ from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes
 from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm, \
                                   MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
-from core.subs_graphjs import get_elevation_data, get_cafe_heights
+from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -52,7 +52,7 @@ def gpx_list():
 
     for gpx in gpxes:
         # Absolute path name
-        filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
         # Check the file is actually there, before we try and parse it etc
         if not os.path.exists(filename):
@@ -126,7 +126,7 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
 
     # This is the absolute path to the file
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
     # Check the file is actually there, before we try and parse it etc
     if not os.path.exists(filename):
@@ -175,7 +175,7 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     if os.path.exists(filename):
         elevation_data = get_elevation_data(filename)
-        cafe_elevation_data = get_cafe_heights(cafe_list, elevation_data)
+        cafe_elevation_data = get_cafe_heights_from_gpx(cafe_list, elevation_data)
     else:
         elevation_data = []
         cafe_elevation_data = []

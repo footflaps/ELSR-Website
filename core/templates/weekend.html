@@ -4,6 +4,18 @@
 {% block content %}
 
 
+<head>
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                Load JavaScript for chart.js                                    -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	
+</head>
+
+
+
 <!---------------------------------------------------------------------------------------------------->
 <!--                                     Page Header                                                -->
 <!---------------------------------------------------------------------------------------------------->
@@ -319,6 +331,93 @@
 </div>
 
 
+<!---------------------------------------------------------------------------------------------------->
+<!--                                  Saturday Elevation Graphs                                     -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="my-3">Elevations for {{ saturday }}</h2>
+			
+			<div style="height: 300px; width: 100%;">
+				<canvas id="saturdayElevation"></canvas>
+			</div>
+			<script>
+			
+				var custom_icon = new Image();
+                custom_icon.src = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+		 
+		        const saturdayData = {
+		            datasets: [
+			           
+			           /* These are our cafes */
+			           {% for cafe in saturday_elevation_cafes %}
+	                       {
+		                        label: '{{ cafe['name']  | tojson }}',
+		                        pointStyle: [custom_icon],
+		                        data: {{ [cafe['coord']] | tojson }},
+		                    },
+	                   {% endfor %}
+	                   
+						/* These are our routes */
+						{% for gpx in saturday_elevation_data %}
+						
+							{
+		                        label: 'Dist (km), Elevation (m)',
+		                        pointStyle: 'false',
+		                        radius: 0,
+		                        tension: 3,
+		                        showLine: true,
+		                        data: {{ gpx['elevation'] | tojson }},
+		                        backgroundColor: '{{ gpx['colour'] }}',
+		                        borderColor: '{{ gpx['colour'] }}'
+		                    },
+		                
+		                {% endfor %}
+                    ],
+				};
+			
+	            
+	            const saturdayConfig = {
+					  type: 'scatter',
+					  data: saturdayData,
+					  options: {
+					        maintainAspectRatio: false,
+					        scales: {
+					            x: {
+					                type: 'linear',
+					                position: 'bottom'
+					            },
+					        },
+					        plugins: {
+		                       legend: {
+	                                display: false
+                               }
+					        }
+					  }
+				};
+					
+				
+	        
+		        
+		        const saturdayChart = new Chart(
+		            document.getElementById('saturdayElevation'),
+		            saturdayConfig
+		        );
+	         
+	        </script>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                     Sunday ride List                                           -->
@@ -393,6 +492,93 @@
 		</div>
 	</div>
 </div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Sunday Elevation Graphs                                     -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="my-3">Elevations for {{ sunday }}</h2>
+			
+			<div style="height: 300px; width: 100%;">
+				<canvas id="sundayElevation"></canvas>
+			</div>
+			<script>
+			
+				var custom_icon = new Image();
+                custom_icon.src = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+		 
+		        const sunday_data = {
+		            datasets: [
+			           
+			           /* These are our cafes */
+			           {% for cafe in sunday_elevation_cafes %}
+			           
+	                       {
+		                        label: '{{ cafe['name']  | tojson }}',
+		                        pointStyle: [custom_icon],
+		                        data: {{ [cafe['coord']] | tojson }},
+		                    },
+	                   
+	                   {% endfor %}
+	                   
+						/* These are our routes */
+						{% for gpx in sunday_elevation_data %}
+						
+							{
+		                        label: 'Dist (km), Elevation (m)',
+		                        pointStyle: 'false',
+		                        radius: 0,
+		                        tension: 3,
+		                        showLine: true,
+		                        data: {{ gpx['elevation'] | tojson }},
+		                        backgroundColor: '{{ gpx['colour'] }}',
+		                        borderColor: '{{ gpx['colour'] }}'
+		                    },
+		                
+		                {% endfor %}
+                    ],
+				};
+			
+	            
+	            const sundayConfig = {
+					  type: 'scatter',
+					  data: sunday_data,
+					  options: {
+					        maintainAspectRatio: false,
+					        scales: {
+					            x: {
+					                type: 'linear',
+					                position: 'bottom'
+					            },
+					        },
+					        plugins: {
+		                       legend: {
+	                                display: false
+                               }
+					        }
+					  }
+				};
+					
+		        
+		        const sundayChart = new Chart(
+		            document.getElementById('sundayElevation'),
+		            sundayConfig
+		        );
+	         
+	        </script>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
 
 
 {% endblock %}

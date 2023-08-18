@@ -17,16 +17,12 @@ from core import app, current_year
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
-from core.subs_gpx import check_new_cafe_with_all_gpxes
+from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.dB_gpx import Gpx
-from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.db_users import User, update_last_seen, logout_barred_user
-from core.send_emails import alert_admin_via_sms
-from core.subs_cafe_photos import update_cafe_photo
+from core.db_users import User, update_last_seen
+from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -83,43 +79,54 @@ def calendar():
     # ----------------------------------------------------------- #
     # Polylines for the GPX files
     # ----------------------------------------------------------- #
-    saturday_gpxes = [ Gpx().one_gpx(1), Gpx().one_gpx(2), Gpx().one_gpx(3) ]
+    saturday_gpxes = [Gpx().one_gpx(1), Gpx().one_gpx(2), Gpx().one_gpx(3)]
     saturday_polylines = create_polyline_set(saturday_gpxes)
 
     sunday_gpxes = [Gpx().one_gpx(12)]
     sunday_polylines = create_polyline_set(sunday_gpxes)
 
-
     # ----------------------------------------------------------- #
     # Dataset for the destination cafes
     # ----------------------------------------------------------- #
 
-    cafes = [Cafe().one_cafe(5), Cafe().one_cafe(39), Cafe().one_cafe(8)]
+    sat_cafes = [Cafe().one_cafe(5), Cafe().one_cafe(39), Cafe().one_cafe(8)]
 
     saturday_cafes = []
-    for cafe in cafes:
+    for cafe in sat_cafes:
         saturday_cafes.append({
             "position": {"lat": cafe.lat, "lng": cafe.lon},
             "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
             "color": OPEN_CAFE_COLOUR,
         })
 
-    cafes = [Cafe().one_cafe(41)]
+    sun_cafes = [Cafe().one_cafe(41)]
 
     sunday_cafes = []
-    for cafe in cafes:
+    for cafe in sun_cafes:
         sunday_cafes.append({
             "position": {"lat": cafe.lat, "lng": cafe.lon},
             "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
             "color": OPEN_CAFE_COLOUR,
         })
 
+    # ----------------------------------------------------------- #
+    # Get elevation data
+    # ----------------------------------------------------------- #
 
+    # Elevation traces
+    saturday_elevation_data = get_elevation_data_set(saturday_gpxes)
+    sunday_elevation_data = get_elevation_data_set(sunday_gpxes)
+
+    # Cafes for elevation graphs
+    saturday_elevation_cafes = get_destination_cafe_height(saturday_elevation_data, saturday_gpxes, sat_cafes)
+    sunday_elevation_cafes = get_destination_cafe_height(sunday_elevation_data, sunday_gpxes, sun_cafes)
 
     # Render home page
     return render_template("weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            saturday=saturday, saturday_rides=saturday_rides, saturday_cafes=saturday_cafes,
-                           saturday_polylines=saturday_polylines,
+                           saturday_polylines=saturday_polylines, saturday_elevation_data=saturday_elevation_data,
+                           saturday_elevation_cafes=saturday_elevation_cafes,
                            sunday=sunday, sunday_rides=sunday_rides, sunday_cafes=sunday_cafes,
-                           sunday_polylines=sunday_polylines)
+                           sunday_polylines=sunday_polylines, sunday_elevation_data=sunday_elevation_data,
+                           sunday_elevation_cafes=sunday_elevation_cafes)
