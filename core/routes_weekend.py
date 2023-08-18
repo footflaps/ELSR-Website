@@ -2,7 +2,6 @@ from flask import render_template, url_for
 from bbc_feeds import weather
 from datetime import datetime as date
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -19,7 +18,6 @@ from core.dB_gpx import Gpx
 from core.dB_events import Event
 from core.db_users import User, update_last_seen
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -38,7 +36,7 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Weekend ride list
+# Weekend ride details
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/weekend', methods=['GET'])
@@ -56,19 +54,23 @@ def calendar():
          "leader": "Anna",
          "destination": "Buntingford",
          "distance": 96,
-         "elevation": 672
+         "elevation": 672,
+         "gpx_id": 1,
+
          },
         {"group": "Espresso",
          "leader": "Andy Linney",
          "destination": "Mill End",
          "distance": 105,
-         "elevation": 803
+         "elevation": 803,
+         "gpx_id": 2,
          },
         {"group": "Doppio",
          "leader": "Andy Fry",
          "destination": "The Cow Shed",
          "distance": 110,
-         "elevation": 750
+         "elevation": 750,
+         "gpx_id": 3,
          }]
 
     sunday_rides = [
@@ -76,7 +78,8 @@ def calendar():
          "leader": "Ian",
          "destination": "La Hogue",
          "distance": 89,
-         "elevation": 551
+         "elevation": 551,
+         "gpx_id": 12,
          }]
 
     # ----------------------------------------------------------- #
@@ -91,7 +94,6 @@ def calendar():
     # ----------------------------------------------------------- #
     # Dataset for the destination cafes
     # ----------------------------------------------------------- #
-
     sat_cafes = [Cafe().one_cafe(5), Cafe().one_cafe(39), Cafe().one_cafe(8)]
 
     saturday_cafes = []
@@ -127,7 +129,6 @@ def calendar():
     # ----------------------------------------------------------- #
     # Get weather
     # ----------------------------------------------------------- #
-
     bbc_weather = weather().forecast(CAMBRIDGE_BBC_WEATHER_CODE)
     saturday_weather = None
     sunday_weather = None
@@ -135,13 +136,15 @@ def calendar():
     for item in bbc_weather:
         title = item['title'].split(':')
         if title[0] == "Saturday" \
-            or today == "Saturday" and title == "Today":
-            saturday_weather = item['summary']
+                or today == "Saturday" and title == "Today":
+            saturday_weather = item['summary'].split(',')[0:7]
         if title[0] == "Sunday" \
-            or today == "Sunday" and title == "Today":
-            sunday_weather = item['summary']
+                or today == "Sunday" and title == "Today":
+            sunday_weather = item['summary'].split(',')[0:7]
 
-    # Render home page
+    # ----------------------------------------------------------- #
+    # Render the page
+    # ----------------------------------------------------------- #
     return render_template("weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            saturday=saturday, saturday_rides=saturday_rides, saturday_cafes=saturday_cafes,

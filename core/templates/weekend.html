@@ -271,6 +271,7 @@
 				
 					<li class="my-3">
 					
+						<!-- Animated wheel -->
 						{% if ride.group == "Decaff" %}
 							<i class="fa-solid fa-cog fa-spin fa-xl"
 					           style="--fa-animation-duration: 10s;">
@@ -289,8 +290,17 @@
 							</i>  &nbsp;
 						{% endif %}
 					
+						 <!-- Download button -->
+			            {% if current_user.is_authenticated: %}
+			                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
+		                        <button class="btn btn-sm btn-primary " style="text-align:right;float:right;">
+		                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+				            </a>
+			            {% endif %}
+						
 				        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
 						     {{ ride.distance }}km, {{ ride.elevation }}m
+						
 						
 					</li>
 				
@@ -298,8 +308,12 @@
 				
 			</ul>
 
+			{% if not current_user.is_authenticated: %}
+				<p>Log in to download GPX files.</p>
+			{% endif %}
+			
 			<!-- Break before footer -->
-			<hr>
+			<hr class="mt-5">
 			
 		</div>
 	</div>
@@ -317,8 +331,18 @@
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 			
 				<h2>Weather forecast for {{ saturday }}</h2>
-				<p>{{ saturday_weather }}</p>
-				<p>Copyright &copy; BBC Weather {{year}}</p>
+				<ul>
+					{% for item in saturday_weather %}
+					
+						<li>{{ item }}</li>
+					
+					{% endfor %}
+				</ul>
+				
+				<p class="copyright text-muted">
+					<a href="http://www.bbc.co.uk/weather">Copyright &copy; BBC Weather {{year}}
+					</a>
+				</p>
 				
 				<!-- Break before footer -->
 				<hr>
@@ -456,6 +480,7 @@
 				
 					<li class="my-2">
 					
+						<!-- Spinning wheel -->
 						{% if ride.group == "Decaff" %}
 							<i class="fa-solid fa-cog fa-spin fa-xl"
 					           style="--fa-animation-duration: 10s;">
@@ -474,17 +499,29 @@
 							</i>  &nbsp;
 						{% endif %}
 					
+						 <!-- Download button -->
+			            {% if current_user.is_authenticated: %}
+			                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
+		                        <button class="btn btn-sm btn-primary " style="text-align:right;float:right;">
+		                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+				            </a>
+			            {% endif %}
+						
 				        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
 						     {{ ride.distance }}km, {{ ride.elevation }}m
-						
+											
 					</li>
 				
 				{% endfor %}
 				
 			</ul>
 			
+			{% if not current_user.is_authenticated: %}
+				<p>Log in to download GPX files.</p>
+			{% endif %}
+			
 			<!-- Break before footer -->
-			<hr>
+			<hr class="mt-5">
 			
 		</div>
 	</div>
@@ -502,8 +539,19 @@
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 			
 				<h2>Weather forecast for {{ sunday }}</h2>
-				<p>{{ sunday_weather }}</p>
-				<p>Copyright &copy; BBC Weather {{year}}</p>
+				
+				<ul>
+					{% for item in sunday_weather %}
+					
+						<li>{{ item }}</li>
+					
+					{% endfor %}
+				</ul>
+				
+				<p class="copyright text-muted">
+					<a href="http://www.bbc.co.uk/weather">Copyright &copy; BBC Weather {{year}}
+					</a>
+				</p>
 				
 				<!-- Break before footer -->
 				<hr>
