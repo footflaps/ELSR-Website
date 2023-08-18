@@ -252,12 +252,7 @@
 	    // Add other bootstrap parameters as needed, using camel case.
     });
 
-	const BOUNDS = {
-        north: {{ map_coords['lat'] + 0.5 }},
-        south: {{ map_coords['lat'] - 0.5 }},
-        west: {{ map_coords['lng'] - 0.5 }},
-        east: {{ map_coords['lng'] + 0.5 }},
-	};
+	
 	
 	let map;
 	
@@ -270,7 +265,7 @@
         /* Define the map view */
         const map = new Map(document.getElementById("map"), {
             restriction: {
-                latLngBounds: BOUNDS,
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
                 strictBounds: false,
             },
             zoom: 9,

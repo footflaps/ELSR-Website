@@ -11,7 +11,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GOOGLE_MAPS_API_KEY
+from core import app, current_year
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -20,7 +20,7 @@ from core import app, current_year, GOOGLE_MAPS_API_KEY
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes
-from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH
+from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
@@ -87,7 +87,7 @@ def cafe_list():
 
     # Render in main index template
     return render_template("cafe_list.html", year=current_year, cafes=cafes, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
-                           cafe_markers=cafe_markers, map_coords=map_coords)
+                           cafe_markers=cafe_markers, map_coords=map_coords, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -193,7 +193,8 @@ def cafe_details(cafe_id):
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, polylines=polylines, warning=warning)
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, polylines=polylines, warning=warning,
+                               MAP_BOUNDS=MAP_BOUNDS)
 
     else:
 
@@ -214,7 +215,8 @@ def cafe_details(cafe_id):
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
                                GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, warning=warning,
-                               polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
+                               polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'],
+                               MAP_BOUNDS=MAP_BOUNDS)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -256,7 +258,8 @@ def new_cafe():
             Event().log_event("New Cafe Fail", f"Lat and Lon are {round(range_km, 1)} km from Cambridge.")
             flash(f"Lat and Lon are {round(range_km, 1)} km from Cambridge!")
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
-                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
+                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS,
+                                   ELSR_HOME=ELSR_HOME)
 
         # Create a new Cafe object
         cafe_name = form.name.data.strip()
@@ -280,7 +283,8 @@ def new_cafe():
             flash("Sorry, that name is already in use, choose another!")
             # Back to edit form
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
-                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
+                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS,
+                                   ELSR_HOME=ELSR_HOME)
 
         # ----------------------------------------------------------- #
         #   Try to add the cafe
@@ -296,7 +300,8 @@ def new_cafe():
             flash("Sorry, something went wrong.")
             # Back to edit form
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
-                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
+                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS,
+                                   ELSR_HOME=ELSR_HOME)
 
         # ----------------------------------------------------------- #
         #   Look up our new cafe
@@ -332,7 +337,8 @@ def new_cafe():
         # ----------------------------------------------------------- #
 
         return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS,
+                               ELSR_HOME=ELSR_HOME)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

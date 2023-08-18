@@ -24,6 +24,9 @@ from core.dB_cafes import Cafe
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
+# Note: Key is domain restricted to *.elsr.co.uk
+GOOGLE_MAPS_API_KEY = os.environ['ELSR_GOOGLE_MAPS_API_KEY']
+
 # How far we display along the route for trimming start and end
 TRIM_DISTANCE_KM = 2.0
 
@@ -33,6 +36,17 @@ GPX_COLOURS = ["#9e0142", "#5e4fa2", "#d53e4f", "#3288bd", "#f46d43", "#66c2a5",
 
 # Don't display 100s on a map as total mess
 MAX_NUM_GPX_PER_GRAPH = 10
+
+# EL coords
+ELSR_HOME = {"lat": 52.203292, "lng": 0.131839}
+
+# Google map bounds
+MAP_BOUNDS = {
+        "north": ELSR_HOME['lat'] + 0.5,
+        "south": ELSR_HOME['lat'] - 0.5,
+        "west": ELSR_HOME['lng'] - 1,
+        "east": ELSR_HOME['lng'] + 1,
+}
 
 
 # -------------------------------------------------------------------------------------------------------------- #

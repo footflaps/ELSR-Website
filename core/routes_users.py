@@ -11,7 +11,7 @@ import re
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GOOGLE_MAPS_API_KEY
+from core import app, current_year
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -27,6 +27,7 @@ from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.send_emails import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
+from core.subs_google_maps import MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -741,19 +742,19 @@ def user_page():
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, anchor="messages")
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, anchor="messages")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, anchor="eventLog")
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY)
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

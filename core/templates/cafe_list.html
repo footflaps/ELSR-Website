@@ -52,14 +52,6 @@
 	    // Add other bootstrap parameters as needed, using camel case.
     });
 
-	const ELSR_HOME = { lat: 52.203292, lng: 0.131839 };
-	
-	const ELSR_BOUNDS = {
-        north: ELSR_HOME['lat'] + 0.5,
-        south: ELSR_HOME['lat'] - 0.5,
-        west: ELSR_HOME['lng'] - 1,
-        east: ELSR_HOME['lng'] + 1,
-	};
 	
 	let map;
 	
@@ -71,9 +63,9 @@
         
         /* Define the map view */
         const map = new google.maps.Map(document.getElementById("map"), {
-            center: ELSR_HOME,
+            center: {{ ELSR_HOME | tojson }},
             restriction: {
-                latLngBounds: ELSR_BOUNDS,
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
                 strictBounds: false,
             },
             zoom: 9,

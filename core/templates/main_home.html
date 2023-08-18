@@ -51,12 +51,6 @@
 	    // Add other bootstrap parameters as needed, using camel case.
     });
 	
-	const BOUNDS = {
-        north: {{ map_coords['lat'] + 0.1 }},
-        south: {{ map_coords['lat'] - 0.1 }},
-        west: {{ map_coords['lng'] - 0.1 }},
-        east: {{ map_coords['lng'] + 0.1 }},
-	};
 	
 	let map;
 	
@@ -69,11 +63,11 @@
         /* Define the map view */
         const map = new google.maps.Map(document.getElementById("map"), {
             restriction: {
-                latLngBounds: BOUNDS,
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
                 strictBounds: false,
             },
             zoom: 16,
-            center: { lat: {{ map_coords['lat'] }}, lng: {{ map_coords['lng'] }} },
+            center: {{ ELSR_HOME | tojson }},
             mapId: "7499929d658a3166",
         });
 

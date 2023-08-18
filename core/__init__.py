@@ -2,7 +2,6 @@ from flask import Flask, request
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditor
-from flask_googlemaps import GoogleMaps
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
 from itsdangerous.url_safe import URLSafeTimedSerializer
@@ -26,19 +25,6 @@ from core.gravatar_hack import Gravatar
 if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
     sys.path.insert(1, '/home/ben_freeman_eu/elsr_website/ELSR-Website/')
     import env_vars
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Google maps API constants
-# -------------------------------------------------------------------------------------------------------------- #
-
-# Note: Key is restricted to IP 195.166.150.111
-GOOGLE_MAPS_API_KEY = os.environ['ELSR_GOOGLE_MAPS_API_KEY']
-
-# This is the size and shape of the Google Map insert
-MAP_STYLE = "height:500px;width:730px;margin:0;"
-# This seems to fit nicely on my iPhone SE 2nd gen
-mMAP_STYLE = "height:500px;width:350px;margin:0;"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -138,14 +124,6 @@ ckeditor = CKEditor(app)
 # -------------------------------------------------------------------------------------------------------------- #
 
 csrf = CSRFProtect(app)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Add Google Maps to Flask app
-# -------------------------------------------------------------------------------------------------------------- #
-
-app.config['GOOGLEMAPS_KEY'] = GOOGLE_MAPS_API_KEY
-GoogleMaps(app)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

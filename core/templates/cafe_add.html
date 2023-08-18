@@ -83,16 +83,7 @@
 	    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
 	    // Add other bootstrap parameters as needed, using camel case.
     });
-	
-	const ELSR_HOME = { lat: 52.203292, lng: 0.131839 };
-	
-	const ELSR_BOUNDS = {
-        north: ELSR_HOME['lat'] + 0.5,
-        south: ELSR_HOME['lat'] - 0.5,
-        west: ELSR_HOME['lng'] - 0.5,
-        east: ELSR_HOME['lng'] + 0.5,
-	};
-	
+		
 	let map;
 	
 	async function initMap() {
@@ -103,20 +94,20 @@
         
         const map = new Map(
             document.getElementById("map"), {
-                center: ELSR_HOME,
+                center: {{ ELSR_HOME | tojson }},
                 restriction: {
-                    latLngBounds: ELSR_BOUNDS,
+                    latLngBounds: {{ MAP_BOUNDS | tojson }},
                     strictBounds: false,
                 },
                 zoom: 10,
-                center: ELSR_HOME,
+                center: {{ ELSR_HOME | tojson }},
             }
         );
   
         // Create the initial InfoWindow.
         let infoWindow = new InfoWindow({
             content: "Locate the cafe on the map and click to transfer the coordinates to the form below.",
-            position: ELSR_HOME,
+            position: {{ ELSR_HOME | tojson }},
         });
 
         infoWindow.open(map);

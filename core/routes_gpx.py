@@ -9,8 +9,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, \
-                 current_year, delete_file_if_exists, is_mobile, GOOGLE_MAPS_API_KEY
+from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists, is_mobile
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -22,7 +21,8 @@ from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes
-from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm
+from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm, \
+                                  MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights
 
@@ -190,7 +190,8 @@ def gpx_details(gpx_id):
     return render_template("gpx_details.html", gpx=gpx, year=current_year, cafe_markers=cafe_markers,
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
                            cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
-                           polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'])
+                           polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
+                           MAP_BOUNDS=MAP_BOUNDS)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -534,7 +535,7 @@ def edit_route():
     maps = start_and_end_maps_native_gm(gpx.filename, gpx_id)
 
     return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
-                           start_markers=maps[0], start_map_coords=maps[1],
+                           MAP_BOUNDS=MAP_BOUNDS, start_markers=maps[0], start_map_coords=maps[1],
                            end_markers=maps[2], end_map_coords=maps[3])
 
 

@@ -54,12 +54,7 @@
 	    // Add other bootstrap parameters as needed, using camel case.
     });
 
-	const START_BOUNDS = {
-        north: {{ start_map_coords['lat'] + 0.02 }},
-        south: {{ start_map_coords['lat'] - 0.02 }},
-        west: {{ start_map_coords['lng'] - 0.02 }},
-        east: {{ start_map_coords['lng'] + 0.02 }},
-	};
+	
 
 	let map1;
 	
@@ -72,7 +67,7 @@
         /* Define the map view */
         const map1 = new Map(document.getElementById("start_map"), {
             restriction: {
-                latLngBounds: START_BOUNDS,
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
                 strictBounds: false,
             },
             zoom: 15,
@@ -116,13 +111,6 @@
 	
 	
 	
-	const END_BOUNDS = {
-        north: {{ end_map_coords['lat'] + 0.02 }},
-        south: {{ end_map_coords['lat'] - 0.02 }},
-        west: {{ end_map_coords['lng'] - 0.02 }},
-        east: {{ end_map_coords['lng'] + 0.02 }},
-	};
-
 	let map2;
 	
 	async function endMap() {
@@ -134,7 +122,7 @@
         /* Define the map view */
         const map2 = new Map(document.getElementById("end_map"), {
             restriction: {
-                latLngBounds: END_BOUNDS,
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
                 strictBounds: false,
             },
             zoom: 15,

@@ -84,13 +84,6 @@
 	    // Add other bootstrap parameters as needed, using camel case.
     });
 
-	const cafe_BOUNDS = {
-        north: {{ cafe_map_coords['lat'] + 0.1 }},
-        south: {{ cafe_map_coords['lat'] - 0.1 }},
-        west: {{ cafe_map_coords['lng'] - 0.1 }},
-        east: {{ cafe_map_coords['lng'] + 0.1 }},
-	};
-
 	let cafe_map;
 
 	async function initCafeMap() {
@@ -102,7 +95,7 @@
         /* Define the map view */
         const cafe_map = new Map(document.getElementById("cafe_map"), {
             restriction: {
-                latLngBounds: cafe_BOUNDS,
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
                 strictBounds: false,
             },
             zoom: 16,
@@ -145,13 +138,6 @@
 
 	initCafeMap();
 
-
-	const gpx_BOUNDS = {
-        north: {{ midlat + 1 }},
-        south: {{ midlat - 1 }},
-        west: {{ midlon - 1 }},
-        east: {{ midlon + 1 }},
-	};
 	
 	let gpx_map;
 	
@@ -164,7 +150,7 @@
         /* Define the map view */
         const map = new Map(document.getElementById("gpx_map"), {
             restriction: {
-                latLngBounds: gpx_BOUNDS,
+                latLngBounds: {{ MAP_BOUNDS | tojson }},
                 strictBounds: false,
             },
             zoom: 9,
