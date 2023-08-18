@@ -1,10 +1,6 @@
-from flask import render_template, redirect, url_for, flash, request, abort
-from flask_login import login_required, current_user
-from datetime import date
-from werkzeug import exceptions
-import mpu
-import os
-from threading import Thread
+from flask import render_template, url_for
+from bbc_feeds import weather
+from datetime import datetime as date
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -23,6 +19,13 @@ from core.dB_gpx import Gpx
 from core.dB_events import Event
 from core.db_users import User, update_last_seen
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Constants
+# -------------------------------------------------------------------------------------------------------------- #
+
+CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -121,12 +124,29 @@ def calendar():
     saturday_elevation_cafes = get_destination_cafe_height(saturday_elevation_data, saturday_gpxes, sat_cafes)
     sunday_elevation_cafes = get_destination_cafe_height(sunday_elevation_data, sunday_gpxes, sun_cafes)
 
+    # ----------------------------------------------------------- #
+    # Get weather
+    # ----------------------------------------------------------- #
+
+    bbc_weather = weather().forecast(CAMBRIDGE_BBC_WEATHER_CODE)
+    saturday_weather = None
+    sunday_weather = None
+    today = date.today().strftime("%A")
+    for item in bbc_weather:
+        title = item['title'].split(':')
+        if title[0] == "Saturday" \
+            or today == "Saturday" and title == "Today":
+            saturday_weather = item['summary']
+        if title[0] == "Sunday" \
+            or today == "Sunday" and title == "Today":
+            sunday_weather = item['summary']
+
     # Render home page
     return render_template("weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            saturday=saturday, saturday_rides=saturday_rides, saturday_cafes=saturday_cafes,
                            saturday_polylines=saturday_polylines, saturday_elevation_data=saturday_elevation_data,
-                           saturday_elevation_cafes=saturday_elevation_cafes,
+                           saturday_elevation_cafes=saturday_elevation_cafes, saturday_weather=saturday_weather,
                            sunday=sunday, sunday_rides=sunday_rides, sunday_cafes=sunday_cafes,
                            sunday_polylines=sunday_polylines, sunday_elevation_data=sunday_elevation_data,
-                           sunday_elevation_cafes=sunday_elevation_cafes)
+                           sunday_elevation_cafes=sunday_elevation_cafes, sunday_weather=sunday_weather)

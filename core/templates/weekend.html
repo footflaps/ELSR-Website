@@ -307,6 +307,30 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                                       Saturday Weather                                         -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if saturday_weather %}
+
+	<div class="container">
+		<div class="row mt-2">
+			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+				<h2>Weather forecast for {{ saturday }}</h2>
+				<p>{{ saturday_weather }}</p>
+				<p>Copyright &copy; BBC Weather {{year}}</p>
+				
+				<!-- Break before footer -->
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                      Saturday routes map                                       -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -398,9 +422,7 @@
 					        }
 					  }
 				};
-					
-				
-	        
+					     
 		        
 		        const saturdayChart = new Chart(
 		            document.getElementById('saturdayElevation'),
@@ -467,6 +489,30 @@
 		</div>
 	</div>
 </div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Sunday Weather                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if sunday_weather %}
+
+	<div class="container">
+		<div class="row mt-2">
+			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+				<h2>Weather forecast for {{ sunday }}</h2>
+				<p>{{ sunday_weather }}</p>
+				<p>Copyright &copy; BBC Weather {{year}}</p>
+				
+				<!-- Break before footer -->
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
 
 
 <!---------------------------------------------------------------------------------------------------->
