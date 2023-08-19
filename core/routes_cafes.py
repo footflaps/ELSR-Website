@@ -489,7 +489,6 @@ def edit_cafe():
     # Make sure cafe photo has correct path
     if cafe.image_name:
         cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
-        app.logger.debug(f"cafe_detail(): cafe.image_name = '{cafe.image_name}'")
 
     # Show edit form for the specified cafe
     return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year)
