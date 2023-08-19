@@ -703,11 +703,11 @@ def update_last_seen(f):
 
         if not current_user.is_authenticated:
             # Not logged in, so no idea who they are
-            app.logger.debug(f"update_last_seen(): User not logged in, IP = {user_ip}.")
+            app.logger.debug(f"update_last_seen(): User not logged in, IP = '{user_ip}'")
             return f(*args, **kwargs)
         else:
             # They are logged in, so log their activity
-            app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}', IP = {user_ip}.")
+            app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}', IP = '{user_ip}'")
             User().log_activity(current_user.id)
             return f(*args, **kwargs)
 
