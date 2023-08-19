@@ -188,7 +188,6 @@ def cafe_details(cafe_id):
         # Make sure cafe photo has correct path for displaying in html
         if cafe.image_name:
             cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
-            app.logger.debug(f"cafe_detail(): cafe.image_name = '{cafe.image_name}'")
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
@@ -209,7 +208,6 @@ def cafe_details(cafe_id):
         # Make sure cafe photo has correct path
         if cafe.image_name:
             cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
-            app.logger.debug(f"cafe_detail(): cafe.image_name = '{cafe.image_name}'")
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
