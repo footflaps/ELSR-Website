@@ -1,4 +1,4 @@
-from flask import abort, redirect, url_for, flash, session
+from flask import abort, redirect, url_for, flash, session, request
 from flask_login import UserMixin, LoginManager, current_user, logout_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField
@@ -692,13 +692,22 @@ def admin_only(f):
 def update_last_seen(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Try and get IP
+        try:
+            if request.headers.getlist("X-Forwarded-For"):
+                user_ip = request.headers.getlist("X-Forwarded-For")[0]
+            else:
+                user_ip = request.remote_addr
+        except Exception as e:
+            user_ip = "unknown"
+
         if not current_user.is_authenticated:
             # Not logged in, so no idea who they are
-            app.logger.debug(f"update_last_seen(): User not logged in.")
+            app.logger.debug(f"update_last_seen(): User not logged in, IP = {user_ip}.")
             return f(*args, **kwargs)
         else:
             # They are logged in, so log their activity
-            app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}'.")
+            app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}', IP = {user_ip}.")
             User().log_activity(current_user.id)
             return f(*args, **kwargs)
 
