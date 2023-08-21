@@ -115,7 +115,7 @@ class CreateRideForm(FlaskForm):
     gpxes = Gpx().all_gpxes()
     for gpx in gpxes:
         gpx_choices.append(f"{gpx.id}: '{gpx.name}'")
-    cafe_choices.append("upload my own route")
+    gpx_choices.append("upload my own route")
 
     # ----------------------------------------------------------- #
     # The form itself
