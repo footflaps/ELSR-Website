@@ -114,22 +114,22 @@ class CreateRideForm(FlaskForm):
     gpx_choices = []
     gpxes = Gpx().all_gpxes()
     for gpx in gpxes:
-        gpx_choices.append(f"{gpx.id}: '{gpx.name}'")
+        gpx_choices.append(f"{gpx.id}: '{gpx.name}', {gpx.length_km}km / {gpx.ascent_m}m")
     gpx_choices.append("upload my own route")
 
     # ----------------------------------------------------------- #
     # The form itself
     # ----------------------------------------------------------- #
-    date = DateField("Which day is the ride for", format='%d/%m/%Y', validators=[DataRequired()])
-    leader = StringField("Ride Leader", validators=[DataRequired()])
-    destination = SelectField("Cafe", choices=cafe_choices, validators=[DataRequired()])
+    date = DateField("Which day is the ride for:", format='%d/%m/%Y', validators=[DataRequired()])
+    leader = StringField("Ride Leader:", validators=[DataRequired()])
+    destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
     new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[])
-    group = SelectField("What pace is the ride", choices=GROUP_CHOICES, validators=[DataRequired()])
+    group = SelectField("What pace is the ride:", choices=GROUP_CHOICES, validators=[DataRequired()])
 
-    gpx_name = SelectField("GPX route", choices=gpx_choices, validators=[DataRequired()])
-    gpx_file = FileField("Upload my own GPX file", validators=[])
+    gpx_name = SelectField("Choose an existing route:", choices=gpx_choices, validators=[DataRequired()])
+    gpx_file = FileField("or, upload your own GPX file:", validators=[])
 
-    submit = SubmitField("Submit")
+    submit = SubmitField("Add Ride")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
