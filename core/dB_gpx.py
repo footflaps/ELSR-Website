@@ -226,7 +226,6 @@ class Gpx(db.Model):
 
         return False
 
-
     # Add length and ascent to the database
     def update_stats(self, gpx_id, length_km, ascent_m):
         with app.app_context():

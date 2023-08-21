@@ -42,7 +42,7 @@ from core.routes_gpx import gpx_list
 from core.routes_admin import admin_page
 from core.routes_messages import mark_read
 from core.routes_events import delete_event
-from core.routes_weekend import calendar
+from core.routes_weekend import weekend
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -298,11 +298,16 @@
 						
 							 <!-- Download button -->
 				            {% if current_user.is_authenticated: %}
-				                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
-			                        <button class="btn btn-sm btn-primary " style="text-align:right;float:right;">
-			                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
-					            </a>
-				            {% endif %}
+								{% if ride.public %}
+					                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
+				                        <button class="btn btn-sm btn-primary">
+				                            <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+						            </a>
+								{% else %}
+									<button class="btn btn-sm disabled btn-dark">
+										<i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+								{% endif %}
+							{% endif %}
 							
 					        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
 							     {{ ride.distance }}km, {{ ride.elevation }}m
@@ -325,7 +330,7 @@
 			<!-- Logged in users can add / edit rides etc -->
 			{% if current_user.is_authenticated: %}
 				<!-- Add ride button -->
-				<a href="{{ url_for('add_ride') }}">
+				<a href="{{ url_for('add_ride', date=saturday_date) }}">
 					<button type="button" class="btn btn-primary float-right">Add ride</button>
 				</a>
 			{% endif %}
@@ -502,246 +507,254 @@
 <!--                                     Sunday ride List                                           -->
 <!---------------------------------------------------------------------------------------------------->
 
-<div class="container">
-	<div class="row mt-3">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-			<h2>Group rides for {{ sunday }}</h2>
-			
-			
-			{% if not sunday_rides %}
-			
-				<h3>Sorry, we don't have any rides scheduled yet...</h3>
-			
-			{% else %}
-			
-				<ul>
-			
-					{% for ride in sunday_rides %}
-					
-						<li class="my-2">
+{% if sunday_date %}
+	
+	<div class="container">
+		<div class="row mt-3">
+			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+				
+				<h2>Group rides for {{ sunday }}</h2>
+				
+				
+				{% if not sunday_rides %}
+				
+					<h3>Sorry, we don't have any rides scheduled yet...</h3>
+				
+				{% else %}
+				
+					<ul>
+				
+						{% for ride in sunday_rides %}
 						
-							<!-- Spinning wheel -->
-							{% if ride.group == "Decaff" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="--fa-animation-duration: 10s;">
-						        </i>  &nbsp;
-							{% elif ride.group == "Mixed" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="--fa-animation-duration: 7s;">
-								</i>  &nbsp;
-							{% elif ride.group == "Espresso" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="--fa-animation-duration: 5s;">
-								</i>  &nbsp;
-							{% elif ride.group == "Doppio" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="">
-								</i>  &nbsp;
-							{% endif %}
-						
-							 <!-- Download button -->
-				            {% if current_user.is_authenticated: %}
-				                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
-			                        <button class="btn btn-sm btn-primary " style="text-align:right;float:right;">
-			                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
-					            </a>
-				            {% endif %}
+							<li class="my-2">
 							
-					        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
-							     {{ ride.distance }}km, {{ ride.elevation }}m
-												
-						</li>
+								<!-- Spinning wheel -->
+								{% if ride.group == "Decaff" %}
+									<i class="fa-solid fa-cog fa-spin fa-xl"
+							           style="--fa-animation-duration: 10s;">
+							        </i>  &nbsp;
+								{% elif ride.group == "Mixed" %}
+									<i class="fa-solid fa-cog fa-spin fa-xl"
+							           style="--fa-animation-duration: 7s;">
+									</i>  &nbsp;
+								{% elif ride.group == "Espresso" %}
+									<i class="fa-solid fa-cog fa-spin fa-xl"
+							           style="--fa-animation-duration: 5s;">
+									</i>  &nbsp;
+								{% elif ride.group == "Doppio" %}
+									<i class="fa-solid fa-cog fa-spin fa-xl"
+							           style="">
+									</i>  &nbsp;
+								{% endif %}
+							
+								 <!-- Download button -->
+					            {% if current_user.is_authenticated: %}
+									{% if ride.public %}
+						                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
+					                        <button class="btn btn-sm btn-primary">
+					                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+							            </a>
+									{% else %}
+										    <button class="btn btn-sm disabled btn-dark">
+					                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+							       {% endif %}
+					            {% endif %}
+								
+						        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
+								     {{ ride.distance }}km, {{ ride.elevation }}m
+													
+							</li>
+						
+						{% endfor %}
+						
+					</ul>
 					
-					{% endfor %}
 					
-				</ul>
+					{% if not current_user.is_authenticated: %}
+						<p>Log in to download GPX files.</p>
+					{% endif %}
 				
-				
-				{% if not current_user.is_authenticated: %}
-					<p>Log in to download GPX files.</p>
 				{% endif %}
-			
-			{% endif %}
-			
-	
-			<!-- Logged in users can add / edit rides etc -->
-			{% if current_user.is_authenticated: %}
-				<!-- Add ride button -->
-				<a href="{{ url_for('add_ride') }}">
-					<button type="button" class="btn btn-primary float-right">Add ride</button>
-				</a>
-			{% endif %}
-	
-		</div>
-	</div>
-</div>
-
-
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-			<!-- Break before next section -->
-			<hr>
-			
-		</div>
-	</div>
-</div>
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                       Sunday Weather                                           -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if sunday_weather %}
-
-	<div class="container">
-		<div class="row mt-2">
-			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-				<h2>Weather forecast for {{ sunday }}</h2>
 				
-				<ul>
-					{% for item in sunday_weather %}
-					
-						<li>{{ item }}</li>
-					
-					{% endfor %}
-				</ul>
-				
-				<p class="copyright text-muted">
-					<a href="http://www.bbc.co.uk/weather">Copyright &copy; BBC Weather {{year}}
+		
+				<!-- Logged in users can add / edit rides etc -->
+				{% if current_user.is_authenticated: %}
+					<!-- Add ride button -->
+					<a href="{{ url_for('add_ride', date=sunday_date) }}">
+						<button type="button" class="btn btn-primary float-right">Add ride</button>
 					</a>
-				</p>
-				
-				<!-- Break before footer -->
-				<hr>
-				
+				{% endif %}
+		
 			</div>
 		</div>
 	</div>
-
-{% endif %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                      Sunday routes map                                       -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if sunday_rides %}
-
-	<div class="container">
-		<div class="row mt-2">
-			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-				
-				<h2>Map of rides for {{ sunday }}</h2>
-				
 	
-				<!---------------------------------------------------------------------------------------------------->
-				<!--                                      Insert Google Map                                         -->
-				<!---------------------------------------------------------------------------------------------------->
-				
-				<div id="sunday_map" style="height: 500px"></div>
-				
-				<!-- Break before footer -->
-				<hr>
-				
-			</div>
-		</div>
-	</div>
-
-{% endif %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                    Sunday Elevation Graphs                                     -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if sunday_rides %}
-
+	
 	<div class="container">
 		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
+			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 				
-				<h2 class="my-3">Elevations for {{ sunday }}</h2>
-				
-				<div style="height: 300px; width: 100%;">
-					<canvas id="sundayElevation"></canvas>
-				</div>
-				<script>
-				
-					var custom_icon = new Image();
-	                custom_icon.src = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
-			 
-			        const sunday_data = {
-			            datasets: [
-				           
-				           /* These are our cafes */
-				           {% for cafe in sunday_elevation_cafes %}
-				           
-		                       {
-			                        label: '{{ cafe['name']  | tojson }}',
-			                        pointStyle: [custom_icon],
-			                        data: {{ [cafe['coord']] | tojson }},
-			                    },
-		                   
-		                   {% endfor %}
-		                   
-							/* These are our routes */
-							{% for gpx in sunday_elevation_data %}
-							
-								{
-			                        label: 'Dist (km), Elevation (m)',
-			                        pointStyle: 'false',
-			                        radius: 0,
-			                        tension: 3,
-			                        showLine: true,
-			                        data: {{ gpx['elevation'] | tojson }},
-			                        backgroundColor: '{{ gpx['colour'] }}',
-			                        borderColor: '{{ gpx['colour'] }}'
-			                    },
-			                
-			                {% endfor %}
-	                    ],
-					};
-				
-		            
-		            const sundayConfig = {
-						  type: 'scatter',
-						  data: sunday_data,
-						  options: {
-						        maintainAspectRatio: false,
-						        scales: {
-						            x: {
-						                type: 'linear',
-						                position: 'bottom'
-						            },
-						        },
-						        plugins: {
-			                       legend: {
-		                                display: false
-	                               }
-						        }
-						  }
-					};
-						
-			        
-			        const sundayChart = new Chart(
-			            document.getElementById('sundayElevation'),
-			            sundayConfig
-			        );
-		         
-		        </script>
-				
-				<!-- Separator before next section -->
+				<!-- Break before next section -->
 				<hr>
 				
 			</div>
 		</div>
 	</div>
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                       Sunday Weather                                           -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	{% if sunday_weather %}
+	
+		<div class="container">
+			<div class="row mt-2">
+				<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+				
+					<h2>Weather forecast for {{ sunday }}</h2>
+					
+					<ul>
+						{% for item in sunday_weather %}
+						
+							<li>{{ item }}</li>
+						
+						{% endfor %}
+					</ul>
+					
+					<p class="copyright text-muted">
+						<a href="http://www.bbc.co.uk/weather">Copyright &copy; BBC Weather {{year}}
+						</a>
+					</p>
+					
+					<!-- Break before footer -->
+					<hr>
+					
+				</div>
+			</div>
+		</div>
+	
+	{% endif %}
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                      Sunday routes map                                       -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	{% if sunday_rides %}
+	
+		<div class="container">
+			<div class="row mt-2">
+				<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+					
+					<h2>Map of rides for {{ sunday }}</h2>
+					
+		
+					<!---------------------------------------------------------------------------------------------------->
+					<!--                                      Insert Google Map                                         -->
+					<!---------------------------------------------------------------------------------------------------->
+					
+					<div id="sunday_map" style="height: 500px"></div>
+					
+					<!-- Break before footer -->
+					<hr>
+					
+				</div>
+			</div>
+		</div>
+	
+	{% endif %}
+	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                    Sunday Elevation Graphs                                     -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	{% if sunday_rides %}
+	
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					
+					<h2 class="my-3">Elevations for {{ sunday }}</h2>
+					
+					<div style="height: 300px; width: 100%;">
+						<canvas id="sundayElevation"></canvas>
+					</div>
+					<script>
+					
+						var custom_icon = new Image();
+		                custom_icon.src = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
+				 
+				        const sunday_data = {
+				            datasets: [
+					           
+					           /* These are our cafes */
+					           {% for cafe in sunday_elevation_cafes %}
+					           
+			                       {
+				                        label: '{{ cafe['name']  | tojson }}',
+				                        pointStyle: [custom_icon],
+				                        data: {{ [cafe['coord']] | tojson }},
+				                    },
+			                   
+			                   {% endfor %}
+			                   
+								/* These are our routes */
+								{% for gpx in sunday_elevation_data %}
+								
+									{
+				                        label: 'Dist (km), Elevation (m)',
+				                        pointStyle: 'false',
+				                        radius: 0,
+				                        tension: 3,
+				                        showLine: true,
+				                        data: {{ gpx['elevation'] | tojson }},
+				                        backgroundColor: '{{ gpx['colour'] }}',
+				                        borderColor: '{{ gpx['colour'] }}'
+				                    },
+				                
+				                {% endfor %}
+		                    ],
+						};
+					
+			            
+			            const sundayConfig = {
+							  type: 'scatter',
+							  data: sunday_data,
+							  options: {
+							        maintainAspectRatio: false,
+							        scales: {
+							            x: {
+							                type: 'linear',
+							                position: 'bottom'
+							            },
+							        },
+							        plugins: {
+				                       legend: {
+			                                display: false
+		                               }
+							        }
+							  }
+						};
+							
+				        
+				        const sundayChart = new Chart(
+				            document.getElementById('sundayElevation'),
+				            sundayConfig
+				        );
+			         
+			        </script>
+					
+					<!-- Separator before next section -->
+					<hr>
+					
+				</div>
+			</div>
+		</div>
+	
+	{% endif %}
 
 {% endif %}
-
 
 {% endblock %}

@@ -3,6 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, FloatField, SelectField, DateField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import DataRequired
+import os
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -12,7 +13,7 @@ from wtforms.validators import DataRequired
 from core import app, db
 
 from core.dB_cafes import Cafe
-from core.dB_gpx import Gpx
+from core.dB_gpx import Gpx, GPX_UPLOAD_FOLDER_ABS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -21,6 +22,9 @@ from core.dB_gpx import Gpx
 
 # These are our standard groups
 GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed"]
+
+NEW_CAFE = "New cafe!"
+UPLOAD_ROUTE = "Upload my own route!"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -55,6 +59,9 @@ class Calendar(db.Model):
     # GPX ID, the route will exist in the gpx dB
     gpx_id = db.Column(db.Integer)
 
+    # Cafe ID, the cafe might exist in the Cafe dB (could be a new cafe)
+    cafe_id = db.Column(db.Integer)
+
     # Return all events
     def all_calendar(self):
         with app.app_context():
@@ -70,10 +77,25 @@ class Calendar(db.Model):
             return rides
 
     def all_calendar_date(self, ride_date: str):
-        print(ride_date)
         with app.app_context():
             rides = db.session.query(Calendar).filter_by(date=ride_date).all()
             return rides
+
+    def add_ride(self, new_ride):
+        # Update some details
+        new_ride.email = current_user.email
+
+        # Try and add to dB
+        with app.app_context():
+            try:
+                db.session.add(new_ride)
+                db.session.commit()
+                # Return new GPX id
+                return True
+            except Exception as e:
+                app.logger.error(f"db_calendar: Failed to add ride '{new_ride}', "
+                                 f"error code '{e.args}'.")
+                return False
 
 
     # Optional: this will allow each event object to be identified by its details when printed.
@@ -105,8 +127,8 @@ class CreateRideForm(FlaskForm):
     cafe_choices = []
     cafes = Cafe().all_cafes()
     for cafe in cafes:
-        cafe_choices.append(cafe.name)
-    cafe_choices.append("new cafe")
+        cafe_choices.append(f"{cafe.name} ({cafe.id})")
+    cafe_choices.append(NEW_CAFE)
 
     # ----------------------------------------------------------- #
     # Generate the list of routes
@@ -114,18 +136,21 @@ class CreateRideForm(FlaskForm):
     gpx_choices = []
     gpxes = Gpx().all_gpxes()
     for gpx in gpxes:
-        gpx_choices.append(f"{gpx.id}: '{gpx.name}', {gpx.length_km}km / {gpx.ascent_m}m")
-    gpx_choices.append("upload my own route")
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+        # Route must be public and double check we have an actual GPX file on tap....
+        if gpx.public() \
+                and os.path.exists(filename):
+            gpx_choices.append(f"{gpx.id}: '{gpx.name}', {gpx.length_km}km / {gpx.ascent_m}m")
+    gpx_choices.append(UPLOAD_ROUTE)
 
     # ----------------------------------------------------------- #
     # The form itself
     # ----------------------------------------------------------- #
-    date = DateField("Which day is the ride for:", format='%d/%m/%Y', validators=[DataRequired()])
+    date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
     leader = StringField("Ride Leader:", validators=[DataRequired()])
     destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
     new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[])
     group = SelectField("What pace is the ride:", choices=GROUP_CHOICES, validators=[DataRequired()])
-
     gpx_name = SelectField("Choose an existing route:", choices=gpx_choices, validators=[DataRequired()])
     gpx_file = FileField("or, upload your own GPX file:", validators=[])
 
