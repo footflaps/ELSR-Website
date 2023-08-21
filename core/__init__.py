@@ -101,7 +101,8 @@ app.config['SQLALCHEMY_BINDS'] = {'users': 'sqlite:///users.db',
                                   'cafe_comments': 'sqlite:///cafe_comments.db',
                                   'gpx': 'sqlite:///gpx.db',
                                   'messages': 'sqlite:///messages.db',
-                                  'events': 'sqlite:///events.db'}
+                                  'events': 'sqlite:///events.db',
+                                  'calendar': 'sqlite:///calendar.db'}
 db = SQLAlchemy(app)
 
 

@@ -18,17 +18,20 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import our Cafe class for Home page
+# Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR
 from core.db_users import update_last_seen
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, GOOGLE_MAPS_API_KEY, ELSR_HOME, MAP_BOUNDS
+from core.dB_events import Event
+
+from core.send_emails import contact_form_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import the other pages
+# Import the other route pages
 # -------------------------------------------------------------------------------------------------------------- #
 
 # I don't know why these are needed here, but without it, it complains even though Pycharm highlights them
@@ -39,8 +42,6 @@ from core.routes_gpx import gpx_list
 from core.routes_admin import admin_page
 from core.routes_messages import mark_read
 from core.routes_events import delete_event
-from core.send_emails import contact_form_email
-from core.dB_events import Event
 from core.routes_weekend import calendar
 
 

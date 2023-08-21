@@ -1,4 +1,5 @@
 from flask import render_template, url_for
+from flask_login import login_required, current_user
 from bbc_feeds import weather
 from datetime import datetime as date
 
@@ -16,8 +17,10 @@ from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.dB_gpx import Gpx
 from core.dB_events import Event
-from core.db_users import User, update_last_seen
+from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
+from core.db_calendar import Calendar, CreateRideForm
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -42,45 +45,34 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 @app.route('/weekend', methods=['GET'])
 @update_last_seen
 def calendar():
-    # -------------------------------------------------------------------------------------------- #
-    # Show the schedule of rides
-    # -------------------------------------------------------------------------------------------- #
 
     saturday = "Saturday Aug 19 2023"
     sunday = "Sunday Aug 20 2023"
 
-    saturday_rides = [
-        {"group": "Decaff",
-         "leader": "Anna",
-         "destination": "Buntingford",
-         "distance": 96,
-         "elevation": 672,
-         "gpx_id": 1,
+    # ----------------------------------------------------------- #
+    # Get the ride list
+    # ----------------------------------------------------------- #
+    saturday_rides = Calendar().all_calendar_date("19082023")
+    sunday_rides = Calendar().all_calendar_date("20082023")
 
-         },
-        {"group": "Espresso",
-         "leader": "Andy Linney",
-         "destination": "Mill End",
-         "distance": 105,
-         "elevation": 803,
-         "gpx_id": 2,
-         },
-        {"group": "Doppio",
-         "leader": "Andy Fry",
-         "destination": "The Cow Shed",
-         "distance": 110,
-         "elevation": 750,
-         "gpx_id": 3,
-         }]
+    # ----------------------------------------------------------- #
+    # Add GPX details
+    # ----------------------------------------------------------- #
+    for ride in saturday_rides:
+        # Look up the ride
+        gpx = Gpx().one_gpx(ride.gpx_id)
+        # Should exist, but..
+        if gpx:
+            ride.distance = gpx.length_km
+            ride.elevation = gpx.ascent_m
 
-    sunday_rides = [
-        {"group": "Mixed",
-         "leader": "Ian",
-         "destination": "La Hogue",
-         "distance": 89,
-         "elevation": 551,
-         "gpx_id": 12,
-         }]
+    for ride in sunday_rides:
+        # Look up the ride
+        gpx = Gpx().one_gpx(ride.gpx_id)
+        # Should exist, but..
+        if gpx:
+            ride.distance = gpx.length_km
+            ride.elevation = gpx.ascent_m
 
     # ----------------------------------------------------------- #
     # Polylines for the GPX files
@@ -153,3 +145,21 @@ def calendar():
                            sunday=sunday, sunday_rides=sunday_rides, sunday_cafes=sunday_cafes,
                            sunday_polylines=sunday_polylines, sunday_elevation_data=sunday_elevation_data,
                            sunday_elevation_cafes=sunday_elevation_cafes, sunday_weather=sunday_weather)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add a new ride to the calendar
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/add_ride', methods=['GET'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def add_ride():
+    # ----------------------------------------------------------- #
+    # Need the form
+    # ----------------------------------------------------------- #
+    form = CreateRideForm()
+
+
+    return render_template("add_ride_to_calendar.html", year=current_year, form=form)
