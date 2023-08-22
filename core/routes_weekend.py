@@ -48,7 +48,7 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 @update_last_seen
 def weekend():
     # ----------------------------------------------------------- #
-    # Did we get passed a date?
+    # Did we get passed a date? (Optional)
     # ----------------------------------------------------------- #
     target_date_str = request.args.get('date', None)
 
@@ -56,7 +56,10 @@ def weekend():
     # Workout which weekend we're displaying
     # ----------------------------------------------------------- #
     if target_date_str:
+        # Passed a specific date, so find that day / weekend
         target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0, 00)
+
+        # We normally display the full weekend
         if target_date.strftime("%A") == "Saturday":
             # Passed a Saturday
             target_saturday = target_date
@@ -70,6 +73,7 @@ def weekend():
             target_saturday = target_date
             target_sunday = None
 
+        # These are our required data vars for the webpage
         saturday_date = target_saturday.strftime("%d%m%Y")
         saturday = target_saturday.strftime("%A %b %d %Y")
         if target_sunday:
@@ -79,7 +83,7 @@ def weekend():
             sunday_date = None
             sunday = ""
     else:
-        # Either it's this weekend or the one coming up....
+        # No date, so either this weekend or next weekend if it's a weekday.
         today_str = datetime.today().strftime("%A")
         today = datetime.today()
         if today_str == "Saturday":
@@ -240,53 +244,89 @@ def weekend():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Add a new ride to the calendar
+# Add / Edit a new ride to the calendar
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/add_ride', methods=['GET', 'POST'])
+@app.route('/edit_ride', methods=['GET', 'POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
 def add_ride():
     # ----------------------------------------------------------- #
-    # Did we get passed a date?
+    # Did we get passed a date or a ride_id? (Optional)
     # ----------------------------------------------------------- #
     start_date_str = request.args.get('date', None)
+    ride_id = request.args.get('ride_id', None)
+
+    # ----------------------------------------------------------- #
+    # Validate ride_id
+    # ----------------------------------------------------------- #
+    if ride_id:
+        ride = Calendar().one_ride_id(ride_id)
+        if not ride:
+            app.logger.debug(f"add_ride(): Failed to locate ride, ride_id = '{ride_id}'.")
+            Event().log_event("Edit Ride Fail", f"Failed to locate ride, ride_id = '{ride_id}'.")
+            return abort(404)
 
     # ----------------------------------------------------------- #
     # Need the form
     # ----------------------------------------------------------- #
-    form = CreateRideForm()
+    if ride_id:
+        # ----------------------------------------------------------- #
+        # Edit event, so pre-fill form from dB
+        # ----------------------------------------------------------- #
+        gpx = Gpx().one_gpx(ride.gpx_id)
+        cafe = Cafe().one_cafe(ride.cafe_id)
+        # These are the easy ones
+        form = CreateRideForm(
+            date=datetime.strptime(ride.date.strip(), '%d%m%Y'),
+            leader=ride.leader,
+            group=ride.group,
+            gpx_name=f"{gpx.id}: '{gpx.name}', {gpx.length_km}km / {gpx.ascent_m}m",
+        )
+        # Cafe might not be in the dB yet, so handle exception
+        if cafe:
+            form.destination.data = f"{cafe.name} ({cafe.id})"
+            form.new_destination.data = ""
+        else:
+            form.destination.data = NEW_CAFE
+            form.new_destination.data = ride.destination
+    else:
+        # ----------------------------------------------------------- #
+        # Add event, so start with fresh form
+        # ----------------------------------------------------------- #
+        form = CreateRideForm()
 
-    # Pre-populate the data in the form, if we were passed one
-    if start_date_str:
-        start_date = datetime(int(start_date_str[4:8]), int(start_date_str[2:4]), int(start_date_str[0:2]), 0, 00)
-        form.date.data = start_date
+        # Pre-populate the data in the form, if we were passed one
+        if start_date_str:
+            start_date = datetime(int(start_date_str[4:8]), int(start_date_str[2:4]), int(start_date_str[0:2]), 0, 00)
+            form.date.data = start_date
 
-    # Assume the author is the group leader
-    if not form.leader.data:
-        form.leader.data = current_user.name
+        # Assume the author is the group leader
+        if not form.leader.data:
+            form.leader.data = current_user.name
 
     # Are we posting the completed comment form?
     if form.validate_on_submit():
-
         # ----------------------------------------------------------- #
         # Handle form passing validation
         # ----------------------------------------------------------- #
 
-        # Date must be in the future
+        # 1: Validate date (must be in the future)
         formdate = form.date.data
         today = datetime.today()
         if formdate < today:
             flash("The date is in the past!")
             return render_template("add_ride_to_calendar.html", year=current_year, form=form)
 
-        # Validate cafe
+        # 2: Validate cafe (must be specified)
         if form.destination.data == NEW_CAFE \
                 and form.new_destination.data == "":
             flash("New cafe not specified!")
+            return render_template("add_ride_to_calendar.html", year=current_year, form=form)
 
-        # Locate Cafe
+        # 3: Check we can find cafe in the dB
         if form.destination.data != NEW_CAFE:
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
@@ -302,12 +342,12 @@ def add_ride():
             # New cafe, not yet in database
             cafe = None
 
-        # Validate GPX
+        # 4: Validate GPX (must be specified)
         if form.gpx_name.data == UPLOAD_ROUTE \
                 and not form.gpx_file.data:
             flash("You didn't select a GPX file to upload!")
 
-        # Locate GPX
+        # 5: Check we can find gpx in the dB
         if form.gpx_name.data != UPLOAD_ROUTE:
             # Work out which GPX route they chose
             # eg "20: 'Mill End again', 107.6km / 838.0m"
@@ -323,7 +363,7 @@ def add_ride():
             # They are uploading their own GPX file
             gpx = None
 
-        # Double check cafe against route (if both from comboboxes)
+        # 6: Check route passes cafe (if both from comboboxes)
         if gpx and cafe:
             match = False
             for cafe_passed in json.loads(gpx.cafes_passed):
@@ -333,7 +373,7 @@ def add_ride():
                 flash(f"That GPX route doesn't pass {cafe.name}!")
                 return render_template("add_ride_to_calendar.html", year=current_year, form=form)
 
-        # Check they aren't nominating someone else (only Admin can nominate another person)
+        # 7: Check they aren't nominating someone else (only Admin can nominate another person)
         if not current_user.admin():
             # Allow them to append eg "Simon" -> "Simon Bond"
             if form.leader.data[0:len(current_user.name)] != current_user.name:
@@ -351,10 +391,16 @@ def add_ride():
 
 
         # ----------------------------------------------------------- #
-        # We can now add the event
+        # We can now add / update the event
         # ----------------------------------------------------------- #
-        # Create a new calendar entry
-        new_ride = Calendar()
+        if ride:
+            # Updating an existing ride
+            new_ride = ride
+        else:
+            # New event
+            new_ride = Calendar()
+
+        # Populate the calendar entry
         # Convert form date format '2023-06-23' to preferred format '23062023'
         start_date_str = form.date.data.strftime("%d%m%Y")
         new_ride.date = start_date_str
@@ -373,7 +419,11 @@ def add_ride():
             # Success
             app.logger.debug(f"add_ride(): Successfully added new ride.")
             Event().log_event("Add ride Pass", f"Successfully added new_ride.")
-            flash("Ride added to Calendar!")
+            if ride:
+                flash("Ride updated!")
+            else:
+                flash("Ride added to Calendar!")
+            # Go to Calendar page for this ride's date
             return redirect(url_for('weekend', date=start_date_str))
         else:
             # Should never happen, but...
@@ -478,7 +528,7 @@ def delete_ride():
         return abort(403)
 
     # ----------------------------------------------------------- #
-    # Delete comment
+    # Delete event from calendar
     # ----------------------------------------------------------- #
     if Calendar().delete_ride(ride_id):
         # Success

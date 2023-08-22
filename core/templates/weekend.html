@@ -315,7 +315,7 @@
 								{% if current_user.admin() or current_user.email == ride.email %}
 									
 									<!-- Edit route -->
-									 <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
+									 <a href="{{ url_for('add_ride', ride_id=ride.id, date=saturday_date) }}">
 				                        <button class="btn btn-sm btn-secondary">Edit</button>
 						            </a>
 							
