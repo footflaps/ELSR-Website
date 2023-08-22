@@ -177,13 +177,13 @@ def weekend():
                     # Just add a blank cafe object
                     sat_cafes.append(Cafe())
             else:
-                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
-                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
-                flash(f"Looks like GPX file {ride.gpx_id} has been deleted!")
+                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
+                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
+                flash(f"Looks like GPX file for ride {ride.id} has been deleted!")
         else:
-            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
-            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
-            flash(f"Looks like GPX route {ride.gpx_id} has been deleted (Saturday)!")
+            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
+            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
+            flash(f"Looks like GPX route for ride {ride.id} has been deleted (Saturday)!")
 
     # Populate everything for Sunday
     for ride in sunday_rides_tmp:
@@ -219,13 +219,13 @@ def weekend():
                     # Just add a blank cafe object
                     sun_cafes.append(Cafe())
             else:
-                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
-                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
-                flash(f"Looks like GPX file {ride.gpx_id} has been deleted!")
+                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
+                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
+                flash(f"Looks like GPX file ride {ride.id} has been deleted!")
         else:
-            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
-            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
-            flash(f"Looks like GPX route {ride.gpx_id} has been deleted (Sunday)!")
+            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
+            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
+            flash(f"Looks like GPX route for ride {ride.id} has been deleted (Sunday)!")
 
     # ----------------------------------------------------------- #
     # Polylines for the GPX files

@@ -326,8 +326,11 @@
 							{% endif %}
 							
 							<!-- Ride description -->
-					        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
-							     {{ ride.distance }}km, {{ ride.elevation }}m
+					        {{ ride.group }}: {{ ride.leader }},
+							<a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">
+								<strong>{{ ride.destination }}</strong>
+							</a>,
+							{{ ride.distance }}km, {{ ride.elevation }}m
 							
 							
 						</li>
@@ -631,8 +634,12 @@
 									{% endif %}
 								{% endif %}
 								
-						        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
-								     {{ ride.distance }}km, {{ ride.elevation }}m
+						        <!-- Ride description -->
+						        {{ ride.group }}: {{ ride.leader }},
+								<a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">
+									<strong>{{ ride.destination }}</strong>
+								</a>,
+								{{ ride.distance }}km, {{ ride.elevation }}m
 													
 							</li>
 						
