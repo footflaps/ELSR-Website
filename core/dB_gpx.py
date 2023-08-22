@@ -79,7 +79,7 @@ class Gpx(db.Model):
 
     def one_gpx(self, gpx_id):
         with app.app_context():
-            gpx = db.get_or_404(Gpx, gpx_id)
+            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
             return gpx
 
     # Add a new gpx file to the dB

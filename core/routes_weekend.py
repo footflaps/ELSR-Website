@@ -116,12 +116,17 @@ def weekend():
     # ----------------------------------------------------------- #
     # Get the ride list
     # ----------------------------------------------------------- #
-    saturday_rides = Calendar().all_calendar_date(saturday_date)
-    sunday_rides = Calendar().all_calendar_date(sunday_date)
+    # We will validate these lists as a GPX file could be deleted after the ride has been added to the calendar
+    saturday_rides_tmp = Calendar().all_calendar_date(saturday_date)
+    sunday_rides_tmp = Calendar().all_calendar_date(sunday_date)
 
     # ----------------------------------------------------------- #
     # Add GPX details
     # ----------------------------------------------------------- #
+
+    # Cleaned lists, after checking GPX files exist
+    saturday_rides = []
+    sunday_rides = []
 
     # We will flash a warning if we find a private GPX in any of the weekend's routes
     private_gpx = False
@@ -139,62 +144,88 @@ def weekend():
     sun_cafes = []
 
     # Populate everything for Saturday
-    for ride in saturday_rides:
+    for ride in saturday_rides_tmp:
         # Look up the ride
         gpx = Gpx().one_gpx(ride.gpx_id)
 
         # Should exist, but..
         if gpx:
-            ride.distance = gpx.length_km
-            ride.elevation = gpx.ascent_m
-            ride.public = gpx.public()
-            if not gpx.public():
-                private_gpx = True
-            saturday_gpxes.append(gpx)
+            filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+            if os.path.exists(filename):
+                ride.distance = gpx.length_km
+                ride.elevation = gpx.ascent_m
+                ride.public = gpx.public()
+                if not gpx.public():
+                    private_gpx = True
+                saturday_gpxes.append(gpx)
 
-        # Look up the cafe
-        cafe = Cafe().one_cafe(ride.cafe_id)
+                # Add to list
+                saturday_rides.append(ride)
 
-        # Might not exist if a new cafe
-        if cafe:
-            saturday_cafes_elevations.append({
-                "position": {"lat": cafe.lat, "lng": cafe.lon},
-                "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                "color": OPEN_CAFE_COLOUR,
-            })
-            sat_cafes.append(cafe)
+                # Look up the cafe
+                cafe = Cafe().one_cafe(ride.cafe_id)
+
+                # Might not exist if a new cafe
+                if cafe:
+                    saturday_cafes_elevations.append({
+                        "position": {"lat": cafe.lat, "lng": cafe.lon},
+                        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+                        "color": OPEN_CAFE_COLOUR,
+                    })
+                    sat_cafes.append(cafe)
+                else:
+                    # Just add a blank cafe object
+                    sat_cafes.append(Cafe())
+            else:
+                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
+                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
+                flash(f"Looks like GPX file {ride.gpx_id} has been deleted!")
         else:
-            # Just add a blank cafe object
-            sat_cafes.append(Cafe())
+            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
+            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
+            flash(f"Looks like GPX route {ride.gpx_id} has been deleted (Saturday)!")
 
     # Populate everything for Sunday
-    for ride in sunday_rides:
+    for ride in sunday_rides_tmp:
         # Look up the ride
         gpx = Gpx().one_gpx(ride.gpx_id)
 
         # Should exist, but..
         if gpx:
-            ride.distance = gpx.length_km
-            ride.elevation = gpx.ascent_m
-            ride.public = gpx.public()
-            if not gpx.public():
-                private_gpx = True
-            sunday_gpxes.append(gpx)
+            filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+            if os.path.exists(filename):
+                ride.distance = gpx.length_km
+                ride.elevation = gpx.ascent_m
+                ride.public = gpx.public()
+                if not gpx.public():
+                    private_gpx = True
+                sunday_gpxes.append(gpx)
 
-        # Look up the cafe
-        cafe = Cafe().one_cafe(ride.cafe_id)
+                # Add to list
+                sunday_rides.append(ride)
 
-        # Might not exist if a new cafe
-        if cafe:
-            sunday_cafes_elevations.append({
-                "position": {"lat": cafe.lat, "lng": cafe.lon},
-                "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                "color": OPEN_CAFE_COLOUR,
-            })
-            sun_cafes.append(cafe)
+                # Look up the cafe
+                cafe = Cafe().one_cafe(ride.cafe_id)
+
+                # Might not exist if a new cafe
+                if cafe:
+                    sunday_cafes_elevations.append({
+                        "position": {"lat": cafe.lat, "lng": cafe.lon},
+                        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+                        "color": OPEN_CAFE_COLOUR,
+                    })
+                    sun_cafes.append(cafe)
+                else:
+                    # Just add a blank cafe object
+                    sun_cafes.append(Cafe())
+            else:
+                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
+                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.gpx_id}'.")
+                flash(f"Looks like GPX file {ride.gpx_id} has been deleted!")
         else:
-            # Just add a blank cafe object
-            sun_cafes.append(Cafe())
+            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
+            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.gpx_id}'.")
+            flash(f"Looks like GPX route {ride.gpx_id} has been deleted (Sunday)!")
 
     # ----------------------------------------------------------- #
     # Polylines for the GPX files
