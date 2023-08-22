@@ -66,20 +66,31 @@ class Calendar(db.Model):
     def all_calendar(self):
         with app.app_context():
             rides = db.session.query(Calendar).all()
-            # Will return nothing if id is invalid
             return rides
 
     # Return all events from a given user
     def all_calendar_email(self, email):
         with app.app_context():
             rides = db.session.query(Calendar).filter_by(email=email).all()
-            # Will return nothing if id is invalid
+            # Will return nothing if email is invalid
             return rides
 
+    # Return all events for a specific day
     def all_calendar_date(self, ride_date: str):
         with app.app_context():
-            rides = db.session.query(Calendar).filter_by(date=ride_date).all()
+            rides = []
+            for group in GROUP_CHOICES:
+                ride_set = db.session.query(Calendar).filter_by(date=ride_date).filter_by(group=group).all()
+                for ride in ride_set:
+                    rides.append(ride)
             return rides
+
+    # Look up event by ID
+    def one_ride_id(self, ride_id):
+        with app.app_context():
+            ride = db.session.query(Calendar).filter_by(id=ride_id).first()
+            # Will return nothing if id is invalid
+            return ride
 
     def add_ride(self, new_ride):
         # Update some details
@@ -97,6 +108,20 @@ class Calendar(db.Model):
                                  f"error code '{e.args}'.")
                 return False
 
+    # Delete a ride by id
+    def delete_ride(self, ride_id):
+        with app.app_context():
+            ride = db.session.query(Calendar).filter_by(id=ride_id).first()
+            if ride:
+                # Delete the ride file
+                try:
+                    db.session.delete(ride)
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_calendar: Failed to delete ride for ride_id = '{ride.id}', "
+                                     f"error code '{e.args}'.")
+        return False
 
     # Optional: this will allow each event object to be identified by its details when printed.
     def __repr__(self):

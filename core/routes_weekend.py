@@ -1,5 +1,6 @@
-from flask import render_template, url_for, request, flash, redirect
+from flask import render_template, url_for, request, flash, redirect, abort
 from flask_login import login_required, current_user
+from werkzeug import exceptions
 from bbc_feeds import weather
 from datetime import datetime, timedelta
 import json
@@ -262,6 +263,10 @@ def add_ride():
         start_date = datetime(int(start_date_str[4:8]), int(start_date_str[2:4]), int(start_date_str[0:2]), 0, 00)
         form.date.data = start_date
 
+    # Assume the author is the group leader
+    if not form.leader.data:
+        form.leader.data = current_user.name
+
     # Are we posting the completed comment form?
     if form.validate_on_submit():
 
@@ -294,6 +299,7 @@ def add_ride():
                 flash("Sorry, something went wrong - couldn't understand the cafe choice.")
                 return render_template("add_ride_to_calendar.html", year=current_year, form=form)
         else:
+            # New cafe, not yet in database
             cafe = None
 
         # Validate GPX
@@ -314,18 +320,28 @@ def add_ride():
                 flash("Sorry, something went wrong - couldn't understand the GPX choice.")
                 return render_template("add_ride_to_calendar.html", year=current_year, form=form)
         else:
+            # They are uploading their own GPX file
             gpx = None
 
         # Double check cafe against route (if both from comboboxes)
-        match = False
         if gpx and cafe:
+            match = False
             for cafe_passed in json.loads(gpx.cafes_passed):
                 if int(cafe_passed["cafe_id"]) == cafe.id:
                     match = True
+            if not match:
+                flash(f"That GPX route doesn't pass {cafe.name}!")
+                return render_template("add_ride_to_calendar.html", year=current_year, form=form)
 
-        if not match:
-            flash(f"That GPX route doesn't pass {cafe.name}!")
-            return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+        # Check they aren't nominating someone else (only Admin can nominate another person)
+        if not current_user.admin():
+            # Allow them to append eg "Simon" -> "Simon Bond"
+            if form.leader.data[0:len(current_user.name)] != current_user.name:
+                # Looks like they've nominated someone else
+                flash("Only Admins can nominate someone else to lead a ride.")
+                # In case they've forgotten their user name
+                form.leader.data = current_user.name
+                return render_template("add_ride_to_calendar.html", year=current_year, form=form)
 
         # ----------------------------------------------------------- #
         # Do we need to upload a GPX?
@@ -337,7 +353,7 @@ def add_ride():
         # ----------------------------------------------------------- #
         # We can now add the event
         # ----------------------------------------------------------- #
-
+        # Create a new calendar entry
         new_ride = Calendar()
         # Convert form date format '2023-06-23' to preferred format '23062023'
         start_date_str = form.date.data.strftime("%d%m%Y")
@@ -381,3 +397,99 @@ def add_ride():
     # ----------------------------------------------------------- #
 
     return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Delete a comment
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route("/delete_ride", methods=['POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def delete_ride():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    ride_id = request.args.get('ride_id', None)
+    date = request.args.get('date', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not ride_id:
+        app.logger.debug(f"delete_ride(): Missing ride_id!")
+        Event().log_event("Delete Ride Fail", f"Missing ride_id!")
+        return abort(400)
+    if not date:
+        app.logger.debug(f"delete_ride(): Missing date!")
+        Event().log_event("Delete Ride Fail", f"Missing date!")
+        return abort(400)
+    elif not password:
+        app.logger.debug(f"delete_ride(): Missing password!")
+        Event().log_event("Delete Ride Fail", f"Missing password!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check the ride_id is valid
+    # ----------------------------------------------------------- #
+    ride = Calendar().one_ride_id(ride_id)
+
+    if not ride:
+        app.logger.debug(f"delete_ride(): Failed to locate ride with cafe_id = '{ride_id}'.")
+        Event().log_event("Delete Ride Fail", f"Failed to locate ride with cafe_id = '{ride_id}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Validate password against current_user's (admins)
+    # ----------------------------------------------------------- #
+    if not current_user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"make_admin(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("Make Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for {current_user.name}.")
+        return redirect(url_for('weekend', date=date))
+
+    # ----------------------------------------------------------- #
+    # Restrict access to Admin or owner of ride event
+    # ----------------------------------------------------------- #
+    if not current_user.admin() \
+            and current_user.email != ride.email:
+        # Failed authentication
+        app.logger.debug(f"delete_ride(): Rejected request from '{current_user.email}' as no permissions"
+                         f" for ride_id = '{ride_id}'.")
+        Event().log_event("Delete Ride Fail", f"Rejected request from user '{current_user.email}' as no "
+                                              f"permissions for ride_id = '{ride_id}'.")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Delete comment
+    # ----------------------------------------------------------- #
+    if Calendar().delete_ride(ride_id):
+        # Success
+        app.logger.debug(f"delete_ride(): Successfully deleted the ride, ride_id = '{ride_id}'.")
+        Event().log_event("Delete Ride Success", f"Successfully deleted the ride. ride_id = '{ride_id}''.")
+        flash("Ride deleted.")
+    else:
+        # Should never get here, but....
+        app.logger.debug(f"delete_ride(): Failed to delete the ride, ride_id = '{ride_id}'.")
+        Event().log_event("Delete Ride Fail", f"Failed to delete the ride, ride_id = '{ride_id}'.")
+        flash("Sorry, something went wrong!")
+
+    # Back to weekend ride summary page for the day in question
+    return redirect(url_for('weekend', date=date))
