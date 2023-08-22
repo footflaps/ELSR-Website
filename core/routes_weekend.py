@@ -288,12 +288,13 @@ def add_ride():
             gpx_name=f"{gpx.id}: '{gpx.name}', {gpx.length_km}km / {gpx.ascent_m}m",
         )
         # Cafe might not be in the dB yet, so handle exception
-        if cafe:
-            form.destination.data = f"{cafe.name} ({cafe.id})"
-            form.new_destination.data = ""
-        else:
-            form.destination.data = NEW_CAFE
-            form.new_destination.data = ride.destination
+        if form.destination.data == "":
+            if cafe:
+                form.destination.data = f"{cafe.name} ({cafe.id})"
+                form.new_destination.data = ""
+            else:
+                form.destination.data = NEW_CAFE
+                form.new_destination.data = ride.destination
     else:
         # ----------------------------------------------------------- #
         # Add event, so start with fresh form
