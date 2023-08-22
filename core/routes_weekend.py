@@ -316,9 +316,9 @@ def add_ride():
         # ----------------------------------------------------------- #
 
         # 1: Validate date (must be in the future)
-        formdate = form.date.data
+        formdate = form.date.data.date()
         today = datetime.today().date()
-        print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
+        app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         if formdate < today:
             flash("The date is in the past!")
             return render_template("add_ride_to_calendar.html", year=current_year, form=form)
