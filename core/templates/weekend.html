@@ -15,7 +15,6 @@
 </head>
 
 
-
 <!---------------------------------------------------------------------------------------------------->
 <!--                                     Page Header                                                -->
 <!---------------------------------------------------------------------------------------------------->
@@ -255,7 +254,6 @@
 </script>
 
 
-
 <!---------------------------------------------------------------------------------------------------->
 <!--                                   Saturday ride List                                           -->
 <!---------------------------------------------------------------------------------------------------->
@@ -371,14 +369,12 @@
 								</div>
 							</div>
 						</div>  <!-- End of modal form -->
-
-					
-					
 					
 					{% endfor %}
 					
 				</ul>
 	
+				<!-- Remind people to log in -->
 				{% if not current_user.is_authenticated: %}
 					<p style="color: red"><strong>Log in to download GPX files.</strong></p>
 				{% endif %}
@@ -683,7 +679,7 @@
 						
 					</ul>
 					
-					
+					<!-- Remind people to log in -->
 					{% if not current_user.is_authenticated: %}
 						<p style="color: red"><strong>Log in to download GPX files.</strong></p>
 					{% endif %}
