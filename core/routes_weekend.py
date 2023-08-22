@@ -268,6 +268,8 @@ def add_ride():
             app.logger.debug(f"add_ride(): Failed to locate ride, ride_id = '{ride_id}'.")
             Event().log_event("Edit Ride Fail", f"Failed to locate ride, ride_id = '{ride_id}'.")
             return abort(404)
+    else:
+        ride = None
 
     # ----------------------------------------------------------- #
     # Need the form
@@ -315,7 +317,8 @@ def add_ride():
 
         # 1: Validate date (must be in the future)
         formdate = form.date.data
-        today = datetime.today()
+        today = datetime.today().date()
+        print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         if formdate < today:
             flash("The date is in the past!")
             return render_template("add_ride_to_calendar.html", year=current_year, form=form)

@@ -335,7 +335,7 @@
 						</li>
 					
 						<!--------------------------------------------------------------------------------------------->
-						<!--                         Modal form for deleting ride                                    -->
+						<!--                         Modal form for deleting Saturday ride                           -->
 						<!--------------------------------------------------------------------------------------------->
 						
 						<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
@@ -618,10 +618,66 @@
 							       {% endif %}
 					            {% endif %}
 								
+								<!-- Admins and author can edit / delete the rides -->
+								{% if current_user.is_authenticated: %}
+									{% if current_user.admin() or current_user.email == ride.email %}
+										
+										<!-- Edit route -->
+										 <a href="{{ url_for('add_ride', ride_id=ride.id, date=sunday_date) }}">
+					                        <button class="btn btn-sm btn-secondary">Edit</button>
+							            </a>
+								
+										<!-- Delete route -->
+										<a data-toggle="modal" data-target="#deleteRoute{{ ride.id }}">
+					                        <button class="btn btn-sm btn-danger">DEL</button>
+							            </a>
+								
+									{% endif %}
+								{% endif %}
+								
 						        {{ ride.group }}: {{ ride.leader }}, <strong>{{ ride.destination }}</strong>,
 								     {{ ride.distance }}km, {{ ride.elevation }}m
 													
 							</li>
+						
+							<!--------------------------------------------------------------------------------------------->
+							<!--                         Modal form for deleting Sunday ride                           -->
+							<!--------------------------------------------------------------------------------------------->
+							
+							<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
+							    <div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title">
+												Delete ride '{{ ride.group }}: {{ ride.leader }}, {{ ride.destination }}'
+											</h5>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<div class="modal-body">
+	
+											<form action="{{ url_for('delete_ride', ride_id=ride.id, date=saturday_date) }}" method="post">
+												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+												
+												<div class="form-group">
+													<label class="col-form-label">
+														Enter <strong>your password</strong> below.
+													</label>
+													<input type="password" class="form-control" name="password">
+												</div>
+												
+												<div class="modal-footer">
+													<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+													<button type="submit" class="btn btn-danger">Submit</button>
+												</div>
+												
+											</form>
+										</div>
+									</div>
+								</div>
+							</div>  <!-- End of modal form -->
+
 						
 						{% endfor %}
 						
