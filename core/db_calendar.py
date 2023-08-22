@@ -152,20 +152,20 @@ class CreateRideForm(FlaskForm):
     cafe_choices = []
     cafes = Cafe().all_cafes()
     for cafe in cafes:
-        cafe_choices.append(f"{cafe.name} ({cafe.id})")
+        cafe_choices.append(cafe.combo_string())
     cafe_choices.append(NEW_CAFE)
 
     # ----------------------------------------------------------- #
     # Generate the list of routes
     # ----------------------------------------------------------- #
     gpx_choices = []
-    gpxes = Gpx().all_gpxes()
+    gpxes = Gpx().all_gpxes_sorted()
     for gpx in gpxes:
         filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
         # Route must be public and double check we have an actual GPX file on tap....
         if gpx.public() \
                 and os.path.exists(filename):
-            gpx_choices.append(f"{gpx.id}: '{gpx.name}', {gpx.length_km}km / {gpx.ascent_m}m")
+            gpx_choices.append(gpx.combo_string())
     gpx_choices.append(UPLOAD_ROUTE)
 
     # ----------------------------------------------------------- #

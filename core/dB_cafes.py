@@ -190,6 +190,14 @@ class Cafe(db.Model):
 
         return sorted(cafe_list, key=lambda x: x['range_km'])
 
+    def combo_string(self):
+        return f"{self.name} ({self.id})"
+
+    def cafe_id_from_combo_string(self, combo_string):
+        # Extract id from number in last set of brackets
+        cafe_id = combo_string.split('(')[-1].split(')')[0]
+        return cafe_id
+
     # Optional: this will allow each blog object to be identified by its name when printed.
     def __repr__(self):
         return f'<Blog {self.title}>'

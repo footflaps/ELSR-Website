@@ -66,6 +66,12 @@ class Gpx(db.Model):
             gpxes = db.session.query(Gpx).all()
             return gpxes
 
+    # Alphabetical list for combobox selection
+    def all_gpxes_sorted(self):
+        with app.app_context():
+            gpxes = db.session.query(Gpx).order_by('name').all()
+            return gpxes
+
     def all_gpxes_by_email(self, email):
         with app.app_context():
             gpxes = db.session.query(Gpx).filter_by(email=email).all()
@@ -300,6 +306,14 @@ class Gpx(db.Model):
                                      f"error code '{e.args}'.")
                     return False
         return False
+
+    def combo_string(self):
+        return f"{self.name}, {self.length_km}km / {self.ascent_m}m ({self.id})"
+
+    def gpx_id_from_combo_string(self, combo_string):
+        # Extract id from number in last set of brackets
+        gpx_id = combo_string.split('(')[-1].split(')')[0]
+        return gpx_id
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -285,16 +285,19 @@ def add_ride():
             date=datetime.strptime(ride.date.strip(), '%d%m%Y'),
             leader=ride.leader,
             group=ride.group,
-            gpx_name=f"{gpx.id}: '{gpx.name}', {gpx.length_km}km / {gpx.ascent_m}m",
+            gpx_name=gpx.combo_string(),
         )
         # Cafe might not be in the dB yet, so handle exception
         if form.destination.data == "":
             if cafe:
-                form.destination.data = f"{cafe.name} ({cafe.id})"
+                form.destination.data = cafe.combo_string()
                 form.new_destination.data = ""
             else:
                 form.destination.data = NEW_CAFE
                 form.new_destination.data = ride.destination
+
+        # Change submission button name
+        form.submit.label.text = "Update Ride"
     else:
         # ----------------------------------------------------------- #
         # Add event, so start with fresh form
@@ -326,26 +329,26 @@ def add_ride():
         app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         if formdate < today:
             flash("The date is in the past!")
-            return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+            return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
         # 2: Validate cafe (must be specified)
         if form.destination.data == NEW_CAFE \
                 and form.new_destination.data == "":
             flash("New cafe not specified!")
-            return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+            return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
         # 3: Check we can find cafe in the dB
         if form.destination.data != NEW_CAFE:
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
-            cafe_id = form.destination.data.split('(')[-1].split(')')[0]
+            cafe_id = Cafe().cafe_id_from_combo_string(form.destination.data)
             cafe = Cafe().one_cafe(cafe_id)
             if not cafe:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get cafe from '{form.destination.data}'.")
                 Event().log_event("Add ride Fail", f"Failed to get cafe from '{form.destination.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the cafe choice.")
-                return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+                return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
         else:
             # New cafe, not yet in database
             cafe = None
@@ -359,14 +362,14 @@ def add_ride():
         if form.gpx_name.data != UPLOAD_ROUTE:
             # Work out which GPX route they chose
             # eg "20: 'Mill End again', 107.6km / 838.0m"
-            gpx_id = form.gpx_name.data.split(':')[0]
+            gpx_id = Gpx().gpx_id_from_combo_string(form.gpx_name.data)
             gpx = Gpx().one_gpx(gpx_id)
             if not gpx:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get GPX from '{form.gpx_name.data}'.")
                 Event().log_event("Add ride Fail", f"Failed to get GPX from '{form.gpx_name.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the GPX choice.")
-                return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+                return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
         else:
             # They are uploading their own GPX file
             gpx = None
@@ -374,22 +377,24 @@ def add_ride():
         # 6: Check route passes cafe (if both from comboboxes)
         if gpx and cafe:
             match = False
+            # gpx.cafes_passed is a json.dumps string, so need to convert back
             for cafe_passed in json.loads(gpx.cafes_passed):
                 if int(cafe_passed["cafe_id"]) == cafe.id:
                     match = True
             if not match:
+                # Doesn't look like we pass that cafe!
                 flash(f"That GPX route doesn't pass {cafe.name}!")
-                return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+                return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
-        # 7: Check they aren't nominating someone else (only Admin can nominate another person)
+        # 7: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
         if not current_user.admin():
-            # Allow them to append eg "Simon" -> "Simon Bond"
+            # Allow them to append eg "Simon" -> "Simon Bond" as some user names are quite short
             if form.leader.data[0:len(current_user.name)] != current_user.name:
                 # Looks like they've nominated someone else
                 flash("Only Admins can nominate someone else to lead a ride.")
-                # In case they've forgotten their user name
+                # In case they've forgotten their user name, reset it in the form
                 form.leader.data = current_user.name
-                return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+                return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
         # ----------------------------------------------------------- #
         # Do we need to upload a GPX?
@@ -438,7 +443,7 @@ def add_ride():
             app.logger.debug(f"add_ride(): Failed to add ride from '{new_ride}'.")
             Event().log_event("Add ride Fail", f"Failed to add ride '{new_ride}'.")
             flash("Sorry, something went wrong.")
-            return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+            return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
     # ----------------------------------------------------------- #
     # Handle POST
@@ -448,13 +453,13 @@ def add_ride():
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
-        return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+        return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
     # ----------------------------------------------------------- #
     # Handle GET
     # ----------------------------------------------------------- #
 
-    return render_template("add_ride_to_calendar.html", year=current_year, form=form)
+    return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
