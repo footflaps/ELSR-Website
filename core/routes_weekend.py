@@ -4,13 +4,14 @@ from werkzeug import exceptions
 from bbc_feeds import weather
 from datetime import datetime, timedelta
 import json
+import os
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year
+from core import app, current_year, delete_file_if_exists
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -19,10 +20,13 @@ from core import app, current_year
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.dB_gpx import Gpx
+from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
 from core.db_calendar import Calendar, CreateRideForm, NEW_CAFE, UPLOAD_ROUTE
+from core.subs_gpx_edit import strip_excess_info_from_gpx
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -399,9 +403,89 @@ def add_ride():
         # ----------------------------------------------------------- #
         # Do we need to upload a GPX?
         # ----------------------------------------------------------- #
+        if not gpx:
+            if 'gpx_file' not in request.files:
+                # Almost certain the form failed validation
+                app.logger.debug(f"add_ride(): Failed to find 'gpx_file' in request.files!")
+                Event().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
+                flash("Couldn't find the file.")
+                return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
+            else:
+                # Get the filename
+                file = request.files['gpx_file']
+                app.logger.debug(f"add_ride(): About to upload '{file}'.")
 
+                # If the user does not select a file, the browser submits an
+                # empty file without a filename.
+                if file.filename == '':
+                    app.logger.debug(f"add_ride(): No selected file!")
+                    Event().log_event(f"Add ride Fail", f"No selected file!")
+                    flash('No selected file')
+                    return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
+                if not file or \
+                        not allowed_file(file.filename):
+                    app.logger.debug(f"add_ride(): Invalid file '{file.filename}'!")
+                    Event().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
+                    flash("That's not a GPX file!")
+                    return render_template("add_ride_to_calendar.html", year=current_year, form=form, ride=ride)
 
+                # Create a new GPX object
+                # We do this first as we need the id in order to create
+                # the filename for the GPX file when we upload it
+                gpx = Gpx()
+                gpx.name = form.new_destination.data
+                gpx.email = current_user.email
+                gpx.cafes_passed = "[]"
+                gpx.ascent_m = 0
+                gpx.length_km = 0
+                gpx.filename = "tmp"
+
+                # Add to the dB
+                new_id = gpx.add_gpx(gpx)
+                if new_id:
+                    # Success, added GPX to dB
+                    # Have to re-get the GPX as it's changed since we created it
+                    gpx = Gpx().one_gpx(new_id)
+                    app.logger.debug(f"add_ride(): GPX added to dB, id = '{gpx.id}'.")
+                    Event().log_event(f"Add ride Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
+                else:
+                    # Failed to create new dB entry
+                    app.logger.debug(f"add_ride(): Failed to add gpx to the dB!")
+                    Event().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
+                    flash("Sorry, something went wrong!")
+                    return render_template("gpx_add.html", year=current_year, form=form)
+
+                # This is where we will store it
+                filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
+                app.logger.debug(f"add_ride(): Filename will be = '{filename}'.")
+
+                # Make sure this doesn't already exist
+                if not delete_file_if_exists(filename):
+                    # Failed to delete existing file (func will generate error trace)
+                    flash("Sorry, something went wrong!")
+                    return render_template("gpx_add.html", year=current_year, form=form)
+
+                # Upload the GPX file
+                try:
+                    file.save(filename)
+                except Exception as e:
+                    app.logger.debug(f"add_ride(): Failed to upload/save '{filename}', error code was {e.args}.")
+                    Event().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
+                    flash("Sorry, something went wrong!")
+                    return render_template("gpx_add.html", year=current_year, form=form)
+
+                # Update gpx object with filename
+                if not Gpx().update_filename(gpx.id, filename):
+                    app.logger.debug(f"add_ride(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                    Event().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                    flash("Sorry, something went wrong!")
+                    return render_template("gpx_add.html", year=current_year, form=form)
+
+                # Strip all excess data from the file
+                strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
+                app.logger.debug(f"add_ride(): New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
+                Event().log_event(f"Add ride Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
 
         # ----------------------------------------------------------- #
         # We can now add / update the event
@@ -436,8 +520,16 @@ def add_ride():
                 flash("Ride updated!")
             else:
                 flash("Ride added to Calendar!")
-            # Go to Calendar page for this ride's date
-            return redirect(url_for('weekend', date=start_date_str))
+
+            # Do they need to edit the just uploaded GPX file to make it public?
+            if not gpx.public():
+                # Forward them to the edit_route page to edit it and make it public
+                flash("You need to edit your route and make it public before it can be added to the calendar!")
+                return redirect(url_for('edit_route', gpx_id=gpx.id,
+                                        return_path=f"{url_for('weekend', date=start_date_str)}"))
+            else:
+                # Go to Calendar page for this ride's date
+                return redirect(url_for('weekend', date=start_date_str))
         else:
             # Should never happen, but...
             app.logger.debug(f"add_ride(): Failed to add ride from '{new_ride}'.")

@@ -198,7 +198,7 @@ def markers_for_cafes_native(cafes):
 # Edit Map Start and Finish Map Points for Native Google Maps
 # -------------------------------------------------------------------------------------------------------------- #
 
-def start_and_end_maps_native_gm(filename, gpx_id):
+def start_and_end_maps_native_gm(filename, gpx_id, return_path):
     # Use absolute path for filename
     filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
 
@@ -243,7 +243,7 @@ def start_and_end_maps_native_gm(filename, gpx_id):
                     if total_km < TRIM_DISTANCE_KM:
                         start_markers.append({
                             "position": {"lat": point.latitude, "lng": point.longitude},
-                            "title": f'<a href="{url_for("gpx_cut_start", gpx_id=gpx_id, index=index)}">Start Here! (Point {index})</a>',
+                            "title": f'<a href="{url_for("gpx_cut_start", gpx_id=gpx_id, index=index, return_path=f"{return_path}")}">Start Here! (Point {index})</a>',
                         })
 
                         start_lat += point.latitude
@@ -282,7 +282,7 @@ def start_and_end_maps_native_gm(filename, gpx_id):
                     if total_km < TRIM_DISTANCE_KM:
                         end_markers.append({
                             "position": {"lat": point.latitude, "lng": point.longitude},
-                            "title": f'<a href="{url_for("gpx_cut_end", gpx_id=gpx_id, index=index)}">Finish Here! (Point {index})</a>',
+                            "title": f'<a href="{url_for("gpx_cut_end", gpx_id=gpx_id, index=index, return_path=f"{return_path}")}">Finish Here! (Point {index})</a>',
                         })
 
                         end_lat += point.latitude

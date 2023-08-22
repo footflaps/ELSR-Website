@@ -207,6 +207,8 @@ def publish_route():
     # Get details from the page
     # ----------------------------------------------------------- #
     gpx_id = request.args.get('gpx_id', None)
+    # return_path is optional
+    return_path = request.args.get('return_path', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -259,7 +261,7 @@ def publish_route():
         app.logger.debug(f"publish_route(): Failed clear cafe list gpx.id = '{gpx.id}'.")
         Event().log_event("Publish GPX Fail", f"Failed clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
-        return redirect(url_for('edit_route', gpx_id=gpx_id))
+        return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
 
     # ----------------------------------------------------------- #
     # Add new existing nearby cafe list
@@ -267,8 +269,13 @@ def publish_route():
     flash("Nearby cafe list is being updated.")
     Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
 
-    # Redirect back to the details page as the route is now public, ie any editing is over
-    return redirect(url_for('gpx_details', gpx_id=gpx_id))
+    # Decide where to go next...
+    if return_path:
+        # Go back to specific page
+        return redirect(return_path)
+    else:
+        # Redirect back to the details page as the route is now public, ie any editing is over
+        return redirect(url_for('gpx_details', gpx_id=gpx_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -284,6 +291,8 @@ def hide_route():
     # Get details from the page
     # ----------------------------------------------------------- #
     gpx_id = request.args.get('gpx_id', None)
+    # return_path is optional
+    return_path = request.args.get('return_path', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -333,7 +342,7 @@ def hide_route():
         flash("Sorry, something went wrong!")
 
     # Redirect back to the edit page as that's probably what they want to do next
-    return redirect(url_for('edit_route', gpx_id=gpx_id))
+    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -483,6 +492,10 @@ def edit_route():
     # Get details from the page
     # ----------------------------------------------------------- #
     gpx_id = request.args.get('gpx_id', None)
+    # return_path is optional
+    return_path = request.args.get('return_path', None)
+
+    flash(f"return_path = '{return_path}'")
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -532,11 +545,11 @@ def edit_route():
     # ----------------------------------------------------------- #
     #   Generate Start and Finish maps
     # ----------------------------------------------------------- #
-    maps = start_and_end_maps_native_gm(gpx.filename, gpx_id)
+    maps = start_and_end_maps_native_gm(gpx.filename, gpx_id, return_path)
 
     return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
                            MAP_BOUNDS=MAP_BOUNDS, start_markers=maps[0], start_map_coords=maps[1],
-                           end_markers=maps[2], end_map_coords=maps[3])
+                           end_markers=maps[2], end_map_coords=maps[3], return_path=return_path)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -553,6 +566,8 @@ def gpx_cut_start():
     # ----------------------------------------------------------- #
     gpx_id = request.args.get('gpx_id', None)
     index = request.args.get('index', None)
+    # return_path is optional
+    return_path = request.args.get('return_path', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -613,7 +628,7 @@ def gpx_cut_start():
         flash("Sorry, something went wrong!")
 
     # Back to the edit page
-    return redirect(url_for('edit_route', gpx_id=gpx_id))
+    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -630,6 +645,8 @@ def gpx_cut_end():
     # ----------------------------------------------------------- #
     gpx_id = request.args.get('gpx_id', None)
     index = request.args.get('index', None)
+    # return_path is optional
+    return_path = request.args.get('return_path', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -689,7 +706,7 @@ def gpx_cut_end():
         flash("Sorry, something went wrong!")
 
     # Back to the edit page
-    return redirect(url_for('edit_route', gpx_id=gpx_id))
+    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
 
 
 # -------------------------------------------------------------------------------------------------------------- #

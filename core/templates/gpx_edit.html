@@ -229,7 +229,7 @@
 				{% if not gpx.public(): %}
 				
 					<!-- Mini form to publish route -->
-					<form action="{{ url_for('publish_route', gpx_id=gpx.id) }}"
+					<form action="{{ url_for('publish_route', gpx_id=gpx.id, return_path=return_path) }}"
 					      method="post">
 						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 						<button type="submit" class="btn btn-primary float-left">Publish Route</button>
@@ -238,7 +238,7 @@
 				{% else: %}
 
 					<!-- Mini form to hide route -->
-					<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
+					<form action="{{ url_for('hide_route', gpx_id=gpx.id, return_path=return_path) }}"
 					      method="post">
 						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 						<button type="submit" class="btn btn-warning float-left">Hide Route</button>
