@@ -316,8 +316,12 @@ def add_ride():
         # ----------------------------------------------------------- #
 
         # 1: Validate date (must be in the future)
-        formdate = form.date.data.date()
+        if type(form.date.data) == datetime:
+            formdate = form.date.data.date()
+        else:
+            formdate = form.date.data
         today = datetime.today().date()
+        print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         if formdate < today:
             flash("The date is in the past!")
