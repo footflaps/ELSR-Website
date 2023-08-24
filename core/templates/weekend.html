@@ -323,7 +323,7 @@
 				<!-- Logged in users can add / edit rides etc -->
 				{% if current_user.is_authenticated: %}
 					<!-- Add ride button -->
-					<a href="{{ url_for('add_ride') }}">
+					<a href="{{ url_for('add_ride', date=None) }}">
 						<button type="button" class="btn btn-primary float-right">Add ride</button>
 					</a>
 				{% endif %}
