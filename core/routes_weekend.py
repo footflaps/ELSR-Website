@@ -465,7 +465,7 @@ def add_ride():
                 # We do this first as we need the id in order to create
                 # the filename for the GPX file when we upload it
                 gpx = Gpx()
-                if form.destination.date != NEW_CAFE:
+                if form.destination.data != NEW_CAFE:
                     gpx.name = form.destination.data
                 else:
                     gpx.name = form.new_destination.data
