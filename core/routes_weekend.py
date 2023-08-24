@@ -400,6 +400,10 @@ def add_ride():
         # Handle form passing validation
         # ----------------------------------------------------------- #
 
+        # Detect cancel button
+        if form.cancel.data:
+            return redirect(url_for('weekend', date=start_date_str))
+
         # 1: Validate date (must be in the future)
         if type(form.date.data) == datetime:
             formdate = form.date.data.date()
@@ -634,6 +638,10 @@ def add_ride():
     # ----------------------------------------------------------- #
 
     elif request.method == 'POST':
+
+        # Detect cancel button
+        if form.cancel.data:
+            return redirect(url_for('weekend', date=start_date_str))
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")

@@ -179,6 +179,7 @@ class CreateRideForm(FlaskForm):
     gpx_name = SelectField("Choose an existing route:", choices=gpx_choices, validators=[DataRequired()])
     gpx_file = FileField("or, upload your own GPX file:", validators=[])
 
+    cancel = SubmitField('Cancel')
     submit = SubmitField("Add Ride")
 
 
