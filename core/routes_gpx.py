@@ -570,7 +570,7 @@ def edit_route():
                 Event().log_event("Edit GPX Fail", f"Failed to rename GPX '{gpx_id}'.")
                 flash("Sorry, something went wrong!")
 
-        # Admin can change ownsership
+        # Admin can change ownership
         if current_user.admin():
             # Get new owner
             new_user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
@@ -590,8 +590,6 @@ def edit_route():
                     Event().log_event("Edit GPX Fail", f"Failed to change ownership GPX '{gpx_id}'.")
                     flash("Sorry, something went wrong!")
 
-
-
     elif request.method == 'POST':
         # ----------------------------------------------------------- #
         # Handle POST
@@ -608,8 +606,10 @@ def edit_route():
     if request.method == 'GET':
         # Pre-fill form with existing name
         form.name.data = gpx.name
+        # And existing owner
         if current_user.admin():
-            form.owner.data = User().find_user_from_email(gpx.email).name
+            user = User().find_user_from_email(gpx.email)
+            form.owner.data = f"{user.name} ({user.id})"
 
     # Render the page
     return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
