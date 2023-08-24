@@ -16,7 +16,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_gpx import Gpx, UploadGPXForm
+from core.dB_gpx import Gpx, UploadGPXForm, RenameGPXForm, AdminRenameGPXForm
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_cafes import Cafe
 from core.dB_events import Event
@@ -483,7 +483,7 @@ def new_route():
 # Allow the user to edit a GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/edit_route', methods=['GET'])
+@app.route('/edit_route', methods=['GET', 'POST'])
 @logout_barred_user
 @login_required
 @update_last_seen
@@ -494,8 +494,6 @@ def edit_route():
     gpx_id = request.args.get('gpx_id', None)
     # return_path is optional
     return_path = request.args.get('return_path', None)
-
-    flash(f"return_path = '{return_path}'")
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -543,13 +541,80 @@ def edit_route():
         return abort(403)
 
     # ----------------------------------------------------------- #
+    #   Form to help them rename the route
+    # ----------------------------------------------------------- #
+    if current_user.admin():
+        # Admins can also change user
+        form = AdminRenameGPXForm()
+    else:
+        form = RenameGPXForm()
+
+    if form.validate_on_submit():
+        # ----------------------------------------------------------- #
+        # Handle form passing validation
+        # ----------------------------------------------------------- #
+
+        # Get new GPX name from the form
+        new_name = form.name.data
+        # Different?
+        if new_name != gpx.name:
+            # Try and write it
+            if Gpx().update_name(gpx_id, new_name):
+                # Success
+                app.logger.debug(f"edit_route(): Successfully renamed GPX '{gpx.id}'.")
+                Event().log_event("Edit GPX Success", f"Successfully renamed GPX '{gpx_id}'.")
+                flash("GPX file has been renamed!")
+            else:
+                # Should never get here, but...
+                app.logger.debug(f"edit_route(): Failed to rename GPX '{gpx.id}'.")
+                Event().log_event("Edit GPX Fail", f"Failed to rename GPX '{gpx_id}'.")
+                flash("Sorry, something went wrong!")
+
+        # Admin can change ownsership
+        if current_user.admin():
+            # Get new owner
+            new_user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
+            # Changed?
+            if new_user.email != gpx.email:
+                # Write the change
+                if Gpx().update_email(gpx_id, new_user.email):
+                    # Success
+                    app.logger.debug(f"edit_route(): Successfully changed ownership of "
+                                     f"GPX '{gpx.id}' to '{new_user.email}'.")
+                    Event().log_event("Edit GPX Success", f"Successfully changed ownership of "
+                                                          f"GPX '{gpx.id}' to '{new_user.email}'.")
+                    flash("GPX file has changed ownership!")
+                else:
+                    # Should never get here, but...
+                    app.logger.debug(f"edit_route(): Failed to change ownership of GPX '{gpx.id}'.")
+                    Event().log_event("Edit GPX Fail", f"Failed to change ownership GPX '{gpx_id}'.")
+                    flash("Sorry, something went wrong!")
+
+
+
+    elif request.method == 'POST':
+        # ----------------------------------------------------------- #
+        # Handle POST
+        # ----------------------------------------------------------- #
+
+        # Only get here is form validation failed..
+        flash("Something was missing in the form!")
+
+    # ----------------------------------------------------------- #
     #   Generate Start and Finish maps
     # ----------------------------------------------------------- #
     maps = start_and_end_maps_native_gm(gpx.filename, gpx_id, return_path)
 
+    if request.method == 'GET':
+        # Pre-fill form with existing name
+        form.name.data = gpx.name
+        if current_user.admin():
+            form.owner.data = User().find_user_from_email(gpx.email).name
+
+    # Render the page
     return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
                            MAP_BOUNDS=MAP_BOUNDS, start_markers=maps[0], start_map_coords=maps[1],
-                           end_markers=maps[2], end_map_coords=maps[3], return_path=return_path)
+                           end_markers=maps[2], end_map_coords=maps[3], return_path=return_path, form=form)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -1,7 +1,6 @@
-from flask_ckeditor import CKEditorField
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FloatField, SelectField
-from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms import StringField, SubmitField, SelectField
+from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, Length
 from datetime import date
 import json
@@ -11,7 +10,8 @@ import json
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, db, GPX_UPLOAD_FOLDER_ABS
+from core import app, db
+from core.db_users import User
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -133,6 +133,44 @@ class Gpx(db.Model):
                     return True
                 except Exception as e:
                     app.logger.error(f"db_gpx: Failed to update filename for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+        return False
+
+    def update_name(self, gpx_id, name):
+        with app.app_context():
+
+            # Locate the GPX file
+            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
+
+            if gpx:
+                try:
+                    # Update filename
+                    gpx.name = name
+                    # Write to dB
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_gpx: Failed to update name for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+        return False
+
+    def update_email(self, gpx_id, email):
+        with app.app_context():
+
+            # Locate the GPX file
+            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
+
+            if gpx:
+                try:
+                    # Update filename
+                    gpx.email = email
+                    # Write to dB
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_gpx: Failed to update email for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False
@@ -333,6 +371,36 @@ class UploadGPXForm(FlaskForm):
     filename = FileField("", validators=[DataRequired()])
 
     submit = SubmitField("Upload GPX")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Edit route name form
+# -------------------------------------------------------------------------------------------------------------- #
+
+class RenameGPXForm(FlaskForm):
+    name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
+
+    submit = SubmitField("Rename")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Admin Edit route name form
+# -------------------------------------------------------------------------------------------------------------- #
+
+class AdminRenameGPXForm(FlaskForm):
+    # ----------------------------------------------------------- #
+    # Generate the list of users
+    # ----------------------------------------------------------- #
+
+    users = User().all_users()
+    all_users = []
+    for user in users:
+        all_users.append(f"{user.name} ({user.id})")
+
+    name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
+    owner = SelectField("Owner:", choices=all_users, validators=[DataRequired()])
+
+    submit = SubmitField("Rename")
 
 
 # -------------------------------------------------------------------------------------------------------------- #

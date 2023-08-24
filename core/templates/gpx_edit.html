@@ -1,5 +1,12 @@
 {% extends "base.html" %}
 
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Bootstrap WTForm Support                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+
 {% block content %}
 
 
@@ -39,6 +46,28 @@
 		{% endfor %}
 	{% endif %}
 {% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Cafe Edit form                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="mb-3">Rename the ride</h2>
+			
+			<!-- This is where the form will go -->
+			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary", "cancel": "secondary"}) }}
+			
+			<!-- Break before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
 
 
 <!---------------------------------------------------------------------------------------------------->

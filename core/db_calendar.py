@@ -10,10 +10,10 @@ import os
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, db
+from core import app, db, GPX_UPLOAD_FOLDER_ABS
 
 from core.dB_cafes import Cafe
-from core.dB_gpx import Gpx, GPX_UPLOAD_FOLDER_ABS
+from core.dB_gpx import Gpx
 from core.db_users import User
 
 
@@ -228,6 +228,7 @@ class AdminCreateRideForm(FlaskForm):
     gpx_name = SelectField("Choose an existing route:", choices=gpx_choices, validators=[DataRequired()])
     gpx_file = FileField("or, upload your own GPX file:", validators=[])
 
+    cancel = SubmitField('Cancel')
     submit = SubmitField("Add Ride")
 
 
