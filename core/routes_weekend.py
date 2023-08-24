@@ -43,6 +43,124 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+def work_out_days(target_date_str):
+
+    # Step 1: Create a set of date strings eg ["23082023", "24082023" ]
+    if target_date_str:
+        # ----------------------------------------------------------- #
+        # Scenario #1 - Passed a specific date, so find that day
+        # ----------------------------------------------------------- #
+        target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0, 00)
+        day_str = target_date.strftime("%A")
+
+        # If it's a Sat or Sunday, we'll show the full WE
+        if day_str == "Saturday":
+            days = ["Saturday", "Sunday"]
+            dates_short = {
+                "Saturday": target_date.strftime("%d%m%Y"),
+                "Sunday": (target_date + timedelta(days=1)).strftime("%d%m%Y")
+            }
+
+        elif day_str == "Sunday":
+            days = ["Saturday", "Sunday"]
+            dates_short = {
+                "Saturday": (target_date - timedelta(days=1)).strftime("%d%m%Y"),
+                "Sunday":   target_date.strftime("%d%m%Y")
+            }
+
+        else:
+            # Just use that single day for now
+            days = [day_str]
+            dates_short = {
+                day_str: target_date.strftime("%d%m%Y")
+            }
+
+    else:
+        # ----------------------------------------------------------- #
+        # Scenario #2 - no date given, so this / next weekend
+        # ----------------------------------------------------------- #
+
+        # No date, so either this weekend or next weekend if it's a weekday.
+        today_str = datetime.today().strftime("%A")
+        today = datetime.today()
+        days = ["Saturday", "Sunday"]
+        if today_str == "Saturday":
+            # Today and tomorrow
+            dates_short = {
+                "Saturday": today.strftime("%d%m%Y"),
+                "Sunday":  (today + timedelta(days=1)).strftime("%d%m%Y")
+            }
+
+        elif today_str == "Sunday":
+            # Yesterday and today
+            dates_short = {
+                "Saturday": (today - timedelta(days=1)).strftime("%d%m%Y"),
+                "Sunday":  today.strftime("%d%m%Y")
+        }
+
+        else:
+            # Next weekend
+            saturday = today + timedelta((5 - today.weekday()) % 7)
+            dates_short = {
+                "Saturday": saturday.strftime("%d%m%Y"),
+                "Sunday":   (saturday + timedelta(days=1)).strftime("%d%m%Y")
+            }
+
+    # ----------------------------------------------------------- #
+    # Detect BHs
+    # ----------------------------------------------------------- #
+
+    # Ignore case of just one day eg a random Wednesday
+    if len(days) > 1:
+        # ----------------------------------------------------------- #
+        # Do we have any rides on the Friday?
+        # ----------------------------------------------------------- #
+        # Convert "23082023" -> datetime object -> "22082023"
+        friday_date = datetime(int(dates_short["Saturday"][4:8]), int(dates_short["Saturday"][2:4]),
+                               int(dates_short["Saturday"][0:2]), 0, 00) - timedelta(days=1)
+        friday_date_str = friday_date.strftime("%d%m%Y")
+        # Do we have any rides in the dB
+        if Calendar().all_calendar_date(friday_date_str):
+            # We a ride on the Friday, so pre-pend Friday
+            days.insert(0, "Friday")
+            dates_short["Friday"] = friday_date_str
+
+        # ----------------------------------------------------------- #
+        # Do we have any rides on the Monday?
+        # ----------------------------------------------------------- #
+        # Convert "23082023" -> datetime object -> "24082023"
+        monday_date = datetime(int(dates_short["Sunday"][4:8]), int(dates_short["Sunday"][2:4]),
+                               int(dates_short["Sunday"][0:2]), 0, 00) + timedelta(days=1)
+        monday_date_str = monday_date.strftime("%d%m%Y")
+        # Do we have any rides in the dB
+        if Calendar().all_calendar_date(monday_date_str):
+            # We a ride on the Friday, so append Monday
+            days.append("Monday")
+            dates_short["Monday"] = monday_date_str
+
+    # ----------------------------------------------------------- #
+    # Add long form dates
+    # ----------------------------------------------------------- #
+
+    # Set of strings for webpage title line etc
+    # {
+    #   "Saturday": "Saturday 25 August 2023",
+    #   "Sunday":   "Sunday 26 August 2023",
+    # }
+    dates_long = {}
+
+    for day in days:
+        # Convert string to datetime object
+        short_date = dates_short[day]
+        target_date = datetime(int(short_date[4:8]), int(short_date[2:4]), int(short_date[0:2]), 0, 00)
+        dates_long[day] = target_date.strftime("%A %b %d %Y")
+
+    # ----------------------------------------------------------- #
+    # Return the three data sets
+    # ----------------------------------------------------------- #
+
+    return [days, dates_long, dates_short]
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Weekend ride details
@@ -59,206 +177,117 @@ def weekend():
     # ----------------------------------------------------------- #
     # Workout which weekend we're displaying
     # ----------------------------------------------------------- #
-    if target_date_str:
-        # Passed a specific date, so find that day / weekend
-        target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0, 00)
 
-        # We normally display the full weekend
-        if target_date.strftime("%A") == "Saturday":
-            # Passed a Saturday
-            target_saturday = target_date
-            target_sunday = target_date + timedelta(days=1)
-        elif target_date.strftime("%A") == "Sunday":
-            # Passed a Sunday
-            target_saturday = target_date - timedelta(days=1)
-            target_sunday = target_date
-        else:
-            # Another random day, so just show one day
-            target_saturday = target_date
-            target_sunday = None
-
-        # These are our required data vars for the webpage
-        saturday_date = target_saturday.strftime("%d%m%Y")
-        saturday = target_saturday.strftime("%A %b %d %Y")
-        if target_sunday:
-            sunday_date = target_sunday.strftime("%d%m%Y")
-            sunday = target_sunday.strftime("%A %b %d %Y")
-        else:
-            sunday_date = None
-            sunday = ""
-    else:
-        # No date, so either this weekend or next weekend if it's a weekday.
-        today_str = datetime.today().strftime("%A")
-        today = datetime.today()
-        if today_str == "Saturday":
-            # Today and tomorrow
-            tomorrow = today + timedelta(days=1)
-            saturday_date = today.strftime("%d%m%Y")
-            sunday_date = tomorrow.strftime("%d%m%Y")
-            saturday = today.strftime("%A %b %d %Y")
-            sunday = tomorrow.strftime("%A %b %d %Y")
-        elif today_str == "Sunday":
-            # Yesterday and today
-            yesterday = today - timedelta(days=1)
-            saturday_date = yesterday.strftime("%d%m%Y")
-            sunday_date = today.strftime("%d%m%Y")
-            saturday = yesterday.strftime("%A %b %d %Y")
-            sunday = today.strftime("%A %b %d %Y")
-        else:
-            # Next weekend
-            next_saturday = today + timedelta((5 - today.weekday()) % 7)
-            next_sunday = today + timedelta((6 - today.weekday()) % 7)
-            saturday_date = next_saturday.strftime("%d%m%Y")
-            sunday_date = next_sunday.strftime("%d%m%Y")
-            saturday = next_saturday.strftime("%A %b %d %Y")
-            sunday = next_sunday.strftime("%A %b %d %Y")
-
-    # ----------------------------------------------------------- #
-    # Get the ride list
-    # ----------------------------------------------------------- #
-    # We will validate these lists as a GPX file could be deleted after the ride has been added to the calendar
-    saturday_rides_tmp = Calendar().all_calendar_date(saturday_date)
-    sunday_rides_tmp = Calendar().all_calendar_date(sunday_date)
+    tmp = work_out_days(target_date_str)
+    days = tmp[0]
+    dates_long = tmp[1]
+    dates_short = tmp[2]
 
     # ----------------------------------------------------------- #
     # Add GPX details
     # ----------------------------------------------------------- #
 
-    # Cleaned lists, after checking GPX files exist
-    saturday_rides = []
-    sunday_rides = []
+    # We will populate these dictionaries for each day
+    rides = {}
+    gpxes = {}
+    cafe_coords = {}
+    cafes = {}
 
     # We will flash a warning if we find a private GPX in any of the weekend's routes
     private_gpx = False
 
-    # Need a set of GPX objects for maps and elevation plots
-    saturday_gpxes = []
-    sunday_gpxes = []
-
-    # Need a set of cafe coordinates for the elevation graphs, to show where the cafes are
-    saturday_cafes_elevations = []
-    sunday_cafes_elevations = []
-
-    # Just a set of cafes for the elevation graphs
-    sat_cafes = []
-    sun_cafes = []
-
     # Populate everything for Saturday
-    for ride in saturday_rides_tmp:
-        # Look up the ride
-        gpx = Gpx().one_gpx(ride.gpx_id)
+    for day in days:
 
-        # Should exist, but..
-        if gpx:
-            filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
-            if os.path.exists(filename):
-                ride.distance = gpx.length_km
-                ride.elevation = gpx.ascent_m
-                ride.public = gpx.public()
-                if not gpx.public():
-                    private_gpx = True
-                saturday_gpxes.append(gpx)
+        # We need to check all the GPXes still exist etc
+        tmp_rides = Calendar().all_calendar_date(dates_short[day])
 
-                # Add to list
-                saturday_rides.append(ride)
+        # Create empty sets for all the data we will need to populate for each day
+        rides[day] = []
+        gpxes[day] = []
+        cafes[day] = []
+        cafe_coords[day] = []
 
-                # Look up the cafe
-                cafe = Cafe().one_cafe(ride.cafe_id)
+        for ride in tmp_rides:
+            # Look up the ride
+            gpx = Gpx().one_gpx(ride.gpx_id)
 
-                # Might not exist if a new cafe
-                if cafe:
-                    saturday_cafes_elevations.append({
-                        "position": {"lat": cafe.lat, "lng": cafe.lon},
-                        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                        "color": OPEN_CAFE_COLOUR,
-                    })
-                    sat_cafes.append(cafe)
+            # Should exist, but..
+            if gpx:
+                # Double check we can find the file
+                filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+                if os.path.exists(filename):
+
+                    # Extract ride stats
+                    ride.distance = gpx.length_km
+                    ride.elevation = gpx.ascent_m
+                    ride.public = gpx.public()
+
+                    # Make a not, if we find a non public GPX
+                    if not gpx.public():
+                        private_gpx = True
+
+                    # Add gpx object to the list of GPX files for that day
+                    gpxes[day].append(gpx)
+
+                    # Add ride to the list of rides that day
+                    rides[day].append(ride)
+
+                    # Look up the cafe
+                    cafe = Cafe().one_cafe(ride.cafe_id)
+
+                    # NB Might not exist if a new cafe, not in our existing db
+                    if cafe:
+                        cafe_coords[day].append({
+                            "position": {"lat": cafe.lat, "lng": cafe.lon},
+                            "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+                            "color": OPEN_CAFE_COLOUR,
+                        })
+                        cafes[day].append(cafe)
+                    else:
+                        # Just add a blank cafe object
+                        cafes[day].append(Cafe())
                 else:
-                    # Just add a blank cafe object
-                    sat_cafes.append(Cafe())
+                    # Missing GPX file
+                    app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
+                    Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
+                    flash(f"Looks like GPX file for ride {ride.id} has been deleted!")
             else:
-                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
-                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
-                flash(f"Looks like GPX file for ride {ride.id} has been deleted!")
-        else:
-            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
-            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
-            flash(f"Looks like GPX route for ride {ride.id} has been deleted (Saturday)!")
-
-    # Populate everything for Sunday
-    for ride in sunday_rides_tmp:
-        # Look up the ride
-        gpx = Gpx().one_gpx(ride.gpx_id)
-
-        # Should exist, but..
-        if gpx:
-            filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
-            if os.path.exists(filename):
-                ride.distance = gpx.length_km
-                ride.elevation = gpx.ascent_m
-                ride.public = gpx.public()
-                if not gpx.public():
-                    private_gpx = True
-                sunday_gpxes.append(gpx)
-
-                # Add to list
-                sunday_rides.append(ride)
-
-                # Look up the cafe
-                cafe = Cafe().one_cafe(ride.cafe_id)
-
-                # Might not exist if a new cafe
-                if cafe:
-                    sunday_cafes_elevations.append({
-                        "position": {"lat": cafe.lat, "lng": cafe.lon},
-                        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                        "color": OPEN_CAFE_COLOUR,
-                    })
-                    sun_cafes.append(cafe)
-                else:
-                    # Just add a blank cafe object
-                    sun_cafes.append(Cafe())
-            else:
-                app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
-                Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
-                flash(f"Looks like GPX file ride {ride.id} has been deleted!")
-        else:
-            app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
-            Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
-            flash(f"Looks like GPX route for ride {ride.id} has been deleted (Sunday)!")
+                # Missing GPX row in the table
+                app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
+                Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
+                flash(f"Looks like GPX route for ride {ride.id} has been deleted (Saturday)!")
 
     # ----------------------------------------------------------- #
     # Polylines for the GPX files
     # ----------------------------------------------------------- #
-    saturday_polylines = create_polyline_set(saturday_gpxes)
-    sunday_polylines = create_polyline_set(sunday_gpxes)
+    polylines = {}
+    for day in days:
+        polylines[day] = create_polyline_set(gpxes[day])
 
     # ----------------------------------------------------------- #
-    # Get elevation data
+    # Get elevation graph data
     # ----------------------------------------------------------- #
-    # Elevation traces
-    saturday_elevation_data = get_elevation_data_set(saturday_gpxes)
-    sunday_elevation_data = get_elevation_data_set(sunday_gpxes)
-
-    # We need x,y traces for the cafes, so they appear at the right point on the elevation graphs
-    saturday_elevation_cafes = get_destination_cafe_height(saturday_elevation_data, saturday_gpxes, sat_cafes)
-    sunday_elevation_cafes = get_destination_cafe_height(sunday_elevation_data, sunday_gpxes, sun_cafes)
+    elevation_data = {}
+    elevation_cafes = {}
+    for day in days:
+        elevation_data[day] = get_elevation_data_set(gpxes[day])
+        elevation_cafes[day] = get_destination_cafe_height(elevation_data[day], gpxes[day], cafes[day])
 
     # ----------------------------------------------------------- #
     # Get weather
     # ----------------------------------------------------------- #
     bbc_weather = weather().forecast(CAMBRIDGE_BBC_WEATHER_CODE)
-    saturday_weather = None
-    sunday_weather = None
     today = datetime.today().strftime("%A")
-    for item in bbc_weather:
-        title = item['title'].split(':')
-        if title[0] == "Saturday" \
-                or today == "Saturday" and title == "Today":
-            saturday_weather = item['summary'].split(',')[0:7]
-        if title[0] == "Sunday" \
-                or today == "Sunday" and title == "Today":
-            sunday_weather = item['summary'].split(',')[0:7]
+
+    weather_data = {}
+    for day in days:
+
+        for item in bbc_weather:
+            title = item['title'].split(':')
+            if title[0] == day \
+                    or today == day and title == "Today":
+                weather_data[day] = item['summary'].split(',')[0:7]
 
     # ----------------------------------------------------------- #
     # Render the page
@@ -269,13 +298,10 @@ def weekend():
 
     return render_template("weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
-                           saturday=saturday, saturday_rides=saturday_rides, saturday_cafes=saturday_cafes_elevations,
-                           saturday_polylines=saturday_polylines, saturday_elevation_data=saturday_elevation_data,
-                           saturday_elevation_cafes=saturday_elevation_cafes, saturday_weather=saturday_weather,
-                           sunday=sunday, sunday_rides=sunday_rides, sunday_cafes=sunday_cafes_elevations,
-                           sunday_polylines=sunday_polylines, sunday_elevation_data=sunday_elevation_data,
-                           sunday_elevation_cafes=sunday_elevation_cafes, sunday_weather=sunday_weather,
-                           saturday_date=saturday_date, sunday_date=sunday_date)
+                           days=days, dates_long=dates_long, dates_short=dates_short,
+                           rides=rides, weather_data=weather_data,
+                           polylines=polylines, cafe_coords=cafe_coords,
+                           elevation_data=elevation_data, elevation_cafes=elevation_cafes)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -466,8 +492,10 @@ def add_ride():
                 # the filename for the GPX file when we upload it
                 gpx = Gpx()
                 if form.destination.data != NEW_CAFE:
-                    gpx.name = form.destination.data
+                    # Existing cafe, so use name from combobox, but strip off cafe.id in brackets
+                    gpx.name = form.destination.data.split('(')[0]
                 else:
+                    # New cafe, so take name from new destination field
                     gpx.name = form.new_destination.data
                 gpx.email = current_user.email
                 gpx.cafes_passed = "[]"
@@ -534,6 +562,13 @@ def add_ride():
         # Populate the calendar entry
         # Convert form date format '2023-06-23' to preferred format '23062023'
         start_date_str = form.date.data.strftime("%d%m%Y")
+
+        print()
+        print()
+        print(f"start_date_str = '{start_date_str}'")
+        print()
+        print()
+
         new_ride.date = start_date_str
         new_ride.leader = form.leader.data
         if cafe:

@@ -12,6 +12,41 @@
 	
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                Load JavaScript for GoogleMaps                                  -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script>
+	
+		(g=>{var h,a,k,p="The Google Maps JavaScript API",
+         c="google",l="importLibrary",q="__ib__",m=document,
+         b=window;b=b[c]||(b[c]={});
+         var d=b.maps||(b.maps={}),r=new Set,
+             e=new URLSearchParams,
+             u=()=>h||(h=new Promise(async(f,n)=>{
+                await (a=m.createElement("script"));
+                e.set("libraries",[...r]+"");
+                for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);
+                e.set("callback",c+".maps."+q);
+                a.src=`https://maps.${c}apis.com/maps/api/js?`+e;
+                d[q]=f;
+                a.onerror=()=>h=n(Error(p+" could not load."));
+                a.nonce=m.querySelector("script[nonce]")?.nonce||"";
+                m.head.append(a)
+             }));
+             d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+   
+                key: "{{ GOOGLE_MAPS_API_KEY }}",
+                v: "weekly",
+                // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+               // Add other bootstrap parameters as needed, using camel case.
+            }
+	    );
+	
+	</script>
+	
+	
 </head>
 
 
@@ -52,528 +87,120 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--             JavaScript for Google Map showing multiple GPX plus one of more Cafes              -->
+<!--                                          Loop by day                                           -->
 <!---------------------------------------------------------------------------------------------------->
 
-<script>
-
-	(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-	    key: "{{ GOOGLE_MAPS_API_KEY }}",
-	    v: "weekly",
-	    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
-	    // Add other bootstrap parameters as needed, using camel case.
-    });
+{% for day in days %}
 
 
-	let saturday_map;
+	<!---------------------------------------------------------------------------------------------------->
+	<!--             JavaScript for Google Map showing multiple GPX plus one of more Cafes              -->
+	<!---------------------------------------------------------------------------------------------------->
 	
-	async function initSaturdayMap() {
-        
-        /* Request needed libraries */
-        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
-        
-        /* Define the map view */
-        const saturday_map = new Map(document.getElementById("saturday_map"), {
-            restriction: {
-                latLngBounds: {{ MAP_BOUNDS | tojson }},
-                strictBounds: false,
-            },
-            zoom: 9,
-            center: {{ ELSR_HOME | tojson }},
-            mapId: "7499929d658a3166",
-        });
-        
-        /* Loop over Polylines */
-        {% for polyline in saturday_polylines['polylines'] %}
-        
-	        /* Define our polyline */
-	        const flightPath{{ loop.index }} = new google.maps.Polyline({
-	            path: {{ polyline['polyline'] }},
-	            geodesic: true,
-	            strokeColor: "{{ polyline['color'] }}",
-	            strokeOpacity: 1.0,
-	            strokeWeight: 4,
+	<script>
+	
+		let {{day}}_map;
+		
+		async function init{{day}}Map() {
+	        
+	        /* Request needed libraries */
+	        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+	        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+	        
+	        /* Define the map view */
+	        const {{day}}_map = new Map(document.getElementById("{{day}}_map"), {
+	            restriction: {
+	                latLngBounds: {{ MAP_BOUNDS | tojson }},
+	                strictBounds: false,
+	            },
+	            zoom: 9,
+	            center: {{ ELSR_HOME | tojson }},
+	            mapId: "7499929d658a3166",
 	        });
-	
-			/* We want a pop up info box for thr GPX route */
-			google.maps.event.addListener(flightPath{{ loop.index }}, 'mouseover', function(event) {
-	            current_lat = event.latLng.lat();
-	            current_lon = event.latLng.lng();
-	            
-	            // Create a new InfoWindow.
-	            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
-	                content: '{{ polyline['name'] | safe }}',
-	                position: event.latLng,
+	        
+	        /* Loop over Polylines */
+	        {% for polyline in polylines[day]['polylines'] %}
+	        
+		        /* Define our polyline */
+		        const flightPath{{ loop.index }} = new google.maps.Polyline({
+		            path: {{ polyline['polyline'] }},
+		            geodesic: true,
+		            strokeColor: "{{ polyline['color'] }}",
+		            strokeOpacity: 1.0,
+		            strokeWeight: 4,
+		        });
+		
+				/* We want a pop up info box for thr GPX route */
+				google.maps.event.addListener(flightPath{{ loop.index }}, 'mouseover', function(event) {
+		            current_lat = event.latLng.lat();
+		            current_lon = event.latLng.lng();
+		            
+		            // Create a new InfoWindow.
+		            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
+		                content: '{{ polyline['name'] | safe }}',
+		                position: event.latLng,
+		            });
+		            
+		            gpxInfoWindow{{loop.index}}.open({{day}}_map);
+				});
+		
+				/* and close the info box when they move elsewhere */
+				google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
+		            gpxInfoWindow{{loop.index}}.close();
+				});
+		
+				/* Add the path to the map */
+		        flightPath{{loop.index}}.setMap({{day}}_map);
+	        
+	        {% endfor %}
+	        
+	        
+	        /* This is our set of cafes */
+			const cafes = {{ cafe_coords[day] | tojson }}
+		    
+		    // Create an info window to share between markers.
+		    const infoWindow = new InfoWindow();
+						
+	        // Create the markers.
+	        cafes.forEach( ({ position, title, color }, i) => {
+	            const pin = new PinElement({
+	            glyph: `${i + 1}`,
 	            });
 	            
-	            gpxInfoWindow{{loop.index}}.open(saturday_map);
-			});
-	
-			/* and close the info box when they move elsewhere */
-			google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
-	            gpxInfoWindow{{loop.index}}.close();
-			});
-	
-			/* Add the path to the map */
-	        flightPath{{loop.index}}.setMap(saturday_map);
-     	
-     	{% endfor %}
-     	
-     	
-     	/* This is our set of cafes */
-		const cafes = {{ saturday_cafes | tojson }}
-	    
-	    // Create an info window to share between markers.
-	    const infoWindow = new InfoWindow();
-					
-        // Create the markers.
-        cafes.forEach( ({ position, title, color }, i) => {
-            const pin = new PinElement({
-            glyph: `${i + 1}`,
-            });
-            
-            const marker = new AdvancedMarkerElement({
-                position,
-                map: saturday_map,
-                title: `${title}`,
-                content: new PinElement({
-                                background: color,
-                                borderColor: "black",
-                                glyphColor: "black",
-							}).element
-            });
-            
-            // Add a click listener for each marker, and set up the info window.
-            marker.addListener("click", ({ domEvent, latLng }) => {
-                const { target } = domEvent;
-                infoWindow.close();
-                infoWindow.setContent(marker.title);
-                infoWindow.open(marker.map, marker);
-            });
-        });
-     	
-     
-	}
-
-	initSaturdayMap();
-	
-	let sunday_map;
-	
-	async function initSundayMap() {
-        
-        /* Request needed libraries */
-        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
-        
-        /* Define the map view */
-        const sunday_map = new Map(document.getElementById("sunday_map"), {
-            restriction: {
-                latLngBounds: {{ MAP_BOUNDS | tojson }},
-                strictBounds: false,
-            },
-            zoom: 9,
-            center: {{ ELSR_HOME | tojson }},
-            mapId: "7499929d658a3166",
-        });
-        
-        /* Loop over Polylines */
-        {% for polyline in sunday_polylines['polylines'] %}
-        
-	        /* Define our polyline */
-	        const flightPath{{ loop.index }} = new google.maps.Polyline({
-	            path: {{ polyline['polyline'] }},
-	            geodesic: true,
-	            strokeColor: "{{ polyline['color'] }}",
-	            strokeOpacity: 1.0,
-	            strokeWeight: 4,
-	        });
-	
-			/* We want a pop up info box for thr GPX route */
-			google.maps.event.addListener(flightPath{{ loop.index }}, 'mouseover', function(event) {
-	            current_lat = event.latLng.lat();
-	            current_lon = event.latLng.lng();
-	            
-	            // Create a new InfoWindow.
-	            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
-	                content: '{{ polyline['name'] | safe }}',
-	                position: event.latLng,
+	            const marker = new AdvancedMarkerElement({
+	                position,
+	                map: {{day}}_map,
+	                title: `${title}`,
+	                content: new PinElement({
+	                                background: color,
+	                                borderColor: "black",
+	                                glyphColor: "black",
+								}).element
 	            });
 	            
-	            gpxInfoWindow{{loop.index}}.open(sunday_map);
-			});
+	            // Add a click listener for each marker, and set up the info window.
+	            marker.addListener("click", ({ domEvent, latLng }) => {
+	                const { target } = domEvent;
+	                infoWindow.close();
+	                infoWindow.setContent(marker.title);
+	                infoWindow.open(marker.map, marker);
+	            });
+	        });
+	        
+	     
+		}
 	
-			/* and close the info box when they move elsewhere */
-			google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
-	            gpxInfoWindow{{loop.index}}.close();
-			});
-	
-			/* Add the path to the map */
-	        flightPath{{loop.index}}.setMap(sunday_map);
-     	
-     	{% endfor %}
-     	
-     	
-     	/* This is our set of cafes */
-		const cafes = {{ sunday_cafes | tojson }}
-	    
-	    // Create an info window to share between markers.
-	    const infoWindow = new InfoWindow();
-					
-        // Create the markers.
-        cafes.forEach( ({ position, title, color }, i) => {
-            const pin = new PinElement({
-            glyph: `${i + 1}`,
-            });
-            
-            const marker = new AdvancedMarkerElement({
-                position,
-                map: sunday_map,
-                title: `${title}`,
-                content: new PinElement({
-                                background: color,
-                                borderColor: "black",
-                                glyphColor: "black",
-							}).element
-            });
-            
-            // Add a click listener for each marker, and set up the info window.
-            marker.addListener("click", ({ domEvent, latLng }) => {
-                const { target } = domEvent;
-                infoWindow.close();
-                infoWindow.setContent(marker.title);
-                infoWindow.open(marker.map, marker);
-            });
-        });
-     	
-     
-	}
-
-	initSundayMap();
-
-</script>
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                   Saturday ride List                                           -->
-<!---------------------------------------------------------------------------------------------------->
-
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-			<h2 class="mb-3">Group rides for {{ saturday }}</h2>
-			
-			{% if not saturday_rides %}
-			
-				<h3>Sorry, we don't have any rides scheduled yet...</h3>
-			
-			{% else %}
-			
-				<ul>
-			
-					{% for ride in saturday_rides %}
-					
-						<li class="my-4">
-						
-							<!-- Animated wheel -->
-							{% if ride.group == "Decaff" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="--fa-animation-duration: 10s;">
-						        </i> &nbsp;
-							{% elif ride.group == "Mixed" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="--fa-animation-duration: 7s;">
-								</i>  &nbsp;
-							{% elif ride.group == "Espresso" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="--fa-animation-duration: 5s;">
-								</i>  &nbsp;
-							{% elif ride.group == "Doppio" %}
-								<i class="fa-solid fa-cog fa-spin fa-xl"
-						           style="">
-								</i>  &nbsp;
-							{% endif %}
-						
-							 <!-- Download button -->
-				            {% if current_user.is_authenticated: %}
-								{% if ride.public %}
-					                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
-				                        <button class="btn btn-sm btn-primary">
-				                            <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
-						            </a>
-								{% else %}
-									<button class="btn btn-sm disabled btn-dark">
-										<i class="fa-solid fa-file-arrow-down"></i> GPX</button>
-								{% endif %}
-							{% endif %}
-							
-							<!-- Admins and author can edit / delete the rides -->
-							{% if current_user.is_authenticated: %}
-								{% if current_user.admin() or current_user.email == ride.email %}
-									
-									<!-- Edit route -->
-									 <a href="{{ url_for('add_ride', ride_id=ride.id, date=saturday_date) }}">
-				                        <button class="btn btn-sm btn-secondary">Edit</button>
-						            </a>
-							
-									<!-- Delete route -->
-									<a data-toggle="modal" data-target="#deleteRoute{{ ride.id }}">
-				                        <button class="btn btn-sm btn-danger">DEL</button>
-						            </a>
-							
-								{% endif %}
-							{% endif %}
-							
-							<!-- Ride description -->
-					        {{ ride.group }}: {{ ride.leader }},
-							<a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">
-								<strong>{{ ride.destination }}</strong>
-							</a>,
-							{{ ride.distance }}km, {{ ride.elevation }}m
-							
-							
-						</li>
-					
-						<!--------------------------------------------------------------------------------------------->
-						<!--                         Modal form for deleting Saturday ride                           -->
-						<!--------------------------------------------------------------------------------------------->
-						
-						<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
-						  	<div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="blockModalLabel">
-											Delete ride '{{ ride.group }}: {{ ride.leader }}, {{ ride.destination }}'
-										</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<div class="modal-body">
-
-										<form action="{{ url_for('delete_ride', ride_id=ride.id, date=saturday_date) }}" method="post">
-											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-											
-											<div class="form-group">
-												<label class="col-form-label">
-													Enter <strong>your password</strong> below.
-												</label>
-												<input type="password" class="form-control" name="password">
-											</div>
-											
-											<div class="modal-footer">
-												<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-												<button type="submit" class="btn btn-danger">Submit</button>
-											</div>
-											
-										</form>
-									</div>
-								</div>
-							</div>
-						</div>  <!-- End of modal form -->
-					
-					{% endfor %}
-					
-				</ul>
-	
-				<!-- Remind people to log in -->
-				{% if not current_user.is_authenticated: %}
-					<p style="color: red"><strong>Log in to download GPX files.</strong></p>
-				{% endif %}
-			
-			{% endif %}
-	
-			<!-- Logged in users can add / edit rides etc -->
-			{% if current_user.is_authenticated: %}
-				<!-- Add ride button -->
-				<a href="{{ url_for('add_ride', date=saturday_date) }}">
-					<button type="button" class="btn btn-primary float-right">Add ride</button>
-				</a>
-			{% endif %}
-	
-		</div>
-	</div>
-</div>
-
-
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-			<!-- Break before next section -->
-			<hr>
-			
-		</div>
-	</div>
-</div>
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                       Saturday Weather                                         -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if saturday_weather %}
-
-	<div class="container">
-		<div class="row mt-2">
-			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-				<h2>Weather forecast for {{ saturday }}</h2>
-				<ul>
-					{% for item in saturday_weather %}
-					
-						<li>{{ item }}</li>
-					
-					{% endfor %}
-				</ul>
-				
-				<p class="copyright text-muted">
-					<a href="http://www.bbc.co.uk/weather">Copyright &copy; BBC Weather {{year}}
-					</a>
-				</p>
-				
-				<!-- Break before footer -->
-				<hr>
-				
-			</div>
-		</div>
-	</div>
-
-{% endif %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                      Saturday routes map                                       -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if saturday_rides %}
-
-	<div class="container">
-		<div class="row mt-2">
-			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-				
-				<h2>Map of rides for {{ saturday }}</h2>
-				
-	
-				<!---------------------------------------------------------------------------------------------------->
-				<!--                                      Insert Google Map                                         -->
-				<!---------------------------------------------------------------------------------------------------->
-				
-				<div id="saturday_map" style="height: 500px"></div>
-				
-				<!-- Break before footer -->
-				<hr>
-				
-			</div>
-		</div>
-	</div>
-
-{% endif %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                  Saturday Elevation Graphs                                     -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if saturday_rides %}
+		init{{day}}Map();
+		
+	</script>
 
 	<div class="container">
 		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
-				
-				<h2 class="my-3">Elevations for {{ saturday }}</h2>
-				
-				<div style="height: 300px; width: 100%;">
-					<canvas id="saturdayElevation"></canvas>
-				</div>
-				<script>
-				
-					var custom_icon = new Image();
-	                custom_icon.src = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
-			 
-			        const saturdayData = {
-			            datasets: [
-				           
-				           /* These are our cafes */
-				           {% for cafe in saturday_elevation_cafes %}
-		                       {
-			                        label: '{{ cafe['name']  | tojson }}',
-			                        pointStyle: [custom_icon],
-			                        data: {{ [cafe['coord']] | tojson }},
-			                    },
-		                   {% endfor %}
-		                   
-							/* These are our routes */
-							{% for gpx in saturday_elevation_data %}
-							
-								{
-			                        label: 'Dist (km), Elevation (m)',
-			                        pointStyle: 'false',
-			                        radius: 0,
-			                        tension: 3,
-			                        showLine: true,
-			                        data: {{ gpx['elevation'] | tojson }},
-			                        backgroundColor: '{{ gpx['colour'] }}',
-			                        borderColor: '{{ gpx['colour'] }}'
-			                    },
-			                
-			                {% endfor %}
-	                    ],
-					};
-				
-		            
-		            const saturdayConfig = {
-						  type: 'scatter',
-						  data: saturdayData,
-						  options: {
-						        maintainAspectRatio: false,
-						        scales: {
-						            x: {
-						                type: 'linear',
-						                position: 'bottom'
-						            },
-						        },
-						        plugins: {
-			                       legend: {
-		                                display: false
-	                               }
-						        }
-						  }
-					};
-						     
-			        
-			        const saturdayChart = new Chart(
-			            document.getElementById('saturdayElevation'),
-			            saturdayConfig
-			        );
-		         
-		        </script>
-				
-				<!-- Separator before next section -->
-				<hr>
-				
-			</div>
-		</div>
-	</div>
-
-{% endif %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                     Sunday ride List                                           -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if sunday_date %}
-	
-	<div class="container">
-		<div class="row mt-3">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 				
-				<h2>Group rides for {{ sunday }}</h2>
+				<h2 class="mb-3">Group rides for {{ dates_long[day] }}</h2>
 				
-				
-				{% if not sunday_rides %}
+				{% if not rides[day] %}
 				
 					<h3>Sorry, we don't have any rides scheduled yet...</h3>
 				
@@ -581,15 +208,15 @@
 				
 					<ul>
 				
-						{% for ride in sunday_rides %}
+						{% for ride in rides[day] %}
 						
 							<li class="my-4">
 							
-								<!-- Spinning wheel -->
+								<!-- Animated wheel -->
 								{% if ride.group == "Decaff" %}
 									<i class="fa-solid fa-cog fa-spin fa-xl"
 							           style="--fa-animation-duration: 10s;">
-							        </i>  &nbsp;
+							        </i> &nbsp;
 								{% elif ride.group == "Mixed" %}
 									<i class="fa-solid fa-cog fa-spin fa-xl"
 							           style="--fa-animation-duration: 7s;">
@@ -609,20 +236,20 @@
 									{% if ride.public %}
 						                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
 					                        <button class="btn btn-sm btn-primary">
-					                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+					                            <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
 							            </a>
 									{% else %}
-										    <button class="btn btn-sm disabled btn-dark">
-					                                 <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
-							       {% endif %}
-					            {% endif %}
+										<button class="btn btn-sm disabled btn-dark">
+											<i class="fa-solid fa-file-arrow-down"></i> GPX</button>
+									{% endif %}
+								{% endif %}
 								
 								<!-- Admins and author can edit / delete the rides -->
 								{% if current_user.is_authenticated: %}
 									{% if current_user.admin() or current_user.email == ride.email %}
 										
 										<!-- Edit route -->
-										 <a href="{{ url_for('add_ride', ride_id=ride.id, date=sunday_date) }}">
+										 <a href="{{ url_for('add_ride', ride_id=ride.id, date=dates_short[day]) }}">
 					                        <button class="btn btn-sm btn-secondary">Edit</button>
 							            </a>
 								
@@ -634,24 +261,25 @@
 									{% endif %}
 								{% endif %}
 								
-						        <!-- Ride description -->
+								<!-- Ride description -->
 						        {{ ride.group }}: {{ ride.leader }},
 								<a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">
 									<strong>{{ ride.destination }}</strong>
 								</a>,
 								{{ ride.distance }}km, {{ ride.elevation }}m
-													
+								
+								
 							</li>
 						
 							<!--------------------------------------------------------------------------------------------->
-							<!--                         Modal form for deleting Sunday ride                           -->
+							<!--                         Modal form for deleting rides                                   -->
 							<!--------------------------------------------------------------------------------------------->
 							
 							<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
 							    <div class="modal-dialog" role="document">
 									<div class="modal-content">
 										<div class="modal-header">
-											<h5 class="modal-title">
+											<h5 class="modal-title" id="blockModalLabel">
 												Delete ride '{{ ride.group }}: {{ ride.leader }}, {{ ride.destination }}'
 											</h5>
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -660,7 +288,7 @@
 										</div>
 										<div class="modal-body">
 	
-											<form action="{{ url_for('delete_ride', ride_id=ride.id, date=saturday_date) }}" method="post">
+											<form action="{{ url_for('delete_ride', ride_id=ride.id, date=dates_short[day]) }}" method="post">
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												
 												<div class="form-group">
@@ -680,24 +308,22 @@
 									</div>
 								</div>
 							</div>  <!-- End of modal form -->
-
 						
 						{% endfor %}
 						
 					</ul>
-					
+		
 					<!-- Remind people to log in -->
 					{% if not current_user.is_authenticated: %}
 						<p style="color: red"><strong>Log in to download GPX files.</strong></p>
 					{% endif %}
 				
 				{% endif %}
-				
 		
 				<!-- Logged in users can add / edit rides etc -->
 				{% if current_user.is_authenticated: %}
 					<!-- Add ride button -->
-					<a href="{{ url_for('add_ride', date=sunday_date) }}">
+					<a href="{{ url_for('add_ride') }}">
 						<button type="button" class="btn btn-primary float-right">Add ride</button>
 					</a>
 				{% endif %}
@@ -720,19 +346,18 @@
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                       Sunday Weather                                           -->
+	<!--                                             Weather                                            -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	{% if sunday_weather %}
+	{% if weather_data[day] %}
 	
 		<div class="container">
 			<div class="row mt-2">
 				<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 				
-					<h2>Weather forecast for {{ sunday }}</h2>
-					
+					<h2>Weather forecast for {{ dates_long[day] }}</h2>
 					<ul>
-						{% for item in sunday_weather %}
+						{% for item in weather_data[day] %}
 						
 							<li>{{ item }}</li>
 						
@@ -755,23 +380,23 @@
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                      Sunday routes map                                       -->
+	<!--                                      Routes map                                                -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	{% if sunday_rides %}
+	{% if rides[day] %}
 	
 		<div class="container">
 			<div class="row mt-2">
 				<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 					
-					<h2>Map of rides for {{ sunday }}</h2>
+					<h2>Map of rides for {{ dates_long[day] }}</h2>
 					
 		
 					<!---------------------------------------------------------------------------------------------------->
 					<!--                                      Insert Google Map                                         -->
 					<!---------------------------------------------------------------------------------------------------->
 					
-					<div id="sunday_map" style="height: 500px"></div>
+					<div id="{{day}}_map" style="height: 500px"></div>
 					
 					<!-- Break before footer -->
 					<hr>
@@ -784,41 +409,39 @@
 	
 	
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                    Sunday Elevation Graphs                                     -->
+	<!--                                         Elevation Graphs                                       -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	{% if sunday_rides %}
+	{% if rides[day] %}
 	
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">
 					
-					<h2 class="my-3">Elevations for {{ sunday }}</h2>
+					<h2 class="my-3">Elevations for {{ dates_long[day] }}</h2>
 					
 					<div style="height: 300px; width: 100%;">
-						<canvas id="sundayElevation"></canvas>
+						<canvas id="{{day}}Elevation"></canvas>
 					</div>
 					<script>
 					
 						var custom_icon = new Image();
 		                custom_icon.src = 'https://maps.google.com/mapfiles/ms/icons/blue-dot.png';
 				 
-				        const sunday_data = {
+				        const {{day}}Data = {
 				            datasets: [
 					           
 					           /* These are our cafes */
-					           {% for cafe in sunday_elevation_cafes %}
-					           
+					           {% for cafe in elevation_cafes[day] %}
 			                       {
 				                        label: '{{ cafe['name']  | tojson }}',
 				                        pointStyle: [custom_icon],
 				                        data: {{ [cafe['coord']] | tojson }},
 				                    },
-			                   
 			                   {% endfor %}
 			                   
 								/* These are our routes */
-								{% for gpx in sunday_elevation_data %}
+								{% for gpx in elevation_data[day] %}
 								
 									{
 				                        label: 'Dist (km), Elevation (m)',
@@ -836,9 +459,9 @@
 						};
 					
 			            
-			            const sundayConfig = {
+			            const {{day}}Config = {
 							  type: 'scatter',
-							  data: sunday_data,
+							  data: {{day}}Data,
 							  options: {
 							        maintainAspectRatio: false,
 							        scales: {
@@ -854,11 +477,11 @@
 							        }
 							  }
 						};
-							
+							     
 				        
-				        const sundayChart = new Chart(
-				            document.getElementById('sundayElevation'),
-				            sundayConfig
+				        const {{day}}Chart = new Chart(
+				            document.getElementById('{{day}}Elevation'),
+				            {{day}}Config
 				        );
 			         
 			        </script>
@@ -872,6 +495,7 @@
 	
 	{% endif %}
 
-{% endif %}
+{% endfor %}  <!-- for day in days -->
+
 
 {% endblock %}
