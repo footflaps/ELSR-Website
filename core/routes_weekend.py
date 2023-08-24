@@ -24,7 +24,7 @@ from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, CreateRideForm, NEW_CAFE, UPLOAD_ROUTE
+from core.db_calendar import Calendar, CreateRideForm, AdminCreateRideForm, NEW_CAFE, UPLOAD_ROUTE
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 
 
@@ -335,35 +335,55 @@ def add_ride():
     # ----------------------------------------------------------- #
     # Need the form
     # ----------------------------------------------------------- #
-    if ride_id:
+    if ride_id \
+            and request.method == 'GET':
         # ----------------------------------------------------------- #
         # Edit event, so pre-fill form from dB
         # ----------------------------------------------------------- #
         gpx = Gpx().one_gpx(ride.gpx_id)
         cafe = Cafe().one_cafe(ride.cafe_id)
-        # These are the easy ones
-        form = CreateRideForm(
-            date=datetime.strptime(ride.date.strip(), '%d%m%Y'),
-            leader=ride.leader,
-            group=ride.group,
-            gpx_name=gpx.combo_string(),
-        )
-        # Cafe might not be in the dB yet, so handle exception
-        if form.destination.data == "":
-            if cafe:
-                form.destination.data = cafe.combo_string()
-                form.new_destination.data = ""
-            else:
-                form.destination.data = NEW_CAFE
-                form.new_destination.data = ride.destination
+        user = User().find_user_from_email(ride.email)
+
+        if current_user.admin():
+            form = AdminCreateRideForm()
+        else:
+            form = CreateRideForm()
+
+        # Date
+        form.date.data = datetime.strptime(ride.date.strip(), '%d%m%Y')
+
+        # Fill in Owner box (admin only)
+        if current_user.admin():
+            form.owner.data = f"{user.name} ({user.id})"
+
+        # Ride leader
+        form.leader.data = ride.leader
+
+        # Cafe:
+        if cafe:
+            form.destination.data = cafe.combo_string()
+            form.new_destination.data = ""
+        else:
+            form.destination.data = NEW_CAFE
+            form.new_destination.data = ride.destination
+
+        # Pace / Group
+        form.group.data = ride.group
+
+        # Existing route
+        form.gpx_name.data = gpx.combo_string()
 
         # Change submission button name
         form.submit.label.text = "Update Ride"
+
     else:
         # ----------------------------------------------------------- #
         # Add event, so start with fresh form
         # ----------------------------------------------------------- #
-        form = CreateRideForm()
+        if current_user.admin():
+            form = AdminCreateRideForm()
+        else:
+            form = CreateRideForm()
 
         # Pre-populate the data in the form, if we were passed one
         if start_date_str:
@@ -563,12 +583,6 @@ def add_ride():
         # Convert form date format '2023-06-23' to preferred format '23062023'
         start_date_str = form.date.data.strftime("%d%m%Y")
 
-        print()
-        print()
-        print(f"start_date_str = '{start_date_str}'")
-        print()
-        print()
-
         new_ride.date = start_date_str
         new_ride.leader = form.leader.data
         if cafe:
@@ -579,6 +593,15 @@ def add_ride():
             new_ride.cafe_id = None
         new_ride.group = form.group.data
         new_ride.gpx_id = gpx.id
+
+        # Admin can allocate events to people
+        if current_user.admin():
+            # Get user
+            user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
+            new_ride.email = user.email
+        else:
+            # Not admin, so user owns the ride event
+            new_ride.email = current_user.email
 
         # Add to the dB
         if Calendar().add_ride(new_ride):

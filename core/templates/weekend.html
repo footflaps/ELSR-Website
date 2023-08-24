@@ -262,7 +262,12 @@
 								{% endif %}
 								
 								<!-- Ride description -->
-						        {{ ride.group }}: {{ ride.leader }},
+						        {{ ride.group }}:
+								<!-- User Gravatar -->
+								<img src="{{ ride.email | gravatar }}"
+							         width="40"
+									 style="border-radius: 50%;"/>
+								{{ ride.leader }}
 								<a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">
 									<strong>{{ ride.destination }}</strong>
 								</a>,

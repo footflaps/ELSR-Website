@@ -14,6 +14,7 @@ from core import app, db
 
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx, GPX_UPLOAD_FOLDER_ABS
+from core.db_users import User
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -93,8 +94,6 @@ class Calendar(db.Model):
             return ride
 
     def add_ride(self, new_ride):
-        # Update some details
-        new_ride.email = current_user.email
 
         # Try and add to dB
         with app.app_context():
@@ -146,6 +145,7 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 
 class CreateRideForm(FlaskForm):
+
     # ----------------------------------------------------------- #
     # Generate the list of cafes
     # ----------------------------------------------------------- #
@@ -172,6 +172,54 @@ class CreateRideForm(FlaskForm):
     # The form itself
     # ----------------------------------------------------------- #
     date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
+    leader = StringField("Ride Leader:", validators=[DataRequired()])
+    destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
+    new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[])
+    group = SelectField("What pace is the ride:", choices=GROUP_CHOICES, validators=[DataRequired()])
+    gpx_name = SelectField("Choose an existing route:", choices=gpx_choices, validators=[DataRequired()])
+    gpx_file = FileField("or, upload your own GPX file:", validators=[])
+
+    submit = SubmitField("Add Ride")
+
+
+class AdminCreateRideForm(FlaskForm):
+
+    # ----------------------------------------------------------- #
+    # Generate the list of cafes
+    # ----------------------------------------------------------- #
+    cafe_choices = []
+    cafes = Cafe().all_cafes()
+    for cafe in cafes:
+        cafe_choices.append(cafe.combo_string())
+    cafe_choices.append(NEW_CAFE)
+
+    # ----------------------------------------------------------- #
+    # Generate the list of routes
+    # ----------------------------------------------------------- #
+    gpx_choices = []
+    gpxes = Gpx().all_gpxes_sorted()
+    for gpx in gpxes:
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+        # Route must be public and double check we have an actual GPX file on tap....
+        if gpx.public() \
+                and os.path.exists(filename):
+            gpx_choices.append(gpx.combo_string())
+    gpx_choices.append(UPLOAD_ROUTE)
+
+    # ----------------------------------------------------------- #
+    # Generate the list of users
+    # ----------------------------------------------------------- #
+
+    users = User().all_users()
+    all_users = []
+    for user in users:
+        all_users.append(f"{user.name} ({user.id})")
+
+    # ----------------------------------------------------------- #
+    # The form itself
+    # ----------------------------------------------------------- #
+    date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
+    owner = SelectField("Owner:", choices=all_users, validators=[DataRequired()])
     leader = StringField("Ride Leader:", validators=[DataRequired()])
     destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
     new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[])
