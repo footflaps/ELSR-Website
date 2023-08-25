@@ -17,6 +17,7 @@ from core import app, current_year, is_mobile
 from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID, logout_barred_user
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
+from core.db_calendar import Calendar
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -79,6 +80,11 @@ def admin_page():
     messages = Message().all_messages_to_email(ADMIN_EMAIL)
 
     # ----------------------------------------------------------- #
+    # All scheduled calendar events (routes)
+    # ----------------------------------------------------------- #
+    rides = Calendar().all_calendar()
+
+    # ----------------------------------------------------------- #
     # Unread messages
     # ----------------------------------------------------------- #
     count = 0
@@ -110,15 +116,18 @@ def admin_page():
             or anchor == "eventLog":
         # Jump straight to the 'eventlog'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
-                               messages=messages, events=events, days=days, mobile=is_mobile(), anchor="eventLog")
+                               messages=messages, events=events, days=days, mobile=is_mobile(),
+                               rides=rides, anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
-                               messages=messages, events=events, days=days, mobile=is_mobile(), anchor="messages")
+                               messages=messages, events=events, days=days, mobile=is_mobile(),
+                               rides=rides, anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
-                               messages=messages, events=events, days=days, mobile=is_mobile())
+                               messages=messages, events=events, days=days, mobile=is_mobile(),
+                               rides=rides)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
