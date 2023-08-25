@@ -777,6 +777,14 @@
             document.getElementById('show_users').innerHTML = 'SHOW';
         });
         
+        /* Rides - Hide <-> Show buttons name change */
+		$("#collapseRideList").on("show.bs.collapse", function(){
+            document.getElementById('show_rides').innerHTML = 'HIDE';
+        });
+       $("#collapseRideList").on("hide.bs.collapse", function(){
+            document.getElementById('show_rides').innerHTML = 'SHOW';
+        });
+        
 		/* Events - Hide <-> Show buttons name change */
 		$("#collapseEventList").on("show.bs.collapse", function(){
             document.getElementById('show_events').innerHTML = 'HIDE';
