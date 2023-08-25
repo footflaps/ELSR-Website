@@ -26,6 +26,7 @@ GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed"]
 
 NEW_CAFE = "New cafe!"
 UPLOAD_ROUTE = "Upload my own route!"
+DEFAULT_START = "8:00am from Espresso Library, East Road"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -62,6 +63,9 @@ class Calendar(db.Model):
 
     # Cafe ID, the cafe might exist in the Cafe dB (could be a new cafe)
     cafe_id = db.Column(db.Integer)
+
+    # Start time
+    start_time = db.Column(db.String(250))
 
     # Return all events
     def all_calendar(self):
