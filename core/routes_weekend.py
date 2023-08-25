@@ -24,7 +24,7 @@ from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, CreateRideForm, AdminCreateRideForm, NEW_CAFE, UPLOAD_ROUTE
+from core.db_calendar import Calendar, CreateRideForm, AdminCreateRideForm, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 
 
@@ -192,6 +192,7 @@ def weekend():
     gpxes = {}
     cafe_coords = {}
     cafes = {}
+    start_times = {}
 
     # We will flash a warning if we find a private GPX in any of the weekend's routes
     private_gpx = False
@@ -206,6 +207,7 @@ def weekend():
         rides[day] = []
         gpxes[day] = []
         cafes[day] = []
+        start_times[day] = []
         cafe_coords[day] = []
 
         for ride in tmp_rides:
@@ -222,6 +224,10 @@ def weekend():
                     ride.distance = gpx.length_km
                     ride.elevation = gpx.ascent_m
                     ride.public = gpx.public()
+                    if ride.start_time:
+                        if ride.start_time.strip() != DEFAULT_START \
+                                and ride.start_time.strip() != "":
+                            start_times[day].append(f"{ride.destination}: {ride.start_time}")
 
                     # Make a not, if we find a non public GPX
                     if not gpx.public():
@@ -298,8 +304,8 @@ def weekend():
 
     return render_template("weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
-                           days=days, dates_long=dates_long, dates_short=dates_short,
-                           rides=rides, weather_data=weather_data,
+                           days=days, dates_long=dates_long, dates_short=dates_short, DEFAULT_START=DEFAULT_START,
+                           rides=rides, start_times=start_times, weather_data=weather_data,
                            polylines=polylines, cafe_coords=cafe_coords,
                            elevation_data=elevation_data, elevation_cafes=elevation_cafes)
 
@@ -359,6 +365,10 @@ def add_ride():
         # Ride leader
         form.leader.data = ride.leader
 
+        # Start time
+        if not form.start.data:
+            form.start.data = ride.start_time
+
         # Cafe:
         if cafe:
             form.destination.data = cafe.combo_string()
@@ -384,6 +394,9 @@ def add_ride():
             form = AdminCreateRideForm()
         else:
             form = CreateRideForm()
+
+        if request.method == 'GET':
+            form.start.data = DEFAULT_START
 
         # Pre-populate the data in the form, if we were passed one
         if start_date_str:
@@ -589,6 +602,7 @@ def add_ride():
 
         new_ride.date = start_date_str
         new_ride.leader = form.leader.data
+        new_ride.start_time = form.start.data
         if cafe:
             new_ride.destination = cafe.name
             new_ride.cafe_id = cafe.id

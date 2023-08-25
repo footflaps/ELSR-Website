@@ -177,6 +177,7 @@ class CreateRideForm(FlaskForm):
     # ----------------------------------------------------------- #
     date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
     leader = StringField("Ride Leader:", validators=[DataRequired()])
+    start = StringField("Start time and location:", validators=[DataRequired()])
     destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
     new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[])
     group = SelectField("What pace is the ride:", choices=GROUP_CHOICES, validators=[DataRequired()])
@@ -226,6 +227,7 @@ class AdminCreateRideForm(FlaskForm):
     date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
     owner = SelectField("Owner:", choices=all_users, validators=[DataRequired()])
     leader = StringField("Ride Leader:", validators=[DataRequired()])
+    start = StringField("Start time and location:", validators=[DataRequired()])
     destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
     new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[])
     group = SelectField("What pace is the ride:", choices=GROUP_CHOICES, validators=[DataRequired()])

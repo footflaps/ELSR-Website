@@ -318,6 +318,19 @@
 						
 					</ul>
 		
+					<!-- Start times -->
+					{% if start_times[day] %}
+						<p>All rides start at {{ DEFAULT_START }} except: </p>
+						<ul>
+							{% for start_time in start_times[day] %}
+								<li>{{ start_time }}</li>
+							{% endfor %}
+						</ul>
+					{% else %}
+						<p>All rides start at {{ DEFAULT_START }}.</p>
+					{% endif %}
+				
+				
 					<!-- Remind people to log in -->
 					{% if not current_user.is_authenticated: %}
 						<p style="color: red"><strong>Log in to download GPX files.</strong></p>
@@ -325,11 +338,11 @@
 				
 				{% endif %}
 		
-				<!-- Logged in users can add / edit rides etc -->
+				<!-- Logged in users can add rides -->
 				{% if current_user.is_authenticated: %}
 					<!-- Add ride button -->
 					<a href="{{ url_for('add_ride', date=None) }}">
-						<button type="button" class="btn btn-primary float-right">Add ride</button>
+						<button type="button" class="btn btn-sm btn-primary float-right">Add ride</button>
 					</a>
 				{% endif %}
 		
