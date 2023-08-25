@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/social-bg.jpg')}}')">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1><i class="fas fa-solid fa-champagne-glasses"></i>
+						&nbsp; Socials &nbsp;
+						<i class="fas fa-solid fa-champagne-glasses"></i>
+					</h1>
+					<span class="subheading">IPA is the new EPO...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<h2>We don't just ride bikes!</h2>
+			
+			<p>We get completely sloshed too...</p>
+			<p>Ok, so half a shandy and I can barely stand, but that's just because I'm a finely tuned athlete.</p>
+			
+			<p>Next social will be 23rd September, location TBC...</p>
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}

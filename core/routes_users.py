@@ -535,7 +535,7 @@ def twofa_login():
                 app.logger.debug(f"twofa_login(): Form, code didn't work for user '{user.email}'.")
                 Event().log_event("2FA login Fail", f"Form, code didn't work for user '{user.email}'.")
                 flash("Incorrect code (or code has expired), please try again!")
-                return render_template("sms_login.html", form=form, year=current_year)
+                return render_template("user_sms_login.html", form=form, year=current_year)
 
         # Invalid email
         app.logger.debug(f"twofa_login(): Form, unrecognised email '{form.email.data}'.")
@@ -543,7 +543,7 @@ def twofa_login():
         flash("Unrecognised email, please try again!")
 
     # Show register page / form
-    return render_template("sms_login.html", form=form, year=current_year)
+    return render_template("user_sms_login.html", form=form, year=current_year)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -1031,5 +1031,5 @@ def mobile_verify():
             # Fal back to the GET option
 
     # Back to user page
-    return render_template("phone_verification.html", year=current_year, form=form)
+    return render_template("user_phone_verification.html", year=current_year, form=form)
 
