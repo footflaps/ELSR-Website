@@ -68,6 +68,45 @@ def calendar():
                     "markup": f"<a href='{url_for('weekend', date=f'{datestr}')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>",
                 })
 
+    # Add a chaingang
+    events.append({
+        "date": "2023-08-03",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-08-10",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-08-17",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-08-24",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-08-31",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-09-07",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-09-14",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-09-21",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+    events.append({
+        "date": "2023-09-28",
+        "markup": f"<a href='{url_for('chaingang')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>"
+    })
+
+
     # Add a social
     events.append({
         "date": "2023-09-23",
