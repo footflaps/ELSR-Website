@@ -70,8 +70,8 @@ def calendar():
 
     # Add a social
     events.append({
-             "date": "2023-08-02",
-             "markup": '<i class="fas fa-solid fa-champagne-glasses fa-2xl"></i>[day]'
+        "date": "2023-09-23",
+        "markup": '<i class="fas fa-solid fa-champagne-glasses fa-2xl"></i>[day]'
     })
 
     return render_template("calendar.html", year=current_year, events=events)
