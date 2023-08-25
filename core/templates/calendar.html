@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<head>
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                Load JavaScript for calendar                                    -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="{{ url_for('static', filename='js/calendar.js')}}"></script>
+	
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/calendar.css')}}">
+	
+</head>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/calendar-bg.jpg')}}')">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Calendar</h1>
+					<span class="subheading">I have seen the future...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                           Calendar                                             -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<!-- Our calendar -->
+			<div id="my-calendar"></div>
+			
+		</div>
+	</div>
+</div>
+
+
+<div class="container">
+	<div class="row mt-4">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<!-- Logged in users can add rides -->
+			{% if current_user.is_authenticated: %}
+			
+				<!-- Add ride button -->
+				<a href="{{ url_for('add_ride', date=None) }}">
+					<button type="button" class="btn btn-primary float-right">Add ride</button>
+				</a>
+			
+			{% endif %}
+
+		</div>
+	</div>
+</div>
+
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<!-- Break before footer -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<style>
+	table.lightgrey-weekends tbody td:nth-child(n+6) {
+	  background-color: #f3f3f3;
+	}
+</style>
+
+<script>
+	 $(document).ready(function () {
+	    $("#my-calendar").zabuto_calendar({
+	      classname: 'table table-bordered lightgrey-weekends',
+	      today_markup: '<span class="badge bg-primary">[day]</span>',
+	      navigation_markup: {
+	        prev: '<i class="fas fa-chevron-circle-left fa-xl"></i>',
+	        next: '<i class="fas fa-chevron-circle-right fa-xl"></i>'
+	      },
+	      events: {{ events | tojson }}
+	    });
+	  });
+
+</script>
+
+{% endblock %}
