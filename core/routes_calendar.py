@@ -52,21 +52,23 @@ def calendar():
     events = []
 
     # Loop over time
-    this_year = datetime.today().year
-    this_month = datetime.today().month
-
+    year = datetime.today().year
+    month = datetime.today().month
     # Just cover next 6 months
-    for month in range(this_month, this_month + 2):
+    for _ in range(0, 7):
         if month == 13:
-            this_year += 1
-        for day in range(1, cal.monthrange(this_year, month % 12)[1] + 1):
-            datestr = f"{format(day, '02d')}{format(month % 12, '02d')}{this_year}"
+            year += 1
+            month = 1
+        for day in range(1, cal.monthrange(year, month)[1] + 1):
+            datestr = f"{format(day, '02d')}{format(month, '02d')}{year}"
             if Calendar().all_calendar_date(datestr):
                 print(f"Have event on {datestr}")
                 events.append({
-                    "date": f"{this_year}-{format(month % 12, '02d')}-{format(day, '02d')}",
+                    "date": f"{year}-{format(month, '02d')}-{format(day, '02d')}",
                     "markup": f"<a href='{url_for('weekend', date=f'{datestr}')}'><i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>",
                 })
+        # Next month
+        month += 1
 
     # Add a chaingang
     events.append({
