@@ -18,6 +18,7 @@ from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_I
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_calendar import Calendar
+from core.db_social import Socials
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -85,6 +86,11 @@ def admin_page():
     rides = Calendar().all_calendar()
 
     # ----------------------------------------------------------- #
+    # All scheduled social events
+    # ----------------------------------------------------------- #
+    socials = Socials().all()
+
+    # ----------------------------------------------------------- #
     # Unread messages
     # ----------------------------------------------------------- #
     count = 0
@@ -116,17 +122,17 @@ def admin_page():
             or anchor == "eventLog":
         # Jump straight to the 'eventlog'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
-                               messages=messages, events=events, days=days, mobile=is_mobile(),
+                               messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
-                               messages=messages, events=events, days=days, mobile=is_mobile(),
+                               messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
-                               messages=messages, events=events, days=days, mobile=is_mobile(),
+                               messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides)
 
 

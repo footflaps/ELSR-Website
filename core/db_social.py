@@ -59,6 +59,11 @@ class Socials(db.Model):
             socials = db.session.query(Socials).all()
             return socials
 
+    def all_by_email(self, email):
+        with app.app_context():
+            socials = db.session.query(Socials).filter_by(email=email).all()
+            return socials
+
     def one_social_id(self, social_id):
         with app.app_context():
             social = db.session.query(Socials).filter_by(id=social_id).first()

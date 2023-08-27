@@ -29,6 +29,7 @@ from core.dB_events import Event
 from core.send_emails import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
 from core.subs_google_maps import MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.db_calendar import Calendar
+from core.db_social import Socials
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -715,6 +716,11 @@ def user_page():
     rides = Calendar().all_calendar_email(user.email)
 
     # ----------------------------------------------------------- #
+    # All scheduled social events
+    # ----------------------------------------------------------- #
+    socials = Socials().all_by_email(user.email)
+
+    # ----------------------------------------------------------- #
     # Markers for Google Map of User's Cafes
     # ----------------------------------------------------------- #
     cafe_markers = []
@@ -753,19 +759,19 @@ def user_page():
     if anchor == "messages":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides,
+                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
                                GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, anchor="messages")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides,
+                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
                                GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides,
+                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
                                GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS)
 
 
