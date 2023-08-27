@@ -56,6 +56,7 @@ ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 
 @app.route('/cafes', methods=['GET'])
 @update_last_seen
+@logout_barred_user
 def cafe_list():
     # ----------------------------------------------------------- #
     # Get all known cafes
@@ -96,6 +97,7 @@ def cafe_list():
 
 @app.route("/cafe/<int:cafe_id>", methods=['GET', 'POST'])
 @update_last_seen
+@logout_barred_user
 def cafe_details(cafe_id):
     # ----------------------------------------------------------- #
     # Check params are valid

@@ -1,7 +1,6 @@
-from flask_login import current_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, FloatField, SelectField, DateField
-from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms import StringField, SubmitField, SelectField, DateField
+from flask_wtf.file import FileField
 from wtforms.validators import DataRequired
 import os
 
@@ -11,6 +10,11 @@ import os
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db, GPX_UPLOAD_FOLDER_ABS
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import our own classes
+# -------------------------------------------------------------------------------------------------------------- #
 
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
@@ -24,15 +28,18 @@ from core.db_users import User
 # These are our standard groups
 GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed"]
 
+# Option for user defined choices
 NEW_CAFE = "New cafe!"
 UPLOAD_ROUTE = "Upload my own route!"
+
+# Default option
 DEFAULT_START = "8:00am from Espresso Library, East Road"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
-# Define Event Class
+# Define Calendar Class
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -219,13 +226,13 @@ class AdminCreateRideForm(FlaskForm):
     users = User().all_users()
     all_users = []
     for user in users:
-        all_users.append(f"{user.name} ({user.id})")
+        all_users.append(user.combo_str())
 
     # ----------------------------------------------------------- #
     # The form itself
     # ----------------------------------------------------------- #
     date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
-    owner = SelectField("Owner:", choices=all_users, validators=[DataRequired()])
+    owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[DataRequired()])
     leader = StringField("Ride Leader:", validators=[DataRequired()])
     start = StringField("Start time and location:", validators=[DataRequired()])
     destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
@@ -253,4 +260,4 @@ class AdminCreateRideForm(FlaskForm):
 
 with app.app_context():
     rides = db.session.query(Calendar).all()
-    print(f"Found {len(rides)} events in the dB")
+    print(f"Found {len(rides)} calendar entries in the dB")

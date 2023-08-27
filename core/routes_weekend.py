@@ -361,7 +361,7 @@ def add_ride():
 
         # Fill in Owner box (admin only)
         if current_user.admin():
-            form.owner.data = f"{user.name} ({user.id})"
+            form.owner.data = user.combo_str()
 
         # Ride leader
         form.leader.data = ride.leader
@@ -669,7 +669,7 @@ def add_ride():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Delete a comment
+# Delete a ride from the calendar
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/delete_ride", methods=['POST'])

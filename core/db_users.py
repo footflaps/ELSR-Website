@@ -625,6 +625,15 @@ class User(UserMixin, db.Model):
             app.logger.error(f"dB.set_phone_number(): Called with invalid user_id = '{user_id}'.")
             return False
 
+    def combo_str(self):
+        return f"{self.name} ({self.id})"
+
+    def user_from_combo_string(self, combo_string):
+        # Extract id from number in last set of brackets
+        # E.g. "Fred (5)"
+        user_id = combo_string.split('(')[-1].split(')')[0]
+        return self.find_user_from_id(user_id)
+
     # Optional: this will allow each user object to be identified by its name when printed.
     # NB Names are not unique, but emails are, hence added in brackets
     def __repr__(self):

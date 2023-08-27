@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Bootstrap WTForm Support                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!-- Generic photo -->
+<header  class="masthead"
+         style="background-image: url({{ url_for('static', filename='img/add-ride-bg.jpg') }})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					
+					{% if social: %}
+						<h1>Edit Social Details</h1>
+					{% else: %}
+						<h1>Add a Social!</h1>
+					{% endif %}
+					
+					<span class="subheading">Let's all get smashed!</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Social Edit form                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="mb-3">Edit the details</h2>
+			
+			<!-- Load ckeditor -->
+			{{ ckeditor.load() }}
+			
+			<!-- This is where the form will go -->
+			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary", "cancel": "secondary"}) }}
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}
+

@@ -76,6 +76,11 @@
 			<!-- Logged in users can add rides -->
 			{% if current_user.is_authenticated: %}
 			
+				<!-- Add social button -->
+				<a href="{{ url_for('add_social', date=None) }}">
+					<button type="button" class="btn btn-primary float-left">Add social</button>
+				</a>
+			
 				<!-- Add ride button -->
 				<a href="{{ url_for('add_ride', date=None) }}">
 					<button type="button" class="btn btn-primary float-right">Add ride</button>

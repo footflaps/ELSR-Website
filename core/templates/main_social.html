@@ -48,19 +48,154 @@
 <div class="container">
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
+			
 			<h2>We don't just ride bikes!</h2>
 			
-			<p>We get completely sloshed too...</p>
-			<p>Ok, so half a shandy and I can barely stand, but that's just because I'm a finely tuned athlete.</p>
-			
-			<p>Next social will be 23rd September, location TBC...</p>
-			
+			<p>We get completely sloshed too... </p>
 			<hr>
 			
 		</div>
 	</div>
 </div>
 
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			{% if date %}
+				<h2 class="mb-3">Upcoming Socials for {{ date }}:</h2>
+			{% else %}
+				<h2 class="mb-3">Upcoming Socials:</h2>
+			{% endif %}
+			
+			{% if date and not socials %}
+				
+				<h3>Sorry, we don't have any socials for {{ date }}.</h3>
+				
+			{% elif not socials %}
+			
+				<h3>Sorry, we don't have any socials scheduled just yet....</h3>
+			
+			{% else %}
+			
+				{% for social in socials %}
+					
+					<div class="card mt-3">
+						<div class="card-body">
+						
+							<!-- Card title -->
+							<h3 class="card-title">{{ social.long_date }}, {{ social.destination }} </h3>
+							<h4 class="card-title">Organiser:
+							    <!-- User Gravatar -->
+								<img src="{{ social.email | gravatar }}"
+								         width="40"
+										 style="border-radius: 50%;"/>
+								{{ social.organiser }}
+							</h4>
+							
+							<!-- Card body -->
+							<h4 class="card-text">Details:</h4>
+			
+							{{ social.details | safe }}
+							
+						</div>
+					</div>
+			
+					<!-- Admin and owner can edit / delete the event -->
+					{% if current_user.is_authenticated %}
+						{% if current_user.admin() or current_user.email == social.email %}
+							<div>
+								
+								<!-- Edit social -->
+								 <a href="{{ url_for('add_social', social_id=social.id) }}">
+			                        <button class="btn btn-sm btn-secondary mr-2">Edit</button>
+					            </a>
+								
+								<!-- Delete social -->
+								<a data-toggle="modal" data-target="#deleteSocial{{ social.id }}">
+			                        <button class="btn btn-sm btn-danger">DEL</button>
+					            </a>
+								
+							</div>
+						{% endif %}
+					{% endif %}
+			
+					<!--------------------------------------------------------------------------------------------->
+					<!--                         Modal form for deleting social                                  -->
+					<!--------------------------------------------------------------------------------------------->
+					
+					<div class="modal fade" id="deleteSocial{{ social.id }}" tabindex="-1" role="dialog">
+					    <div class="modal-dialog" role="document">
+							<div class="modal-content">
+								<div class="modal-header">
+									<h5 class="modal-title" id="blockModalLabel">
+										Delete Social '{{ social.date }}: {{ social.destination }}'
+									</h5>
+									<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+										<span aria-hidden="true">&times;</span>
+									</button>
+								</div>
+								<div class="modal-body">
+
+									<form action="{{ url_for('delete_social', social_id=social.id) }}" method="post">
+										<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+										
+										<div class="form-group">
+											<label class="col-form-label">
+												Enter <strong>your password</strong> below.
+											</label>
+											<input type="password" class="form-control" name="password">
+										</div>
+										
+										<div class="modal-footer">
+											<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+											<button type="submit" class="btn btn-danger">Submit</button>
+										</div>
+										
+									</form>
+								</div>
+							</div>
+						</div>
+					</div>  <!-- End of modal form -->
+			
+			
+				{% endfor %}
+			
+			{% endif %}
+		
+		</div>
+	</div>
+</div>
+
+<!-- Logged in users can add social evenst -->
+{% if current_user.is_authenticated: %}
+
+	<div class="container">
+		<div class="row mt-3">
+			<div class="col-lg-8 col-md-10 mx-auto">
+			
+				<!-- Add social button -->
+				<a href="{{ url_for('add_social', date=None) }}">
+					<button type="button" class="btn btn-primary float-right">Add social</button>
+				</a>
+			
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+		
+			<!-- Break before footer -->
+			<hr>
+		
+		</div>
+	</div>
+</div>
 
 
 

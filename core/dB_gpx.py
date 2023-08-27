@@ -398,7 +398,7 @@ class AdminRenameGPXForm(FlaskForm):
         all_users.append(f"{user.name} ({user.id})")
 
     name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
-    owner = SelectField("Owner:", choices=all_users, validators=[DataRequired()])
+    owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[DataRequired()])
 
     submit = SubmitField("Rename")
 
