@@ -446,13 +446,9 @@
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<div class="collapse" id="collapseRoutes">
 				
-					{% if mobile %}
-						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
-						       style="width: 100%">
-					{% else %}
-						<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
-					           style="width: 100%">
-					{% endif %}
+					<table id="gpxTable" class="table table-striped table-bordered table-sm table-condensed"
+					       data-page-length="25"
+					       style="width: 100%">
 					
 			        	<!-- Header -->
 						<thead>

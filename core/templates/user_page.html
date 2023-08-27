@@ -68,6 +68,7 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 		
+				<!-- Shorter description on smaller screens -->
 				{% if mobile %}
 					{% if messages | count == 1 %}
 						<h2 class="post-title float-left">{{ messages | count }} Message:</h2>
@@ -320,6 +321,7 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
+				<!-- Shorter description on smaller screens -->
 				{% if mobile %}
 		            <h2 class="mb-4">Map of your cafes:</h2>
 				{% else %}
@@ -349,6 +351,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 	
+			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
 				<h2 class="post-title float-left">{{ cafes|length }} cafes:</h2>
 			{% else %}
@@ -455,6 +458,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
+			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
 				<h2 class="post-title float-left">{{ gpxes|length }} routes:</h2>
 			{% else %}
@@ -555,6 +559,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 
+			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
 				<h2 class="post-title float-left">{{cafe_comments|length}} comments:</h2>
 			{% else %}
@@ -647,6 +652,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 
+			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
 				<h2 class="post-title float-left">{{rides|length}} rides:</h2>
 			{% else %}
@@ -742,6 +748,7 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
+				<!-- Shorter description on smaller screens -->
 				{% if mobile %}
 					<h2 class="post-title float-left">{{ events|count }} events in {{ days }} days:</h2>
 				{% elif current_user.id == user.id %}
@@ -894,6 +901,7 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
+			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
 				<h2 class="post-title float-left">Account:</h2>
 			{% else %}

@@ -76,6 +76,7 @@
 			{% if current_user.is_authenticated and current_user.can_post_gpx() %}
 				<a class="btn btn-primary float-right" href="{{ url_for('new_route') }}">
 					<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i>
+					<!-- Shorter description on smaller screens -->
 					{% if mobile %}
 						Add
 					{% else %}
@@ -168,6 +169,7 @@
 			{% if current_user.is_authenticated and current_user.can_post_gpx() %}
 				<a class="btn btn-primary float-right" href="{{ url_for('new_route') }}">
 					<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i>
+					<!-- Shorter description on smaller screens -->
 					{% if mobile %}
 						Add
 					{% else %}
