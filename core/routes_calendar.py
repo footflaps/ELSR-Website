@@ -167,6 +167,7 @@ def add_social():
 
             # We are editing an existing event, so pre-fill details
             form.date.data = datetime.strptime(social.date.strip(), '%d%m%Y')
+            form.start_time.data = datetime.strptime(f"{social.date} {social.start_time}", '%d%m%Y %H%M').time()
             form.organiser.data = social.organiser
             form.destination.data = social.destination
             form.details.data = social.details
@@ -229,6 +230,7 @@ def add_social():
         new_social.email = owner.email
         # Convert form date format '2023-06-23' to preferred format '23062023'
         new_social.date = form.date.data.strftime("%d%m%Y")
+        new_social.start_time = form.start_time.data.strftime("%H%M")
         new_social.destination = form.destination.data
         new_social.details = form.details.data
 
@@ -283,7 +285,7 @@ def social():
     date = request.args.get('date', None)
 
     # ----------------------------------------------------------- #
-    # Get out socials
+    # Get our socials
     # ----------------------------------------------------------- #
     if date:
         # Get socials specific to that date
@@ -292,6 +294,16 @@ def social():
     else:
         # Just get ones yet to happen
         socials = Socials().all_socials_future()
+
+    # ----------------------------------------------------------- #
+    # Add more friendly start time
+    # ----------------------------------------------------------- #
+    for social in socials:
+        if social.start_time:
+            social.start_time_txt = f"{social.start_time[0:2]}:{social.start_time[2:4]}"
+        else:
+            social.start_time_txt = "TBC"
+
 
     return render_template("main_social.html", year=current_year, socials=socials, date=date)
 
@@ -427,7 +439,8 @@ def download_ics():
     # Create ics event
     new_event = icsEvent()
     new_event.name = "ELSR Social"
-    new_event.begin = f"{social.date[4:8]}-{social.date[2:4]}-{social.date[0:2]} 19:00:00"
+    new_event.begin = f"{social.date[4:8]}-{social.date[2:4]}-{social.date[0:2]} " \
+                      f"{social.start_time[0:2]}:{social.start_time[2:4]}:00"
     new_event.location = social.destination
     new_event.description = f"ELSR Social organised by {social.organiser}: {social.details} \n\n " \
                             f"https://www.elsr.co.uk/social"

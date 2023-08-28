@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, DateField
+from wtforms import StringField, SubmitField, SelectField, DateField, TimeField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from datetime import datetime
@@ -52,6 +52,9 @@ class Socials(db.Model):
 
     # Details
     details = db.Column(db.String(500))
+
+    # Start time
+    start_time = db.Column(db.String(20))
 
     # Return all events
     def all(self):
@@ -149,6 +152,7 @@ class CreateSocialForm(FlaskForm):
     # The form itself
     # ----------------------------------------------------------- #
     date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
+    start_time = TimeField("Start time:", format="%H:%M")
     organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
     destination = StringField("Location:", validators=[InputRequired("Please enter a destination.")])
     details = CKEditorField("When, where, dress code etc:", validators=[InputRequired("Please provide some details.")])
@@ -172,6 +176,7 @@ class AdminCreateSocialForm(FlaskForm):
     # The form itself
     # ----------------------------------------------------------- #
     date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
+    start_time = TimeField("Start time:", format="%H:%M")
     owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[InputRequired("Please enter an owner.")])
     organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
     destination = StringField("Location:", validators=[InputRequired("Please enter a destination.")])
