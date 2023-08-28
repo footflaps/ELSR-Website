@@ -20,7 +20,7 @@ from core import app, current_year
 
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
     admin_only, update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
-    TwoFactorLoginForm, DELETED_NAME
+    TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
@@ -622,7 +622,7 @@ def reset_password():
 # User home page
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/user_page', methods=['GET'])
+@app.route('/user_page', methods=['GET', 'POST'])
 @login_required
 @update_last_seen
 def user_page():
@@ -665,6 +665,46 @@ def user_page():
         Event().log_event("User Page Fail", f"Rejected request from current_user.id = '{current_user.id}', "
                                             f"for user_id = '{user_id}'.")
         abort(403)
+
+    # ----------------------------------------------------------- #
+    # Need a form
+    # ----------------------------------------------------------- #
+    form = ChangeUserNameForm()
+
+    if request.method == 'GET':
+        # pre-fill existing name
+        form.name.data = user.name
+    elif form.validate_on_submit():
+        # User has requested new name
+        new_name = form.name.data.strip()
+        if new_name == user.name:
+            # No change
+            flash("That's the same name as before!")
+            return redirect(url_for('user_page', user_id=user.id))
+        elif User().check_name_in_use(new_name):
+            # Not unique
+            flash(f"Sorry, the name '{new_name}' is already in use!")
+            return redirect(url_for('user_page', user_id=user.id))
+        else:
+            # Change their name
+            if User().update_user_name(user.id, new_name):
+                app.logger.debug(f"user_page(): Change username for user_id = '{user_id}' to '{new_name}'.")
+                Event().log_event("User Page Succes", f"Changed username for user_id = '{user_id}' to '{new_name}'.")
+                flash("User name has been changed!")
+                return redirect(url_for('user_page', user_id=user.id))
+            else:
+                # Should never get here, but..
+                app.logger.debug(f"user_page(): Failed to change username for user_id = '{user_id}'.")
+                Event().log_event("User Page Fail",
+                                  f"Failed to change username for user_id = '{user_id}'.")
+                flash("Sorry, something went wrong!")
+                return redirect(url_for('user_page', user_id=user.id))
+
+    elif request.method == 'POST':
+        # Failed form validation
+        flash("You didn't fill your name in properly!")
+        return redirect(url_for('user_page', user_id=user.id))
+
 
     # ----------------------------------------------------------- #
     # Events
@@ -765,19 +805,21 @@ def user_page():
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, anchor="messages")
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, form=form,
+                               anchor="messages")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, anchor="eventLog")
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, form=form,
+                               anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS)
+                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, form=form)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

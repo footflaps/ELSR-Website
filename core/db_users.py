@@ -301,9 +301,9 @@ class User(UserMixin, db.Model):
                 app.logger.error(f"dB.generate_sms_code(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def find_user_from_id(self, id):
+    def find_user_from_id(self, user_id):
         with app.app_context():
-            user = db.session.query(User).filter_by(id=id).first()
+            user = db.session.query(User).filter_by(id=user_id).first()
             return user
 
     def check_name_in_use(self, name):
@@ -312,6 +312,24 @@ class User(UserMixin, db.Model):
             if name.strip().lower() == user.name.strip().lower():
                 return True
         return False
+
+    def update_user_name(self, user_id, new_name):
+        with app.app_context():
+            user = db.session.query(User).filter_by(id=user_id).first()
+            if user:
+                try:
+                    user.name = new_name
+                    # Write to dB
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"dB.update_user_name(): Failed with error code '{e.args}' "
+                                     f"for user_id = '{user_id}'.")
+                    return False
+            else:
+                app.logger.error(f"dB.update_user_name(): Called with invalid user_id = '{user_id}'.")
+        return False
+
 
     def find_user_from_email(self, email):
         with app.app_context():
@@ -850,6 +868,15 @@ class ResetPasswordForm(FlaskForm):
     password1 = PasswordField("Password", validators=[InputRequired("Please enter a password.")])
     password2 = PasswordField("Password again", validators=[InputRequired("Please enter a password.")])
     submit = SubmitField("Reset password")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Change username form
+# -------------------------------------------------------------------------------------------------------------- #
+class ChangeUserNameForm(FlaskForm):
+    name = StringField("Change my user name:",
+                       validators=[InputRequired("Please enter your name.")])
+    submit = SubmitField("Change me!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
