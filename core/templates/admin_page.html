@@ -346,7 +346,7 @@
 								<th scope="col">Start date</th>
 							{% endif %}
 							<th scope="col">Last Login</th>
-							{% if current_user.id == 1 %}
+							{% if current_user.admin() %}
 								<th scope="col">Email</th>
 							{% endif %}
 						</tr>
@@ -380,7 +380,7 @@
 									<td>{{ user.start_date }}</td>
 								{% endif %}
 								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
-								{% if current_user.id == 1 %}
+								{% if current_user.admin() %}
 									<td>{{ user.email }}</td>
 								{% endif %}
 							</tr>
