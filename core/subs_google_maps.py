@@ -200,7 +200,7 @@ def markers_for_cafes_native(cafes):
 
 def start_and_end_maps_native_gm(filename, gpx_id, return_path):
     # Use absolute path for filename
-    filename = (os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename))
 
     # Creating two separate maps:
     start_markers = []

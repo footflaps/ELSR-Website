@@ -1,10 +1,18 @@
 from flask import url_for
 import smtplib
 import os
-from core import app
 from twilio.rest import Client
 from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX
+import logging
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import app from __init__.py
+# -------------------------------------------------------------------------------------------------------------- #
+
+from core import app
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -72,9 +80,12 @@ def send_verification_email(target_email, user_name, code):
                 to_addrs=target_email,
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
+            logging.getLogger(__name__).debug(f"Email(): sent verification email to '{target_email}'")
             app.logger.debug(f"Email(): sent verification email to '{target_email}'")
             return True
         except Exception as e:
+            logging.getLogger(__name__).debug(f"Email(): Failed to send verification email to '{target_email}', "
+                                              f"error code was '{e.args}'.")
             app.logger.debug(
                 f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
             return False
