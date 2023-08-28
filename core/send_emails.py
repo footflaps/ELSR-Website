@@ -4,7 +4,6 @@ import os
 from twilio.rest import Client
 from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX
-import logging
 
 
 # -------------------------------------------------------------------------------------------------------------- #

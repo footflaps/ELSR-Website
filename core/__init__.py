@@ -89,7 +89,12 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
 # -------------------------------------------------------------------------------------------------------------- #
 
 app.logger.setLevel(logging.DEBUG)
-app.logger.warning('this will show in the log')
+app.logger.debug('this will show in the log')
+
+if __name__ != '__main__':
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
