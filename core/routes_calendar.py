@@ -448,6 +448,6 @@ def download_ics():
     app.logger.debug(f"download_ics(): Serving ICS social_id = '{social_id}' ({social.date}), "
                      f"download_name = '{download_name}'.")
     Event().log_event("ICS Downloaded", f"Serving ICS social_idd = '{social_id}' ({social.date}).")
-    return send_from_directory(directory="D:/Dropbox/100 Days of Code/Python/ELSR-website/core/ics/",
+    return send_from_directory(directory=ICS_DIRECTORY,
                                path=os.path.basename(filename),
                                download_name=download_name)
