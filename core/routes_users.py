@@ -305,6 +305,12 @@ def register():
             return render_template("user_register.html", form=form, year=current_year,
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
+        # Names must be unique
+        if User().check_name_in_use:
+            flash(f"Sorry, the name '{new_user.name.strip()}' is already in use!")
+            return render_template("user_register.html", form=form, year=current_year,
+                                   admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
+
         # Add to dB
         if User().create_user(new_user, form.password.data):
 
@@ -330,8 +336,7 @@ def register():
     elif request.method == 'POST':
         flash("Something was missing in the registration form, see below!")
         return render_template("user_register.html", form=form, year=current_year,
-                               admin_email_address=admin_email_address, admin_phone_number=admin_phone_number,
-                               anchor="registration_form")
+                               admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
     # Show register page / form
     return render_template("user_register.html", form=form, year=current_year,

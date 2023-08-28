@@ -306,6 +306,13 @@ class User(UserMixin, db.Model):
             user = db.session.query(User).filter_by(id=id).first()
             return user
 
+    def check_name_in_use(self, name):
+        users = self.all_users()
+        for user in users:
+            if name.strip().lower() == user.name.strip().lower():
+                return True
+        return False
+
     def find_user_from_email(self, email):
         with app.app_context():
             user = db.session.query(User).filter_by(email=email).first()
