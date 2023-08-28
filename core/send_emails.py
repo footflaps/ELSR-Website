@@ -80,14 +80,14 @@ def send_verification_email(target_email, user_name, code):
                 to_addrs=target_email,
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
-            logging.getLogger(__name__).debug(f"Email(): sent verification email to '{target_email}'")
             app.logger.debug(f"Email(): sent verification email to '{target_email}'")
+            Event().log_event("Email Success", f"Sent verification email to '{target_email}'.")
             return True
         except Exception as e:
-            logging.getLogger(__name__).debug(f"Email(): Failed to send verification email to '{target_email}', "
-                                              f"error code was '{e.args}'.")
             app.logger.debug(
                 f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send verification email to '{target_email}', "
+                                            f"error code was '{e.args}'.")
             return False
 
 
@@ -104,11 +104,14 @@ def send_reset_email(target_email, user_name, code):
                 to_addrs=target_email,
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
-            app.logger.debug("Email(): sent reset email to '{target_email}'")
+            app.logger.debug(f"Email(): sent reset email to '{target_email}'")
+            Event().log_event("Email Success", f"Sent reset email to '{target_email}'.")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send reset email to '{target_email}', "
+                                            f"error code was '{e.args}'.")
             return False
 
 
@@ -122,11 +125,14 @@ def contact_form_email(from_name, from_email, body):
                 to_addrs=my_email,
                 msg=f"To:{my_email}\nSubject:{subject}\n\n{body}"
             )
-            app.logger.debug(f"Email(): sent message to '{my_email}'")
+            app.logger.debug(f"Email(): sent message to '{my_email}'.")
+            Event().log_event("Email Success", f"Sent message to '{my_email}'")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message to '{my_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send message to '{my_email}', "
+                                            f"error code was '{e.args}'.")
             return False
 
 
