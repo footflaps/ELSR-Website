@@ -76,7 +76,7 @@ def gpx_colour(number):
 
 def polyline_json(filename):
     # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename))
 
     # This is the list we will return
     polyline = []
@@ -133,7 +133,7 @@ def create_polyline_set(gpxes):
 
     for gpx in gpxes:
         # Absolute path
-        filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
         # File should always be there, but....
         if os.path.exists(filename):
@@ -200,7 +200,7 @@ def markers_for_cafes_native(cafes):
 
 def start_and_end_maps_native_gm(filename, gpx_id, return_path):
     # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename)))
+    filename = (os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(filename))
 
     # Creating two separate maps:
     start_markers = []

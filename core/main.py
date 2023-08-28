@@ -162,7 +162,7 @@ def chaingang():
     # ----------------------------------------------------------- #
 
     # This is  the absolute path to the file
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, CHAINGANG_GPX_FILENAME))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, CHAINGANG_GPX_FILENAME)
 
     # Check it exists before we try and parse it etc
     if not os.path.exists(filename):

@@ -36,7 +36,7 @@ GPX_MAX_RESOLUTION_KM = 0.05
 
 def update_existing_gpx(gpx_file, gpx_filename):
     # This is the full path to the existing GPX file we are going to over write
-    old_filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+    old_filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename))
 
     # This is a temp file we will use to write out the new GPX file to first
     tmp_filename = f"{old_filename}.tmp"
@@ -109,7 +109,7 @@ def cut_start_gpx(gpx_filename, start_count):
     # ----------------------------------------------------------- #
 
     # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename))
 
     with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
@@ -147,7 +147,7 @@ def cut_end_gpx(gpx_filename, end_count):
     # Open the file and trim it
     # ----------------------------------------------------------- #
     # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename))
 
     with open(filename, 'r') as file_ref:
         gpx_file = gpxpy.parse(file_ref)
@@ -204,7 +204,7 @@ def check_route_name(gpx):
     # ----------------------------------------------------------- #
     # Use absolute path
     # ----------------------------------------------------------- #
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
     # ----------------------------------------------------------- #
     # Params we will add
@@ -244,7 +244,7 @@ def check_route_name(gpx):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Clean up the GPX file
+# Clean up the GPX file and update length / elevation stats in the db
 # -------------------------------------------------------------------------------------------------------------- #
 
 def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
@@ -256,7 +256,7 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
     # ----------------------------------------------------------- #
     # Use absolute path
     # ----------------------------------------------------------- #
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx_filename))
 
     # ----------------------------------------------------------- #
     # Generate stats for updating the dB route summary

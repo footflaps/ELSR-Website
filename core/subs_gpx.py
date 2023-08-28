@@ -60,7 +60,7 @@ def check_new_cafe_with_all_gpxes(cafe):
     for gpx in gpxes:
 
         # Use absolute path for filename
-        filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
         # Open the file
         with open(filename, 'r') as file_ref:
@@ -134,7 +134,7 @@ def check_new_gpx_with_all_cafes(gpx_id):
     # ----------------------------------------------------------- #
 
     # Use absolute path for filename
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
     with open(filename, 'r') as file_ref:
 

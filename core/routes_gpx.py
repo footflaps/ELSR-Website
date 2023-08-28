@@ -517,7 +517,7 @@ def edit_route():
     # Check the file exist
     # ----------------------------------------------------------- #
     # This is the absolute path to the file
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
     # Check the file is actually there, before we try and parse it etc
     if not os.path.exists(filename):
@@ -875,7 +875,7 @@ def route_delete():
     # ----------------------------------------------------------- #
     # Delete #2: Remove GPX file itself
     # ----------------------------------------------------------- #
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
     try:
         os.remove(filename)
         app.logger.debug(f"route_delete(): File '{filename}' deleted from directory.")
