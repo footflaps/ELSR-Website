@@ -260,6 +260,9 @@
 								<th scope="col">Start date</th>
 							{% endif %}
 							<th scope="col">Last Login</th>
+							{% if current_user.id == 1 %}
+								<th scope="email">Email</th>
+							{% endif %}
 						</tr>
 					</thead>
 				
@@ -279,6 +282,9 @@
 									<td>{{ user.start_date }}</td>
 								{% endif %}
 								<td>{{ user.last_login }}  ({{ user.last_login_ip }})</td>
+								{% if current_user.id == 1 %}
+									<td>{{ user.email }}</td>
+								{% endif %}
 							</tr>
 							
 							{% endif %}
@@ -340,6 +346,9 @@
 								<th scope="col">Start date</th>
 							{% endif %}
 							<th scope="col">Last Login</th>
+							{% if current_user.id == 1 %}
+								<th scope="col">Email</th>
+							{% endif %}
 						</tr>
 					</thead>
 					
@@ -371,6 +380,9 @@
 									<td>{{ user.start_date }}</td>
 								{% endif %}
 								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
+								{% if current_user.id == 1 %}
+									<td>{{ user.email }}</td>
+								{% endif %}
 							</tr>
 							
 						{% endfor %}
