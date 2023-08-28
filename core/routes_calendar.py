@@ -1,10 +1,9 @@
-from flask import render_template, url_for, request, flash, redirect, abort
+from flask import render_template, url_for, request, flash, redirect, abort, send_from_directory
 from flask_login import login_required, current_user
 from werkzeug import exceptions
-from bbc_feeds import weather
 from datetime import datetime
 import calendar as cal
-import json
+from ics import Calendar as icsCalendar, Event as icsEvent
 import os
 
 
@@ -36,6 +35,12 @@ CHAINGANG_DAY = "Thursday"
 CHAINGANG_START_DATE = datetime(2023, 3, 30, 0, 00)
 # To last week of September
 CHAINGANG_END_DATE = datetime(2023, 9, 28, 0, 00)
+
+# Where we store calendar ics files
+# "D:/Dropbox/100 Days of Code/Python/ELSR-website/core/ics/"
+ICS_DIRECTORY = os.environ['ELSR_ICS_DIRECTORY']
+
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -383,3 +388,66 @@ def delete_social():
 
     return redirect(url_for('social'))
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Download ics file
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/download_ics', methods=['GET'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def download_ics():
+    # ----------------------------------------------------------- #
+    # Did we get passed a social_id?
+    # ----------------------------------------------------------- #
+    social_id = request.args.get('social_id', None)
+
+    # ----------------------------------------------------------- #
+    # Must have parameters
+    # ----------------------------------------------------------- #
+    if not social_id:
+        app.logger.debug(f"download_ics(): Missing social_id!")
+        Event().log_event("download_ics Fail", f"Missing social_id!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Validate social_id
+    # ----------------------------------------------------------- #
+    social = Socials().one_social_id(social_id)
+    if not social:
+        app.logger.debug(f"download_ics(): Failed to locate social, social_id = '{social_id}'.")
+        Event().log_event("download_ics Fail", f"Failed to locate social, social_id = '{social_id}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Create ics file
+    # ----------------------------------------------------------- #
+
+    # Create ics event
+    new_event = icsEvent()
+    new_event.name = "ELSR Social"
+    new_event.begin = f"{social.date[4:8]}-{social.date[2:4]}-{social.date[0:2]} 19:00:00"
+    new_event.location = social.destination
+    new_event.description = f"ELSR Social organised by {social.organiser}: {social.details}"
+
+    # Add to ics calendar
+    new_cal = icsCalendar()
+    new_cal.events.add(new_event)
+
+    # Save as file
+    filename = os.path.join(ICS_DIRECTORY, f"Social_{social.date}.ics")
+    with open(filename, 'w') as my_file:
+        my_file.writelines(new_cal.serialize_iter())
+
+    # ----------------------------------------------------------- #
+    # Send link to download the file
+    # ----------------------------------------------------------- #
+    download_name = f"ELSR_Social_{social.date}.ics"
+
+    app.logger.debug(f"download_ics(): Serving ICS social_id = '{social_id}' ({social.date}), "
+                     f"download_name = '{download_name}'.")
+    Event().log_event("ICS Downloaded", f"Serving ICS social_idd = '{social_id}' ({social.date}).")
+    return send_from_directory(directory="D:/Dropbox/100 Days of Code/Python/ELSR-website/core/ics/",
+                               path=os.path.basename(filename),
+                               download_name=download_name)

@@ -912,7 +912,7 @@ def route_download(gpx_id):
     # ----------------------------------------------------------- #
     # Check GPX file exists
     # ----------------------------------------------------------- #
-    filename = os.path.join(os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename)))
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
     if not os.path.exists(filename):
         # Should never get here, but..

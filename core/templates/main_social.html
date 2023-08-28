@@ -104,8 +104,14 @@
 			
 					<!-- Admin and owner can edit / delete the event -->
 					{% if current_user.is_authenticated %}
+					<div>
+						
+						<!-- Download ics -->
+						 <a href="{{ url_for('download_ics', social_id=social.id) }}">
+	                        <button class="btn btn-sm btn-primary mr-2"><i class="fa-regular fa-calendar-plus"></i></button>
+						 </a>
+			
 						{% if current_user.admin() or current_user.email == social.email %}
-							<div>
 								
 								<!-- Edit social -->
 								 <a href="{{ url_for('add_social', social_id=social.id) }}">
@@ -117,8 +123,9 @@
 			                        <button class="btn btn-sm btn-danger">DEL</button>
 					            </a>
 								
-							</div>
-						{% endif %}
+							
+							{% endif %}
+						</div>
 					{% endif %}
 			
 					<!--------------------------------------------------------------------------------------------->
