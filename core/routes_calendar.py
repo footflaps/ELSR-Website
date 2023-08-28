@@ -429,7 +429,8 @@ def download_ics():
     new_event.name = "ELSR Social"
     new_event.begin = f"{social.date[4:8]}-{social.date[2:4]}-{social.date[0:2]} 19:00:00"
     new_event.location = social.destination
-    new_event.description = f"ELSR Social organised by {social.organiser}: {social.details}"
+    new_event.description = f"ELSR Social organised by {social.organiser}: {social.details} \n\n " \
+                            f"https://www.elsr.co.uk/social"
 
     # Add to ics calendar
     new_cal = icsCalendar()
