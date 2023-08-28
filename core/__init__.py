@@ -89,7 +89,7 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1000 * 1000
 # -------------------------------------------------------------------------------------------------------------- #
 
 app.logger.setLevel(logging.DEBUG)
-app.logger.debug('this will show in the log')
+app.logger.warning('this will show in the log')
 
 
 # -------------------------------------------------------------------------------------------------------------- #
