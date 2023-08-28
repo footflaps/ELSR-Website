@@ -311,6 +311,14 @@ class User(UserMixin, db.Model):
             user = db.session.query(User).filter_by(email=email).first()
             return user
 
+    def find_id_from_email(self, email):
+        with app.app_context():
+            user = db.session.query(User).filter_by(email=email).first()
+            if user:
+                return user.id
+            else:
+                return None
+
     def display_name(self, email):
         with app.app_context():
             user = self.find_user_from_email(email)
@@ -751,8 +759,13 @@ def get_user_name(user_email):
     return User().display_name(user_email)
 
 
+def get_user_id_from_email(user_email):
+    return User().find_id_from_email(user_email)
+
+
 # Add this to jinja's environment, so we can use it within html templates
 app.jinja_env.globals.update(get_user_name=get_user_name)
+app.jinja_env.globals.update(get_user_id_from_email=get_user_id_from_email)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

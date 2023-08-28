@@ -75,11 +75,17 @@
 					{% else %}
 						<h2 class="post-title float-left">{{ messages | count }} Messages:</h2>
 					{% endif %}
-				{% else %}
+				{% elif current_user.email == user.email %}
 					{% if messages | count == 1 %}
 						<h2 class="post-title float-left">You have {{ messages | count }} Message:</h2>
 					{% else %}
 						<h2 class="post-title float-left">You have {{ messages | count }} Messages:</h2>
+					{% endif %}
+				{% else %}
+					{% if messages | count == 1 %}
+						<h2 class="post-title float-left">{{ user.name }} has {{ messages | count }} Message:</h2>
+					{% else %}
+						<h2 class="post-title float-left">{{ user.name }} has {{ messages | count }} Messages:</h2>
 					{% endif %}
 				{% endif %}
 				
@@ -324,8 +330,10 @@
 				<!-- Shorter description on smaller screens -->
 				{% if mobile %}
 		            <h2 class="mb-4">Map of your cafes:</h2>
-				{% else %}
+				{% elif current_user.email == user.email %}
 					<h2 class="mb-4">Map view of your {{ cafes | count }} cafes:</h2>
+				{% else %}
+					<h2 class="mb-4">Map view of {{ user.name }}'s {{ cafes | count }} cafes:</h2>
 				{% endif %}
 				
 				<!---------------------------------------------------------------------------------------------------->
@@ -748,8 +756,10 @@
 			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
 				<h2 class="post-title float-left">{{ socials|length }} socials:</h2>
-			{% else %}
+			{% elif current_user.email == user.email %}
 				<h2 class="post-title float-left">You have {{ socials|length }} social events:</h2>
+			{% else %}
+				<h2 class="post-title float-left">{{ user.name }} has {{ socials|length }} social events:</h2>
 			{% endif %}
 			
 			{% if socials | count > 0: %}
@@ -845,7 +855,7 @@
 				{% elif current_user.id == user.id %}
 					<h2 class="post-title float-left">You have {{ events|count }} events in {{ days }} days:</h2>
 				{% else %}
-					<h2 class="post-title float-left">User has {{ events|count }} events in {{ days }} days:</h2>
+					<h2 class="post-title float-left">{{ user.name }} has {{ events|count }} events in {{ days }} days:</h2>
 				{% endif %}
 				
 				<!-- Button to expose hidden table -->
@@ -999,7 +1009,7 @@
 				{% if current_user.id == user.id %}
 					<h2 class="post-title float-left">Manage my account:</h2>
 				{% else %}
-					<h2 class="post-title float-left">Manage account:</h2>
+					<h2 class="post-title float-left">Manage {{ user.name }}'s account:</h2>
 				{% endif %}
 			{% endif %}
 			
