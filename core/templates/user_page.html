@@ -1060,11 +1060,13 @@
 		                            <a data-toggle="modal" data-target="#unmakeAdminModal">
 										<button type="button" class="btn btn-danger mr-2 my-2" >unAdmin</button>
 			                        </a>
-		                        {% else %}
+		                        {% elif user.phone_number %}
 			                        <a data-toggle="modal" data-target="#makeAdminModal">
 										<button type="button" class="btn btn-danger mr-2 my-2" >Make Admin</button>
 			                        </a>
-		                        {% endif %}
+		                        {% else %}
+		                           	<button type="button" class="btn btn-disabled mr-2 my-2" >Make Admin</button>
+			                    {% endif %}
 		                    {% endif %}
 		                
 							<!-- Block / unBlock user -->
