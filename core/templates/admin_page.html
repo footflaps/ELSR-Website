@@ -387,7 +387,8 @@
 								{% endif %}
 								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
 								{% if current_user.admin() %}
-									<td>{{ user.email }}</td>
+									<td>{{ user.email }}
+									    {% if user.phone_number %} {{ user.phone_number }} {% endif %}</td>
 								{% endif %}
 							</tr>
 							
