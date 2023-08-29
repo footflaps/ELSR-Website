@@ -155,6 +155,25 @@ def cafe_details(cafe_id):
         # Handle POST
         # ----------------------------------------------------------- #
 
+        # Who is trying to post
+        user = User().find_user_from_id(current_user.id)
+        if not user:
+            # Should never get here, but....
+            app.logger.debug(f"cafe_details(): Couldn't locate user, current_user.id = '{current_user.id}'.")
+            Event().log_event("Cafe Comment Fail", f"Couldn't locate user, current_user.id = '{current_user.id}'.")
+            flash("Sorry, something went wrong.")
+            return redirect(url_for('cafe_details', cafe_id=cafe.id))
+
+        # ----------------------------------------------------------- #
+        # Permission check
+        # ----------------------------------------------------------- #
+        if not user.readwrite():
+            # Should never get here, but....
+            app.logger.debug(f"cafe_details(): User doesn't have write permissions user.id = '{user.id}'.")
+            Event().log_event("Cafe Comment Fail", f"User doesn't have write permissions user.id = '{user.id}'.")
+            flash("Sorry, you do not have write permissions.")
+            return redirect(url_for('cafe_details', cafe_id=cafe.id))
+
         # New comment
         new_comment = CafeComment(
             article_id=cafe.id,
