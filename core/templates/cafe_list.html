@@ -240,11 +240,11 @@
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto my-3">
 	
 				<!-- Must have permission to post -->
-				{% if current_user.is_authenticated and current_user.can_post_cafe() %}
+				{% if current_user.is_authenticated and current_user.readwrite() %}
 					<a class="btn btn-primary float-right" href="{{ url_for('new_cafe') }}">
 						<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i> Add cafe
 					</a>
-				{% else %}
+				{% elif not current_user.is_authenticated %}
 					<a class="btn btn-primary disabled float-right">Log in to add a cafe.</a>
 				{% endif %}
 	
