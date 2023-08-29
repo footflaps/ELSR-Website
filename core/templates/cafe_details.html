@@ -347,16 +347,18 @@
 						
 						
 						{% elif current_user.is_authenticated: %}
+		                    {% if current_user.readwrite() %}
 						
-							<!----------------------------->
-							<!--      FLAG button        -->
-							<!----------------------------->
-							
-							<div class="clearfix">
-								<a class="btn btn-warning float-right"
-								   data-toggle="modal" data-target="#flagCafe">Flag Cafe</a>
-							</div>
-						
+								<!----------------------------->
+								<!--      FLAG button        -->
+								<!----------------------------->
+								
+								<div class="clearfix">
+									<a class="btn btn-warning float-right"
+									   data-toggle="modal" data-target="#flagCafe">Flag Cafe</a>
+								</div>
+		      
+							{% endif %}
 						{% endif %}
 			
 		            </div>
