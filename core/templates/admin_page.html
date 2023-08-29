@@ -378,6 +378,9 @@
 									{% if user.readwrite() %}
 										<i class="fa-solid fa-user-pen"></i>
 									{% endif %}
+									{% if user.blocked() %}
+										<i class="fa-solid fa-door-closed"></i>
+									{% endif %}
 								</td>
 								{% if not mobile %}
 									<td>{{ user.start_date }}</td>
