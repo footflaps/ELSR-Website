@@ -917,18 +917,18 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 # One off correct permissions
 # -------------------------------------------------------------------------------------------------------------- #
-
-for user in User().all_users():
-    with app.app_context():
-        user = db.session.query(User).filter_by(id=user.id).first()
-        if user:
-            if user.permissions >= 64:
-                user.permissions -= 64
-            if user.permissions >= 32:
-                user.permissions -= 32
-            if user.permissions >= 16:
-                user.permissions -= 16
-            db.session.commit()
+#
+# for user in User().all_users():
+#     with app.app_context():
+#         user = db.session.query(User).filter_by(id=user.id).first()
+#         if user:
+#             if user.permissions >= 64:
+#                 user.permissions -= 64
+#             if user.permissions >= 32:
+#                 user.permissions -= 32
+#             if user.permissions >= 16:
+#                 user.permissions -= 16
+#             db.session.commit()
 
 
 
