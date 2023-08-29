@@ -1086,3 +1086,119 @@ def mobile_verify():
     # Back to user page
     return render_template("user_phone_verification.html", year=current_year, form=form)
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Delete user - user can delete themselves so not restricted to Admin only
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/delete_user', methods=['POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def delete_user():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    user_id = request.args.get('user_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"delete_user(): Missing user_id!")
+        Event().log_event("Delete User Fail", f"missing user id")
+        abort(400)
+    elif not password:
+        app.logger.debug(f"delete_user(): Missing user password!")
+        Event().log_event("Delete User Fail", f"Missing user password")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(user_id)
+    if not user:
+        app.logger.debug(f"delete_user(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    if int(current_user.id) != int(user_id) and \
+            not current_user.admin():
+        app.logger.debug(f"delete_user(): User isn't allowed "
+                         f"current_user.id='{current_user.id}', user_id='{user_id}'.")
+        Event().log_event("Delete User Fail", f"User isn't allowed "
+                                              f"current_user.id='{current_user.id}', user_id='{user_id}'.")
+        abort(403)
+
+    # ----------------------------------------------------------- #
+    #  Validate user / Admin password
+    # ----------------------------------------------------------- #
+    if int(current_user.id) == int(user_id):
+        # Validate against their own password
+        if not user.validate_password(user, password, user_ip):
+            app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{user.id}'!")
+            Event().log_event("Delete User Fail", f"Delete failed, incorrect password for user_id = '{user.id}'!")
+            flash(f"Incorrect password for {user.name}.")
+            return redirect(url_for('user_page', user_id=user_id))
+    else:
+        # Validate against current_user's (admins) password
+        if not user.validate_password(current_user, password, user_ip):
+            app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+            Event().log_event("Delete User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+            flash(f"Incorrect password for {current_user.name}.")
+            return redirect(url_for('user_page', user_id=user_id))
+
+    # ----------------------------------------------------------- #
+    # Delete the user
+    # ----------------------------------------------------------- #
+    if User().delete_user(user_id):
+        app.logger.debug(f"delete_user(): Success, user '{user.email}' deleted.")
+        Event().log_event("Delete User Success", f"User '{user.email}' deleted.")
+        flash(f"User '{user.name}' successfully deleted.")
+
+        if current_user.admin \
+                and int(current_user.id) != int(user_id):
+            # Admin deleting someone, so back to admin
+            return redirect(url_for('admin_page'))
+
+        # ----------------------------------------------------------- #
+        # User deleting themselves, so try and clean up
+        # ----------------------------------------------------------- #
+        # Log them out
+        logout_user()
+
+        # Clear the session
+        session.clear()
+
+        # Delete the user's "remember me" cookie as apparently logout doesn't do that
+        # From: https://stackoverflow.com/questions/25144092/flask-login-still-logged-in-after-use-logouts-when-using-remember-me
+        # This seems to work now....
+        response = make_response(redirect(url_for('home')))
+        response.delete_cookie(app.config['REMEMBER_COOKIE_NAME'])
+        return response
+
+    else:
+        # Should never get here, but...
+        app.logger.debug(f"delete_user(): User().delete_user() failed for user_id = '{user_id}'.")
+        Event().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
+        flash("Sorry, something went wrong.")
+        return redirect(url_for('user_page', user_id=user_id))

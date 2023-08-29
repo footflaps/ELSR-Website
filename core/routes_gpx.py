@@ -932,6 +932,7 @@ def route_download(gpx_id):
     # Send link to download the file
     # ----------------------------------------------------------- #
 
+    # This is the filename the user will see
     download_name = f"ELSR_{gpx.name.replace(' ','_')}.gpx"
 
     app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")

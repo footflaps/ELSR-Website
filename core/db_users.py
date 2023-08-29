@@ -1,5 +1,5 @@
-from flask import abort, redirect, url_for, flash, session, request
-from flask_login import UserMixin, LoginManager, current_user, logout_user
+from flask import abort, flash, session, request
+from flask_login import UserMixin, current_user, logout_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField
 from wtforms.validators import InputRequired, Email
@@ -34,25 +34,16 @@ from core.dB_events import Event
 #       1 :     Admin                   1 = Admin,          0 = Normal user
 #       2 :     Verified                1 = Verified,       0 = Unverified
 #       4 :     Blocked                 1 = Active,         0 = Blocked by Admin
-#       8 :     Can Post Cafes          1 = Can add,        0 = Can't add
-#       16:     Can Post GPX            1 = Can add,        0 = Can't add
-#       32:     Can comment on cafes    1 = Can comment,    0 = Can't comment
-#       64:     Can comment on gpx      1 = Can comment,    0 = Can't comment
+#       8 :     Read/Write              1 = Read+Write,     0 = Read only
 
 # Use these masks on the Integer to extract permissions
 MASK_ADMIN = 1
 MASK_VERIFIED = 2
 MASK_BLOCKED = 4
-MASK_POST_CAFE = 8
-MASK_POST_GPX = 16
-MASK_COMMENT_CAFE = 32
-MASK_COMMENT_GPX = 64
+MASK_READWRITE = 8
 
 # Default User Permissions on verification
-DEFAULT_PERMISSIONS = MASK_POST_CAFE \
-                      + MASK_POST_GPX \
-                      + MASK_COMMENT_CAFE \
-                      + MASK_COMMENT_GPX
+DEFAULT_PERMISSIONS = 0
 
 # One day time out for email
 VERIFICATION_TIMEOUT_SECS = 60 * 60 * 24
@@ -161,29 +152,36 @@ class User(UserMixin, db.Model):
         else:
             return False
 
+    def readwrite(self):
+        if self.permissions & MASK_READWRITE > 0 or \
+           self.permissions & MASK_ADMIN > 0:
+            return True
+        else:
+            return False
+
     def can_post_cafe(self):
-        if self.permissions & MASK_POST_CAFE > 0 or \
+        if self.permissions & MASK_READWRITE > 0 or \
            self.permissions & MASK_ADMIN > 0:
             return True
         else:
             return False
 
     def can_post_gpx(self):
-        if self.permissions & MASK_POST_GPX > 0 or \
+        if self.permissions & MASK_READWRITE > 0 or \
            self.permissions & MASK_ADMIN > 0:
             return True
         else:
             return False
 
     def can_comment_cafe(self):
-        if self.permissions & MASK_COMMENT_CAFE > 0 or \
+        if self.permissions & MASK_READWRITE > 0 or \
            self.permissions & MASK_ADMIN > 0:
             return True
         else:
             return False
 
     def can_comment_gpx(self):
-        if self.permissions & MASK_COMMENT_GPX > 0 or \
+        if self.permissions & MASK_READWRITE > 0 or \
            self.permissions & MASK_ADMIN > 0:
             return True
         else:
@@ -329,7 +327,6 @@ class User(UserMixin, db.Model):
             else:
                 app.logger.error(f"dB.update_user_name(): Called with invalid user_id = '{user_id}'.")
         return False
-
 
     def find_user_from_email(self, email):
         with app.app_context():
@@ -609,6 +606,40 @@ class User(UserMixin, db.Model):
                 app.logger.error(f"dB.unblock_user(): Called with invalid user_id = '{user_id}'.")
         return False
 
+    def set_readwrite(self, user_id):
+        with app.app_context():
+            # For some reason we need to re-acquire the user within this context
+            user = db.session.query(User).filter_by(id=user_id).first()
+            if user:
+                try:
+                    if user.permissions & MASK_READWRITE == 0:
+                        user.permissions = user.permissions + MASK_READWRITE
+                        db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"dB.set_readwrite(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                    return False
+            else:
+                app.logger.error(f"dB.set_readwrite(): Called with invalid user_id = '{user_id}'.")
+        return False
+
+    def set_readonly(self, user_id):
+        with app.app_context():
+            # For some reason we need to re-acquire the user within this context
+            user = db.session.query(User).filter_by(id=user_id).first()
+            if user:
+                try:
+                    if user.permissions & MASK_READWRITE > 0:
+                        user.permissions = user.permissions - MASK_READWRITE
+                        db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"dB.set_readonly(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                    return False
+            else:
+                app.logger.error(f"dB.set_readonly(): Called with invalid user_id = '{user_id}'.")
+        return False
+
     def make_admin(self, user_id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
@@ -680,11 +711,6 @@ class User(UserMixin, db.Model):
 # This one doesn't seem to work, need to use the one in the same module as the Primary dB
 with app.app_context():
     db.create_all()
-
-
-# Seems we can do this as well!
-# print(User.query.all())
-# print(User.query.filter_by(id=1).first())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -874,7 +900,7 @@ class ResetPasswordForm(FlaskForm):
 # Change username form
 # -------------------------------------------------------------------------------------------------------------- #
 class ChangeUserNameForm(FlaskForm):
-    name = StringField("Change my user name:",
+    name = StringField("Change user name:",
                        validators=[InputRequired("Please enter your name.")])
     submit = SubmitField("Change me!")
 
@@ -886,3 +912,26 @@ class ChangeUserNameForm(FlaskForm):
 with app.app_context():
     users = db.session.query(User).all()
     print(f"Found {len(users)} users in the dB")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# One off correct permissions
+# -------------------------------------------------------------------------------------------------------------- #
+
+for user in User().all_users():
+    with app.app_context():
+        user = db.session.query(User).filter_by(id=user.id).first()
+        if user:
+            if user.permissions >= 64:
+                user.permissions -= 64
+            if user.permissions >= 32:
+                user.permissions -= 32
+            if user.permissions >= 16:
+                user.permissions -= 16
+            db.session.commit()
+
+
+
+
+
+

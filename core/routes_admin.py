@@ -1,6 +1,7 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
 from flask_login import current_user, login_required, logout_user
 from werkzeug import exceptions
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -38,7 +39,7 @@ DEFAULT_EVENT_DAYS = 7
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Admin home page
+# Admin home page - Admin only
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/admin', methods=['GET'])
@@ -51,6 +52,14 @@ def admin_page():
     # ----------------------------------------------------------- #
     event_period = request.args.get('days', None)       # Optional
     anchor = request.args.get('anchor', None)           # Optional
+
+    # ----------------------------------------------------------- #
+    # Double check for Admin only (in case decorator fails)
+    # ----------------------------------------------------------- #
+    if not current_user.admin():
+        app.logger.debug(f"admin_page(): Non Admin access, user_id = '{current_user.id}'!")
+        Event().log_event("Admin Page Fail", f"on Admin access, user_id = '{current_user.id}'!")
+        return abort(403)
 
     # ----------------------------------------------------------- #
     # List of all events for relevant period (for admin page table)
@@ -137,7 +146,7 @@ def admin_page():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Make a user admin
+# Make a user admin - Admin only
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/make_admin', methods=['POST'])
@@ -200,7 +209,7 @@ def make_admin():
         return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access - only Super Admin can do this
     # ----------------------------------------------------------- #
     if current_user.id != SUPER_ADMIN_USER_ID:
         # Failed authentication
@@ -239,7 +248,7 @@ def make_admin():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Remove admin privileges
+# Remove admin privileges - Admin only
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/unmake_admin', methods=['POST'])
@@ -301,7 +310,7 @@ def unmake_admin():
         return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access - only Super Admin can do this
     # ----------------------------------------------------------- #
     if current_user.id != SUPER_ADMIN_USER_ID:
         # Failed authentication
@@ -328,7 +337,7 @@ def unmake_admin():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Block user
+# Block user - Admin only
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/block_user', methods=['POST'])
@@ -382,9 +391,23 @@ def block_user():
     # Validate password against current_user's (admins)
     # ----------------------------------------------------------- #
     if not current_user.validate_password(current_user, password, user_ip):
-        app.logger.debug(f"block_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        app.logger.debug(f"block_user(): Block failed, incorrect password for user_id = '{current_user.id}'!")
         Event().log_event("Block User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # ----------------------------------------------------------- #
+    # Can't block yourself nor an admin
+    # ----------------------------------------------------------- #
+    if current_user.id == user.id:
+        app.logger.debug(f"block_user(): Block failed, admin can't block themselves, user_id = '{current_user.id}'.")
+        Event().log_event("Block User Fail", f"Admin can't block themselves, user_id = '{current_user.id}'.")
+        flash(f"You can't block yourself!")
+        return redirect(url_for('user_page', user_id=user_id))
+    if user.admin():
+        app.logger.debug(f"block_user(): Block failed, can't block Admin, user_id = '{current_user.id}'.")
+        Event().log_event("Block User Fail", f"Can't block Admin, user_id = '{current_user.id}'.")
+        flash(f"You can't block an Admin!")
         return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
@@ -405,7 +428,7 @@ def block_user():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# unBlock user
+# unBlock user - Admin only
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/unblock_user', methods=['POST'])
@@ -465,6 +488,21 @@ def unblock_user():
         return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
+    # Can't block yourself nor an admin
+    # ----------------------------------------------------------- #
+    if current_user.id == user.id:
+        app.logger.debug(
+            f"block_user(): ubBlock failed, admin can't unblock themselves, user_id = '{current_user.id}'.")
+        Event().log_event("unBlock User Fail", f"Admin can't unblock themselves, user_id = '{current_user.id}'.")
+        flash(f"You can't unblock yourself!")
+        return redirect(url_for('user_page', user_id=user_id))
+    if user.admin():
+        app.logger.debug(f"unblock_user(): unBlock failed, can't block Admin, user_id = '{current_user.id}'.")
+        Event().log_event("unBlock User Fail", f"Can't unblock Admin, user_id = '{current_user.id}'.")
+        flash(f"You can't unblock an Admin!")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # ----------------------------------------------------------- #
     # Unblock user
     # ----------------------------------------------------------- #
     if User().unblock_user(user_id):
@@ -482,14 +520,14 @@ def unblock_user():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Delete user
+# Give user write permissions - Admin only
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/delete_user', methods=['POST'])
-@logout_barred_user
+@app.route('/user_readwrite', methods=['POST'])
 @login_required
+@admin_only
 @update_last_seen
-def delete_user():
+def user_readwrite():
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -515,12 +553,12 @@ def delete_user():
     # Handle missing parameters
     # ----------------------------------------------------------- #
     if not user_id:
-        app.logger.debug(f"delete_user(): Missing user_id!")
-        Event().log_event("Delete User Fail", f"missing user id")
+        app.logger.debug(f"user_readwrite(): Missing user_id!")
+        Event().log_event("ReadWrite Fail", f"Missing user id")
         abort(400)
     elif not password:
-        app.logger.debug(f"delete_user(): Missing user password!")
-        Event().log_event("Delete User Fail", f"Missing user password")
+        app.logger.debug(f"user_readwrite(): Missing user password!")
+        Event().log_event("ReadWrite Fail", f"Missing user password")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -528,73 +566,136 @@ def delete_user():
     # ----------------------------------------------------------- #
     user = User().find_user_from_id(user_id)
     if not user:
-        app.logger.debug(f"delete_user(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
+        app.logger.debug(f"user_readwrite(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("ReadWrite Fail", f"Invalid user user_id = '{user_id}'!")
         abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Can't edit yourself nor an admin
     # ----------------------------------------------------------- #
-    if int(current_user.id) != int(user_id) and \
-            not current_user.admin():
-        app.logger.debug(f"delete_user(): User isn't allowed "
-                         f"current_user.id='{current_user.id}', user_id='{user_id}'.")
-        Event().log_event("Delete User Fail", f"User isn't allowed "
-                                              f"current_user.id='{current_user.id}', user_id='{user_id}'.")
-        abort(403)
-
-    # ----------------------------------------------------------- #
-    #  Validate user / Admin password
-    # ----------------------------------------------------------- #
-    if int(current_user.id) == int(user_id):
-        # Validate against their own password
-        if not user.validate_password(user, password, user_ip):
-            app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{user.id}'!")
-            Event().log_event("Delete User Fail", f"Delete failed, incorrect password for user_id = '{user.id}'!")
-            flash(f"Incorrect password for {user.name}.")
-            return redirect(url_for('user_page', user_id=user_id))
-    else:
-        # Validate against current_user's (admins) password
-        if not user.validate_password(current_user, password, user_ip):
-            app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
-            Event().log_event("Delete User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
-            flash(f"Incorrect password for {current_user.name}.")
-            return redirect(url_for('user_page', user_id=user_id))
+    if current_user.id == user.id:
+        app.logger.debug(f"user_readwrite(): ubBlock failed, admin can't unblock themselves, user_id = '{user_id}'.")
+        Event().log_event("ReadWrite Fail", f"Admin can't unblock themselves, user_id = '{user_id}'.")
+        flash(f"You can't unblock yourself!")
+        return redirect(url_for('user_page', user_id=user_id))
+    if user.admin():
+        app.logger.debug(f"user_readwrite(): unBlock failed, can't block Admin, user_id = '{user_id}'.")
+        Event().log_event("ReadWrite Fail", f"Can't unblock Admin, user_id = '{user_id}'.")
+        flash(f"You can't unblock an Admin!")
+        return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
-    # Delete the user
+    #  Validate against current_user's (admins) password
     # ----------------------------------------------------------- #
-    if User().delete_user(user_id):
-        app.logger.debug(f"delete_user(): Success, user '{user.email}' deleted.")
-        Event().log_event("Delete User Success", f"User '{user.email}' deleted.")
-        flash(f"User '{user.name}' successfully deleted.")
+    if not user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"user_readwrite(): Incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("ReadWrite Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for '{current_user.name}'.")
+        return redirect(url_for('user_page', user_id=user_id))
 
-        if current_user.admin \
-                and int(current_user.id) != int(user_id):
-            # Admin deleting someone, so back to admin
-            return redirect(url_for('admin_page'))
-
-        # ----------------------------------------------------------- #
-        # User deleting themselves, so try and clean up
-        # ----------------------------------------------------------- #
-        # Log them out
-        logout_user()
-
-        # Clear the session
-        session.clear()
-
-        # Delete the user's "remember me" cookie as apparently logout doesn't do that
-        # From: https://stackoverflow.com/questions/25144092/flask-login-still-logged-in-after-use-logouts-when-using-remember-me
-        # This seems to work now....
-        response = make_response(redirect(url_for('home')))
-        response.delete_cookie(app.config['REMEMBER_COOKIE_NAME'])
-        return response
-
+    # ----------------------------------------------------------- #
+    # Set Read Write permission
+    # ----------------------------------------------------------- #
+    if User().set_readwrite(user_id):
+        app.logger.debug(f"user_readwrite(): Success, user can now write, user_id = '{user_id}'.")
+        Event().log_event("ReadWrite Success", f"User can now write, user_id = '{user_id}'.")
+        flash(f"User '{user.name}' now has Write permissions.")
+        Message().send_readwrite_message(user.email)
+        return redirect(url_for('user_page', user_id=user_id))
     else:
         # Should never get here, but...
-        app.logger.debug(f"delete_user(): User().delete_user() failed for user_id = '{user_id}'.")
-        Event().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
+        app.logger.debug(f"user_readwrite(): User().set_readwrite() failed for user_id = '{user_id}'.")
+        Event().log_event("ReadWrite Fail", f"User().set_readwrite() failed for user_id = '{user_id}'.")
         flash("Sorry, something went wrong.")
         return redirect(url_for('user_page', user_id=user_id))
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Give user read only permissions - Admin only
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/user_readonly', methods=['POST'])
+@login_required
+@admin_only
+@update_last_seen
+def user_readonly():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    user_id = request.args.get('user_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"user_readonly(): Missing user_id!")
+        Event().log_event("ReadOnly Fail", f"Missing user id")
+        abort(400)
+    elif not password:
+        app.logger.debug(f"user_readonly(): Missing user password!")
+        Event().log_event("ReadOnly Fail", f"Missing user password")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(user_id)
+    if not user:
+        app.logger.debug(f"user_readonly(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("ReadOnly Fail", f"Invalid user user_id = '{user_id}'!")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Can't edit yourself nor an admin
+    # ----------------------------------------------------------- #
+    if current_user.id == user.id:
+        app.logger.debug(f"user_readonly(): ubBlock failed, admin can't unblock themselves, user_id = '{user_id}'.")
+        Event().log_event("ReadOnly Fail", f"Admin can't unblock themselves, user_id = '{user_id}'.")
+        flash(f"You can't unblock yourself!")
+        return redirect(url_for('user_page', user_id=user_id))
+    if user.admin():
+        app.logger.debug(f"user_readonly(): unBlock failed, can't block Admin, user_id = '{user_id}'.")
+        Event().log_event("ReadOnly Fail", f"Can't unblock Admin, user_id = '{user_id}'.")
+        flash(f"You can't unblock an Admin!")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # ----------------------------------------------------------- #
+    #  Validate against current_user's (admins) password
+    # ----------------------------------------------------------- #
+    if not user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"user_readonly(): Incorrect password for user_id = '{current_user.id}'!")
+        Event().log_event("ReadOnly Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for '{current_user.name}'.")
+        return redirect(url_for('user_page', user_id=user_id))
+
+    # ----------------------------------------------------------- #
+    # Set Read Only permission
+    # ----------------------------------------------------------- #
+    if User().set_readonly(user_id):
+        app.logger.debug(f"user_readonly(): Success, user is Readonly, user_id = '{user_id}'.")
+        Event().log_event("ReadOnly Success", f"User is Readonly, user_id = '{user_id}'.")
+        flash(f"User '{user.name}' is now Read ONLY.")
+        Message().send_readonly_message(user.email)
+        return redirect(url_for('user_page', user_id=user_id))
+    else:
+        # Should never get here, but...
+        app.logger.debug(f"user_readonly(): User().set_readonly() failed for user_id = '{user_id}'.")
+        Event().log_event("ReadOnly Fail", f"User().set_readonly() failed for user_id = '{user_id}'.")
+        flash("Sorry, something went wrong.")
+        return redirect(url_for('user_page', user_id=user_id))

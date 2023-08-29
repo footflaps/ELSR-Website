@@ -24,9 +24,15 @@ NEW_MESSAGE_STATUS = 0
 
 ADMIN_EMAIL = "Admin"
 
-WELCOME_MESSAGE = "Welcome to the new elsr.co.uk website. Now you have registered you can add to the cafe list, " \
-                  "upload GPX files and download GPX files. If you find something amiss or broken, you can contact " \
-                  "an admin using the internal messaging system."
+WELCOME_MESSAGE = "Welcome to the new ELSR website. Now you have registered you can download GPX files. Once " \
+                  "an admin has verified your identity, you will receive write permissions and be able to add and " \
+                  "edit content."
+
+READWRITE_MESSAGE = "Congratulations, the Admin team have now given you read and write permissions. You can now add " \
+                    "and edit content on the site, e.g. organise rides and add events to the Calendar."
+
+READONLY_MESSAGE = "Sorry, but the Admins have removed your write permissions to the site."
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Define Message
@@ -114,6 +120,22 @@ class Message(db.Model):
             from_email=ADMIN_EMAIL,
             to_email=target_email,
             body=WELCOME_MESSAGE
+        )
+        return self.add_message(message)
+
+    def send_readwrite_message(self, target_email):
+        message = Message(
+            from_email=ADMIN_EMAIL,
+            to_email=target_email,
+            body=READWRITE_MESSAGE
+        )
+        return self.add_message(message)
+
+    def send_readonly_message(self, target_email):
+        message = Message(
+            from_email=ADMIN_EMAIL,
+            to_email=target_email,
+            body=READONLY_MESSAGE
         )
         return self.add_message(message)
 

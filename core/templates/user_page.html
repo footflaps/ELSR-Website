@@ -215,7 +215,7 @@
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												
 												<div class="form-group">
-													<label for="confirm" class="col-form-label">
+													<label  class="col-form-label">
 													Try and think of something witty to say! But then you were never
 													much of a comedian...</label>
 													<textarea class="form-control" name="body" rows="6"></textarea>
@@ -1036,12 +1036,146 @@
 				<div class="card card-body my-3">
 	                <div class="clearfix">
 		
+		                <!---------------------------------------------------------------------------------------->
+						<!--                               Change username form                                 -->
+						<!---------------------------------------------------------------------------------------->
 		                
-		                <!-- This is where the form will go -->
-						{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+		                {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
 		    
 		                <hr>
 		    
+		                <!---------------------------------------------------------------------------------------->
+						<!--                                     2FA                                            -->
+						<!---------------------------------------------------------------------------------------->
+		                
+		                <h4>Two Factor Autentication:</h4>
+		                
+		                <!-- Manage phone number -->
+	                    {% if user.has_valid_phone_number() %}
+		                
+		                    <!-- NB An Admin can't change their phone number whilst an admin -->
+							{% if not user.admin() %}
+		                    
+		                        <!-- Edit existing phone number -->
+		                        <a data-toggle="modal" data-target="#editPhoneModal">
+				                    <button type="button" class="btn btn-secondary mx-2 my-2">Edit my
+					                    <i class="fa-solid fa-mobile-retro fa-xl"></i>
+				                    </button>
+								</a>
+	                    
+	                        {% endif %}
+	                    
+		                {% elif user.has_unvalidated_phone_number() %}
+	                    
+	                        <!-- Validate existing phone number -->
+	                        <form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
+								<input type="hidden" name="phone_number" value="{{ user.phone_number }}"/>
+								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+								<button type="submit" class="btn btn-primary mx-2 my-2">Verify my
+									<i class="fa-solid fa-mobile-retro fa-xl"></i>
+								</button>
+							</form>
+	                 
+		                {% else %}
+	                    
+	                        <!-- Add phone number -->
+	                        <a data-toggle="modal" data-target="#addPhoneModal">
+			                    <button type="button" class="btn btn-primary mx-2 my-2">Add my
+				                    <i class="fa-solid fa-mobile-retro fa-xl"></i>
+			                    </button>
+							</a>
+	                 
+		                {% endif %}
+		                
+		                <hr>
+		                
+		                <!---------------------------------------------------------------------------------------->
+						<!--                                User permissions                                    -->
+						<!---------------------------------------------------------------------------------------->
+		                
+		                <h4>User permissions:</h4>
+		                 
+		                <table id="permTable" class="table table-striped table-bordered table-sm table-condensed"
+					       style="width: 100%">
+				
+							<!-- Header -->
+							<thead>
+								<tr>
+									<th scope="col">Action</th>
+									<th scope="col">Permission</th>
+								</tr>
+							</thead>
+	                  
+			                <!-- Body -->
+	                        <tbody>
+								<tr>
+									<td class="small">Can add GPXes</td>
+									<td class="small">
+										{% if user.readwrite() %}
+											<i class="fa-regular fa-face-smile fa-xl"></i>
+										{% else %}
+											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
+										{% endif %}
+									</td>
+								</tr>
+		                        <tr>
+									<td class="small">Can add Cafes</td>
+									<td class="small">
+										{% if user.readwrite() %}
+											<i class="fa-regular fa-face-smile fa-xl"></i>
+										{% else %}
+											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
+										{% endif %}
+									</td>
+								</tr>
+		                        <tr>
+									<td class="small">Can comment on Cafes</td>
+									<td class="small">
+										{% if user.readwrite() %}
+											<i class="fa-regular fa-face-smile fa-xl"></i>
+										{% else %}
+											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
+										{% endif %}
+									</td>
+								</tr>
+								<tr>
+									<td class="small">Can add event to Calendar</td>
+									<td class="small">
+										{% if user.readwrite() %}
+											<i class="fa-regular fa-face-smile fa-xl"></i>
+										{% else %}
+											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
+										{% endif %}
+									</td>
+								</tr>
+		                   </tbody>
+				
+						</table>
+		                
+		                <div>
+			                {% if current_user.id == user.id : %}
+							    
+			                    <!-- Contact an admin -->
+								<a data-toggle="modal" data-target="#contactAdminModal">
+									<button type="button" class="btn btn-primary float-right ml-3">Contact an Admin</button>
+								</a>
+							
+			                {% else %}
+			                
+			                  <!-- Message the user -->
+								<a data-toggle="modal" data-target="#contactUserModal">
+									<button type="button" class="btn btn-primary float-right ml-3">Message '{{ user.name }}'</button>
+								</a>
+			     
+							{% endif %}
+			                
+			                <p>NB New users may have
+			                   restricted permissions until an Admin can confirm their identity.</p>
+				        
+			            </div>
+			               
+		                <hr>
+		                
 						<!---------------------------------------------------------------------------------------->
 						<!--                                  Admin tools                                       -->
 						<!---------------------------------------------------------------------------------------->
@@ -1049,10 +1183,7 @@
 		                <!-- Options for managing another user -->
 						{% if current_user.admin() and current_user.id != user.id %}
 						
-		                     <!-- Message the user -->
-							<a data-toggle="modal" data-target="#contactUserModal">
-								<button type="button" class="btn btn-primary my-2">Message User</button>
-							</a>
+		                    <h4>Admin tools for '{{ user.name }}' ({{ user.email }}):</h4>
 		                
 		                    <!-- Send Verification Code -->
 		                    {% if not user.verified() %}
@@ -1063,7 +1194,7 @@
 		                
 			                <!-- Send Password Reset Code -->
 			                <a href="{{ url_for('password_reset_user', user_id=user.id) }}">
-			                    <button type="button" class="btn btn-secondary mr-2 my-2">Reset PSW</button>
+			                    <button type="button" class="btn btn-secondary mr-2 my-2">Send PSW Reset</button>
 							</a>
 		        
 		                    <!-- Make Admin -->
@@ -1084,14 +1215,27 @@
 							<!-- Block / unBlock user -->
 							{% if user.blocked(): %}
 		                        <a data-toggle="modal" data-target="#unBlockUserModal">
-									<button type="button" class="btn btn-warning my-2" >unBan User</button>
+									<button type="button" class="btn btn-danger mr-2 my-2" >unBan User</button>
 		                        </a>
 							{% else: %}
 		                        <a data-toggle="modal" data-target="#blockUserModal">
-									<button type="button" class="btn btn-warning my-2" >Ban User</button>
+									<button type="button" class="btn btn-danger mr-2 my-2" >Ban User</button>
 		                        </a>
 							{% endif %}
 							
+		                    <!-- Allow / Disable Write permissions -->
+							{% if user.readwrite(): %}
+		                        <a data-toggle="modal" data-target="#removeWriteUserModal">
+									<button type="button" class="btn btn-warning mr-2 my-2" >Read only</button>
+		                        </a>
+							{% else: %}
+		                        <a data-toggle="modal" data-target="#allowWriteUserModal">
+									<button type="button" class="btn btn-primary mr-2 my-2" >Read Write</button>
+		                        </a>
+							{% endif %}
+		                
+		                    <hr>
+		                
 						{% endif %}
 					
 						
@@ -1099,35 +1243,9 @@
 						<!--                                 User's tools                                             -->
 						<!---------------------------------------------------------------------------------------------->
 						
-						{% if current_user.id == user.id : %}
-						
-		                    <!-- Manage phone number -->
-		                    {% if user.has_valid_phone_number() %}
-		                        <!-- Edit existing phone number -->
-								{% if not user.admin() %}
-					                <!-- NB An Admin can't change their phone number whilst an admin -->
-			                        <a data-toggle="modal" data-target="#editPhoneModal">
-					                    <button type="button" class="btn btn-secondary mx-2 my-2">Edit Phone #</button>
-									</a>
-		                        {% endif %}
-		                    {% elif user.has_unvalidated_phone_number() %}
-		                        <!-- Validate existing phone number -->
-		                        <form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
-									<input type="hidden" name="phone_number" value="{{ user.phone_number }}"/>
-									<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-									<button type="submit" class="btn btn-secondary mx-2 my-2">Verify Phone #</button>
-								</form>
-		                    {% else %}
-		                        <!-- Add phone number -->
-		                        <a data-toggle="modal" data-target="#addPhoneModal">
-				                    <button type="button" class="btn btn-secondary mx-2 my-2">Add Phone #</button>
-								</a>
-		                    {% endif %}
+		                <h4>Account Control:</h4>
 		                
-		                    <!-- Contact an admin -->
-							<a data-toggle="modal" data-target="#contactAdminModal">
-								<button type="button" class="btn btn-primary float-left my-2">Contact an Admin</button>
-							</a>
+						{% if current_user.id == user.id : %}
 						
 		                    <!-- Log out button -->
 							<a href="{{ url_for('logout') }}">
@@ -1136,15 +1254,12 @@
 						
 						{% endif %}
 						
-						<!---------------------------------------------------------------------------------------->
-						<!--                                 Delete Account                                     -->
-						<!---------------------------------------------------------------------------------------->
 						
 						{% if current_user.admin(): %}
 					
 							<a data-toggle="modal" data-target="#deleteUserModal">
 								<button type="button"
-								        class="btn btn btn-danger float-right my-2">Delete account
+								        class="btn btn btn-danger float-right">Delete user's account
 								</button>
 							</a>
 						
@@ -1152,7 +1267,7 @@
 					
 							<a data-toggle="modal" data-target="#deleteUserModal">
 								<button type="button"
-								        class="btn btn btn-danger float-right my-2">Delete account
+								        class="btn btn btn-danger float-left">Delete my account
 								</button>
 							</a>
 		                
@@ -1836,5 +1951,93 @@
 		</div>
 	</div>
 </div>  <!-- End of modal form -->
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                         Modal form for giving user Write permissions                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="allowWriteUserModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" >Give user {{ user.name }} Write Access</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!--
+					NB To get the two parameters use:
+						1. gpx_id = request.args.get('gpx_id', None)
+                        2. confirm = request.form['confirm']
+				-->
+				<form action="{{ url_for('user_readwrite', user_id=user.id) }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
+					<div class="form-group">
+						<label class="col-form-label">
+							Enter <strong>your password</strong> below.
+						</label>
+						<input type="password" class="form-control" name="password">
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-danger">Submit</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>  <!-- End of modal form -->
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                         Modal form for removing user Write permissions                         -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="removeWriteUserModal" tabindex="-1" role="dialog"
+     aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" >Remove user {{ user.name }} Write Access</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<!--
+					NB To get the two parameters use:
+						1. gpx_id = request.args.get('gpx_id', None)
+                        2. confirm = request.form['confirm']
+				-->
+				<form action="{{ url_for('user_readonly', user_id=user.id) }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
+					<div class="form-group">
+						<label class="col-form-label">
+							Enter <strong>your password</strong> below.
+						</label>
+						<input type="password" class="form-control" name="password">
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+						<button type="submit" class="btn btn-danger">Submit</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>  <!-- End of modal form -->
+
+
 
 {% endblock %}
