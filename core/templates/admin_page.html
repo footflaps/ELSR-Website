@@ -375,6 +375,9 @@
 									{% if user.has_valid_phone_number() %}
 										<i class="fa-solid fa-user-lock"></i>
 									{% endif %}
+									{% if user.readwrite() %}
+										<i class="fa-solid fa-user-pen"></i>
+									{% endif %}
 								</td>
 								{% if not mobile %}
 									<td>{{ user.start_date }}</td>
