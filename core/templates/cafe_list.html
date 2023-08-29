@@ -168,10 +168,12 @@
 	        </a>
 			
 			<!-- Add a cafe button -->
-			{% if current_user.is_authenticated and current_user.can_post_cafe() %}
-				<a class="btn btn-primary float-right" href="{{ url_for('new_cafe') }}">
-					<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i> add cafe
-				</a>
+			{% if current_user.is_authenticated %}
+				{% if current_user.readwrite() %}
+					<a class="btn btn-primary float-right" href="{{ url_for('new_cafe') }}">
+						<i class="fa-solid fa-circle-plus fa-beat fa-xl"></i> add cafe
+					</a>
+				{% endif %}
 			{% endif %}
 			
 		</div>

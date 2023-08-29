@@ -236,7 +236,7 @@ def publish_route():
     # 2. Must not be barred (NB Admins cannot be barred)
     if (current_user.email != gpx.email
         and not current_user.admin()) \
-            or not current_user.can_post_gpx():
+            or not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"publish_route(): Refusing permission for '{current_user.email}' to and route '{gpx.id}'!")
         Event().log_event("Publish GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
@@ -320,7 +320,7 @@ def hide_route():
     # 2. Must not be barred (NB Admins cannot be barred)
     if (current_user.email != gpx.email
         and not current_user.admin()) \
-            or not current_user.can_post_gpx():
+            or not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"hide_route(): Refusing permission for {current_user.email} to "
                          f"and route gpx_id = '{gpx_id}'.")
@@ -357,7 +357,7 @@ def new_route():
     # ----------------------------------------------------------- #
     # Restrict access
     # ----------------------------------------------------------- #
-    if not current_user.can_post_gpx():
+    if not current_user.readwrite():
         Event().log_event("New GPX Fail", f"Refusing permission for user {current_user.email} to upload GPX route!")
         app.logger.debug(f"new_route(): Refusing permission for user {current_user.email} to upload GPX route!")
         return abort(403)
@@ -534,7 +534,7 @@ def edit_route():
     # 2. Must not be barred (NB Admins cannot be barred)
     if (current_user.email != gpx.email
         and not current_user.admin()) \
-       or not current_user.can_post_gpx():
+       or not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"edit_route(): Refusing permission for '{current_user.email}' and route '{gpx.id}'.")
         Event().log_event("Edit GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
@@ -667,7 +667,7 @@ def gpx_cut_start():
     # 2. Must not be barred (NB Admins cannot be barred)
     if (current_user.email != gpx.email
         and not current_user.admin()) \
-            or not current_user.can_post_gpx():
+            or not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"gpx_cut_start(): Refusing permission for '{current_user.email}' and route '{gpx_id}'.")
         Event().log_event("GPX Cut Start Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
@@ -746,7 +746,7 @@ def gpx_cut_end():
     # 2. Must not be barred (NB Admins cannot be barred)
     if (current_user.email != gpx.email
         and not current_user.admin()) \
-            or not current_user.can_post_gpx():
+            or not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"gpx_cut_end(): Refusing permission for '{current_user.email}' and route '{gpx_id}'!")
         Event().log_event("GPX Cut End Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
@@ -838,7 +838,7 @@ def route_delete():
     # 2. Must not be barred (NB Admins cannot be barred)
     if (current_user.email != gpx.email
         and not current_user.admin()) \
-            or not current_user.can_post_gpx():
+            or not current_user.readwrite():
         app.logger.debug(f"route_delete(): Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         Event().log_event("GPX Delete Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         return abort(403)

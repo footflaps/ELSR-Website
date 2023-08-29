@@ -159,34 +159,6 @@ class User(UserMixin, db.Model):
         else:
             return False
 
-    def can_post_cafe(self):
-        if self.permissions & MASK_READWRITE > 0 or \
-           self.permissions & MASK_ADMIN > 0:
-            return True
-        else:
-            return False
-
-    def can_post_gpx(self):
-        if self.permissions & MASK_READWRITE > 0 or \
-           self.permissions & MASK_ADMIN > 0:
-            return True
-        else:
-            return False
-
-    def can_comment_cafe(self):
-        if self.permissions & MASK_READWRITE > 0 or \
-           self.permissions & MASK_ADMIN > 0:
-            return True
-        else:
-            return False
-
-    def can_comment_gpx(self):
-        if self.permissions & MASK_READWRITE > 0 or \
-           self.permissions & MASK_ADMIN > 0:
-            return True
-        else:
-            return False
-
     def has_mail(self):
         if Message().all_unread_messages_to_email(self.email):
             return True
