@@ -30,6 +30,7 @@ from core.send_emails import send_reset_email, send_verification_email, send_2fa
 from core.subs_google_maps import MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.db_calendar import Calendar
 from core.db_social import Socials
+from core.send_emails import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -433,6 +434,12 @@ def validate_email():
 
                 # Send welcome email
                 Message().send_welcome_message(new_user.email)
+
+                # ----------------------------------------------------------- #
+                # Alert admin via SMS
+                # ----------------------------------------------------------- #
+                message = "New user joined. Remember to set write permissions for user."
+                Thread(target=alert_admin_via_sms, args=(user, message,)).start()
 
                 # Forward to login page
                 return redirect(url_for('login', email=new_user.email))
