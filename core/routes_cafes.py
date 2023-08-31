@@ -525,7 +525,7 @@ def edit_cafe():
     # Show edit form for the specified cafe
     return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year,
                            GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS,
-                           ELSR_HOME=ELSR_HOME )
+                           ELSR_HOME=ELSR_HOME)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
