@@ -67,6 +67,7 @@ def calendar():
     # ----------------------------------------------------------- #
     year = datetime.today().year
     month = datetime.today().month
+    today_str = datetime.today().strftime("%Y-%m-%d")
 
     # Just cover next 6 months
     for _ in range(0, 7):
@@ -78,36 +79,46 @@ def calendar():
             day_of_week = day_datestr.strftime("%A")
             datestr = f"{format(day, '02d')}{format(month, '02d')}{year}"
 
+            markup = ""
+
             # ----------------------------------------------------------- #
             # Request rides from Calendar class
             # ----------------------------------------------------------- #
             if Calendar().all_calendar_date(datestr):
-                events.append({
-                    "date": f"{year}-{format(month, '02d')}-{format(day, '02d')}",
-                    "markup": f"<a href='{url_for('weekend', date=f'{datestr}')}'>"
-                              f"<i class='fas fa-solid fa-person-biking fa-2xl'></i>[day]</a>",
-                })
+                markup += f"<a href='{url_for('weekend', date=f'{datestr}')}'>" \
+                          f"<i class='fas fa-solid fa-person-biking fa-2xl'></i></a>"
 
             # ----------------------------------------------------------- #
             # Request socials from Socials class
             # ----------------------------------------------------------- #
             if Socials().all_socials_date(datestr):
-                events.append({
-                    "date": f"{year}-{format(month, '02d')}-{format(day, '02d')}",
-                    "markup": f"<a href='{url_for('social')}'>"
-                              f"<i class='fas fa-solid fa-champagne-glasses fa-bounce fa-2xl'></i>[day]</a>",
-                })
+                markup += f"<a href='{url_for('social')}'>" \
+                          f"<i class='fas fa-solid fa-champagne-glasses fa-bounce fa-2xl'></i></a>"
 
             # ----------------------------------------------------------- #
             # Add chaingangs
             # ----------------------------------------------------------- #
             if day_of_week == CHAINGANG_DAY:
                 if CHAINGANG_START_DATE <= day_datestr <= CHAINGANG_END_DATE:
-                    events.append({
-                        "date": f"{year}-{format(month, '02d')}-{format(day, '02d')}",
-                        "markup": f"<a href='{url_for('chaingang')}'>"
-                                  f"<i class='fas fa-solid fa-arrows-spin fa-spin fa-xl'></i>[day]</a>"
-                    })
+                    markup += f"<a href='{url_for('chaingang')}'>" \
+                              f"<i class='fas fa-solid fa-arrows-spin fa-spin fa-xl'></i></a>"
+
+            # ----------------------------------------------------------- #
+            # Add today
+            # ----------------------------------------------------------- #
+            if f"{year}-{format(month, '02d')}-{format(day, '02d')}" == today_str:
+                markup += '<span class="badge bg-primary">[day]</span>'
+            else:
+                markup += "[day]"
+
+            # ----------------------------------------------------------- #
+            # Add single entry for the day
+            # ----------------------------------------------------------- #
+            if markup != "":
+                events.append({
+                    "date": f"{year}-{format(month, '02d')}-{format(day, '02d')}",
+                    "markup": markup
+                })
 
         # Next month
         month += 1

@@ -117,12 +117,12 @@
 	 $(document).ready(function () {
 	    $("#my-calendar").zabuto_calendar({
 	      classname: 'table table-bordered lightgrey-weekends',
-	      today_markup: '<span class="badge bg-primary">[day]</span>',
 	      navigation_markup: {
 	        prev: '<i class="fas fa-chevron-circle-left fa-xl"></i>',
 	        next: '<i class="fas fa-chevron-circle-right fa-xl"></i>'
 	      },
-	      events: {{ events | tojson }}
+	      events: {{ events | tojson }},
+	      today_markup: '<span class="badge bg-primary">[day]</span>',
 	    });
 	  });
 
