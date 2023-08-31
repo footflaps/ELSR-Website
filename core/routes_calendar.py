@@ -66,14 +66,18 @@ def calendar():
     # Loop over time
     # ----------------------------------------------------------- #
     year = datetime.today().year
-    month = datetime.today().month
+    # Start one month behind to backfill calendar a bit
+    month = datetime.today().month - 1
     today_str = datetime.today().strftime("%Y-%m-%d")
 
-    # Just cover next 6 months
-    for _ in range(0, 7):
+    # Just cover 6 month span
+    for _ in range(0, 6):
         if month == 13:
             year += 1
             month = 1
+        elif month == 0:
+            year -= 1
+            month = 12
         for day in range(1, cal.monthrange(year, month)[1] + 1):
             day_datestr = datetime(year, month, day, 0, 00)
             day_of_week = day_datestr.strftime("%A")
