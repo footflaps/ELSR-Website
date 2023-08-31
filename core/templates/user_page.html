@@ -1037,6 +1037,23 @@
 	                <div class="clearfix">
 		
 		                <!---------------------------------------------------------------------------------------->
+						<!--                                      Summary                                       -->
+						<!---------------------------------------------------------------------------------------->
+		                
+		                <h4>Account details for:</h4>
+		                <ul>
+			                <li>User: '<strong>{{ user.name }}</strong>'</li>
+			                <li>Email: '<strong>{{ user.email }}</strong>'</li>
+			                {% if user.has_valid_phone_number() %}
+			                    <li>Mobile: '<strong>{{ user.phone_number }}</strong>'</li>
+			                {% elif user.has_unvalidated_phone_number() %}
+			                    <li>Mobile: '<strong>{{ user.phone_number }}</strong>' [unverified]</li>
+			                {% endif %}
+		                </ul>
+		                
+		                <hr>
+		                
+		                <!---------------------------------------------------------------------------------------->
 						<!--                               Change username form                                 -->
 						<!---------------------------------------------------------------------------------------->
 		                
