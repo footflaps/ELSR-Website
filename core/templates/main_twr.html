@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                   JavaScript for Google Maps (one or more cafes)                               -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if GOOGLE_MAPS_API_KEY %}
+
+	<script>
+		
+		(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+		    key: "{{ GOOGLE_MAPS_API_KEY }}",
+		    v: "weekly",
+		    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
+		    // Add other bootstrap parameters as needed, using camel case.
+	    });
+		
+		
+		let map;
+		
+		async function initMap() {
+	        
+	        // Request needed libraries.
+	        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+	        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+	        
+	        /* Define the map view */
+	        const map = new google.maps.Map(document.getElementById("map"), {
+	            restriction: {
+	                latLngBounds: {{ MAP_BOUNDS | tojson }},
+	                strictBounds: false,
+	            },
+	            zoom: 16,
+	            center: {{ cafes[0]['position'] | tojson }},
+	            mapId: "7499929d658a3166",
+	        });
+	
+	        /* This is our set of cafes */
+			const cafes = {{ cafes | tojson }}
+		    
+		    // Create an info window to share between markers.
+		    const infoWindow = new InfoWindow();
+						
+	        // Create the markers.
+	        cafes.forEach( ({ position, title, color }, i) => {
+	            const pin = new PinElement({
+	                glyph: `${i + 1}`,
+	            });
+	            
+	            const marker = new AdvancedMarkerElement({
+	                position,
+	                map,
+	                title: `${title}`,
+	                content: new PinElement({
+	                                background: color,
+	                                borderColor: "black",
+	                                glyphColor: "black",
+	                                scale: 1.5,
+								}).element
+	            });
+	            
+	            // Add a click listener for each marker, and set up the info window.
+	            marker.addListener("click", ({ domEvent, latLng }) => {
+	                const { target } = domEvent;
+	                infoWindow.close();
+	                infoWindow.setContent(marker.title);
+	                infoWindow.open(marker.map, marker);
+	            });
+	        });
+		}
+	
+		initMap();
+	
+	</script>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/twr-bg.jpg')}}')">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>TWR</h1>
+					<span class="subheading">The / Tim's Wedneday Ride</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>TWR</h2>
+			
+			<p>Not an ELSR organised ride, but an unaffiliated weekly ride, which has been running for over 30 years!</p>
+			
+			<p>Organised by Tim Williams (Cambridge Tri-club coach and Tuesday Chaingang organiser) and regularly
+			   frequented by ELSR riders. </p>
+			
+			<p>Rides are at Espresso pace, between 100km (winter) and 120km (summer), with a cafe stop midway.</p>
+			
+			<p>Normally a small, but select group. New riders welcome (just make sure you know how to fix a puncture).</p>
+			
+			<p>Featuring a weekly 'guess the cafe' (GTC) as the destination is never disclosed in advance and riders
+			   are left to guess where they're headed as the ride progresses. Obviously the ride leader is free to
+			   change the destination en-route if anyone guess correctly too early.</p>
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Where we meet                                             -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                      Insert Google Map                                         -->
+			<!---------------------------------------------------------------------------------------------------->
+			
+			<h2>Where <i class="fa-solid fa-map-location-dot"></i> and When <i class="fa-solid fa-calendar-days"></i>
+				<i class="fa-regular fa-clock"></i></h2>
+			
+			<p><i class="fa-solid fa-map-location-dot fa-xl"></i>  The ride meets at <strong>The Bench</strong> on Newnham corner.</p>
+			
+			<ul>
+				<li> <i class="fa-solid fa-calendar-days"></i> February through November: <i class="fa-regular fa-clock"></i> 08:00 every Wednesday</li>
+				<li> <i class="fa-solid fa-calendar-days"></i> December and January: <i class="fa-regular fa-clock"></i> 08:30 every Wednesday</li>
+			</ul>
+			
+			<div id="map" style="height: 500px" class="mt-5">
+				{% if not GOOGLE_MAPS_API_KEY %}
+					<img src="{{ url_for('static', filename='img/fake_map.jpg') }}">
+				{% endif %}
+			</div>
+			
+			<hr>
+
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}

@@ -108,6 +108,13 @@ def calendar():
                               f"<i class='fas fa-solid fa-arrows-spin fa-spin fa-xl'></i></a>"
 
             # ----------------------------------------------------------- #
+            # Add TWRs
+            # ----------------------------------------------------------- #
+            if day_of_week == "Wednesday":
+                markup += f"<a href='{url_for('twr')}'>" \
+                          f"<i class='fas fa-solid fa-person-biking fa-xl'></i></a>"
+
+            # ----------------------------------------------------------- #
             # Add today
             # ----------------------------------------------------------- #
             if f"{year}-{format(month, '02d')}-{format(day, '02d')}" == today_str:
