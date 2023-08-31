@@ -37,10 +37,10 @@ GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Initialise Sentry
+# Initialise Sentry (only for live site)
 # -------------------------------------------------------------------------------------------------------------- #
 
-if __name__ != '__main__':
+if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
     sentry_sdk.init(
         dsn=os.environ['ELSR_SENTRY_DSN'],
         integrations=[
