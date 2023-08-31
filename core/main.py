@@ -24,9 +24,8 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR
 from core.db_users import update_last_seen
 from core.subs_graphjs import get_elevation_data
-from core.subs_google_maps import polyline_json, GOOGLE_MAPS_API_KEY, ELSR_HOME, MAP_BOUNDS
+from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS
 from core.dB_events import Event
-
 from core.subs_email_sms import contact_form_email
 
 
@@ -128,7 +127,7 @@ def home():
     # -------------------------------------------------------------------------------------------- #
     # Show Espresso Library on a map
     # -------------------------------------------------------------------------------------------- #
-
+    # Look up the cafe
     cafe = Cafe().one_cafe(ESPRESSO_LIBRARY_INDEX)
 
     # Need cafe markers as weird Google proprietary JSON string
@@ -143,7 +142,7 @@ def home():
 
     # Render home page
     return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,
-                           GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS)
+                           GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -197,7 +196,7 @@ def chaingang():
     return render_template("main_chaingang.html", year=current_year, leader_table=leader_table,
                            cafe_markers=cafe_markers, elevation_data=elevation_data,
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
-                           GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS)
+                           GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -234,7 +233,6 @@ def contact():
         form.name.data = ""
         form.message.data = ""
 
-
     elif request.method == 'POST':
 
         # ----------------------------------------------------------- #
@@ -270,8 +268,16 @@ def uncut():
     return render_template("uncut_steerertubes.html", year=current_year)
 
 
-# ------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 # Error Handlers
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
+# ------------------------------------------------------------------------------------------------------------- #
+# Generate a 500 error
 # ------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/error", methods=['GET'])
@@ -280,6 +286,9 @@ def error():
     return render_template("uncut_steerertubes.html", year=current_year)
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# CSRF Error
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(CSRFError)
 def csrf_error(e):
     # What page were they looking for?
@@ -298,6 +307,9 @@ def csrf_error(e):
     return render_template('400.html', year=current_year), 400
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# 400: Bad Request
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(400)
 def bad_request(e):
     # What page were they looking for?
@@ -314,6 +326,9 @@ def bad_request(e):
     return render_template('400.html', year=current_year), 400
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# 401: Unauthorized
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(401)
 def unauthorized(e):
     # What page were they looking for?
@@ -331,6 +346,9 @@ def unauthorized(e):
     return render_template('403.html', year=current_year), 401
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# 403: Forbidden
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(403)
 def forbidden(e):
     # What page were they looking for?
@@ -347,6 +365,9 @@ def forbidden(e):
     return render_template('403.html', year=current_year), 403
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# 404: Not Found
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(404)
 def page_not_found(e):
     # What page were they looking for?
@@ -363,6 +384,9 @@ def page_not_found(e):
     return render_template('404.html', year=current_year), 404
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# 405: Method Not Allowed
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(405)
 def method_not_allowed(e):
     # What page were they looking for?
@@ -379,6 +403,9 @@ def method_not_allowed(e):
     return render_template('403.html', year=current_year), 405
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# 413: Request Entity Too Large
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(413)
 def file_too_large(e):
     # What page were they looking for?
@@ -396,6 +423,9 @@ def file_too_large(e):
     return render_template('400.html', year=current_year), 413
 
 
+# ------------------------------------------------------------------------------------------------------------- #
+# 500: Internal server error
+# ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(500)
 def internal_server_error(e):
     # What page were they looking for?

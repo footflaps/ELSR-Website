@@ -22,7 +22,7 @@ from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes
 from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm, \
-                                  MAP_BOUNDS, GOOGLE_MAPS_API_KEY
+                                  MAP_BOUNDS, google_maps_api_key
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
 
@@ -189,7 +189,7 @@ def gpx_details(gpx_id):
     # Render in main index template
     return render_template("gpx_details.html", gpx=gpx, year=current_year, cafe_markers=cafe_markers,
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
-                           cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
+                           cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
                            MAP_BOUNDS=MAP_BOUNDS)
 
@@ -612,7 +612,7 @@ def edit_route():
             form.owner.data = f"{user.name} ({user.id})"
 
     # Render the page
-    return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY,
+    return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            MAP_BOUNDS=MAP_BOUNDS, start_markers=maps[0], start_map_coords=maps[1],
                            end_markers=maps[2], end_map_coords=maps[3], return_path=return_path, form=form)
 

@@ -27,7 +27,7 @@ from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.subs_email_sms import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
-from core.subs_google_maps import MAP_BOUNDS, GOOGLE_MAPS_API_KEY
+from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key
 from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.subs_email_sms import alert_admin_via_sms
@@ -831,21 +831,21 @@ def user_page():
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, form=form,
+                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
                                anchor="messages")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, form=form,
+                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
                                anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
-                               GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, form=form)
+                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
