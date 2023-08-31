@@ -950,7 +950,7 @@ def disable_maps():
     # Verify
     if not maps_enabled():
         app.logger.debug(f"disable_maps(): Disabled Maps, current_user.id = '{current_user.id}'!")
-        Event().log_event("Enable Maps Success", f"Disabled Maps, current_user.id = '{current_user.id}'.")
+        Event().log_event("Disable Maps Success", f"Disabled Maps, current_user.id = '{current_user.id}'.")
         flash("Maps disabled")
     else:
         app.logger.debug(f"disable_maps(): Failed to disable maps, current_user.id = '{current_user.id}'!")
