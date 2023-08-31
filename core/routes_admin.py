@@ -20,6 +20,7 @@ from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_calendar import Calendar
 from core.db_social import Socials
+from core.send_emails import send_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -796,3 +797,21 @@ def password_reset_user():
     # Back to user page
     return redirect(url_for('user_page', user_id=user_id))
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Test SMS
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/test_sms', methods=['GET'])
+@login_required
+@admin_only
+@update_last_seen
+def test_sms():
+    # ----------------------------------------------------------- #
+    # Send SMS
+    # ----------------------------------------------------------- #
+    send_sms(current_user, "Test SMS")
+    flash(f"An SMS has been sent to '{current_user.phone_number}'")
+
+    # Back to user page
+    return redirect(url_for('user_page', user_id=current_user.id))

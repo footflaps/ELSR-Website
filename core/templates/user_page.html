@@ -1075,11 +1075,27 @@
 		                    
 		                        <!-- Edit existing phone number -->
 		                        <a data-toggle="modal" data-target="#editPhoneModal">
-				                    <button type="button" class="btn btn-secondary mx-2 my-2">Edit my
+				                    <button type="button" class="btn btn-secondary mt-2">Edit my
 					                    <i class="fa-solid fa-mobile-retro fa-xl"></i>
 				                    </button>
 								</a>
 	                    
+		                    {% else %}
+		                
+		                        <!-- Disabled Edit button -->
+	                            <button type="button" class="btn btn-dark disabled float_left mt-2">Edit my
+				                    <i class="fa-solid fa-mobile-retro fa-xl"></i>
+			                    </button>
+							
+		                        <!-- Test SMS button -->
+		                        <a href="{{ url_for('test_sms') }}">
+		                            <button type="button" class="btn btn-primary float-right mt-2">Test SMS
+					                    <i class="fa-solid fa-mobile-retro fa-xl"></i>
+				                    </button>
+			                    </a>
+		                
+		                        <p>NB Admins can't change their 2FA mobile as it would lock them out.</p>
+		                
 	                        {% endif %}
 	                    
 		                {% elif user.has_unvalidated_phone_number() %}
@@ -1088,7 +1104,7 @@
 	                        <form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
 								<input type="hidden" name="phone_number" value="{{ user.phone_number }}"/>
 								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-								<button type="submit" class="btn btn-primary mx-2 my-2">Verify my
+								<button type="submit" class="btn btn-primary my-2">Verify my
 									<i class="fa-solid fa-mobile-retro fa-xl"></i>
 								</button>
 							</form>
