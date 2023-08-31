@@ -18,7 +18,7 @@ from core import app
 from core.db_users import User, admin_only, update_last_seen, logout_barred_user
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.send_emails import alert_admin_via_sms
+from core.subs_email_sms import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -38,6 +38,35 @@
 {% endwith %}
 
 
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Twilio-Balance                                             -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+
+			<h2>Twilio balance (SMS provider)</h2>
+			{% if twilio_balance[0] < 5 %}
+			
+				<h2 class="my-3" style="color:red">
+					<i class="fa-solid fa-triangle-exclamation fa-2xl"></i> &nbsp;
+					{{ twilio_balance[0] }} {{ twilio_balance[1] }}  &nbsp;
+					<i class="fa-solid fa-triangle-exclamation fa-2xl"></i>
+				</h2>
+			
+			{% else %}
+			
+				<h4 class="my-3">{{ twilio_balance[0] }} {{ twilio_balance[1] }} </h4>
+			
+			{% endif %}
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                        Messages                                                -->

@@ -40,17 +40,18 @@ GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 # Initialise Sentry
 # -------------------------------------------------------------------------------------------------------------- #
 
-sentry_sdk.init(
-    dsn=os.environ['ELSR_SENTRY_DSN'],
-    integrations=[
-        FlaskIntegration(),
-    ],
+if __name__ != '__main__':
+    sentry_sdk.init(
+        dsn=os.environ['ELSR_SENTRY_DSN'],
+        integrations=[
+            FlaskIntegration(),
+        ],
 
-    # Set traces_sample_rate to 1.0 to capture 100%
-    # of transactions for performance monitoring.
-    # We recommend adjusting this value in production.
-    traces_sample_rate=1.0
-)
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        # We recommend adjusting this value in production.
+        traces_sample_rate=1.0
+    )
 
 
 # -------------------------------------------------------------------------------------------------------------- #

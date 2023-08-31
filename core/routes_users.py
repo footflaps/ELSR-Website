@@ -26,11 +26,11 @@ from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.send_emails import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
+from core.subs_email_sms import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
 from core.subs_google_maps import MAP_BOUNDS, GOOGLE_MAPS_API_KEY
 from core.db_calendar import Calendar
 from core.db_social import Socials
-from core.send_emails import alert_admin_via_sms
+from core.subs_email_sms import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #

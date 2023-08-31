@@ -1,9 +1,12 @@
 from flask import url_for
 import smtplib
 import os
+
+from requests.auth import HTTPBasicAuth
 from twilio.rest import Client
 from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX
+import requests
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -201,4 +204,16 @@ def alert_admin_via_sms(from_user: User, message: str):
             # Should never get here, but..
             Event().log_event("SMS admin alert", f"Admin '{admin.email}' doesn't appear to have a valid mobile number.")
             app.logger.debug(f"alert_admin_sms(): Admin '{admin.email}' doesn't appear to have a valid mobile number.")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Get Twillio balance
+# -------------------------------------------------------------------------------------------------------------- #
+def get_twilio_balance():
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{twilio_account_sid}/Balance.json"
+    auth = HTTPBasicAuth(twilio_account_sid, twilio_auth_token)
+    response = requests.get(url=url, auth=auth)
+    response.raise_for_status()
+    return [float(response.json()['balance']), response.json()['currency']]
+
 

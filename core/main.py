@@ -27,7 +27,7 @@ from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, GOOGLE_MAPS_API_KEY, ELSR_HOME, MAP_BOUNDS
 from core.dB_events import Event
 
-from core.send_emails import contact_form_email
+from core.subs_email_sms import contact_form_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #

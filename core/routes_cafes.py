@@ -25,7 +25,7 @@ from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
-from core.send_emails import alert_admin_via_sms
+from core.subs_email_sms import alert_admin_via_sms
 from core.subs_cafe_photos import update_cafe_photo
 
 

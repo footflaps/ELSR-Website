@@ -20,7 +20,7 @@ from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_calendar import Calendar
 from core.db_social import Socials
-from core.send_emails import send_sms
+from core.subs_email_sms import send_sms, get_twilio_balance
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -101,6 +101,11 @@ def admin_page():
     socials = Socials().all()
 
     # ----------------------------------------------------------- #
+    # Twilio balance
+    # ----------------------------------------------------------- #
+    twilio_balance = get_twilio_balance()
+
+    # ----------------------------------------------------------- #
     # Unread messages
     # ----------------------------------------------------------- #
     count = 0
@@ -133,17 +138,17 @@ def admin_page():
         # Jump straight to the 'eventlog'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, anchor="eventLog")
+                               rides=rides, twilio_balance=twilio_balance, anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, anchor="messages")
+                               rides=rides, twilio_balance=twilio_balance, anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides)
+                               rides=rides, twilio_balance=twilio_balance)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
