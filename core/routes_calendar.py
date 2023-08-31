@@ -245,7 +245,6 @@ def add_social():
         # ----------------------------------------------------------- #
         # Add to the db
         # ----------------------------------------------------------- #
-
         if Socials().add_social(new_social):
             # Success
             app.logger.debug(f"add_social(): Successfully added new social.")

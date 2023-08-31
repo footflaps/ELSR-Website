@@ -732,7 +732,6 @@ def user_page():
         flash("You didn't fill your name in properly!")
         return redirect(url_for('user_page', user_id=user.id))
 
-
     # ----------------------------------------------------------- #
     # Events
     # ----------------------------------------------------------- #
@@ -847,102 +846,6 @@ def user_page():
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
                                GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS, form=form)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Send a new verification code
-# -------------------------------------------------------------------------------------------------------------- #
-
-@app.route('/send_verification', methods=['GET'])
-@login_required
-@admin_only
-@update_last_seen
-def reverify_user():
-    # ----------------------------------------------------------- #
-    # Get details from the page
-    # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-
-    # ----------------------------------------------------------- #
-    # Handle missing parameters
-    # ----------------------------------------------------------- #
-    if not user_id:
-        app.logger.debug(f"reverify_user(): Missing user_id!")
-        Event().log_event("Send Verify Fail", f"Missing user_id.")
-        abort(400)
-
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
-    if not user:
-        app.logger.debug(f"reverify_user(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("Send Verify Fail", f"Invalid user_id = '{user_id}'.")
-        abort(404)
-
-    # ----------------------------------------------------------- #
-    # Send verification code
-    # ----------------------------------------------------------- #
-    if User().create_new_verification(user_id):
-        app.logger.debug(f"reverify_user(): Verification code sent user_id = '{user_id}'.")
-        Event().log_event("Send Verify Pass", f"Verification code sent user_id = '{user_id}'.")
-        flash("Verification code sent!")
-    else:
-        # Should never get here, but...
-        app.logger.debug(f"reverify_user(): User().create_new_verification() failed, user_id = '{user_id}'!")
-        Event().log_event("Send Verify Fail", f"User().create_new_verification() failed, user_id = '{user_id}'!")
-        flash("Sorry, something went wrong!")
-
-    # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Send a new password reset code
-# -------------------------------------------------------------------------------------------------------------- #
-
-@app.route('/send_password_reset', methods=['GET'])
-@login_required
-@admin_only
-@update_last_seen
-def password_reset_user():
-    # ----------------------------------------------------------- #
-    # Get details from the page
-    # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
-
-    # ----------------------------------------------------------- #
-    # Handle missing parameters
-    # ----------------------------------------------------------- #
-    if not user_id:
-        app.logger.debug(f"password_reset_user(): Missing user_id!")
-        Event().log_event("Send Reset Fail", f"Missing user id!")
-        abort(400)
-
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
-    if not user:
-        app.logger.debug(f"password_reset_user(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("Send Reset Fail", f"Invalid user user_id = '{user_id}'.")
-        abort(404)
-
-    # ----------------------------------------------------------- #
-    # Send reset
-    # ----------------------------------------------------------- #
-    if User().create_new_reset_code(user.email):
-        app.logger.debug(f"password_reset_user(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("Send Reset Pass", f"Reset code sent to '{user.email}'.")
-        flash("Reset code sent!")
-    else:
-        # Should never get here, but...
-        app.logger.debug(f"password_reset_user(): User().create_new_reset_code failed, user_id = '{user_id}'!")
-        Event().log_event("Send Reset Fail", f"User().create_new_reset_code failed, user_id = '{user_id}'!")
-        flash("Sorry, something went wrong!")
-
-    # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #

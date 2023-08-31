@@ -328,6 +328,16 @@ def add_ride():
     ride_id = request.args.get('ride_id', None)
 
     # ----------------------------------------------------------- #
+    # Permissions
+    # ----------------------------------------------------------- #
+    if not current_user.readwrite():
+        # Failed authentication
+        app.logger.debug(f"add_ride(): Refusing permission for '{current_user.email}'.")
+        Event().log_event("Add Ride Fail", f"Refusing permission for '{current_user.email}'.")
+        flash("You do not have permission to add events to the calendar.")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
     # Validate ride_id
     # ----------------------------------------------------------- #
     if ride_id:
@@ -738,7 +748,8 @@ def delete_ride():
     # Restrict access to Admin or owner of ride event
     # ----------------------------------------------------------- #
     if not current_user.admin() \
-            and current_user.email != ride.email:
+            and current_user.email != ride.email or \
+            not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"delete_ride(): Rejected request from '{current_user.email}' as no permissions"
                          f" for ride_id = '{ride_id}'.")
