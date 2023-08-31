@@ -610,15 +610,15 @@ def user_readwrite():
     # Set Read Write permission
     # ----------------------------------------------------------- #
     if User().set_readwrite(user_id):
-        app.logger.debug(f"user_readwrite(): Success, user can now write, user_id = '{user_id}'.")
-        Event().log_event("ReadWrite Success", f"User can now write, user_id = '{user_id}'.")
+        app.logger.debug(f"user_readwrite(): Success, user can now write, user.email = '{user.email}'.")
+        Event().log_event("ReadWrite Success", f"User can now write, user.email = '{user.email}'.")
         flash(f"User '{user.name}' now has Write permissions.")
         Message().send_readwrite_message(user.email)
         return redirect(url_for('user_page', user_id=user_id))
     else:
         # Should never get here, but...
-        app.logger.debug(f"user_readwrite(): User().set_readwrite() failed for user_id = '{user_id}'.")
-        Event().log_event("ReadWrite Fail", f"User().set_readwrite() failed for user_id = '{user_id}'.")
+        app.logger.debug(f"user_readwrite(): User().set_readwrite() failed for user.email = '{user.email}'.")
+        Event().log_event("ReadWrite Fail", f"User().set_readwrite() failed for user.email = '{user.email}'.")
         flash("Sorry, something went wrong.")
         return redirect(url_for('user_page', user_id=user_id))
 
@@ -678,13 +678,14 @@ def user_readonly():
     # Can't edit yourself nor an admin
     # ----------------------------------------------------------- #
     if current_user.id == user.id:
-        app.logger.debug(f"user_readonly(): ubBlock failed, admin can't unblock themselves, user_id = '{user_id}'.")
-        Event().log_event("ReadOnly Fail", f"Admin can't unblock themselves, user_id = '{user_id}'.")
+        app.logger.debug(f"user_readonly(): ubBlock failed, admin can't unblock themselves, '{current_user.email}'.")
+        Event().log_event("ReadOnly Fail", f"Admin can't unblock themselves, '{current_user.email}'.")
         flash(f"You can't unblock yourself!")
         return redirect(url_for('user_page', user_id=user_id))
     if user.admin():
-        app.logger.debug(f"user_readonly(): unBlock failed, can't block Admin, user_id = '{user_id}'.")
-        Event().log_event("ReadOnly Fail", f"Can't unblock Admin, user_id = '{user_id}'.")
+        app.logger.debug(f"user_readonly(): unBlock failed, can't block Admin, "
+                         f"'{current_user.email}' blocking '{user.email}'.")
+        Event().log_event("ReadOnly Fail", f"Can't unblock Admin, '{current_user.email}' blocking '{user.email}'.")
         flash(f"You can't unblock an Admin!")
         return redirect(url_for('user_page', user_id=user_id))
 
@@ -692,8 +693,8 @@ def user_readonly():
     #  Validate against current_user's (admins) password
     # ----------------------------------------------------------- #
     if not user.validate_password(current_user, password, user_ip):
-        app.logger.debug(f"user_readonly(): Incorrect password for user_id = '{current_user.id}'!")
-        Event().log_event("ReadOnly Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        app.logger.debug(f"user_readonly(): Incorrect password for '{current_user.email}'!")
+        Event().log_event("ReadOnly Fail", f"Incorrect password for '{current_user.email}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
         return redirect(url_for('user_page', user_id=user_id))
 
@@ -701,15 +702,15 @@ def user_readonly():
     # Set Read Only permission
     # ----------------------------------------------------------- #
     if User().set_readonly(user_id):
-        app.logger.debug(f"user_readonly(): Success, user is Readonly, user_id = '{user_id}'.")
-        Event().log_event("ReadOnly Success", f"User is Readonly, user_id = '{user_id}'.")
+        app.logger.debug(f"user_readonly(): Success, user is Readonly, user.email = '{user.email}'.")
+        Event().log_event("ReadOnly Success", f"User is Readonly, user.email = '{user.email}'.")
         flash(f"User '{user.name}' is now Read ONLY.")
         Message().send_readonly_message(user.email)
         return redirect(url_for('user_page', user_id=user_id))
     else:
         # Should never get here, but...
-        app.logger.debug(f"user_readonly(): User().set_readonly() failed for user_id = '{user_id}'.")
-        Event().log_event("ReadOnly Fail", f"User().set_readonly() failed for user_id = '{user_id}'.")
+        app.logger.debug(f"user_readonly(): User().set_readonly() failed for user.email = '{user.email}'.")
+        Event().log_event("ReadOnly Fail", f"User().set_readonly() failed for user.email = '{user.email}'.")
         flash("Sorry, something went wrong.")
         return redirect(url_for('user_page', user_id=user_id))
 
