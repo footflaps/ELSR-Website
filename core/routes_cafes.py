@@ -464,7 +464,9 @@ def edit_cafe():
             Event().log_event("Edit Cafe Fail", f"Detected duplicate cafe name '{updated_cafe.name}'.")
             flash("Sorry, that name is already in use, choose another!")
             # Back to edit form
-            return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year)
+            return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year,
+                                   GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS,
+                                   ELSR_HOME=ELSR_HOME)
 
         # ----------------------------------------------------------- #
         # Update details
@@ -521,7 +523,9 @@ def edit_cafe():
         cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
 
     # Show edit form for the specified cafe
-    return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year)
+    return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year,
+                           GOOGLE_MAPS_API_KEY=GOOGLE_MAPS_API_KEY, MAP_BOUNDS=MAP_BOUNDS,
+                           ELSR_HOME=ELSR_HOME )
 
 
 # -------------------------------------------------------------------------------------------------------------- #
