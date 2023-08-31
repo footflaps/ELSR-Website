@@ -1104,7 +1104,7 @@
 	                        <form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
 								<input type="hidden" name="phone_number" value="{{ user.phone_number }}"/>
 								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-								<button type="submit" class="btn btn-primary my-2">Verify my
+								<button type="submit" class="btn btn-primary mt-2">Verify my
 									<i class="fa-solid fa-mobile-retro fa-xl"></i>
 								</button>
 							</form>
@@ -1113,7 +1113,7 @@
 	                    
 	                        <!-- Add phone number -->
 	                        <a data-toggle="modal" data-target="#addPhoneModal">
-			                    <button type="button" class="btn btn-primary mx-2 my-2">Add my
+			                    <button type="button" class="btn btn-primary mt-2">Add my
 				                    <i class="fa-solid fa-mobile-retro fa-xl"></i>
 			                    </button>
 							</a>
