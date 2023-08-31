@@ -307,10 +307,10 @@ def register():
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Names must be unique
-        if User().check_name_in_use:
-            flash(f"Sorry, the name '{new_user.name.strip()}' is already in use!")
-            return render_template("user_register.html", form=form, year=current_year,
-                                   admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
+        # if User().check_name_in_use:
+        #     flash(f"Sorry, the name '{new_user.name.strip()}' is already in use!")
+        #     return render_template("user_register.html", form=form, year=current_year,
+        #                            admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Add to dB
         if User().create_user(new_user, form.password.data):
