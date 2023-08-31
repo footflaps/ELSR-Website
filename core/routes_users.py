@@ -307,10 +307,13 @@ def register():
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Names must be unique
-        # if User().check_name_in_use:
-        #     flash(f"Sorry, the name '{new_user.name.strip()}' is already in use!")
-        #     return render_template("user_register.html", form=form, year=current_year,
-        #                            admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
+        if User().check_name_in_use(new_user.name):
+            app.logger.debug(f"user_page(): Username clash '{new_user.name}' for new_user.id = '{new_user.id}'.")
+            Event().log_event("User Page Succes", f"Username clash '{new_user.name}' "
+                                                  f"for new_user.id = '{new_user.id}'.")
+            flash(f"Sorry, the name '{new_user.name.strip()}' is already in use!")
+            return render_template("user_register.html", form=form, year=current_year,
+                                   admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Add to dB
         if User().create_user(new_user, form.password.data):
@@ -711,6 +714,8 @@ def user_page():
         elif User().check_name_in_use(new_name):
             # Not unique
             flash(f"Sorry, the name '{new_name}' is already in use!")
+            app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")
+            Event().log_event("User Page Succes", f"Username clash '{new_name}' for user_id = '{user_id}'.")
             return redirect(url_for('user_page', user_id=user.id))
         else:
             # Change their name

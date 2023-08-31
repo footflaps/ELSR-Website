@@ -158,8 +158,8 @@ def send_2fa_sms(user):
         from_=twilio_mobile_number,
         to=user.phone_number
     )
-    Event().log_event("SMS", f"SMS 2FA sent to user_id = '{user.id}'. Status is '{message.status}'.")
-    app.logger.debug(f"send_sms(): SMS 2FA sent to user_id = '{user.id}'. Status is '{message.status}'.")
+    Event().log_event("SMS", f"SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
+    app.logger.debug(f"send_sms(): SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -173,8 +173,8 @@ def send_sms_verif_code(user):
         from_=twilio_mobile_number,
         to=user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number)]
     )
-    Event().log_event("SMS", f"SMS code sent to user_id = '{user.id}'. Status is '{message.status}'.")
-    app.logger.debug(f"send_sms(): SMS code sent to user_id = '{user.id}'. Status is '{message.status}'.")
+    Event().log_event("SMS", f"SMS code sent to '{user.email}'. Status is '{message.status}'.")
+    app.logger.debug(f"send_sms(): SMS code sent to '{user.email}'. Status is '{message.status}'.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -187,8 +187,8 @@ def send_sms(user, message):
         from_=twilio_mobile_number,
         to=user.phone_number
     )
-    Event().log_event("SMS", f"Sent SMS to '{user.id}'. Status is '{message.status}'.")
-    app.logger.debug(f"send_sms(): Sent SMS to '{user.id}'. Status is '{message.status}'.")
+    Event().log_event("SMS", f"Sent SMS to '{user.email}'. Status is '{message.status}'.")
+    app.logger.debug(f"send_sms(): Sent SMS to '{user.email}'. Status is '{message.status}'.")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
