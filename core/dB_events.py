@@ -229,7 +229,8 @@ def flag_event(event_type):
 
 # Decide if an event is good or not (so we can colour it green in the table)
 def good_event(event_type):
-    if "success" in event_type.lower():
+    if "success" in event_type.lower() or \
+            "pass" in event_type.lower():
         return True
     return False
 
