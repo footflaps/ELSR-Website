@@ -41,8 +41,6 @@ CHAINGANG_END_DATE = datetime(2023, 9, 28, 0, 00)
 ICS_DIRECTORY = os.environ['ELSR_ICS_DIRECTORY']
 
 
-
-
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -138,10 +136,20 @@ def add_social():
         social = Socials().one_social_id(social_id)
         if not social:
             app.logger.debug(f"add_social(): Failed to locate social, social_id = '{social_id}'.")
-            Event().log_event("Edit Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
+            Event().log_event("Add Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
             return abort(404)
     else:
         social = None
+
+    # ----------------------------------------------------------- #
+    # Permission check
+    # ----------------------------------------------------------- #
+    if not current_user.readwrite():
+        # Should never get here, but....
+        app.logger.debug(f"add_social(): Rejected request for '{current_user.email}' as no permissions.")
+        Event().log_event("Add Social Fail", f"Rejected request for '{current_user.email}' as no permissions.")
+        flash("Sorry, you do not have write permissions.")
+        return abort(403)
 
     # ----------------------------------------------------------- #
     # Need a form
@@ -364,7 +372,8 @@ def delete_social():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != social.email \
-            and not current_user.admin():
+            and not current_user.admin() or \
+            not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}'.")
@@ -435,8 +444,6 @@ def download_ics():
     # ----------------------------------------------------------- #
     # Create ics file
     # ----------------------------------------------------------- #
-
-    # Create ics event
     new_event = icsEvent()
     new_event.name = "ELSR Social"
     new_event.begin = f"{social.date[4:8]}-{social.date[2:4]}-{social.date[0:2]} " \
