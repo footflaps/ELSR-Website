@@ -39,6 +39,58 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                                     Google Maps Status                                         -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+
+			<h2>Google Maps Status</h2>
+			
+			{% if map_status %}
+			
+				<!-- Maps are enabled -->
+				<h2 class="float-left" style="color: green">
+					<i class="fa-regular fa-thumbs-up fa-xl"></i>
+				    Maps Enabled
+				</h2>
+			
+				<button class="btn btn-danger float-right" type="button" data-toggle="modal"
+				        data-target="#disableMaps">
+					Disable Maps
+				</button>
+
+			{% else %}
+			
+				<!-- Maps are disabled -->
+				<h2 class="float-left" style="color:red">
+					<i class="fa-solid fa-triangle-exclamation fa-2xl"></i> &nbsp;
+					Maps Disabled! &nbsp;
+					<i class="fa-solid fa-triangle-exclamation fa-2xl"></i>
+				</h2>
+			
+				<button class="btn btn-success float-right" type="button" data-toggle="modal"
+				        data-target="#enableMaps">
+					Enable Maps
+				</button>
+			
+			{% endif %}
+			
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                     Twilio-Balance                                             -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -57,7 +109,10 @@
 			
 			{% else %}
 			
-				<h2 class="my-3">{{ "£%.2f"|format(twilio_balance[0]) }}</h2>
+				<h2 class="my-3" style="color: green">
+					<i class="fa-regular fa-thumbs-up fa-xl"></i>
+					{{ "£%.2f"|format(twilio_balance[0]) }}
+				</h2>
 			
 			{% endif %}
 			
@@ -1049,6 +1104,83 @@
 		</div>
 	</div>
 </div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                Modal form for enable Maps                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="enableMaps" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="enableMaps2">Enable Google Maps</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				
+				<form action="{{ url_for('enable_maps') }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
+					<div class="form-group">
+						<label class="col-form-label">
+							Enter <strong>your password</strong> below.
+						</label>
+						<input type="password" class="form-control" name="password">
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
+						<button type="submit" class="btn btn-success">ENABLE</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                               Modal form for disable Maps                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="disableMaps" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="disableMaps2">Disable Google Maps</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				
+				<form action="{{ url_for('disable_maps') }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
+					<div class="form-group">
+						<label class="col-form-label">
+							Enter <strong>your password</strong> below.
+						</label>
+						<input type="password" class="form-control" name="password">
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
+						<button type="submit" class="btn btn-danger">DISABLE</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
 
 {% endblock %}
 

@@ -48,6 +48,10 @@ MAP_BOUNDS = {
         "east": ELSR_HOME['lng'] + 1,
 }
 
+# Maps enable status file location
+MAP_STATUS_FILENAME = "map_status.txt"
+CONFIG_FOLDER = os.environ['ELSR_CONFIG_FOLDER']
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -306,9 +310,17 @@ def start_and_end_maps_native_gm(filename, gpx_id, return_path):
 # -------------------------------------------------------------------------------------------------------------- #
 # Are maps enabled?
 # -------------------------------------------------------------------------------------------------------------- #
-
 def maps_enabled():
-    return True
+    # ----------------------------------------------------------- #
+    #   Read status from file
+    # ----------------------------------------------------------- #
+    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_STATUS_FILENAME))
+
+    with open(filename) as file:
+        text = file.readline()
+        map_status = text == "True"
+
+    return map_status
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -319,3 +331,33 @@ def google_maps_api_key():
         return NEW_GOOGLE_MAPS_API_KEY
     else:
         return None
+
+print(f"Maps Status = {maps_enabled()}")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Enable maps
+# -------------------------------------------------------------------------------------------------------------- #
+
+def set_enable_maps():
+    # ----------------------------------------------------------- #
+    #   Write status to file
+    # ----------------------------------------------------------- #
+    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_STATUS_FILENAME))
+
+    with open(filename, 'w') as file:
+        file.write("True")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Disable maps
+# -------------------------------------------------------------------------------------------------------------- #
+
+def set_disable_maps():
+    # ----------------------------------------------------------- #
+    #   Write status to file
+    # ----------------------------------------------------------- #
+    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_STATUS_FILENAME))
+
+    with open(filename, 'w') as file:
+        file.write("False")
