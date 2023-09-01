@@ -48,43 +48,71 @@
 
 			<h2>Google Maps Status</h2>
 			<ul>
-			
 				<li>Map Count since midnight is {{ map_count }} / {{ map_limit }}, {{ "£%.2f"|format(map_cost_ukp) }}</li>
-			
 			</ul>
 			
 			{% if map_status %}
-			
+				
 				<!-- Maps are enabled -->
 				<h2 class="float-left" style="color: green">
 					<i class="fa-regular fa-thumbs-up fa-xl"></i>
 				    Maps Enabled
 				</h2>
 			
-				<button class="btn btn-danger float-right" type="button" data-toggle="modal"
-				        data-target="#disableMaps">
-					Disable Maps
-				</button>
-
 			{% else %}
-			
+				
 				<!-- Maps are disabled -->
 				<h2 class="float-left" style="color:red">
 					<i class="fa-solid fa-triangle-exclamation fa-2xl"></i> &nbsp;
 					Maps Disabled! &nbsp;
 					<i class="fa-solid fa-triangle-exclamation fa-2xl"></i>
 				</h2>
-			
-				<button class="btn btn-success float-right" type="button" data-toggle="modal"
-				        data-target="#enableMaps">
-					Enable Maps
-				</button>
-			
+		
 			{% endif %}
 			
+			<!-- Button to expose hidden table -->
+			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseMapControls"
+			   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_mapcontrols">
+                   SHOW
+            </a>
+	
 		</div>
 	</div>
 	
+	<!-- Collapsed / Hidden table of users -->
+	<div class="collapse" id="collapseMapControls">
+		<div class="row mt-3">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="card card-body my-3">
+	                <div class="clearfix">
+		               
+						{% if map_status %}
+						
+		                    <p class="float-left">Disable Google Maps Loading</p>
+		                
+							<button class="btn btn-danger float-right" type="button" data-toggle="modal"
+							        data-target="#disableMaps">
+								Disable Maps
+							</button>
+			
+						{% else %}
+						
+		                    <p class="float-left">Maps can only be enabled if before daily threshold.</p>
+		                
+							<button class="btn btn-success float-right" type="button" data-toggle="modal"
+							        data-target="#enableMaps">
+								Enable Maps
+							</button>
+						
+						{% endif %}
+				
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Break before next section -->
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
@@ -972,6 +1000,14 @@
 				}
 			}
 		})
+		
+		/* Map - Hide <-> Show buttons name change */
+		$("#collapseMapControls").on("show.bs.collapse", function(){
+            document.getElementById('show_mapcontrols').innerHTML = 'HIDE';
+        });
+       $("#collapseMapControls").on("hide.bs.collapse", function(){
+            document.getElementById('show_mapcontrols').innerHTML = 'SHOW';
+        });
 		
 		/* Messages - Hide <-> Show buttons name change */
 		$("#collapseMessageList").on("show.bs.collapse", function(){
