@@ -24,7 +24,7 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR
 from core.db_users import update_last_seen
 from core.subs_graphjs import get_elevation_data
-from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS
+from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
 from core.dB_events import Event
 from core.subs_email_sms import contact_form_email
 
@@ -140,6 +140,9 @@ def home():
     # Map will launch centered here
     map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
+    # Increment map counts
+    count_map_loads(1)
+
     # Render home page
     return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS)
@@ -192,6 +195,9 @@ def chaingang():
     # ----------------------------------------------------------- #
     leader_table = get_chaingang_top10()
 
+    # Increment map counts
+    count_map_loads(1)
+
     # Render home page
     return render_template("main_chaingang.html", year=current_year, leader_table=leader_table,
                            cafe_markers=cafe_markers, elevation_data=elevation_data,
@@ -221,6 +227,9 @@ def twr():
 
     # Map will launch centered here
     map_coords = {"lat": cafe.lat, "lng": cafe.lon}
+
+    # Increment map counts
+    count_map_loads(1)
 
     # Render home page
     return render_template("main_twr.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,
