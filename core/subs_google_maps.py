@@ -419,9 +419,11 @@ def count_map_loads(count: int):
 
     # Make sure file exists!
     if os.path.exists(filename):
+        app.logger.debug(f"count_map_loads(): Found '{filename}'.")
         with open(filename, 'r') as file:
             lines = file.readlines()
     else:
+        app.logger.debug(f"count_map_loads(): Couldn't find '{filename}'.")
         lines = []
 
     # ----------------------------------------------------------- #
