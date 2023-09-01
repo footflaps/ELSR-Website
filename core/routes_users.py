@@ -19,15 +19,15 @@ from core import app, current_year
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
-    admin_only, update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
-    TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm
+                          update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
+                          TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.subs_email_sms import send_reset_email, send_verification_email, send_2fa_sms, send_sms_verif_code
-from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key
+from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.subs_email_sms import alert_admin_via_sms
@@ -832,6 +832,10 @@ def user_page():
     # -------------------------------------------------------------------------------------------- #
     # Show user page
     # -------------------------------------------------------------------------------------------- #
+
+    # Keep count of Google Map Loads
+    count_map_loads(1)
+
     if anchor == "messages":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,

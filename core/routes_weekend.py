@@ -18,7 +18,7 @@ from core import app, current_year, delete_file_if_exists
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key
+from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.dB_gpx import Gpx
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
@@ -302,6 +302,9 @@ def weekend():
 
     if private_gpx:
         flash("One or more routes hasn't been made public yet!")
+
+    # Keep count of Google Map Loads
+    count_map_loads(1)
 
     return render_template("calendar_weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,

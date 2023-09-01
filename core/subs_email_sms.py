@@ -20,9 +20,9 @@ from core import app
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
-admin_email = os.environ['ELSR_ADMIN_EMAIL']
-admin_password = os.environ['ELSR_ADMIN_EMAIL_PASSWORD']
-my_email = os.environ['ELSR_CONTACT_EMAIL']
+gmail_admin_acc_email = os.environ['ELSR_ADMIN_EMAIL']
+gmail_admin_acc_password = os.environ['ELSR_ADMIN_EMAIL_PASSWORD']
+brf_personal_email = os.environ['ELSR_CONTACT_EMAIL']
 
 # Twilio
 twilio_account_sid = os.environ['ELSR_TWILIO_SID']
@@ -68,17 +68,20 @@ RESET_BODY = "Dear [USER], \n\n" \
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-# Send an email
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Send email verification code to new user
+# -------------------------------------------------------------------------------------------------------------- #
 def send_verification_email(target_email, user_name, code):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
-        connection.login(user=admin_email, password=admin_password)
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = "Verification email."
         body = VERIFICATION_BODY.replace("[USER]", user_name)
         body = body.replace("[CODE]", str(code))
         body = body.replace("[EMAIL]", target_email)
         try:
             connection.sendmail(
-                from_addr=admin_email,
+                from_addr=gmail_admin_acc_email,
                 to_addrs=target_email,
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
@@ -93,16 +96,19 @@ def send_verification_email(target_email, user_name, code):
             return False
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Sent reset password code to user
+# -------------------------------------------------------------------------------------------------------------- #
 def send_reset_email(target_email, user_name, code):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
-        connection.login(user=admin_email, password=admin_password)
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = "Password reset email."
         body = RESET_BODY.replace("[USER]", user_name)
         body = body.replace("[CODE]", str(code))
         body = body.replace("[EMAIL]", target_email)
         try:
             connection.sendmail(
-                from_addr=admin_email,
+                from_addr=gmail_admin_acc_email,
                 to_addrs=target_email,
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
@@ -117,24 +123,51 @@ def send_reset_email(target_email, user_name, code):
             return False
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Forward message from contact form onto site owner (BRF)
+# -------------------------------------------------------------------------------------------------------------- #
 def contact_form_email(from_name, from_email, body):
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
-        connection.login(user=admin_email, password=admin_password)
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = f"Message from elsr.co.uk from '{from_name}' ({from_email})"
         try:
             connection.sendmail(
-                from_addr=admin_email,
-                to_addrs=my_email,
-                msg=f"To:{my_email}\nSubject:{subject}\n\n{body}"
+                from_addr=gmail_admin_acc_email,
+                to_addrs=brf_personal_email,
+                msg=f"To:{brf_personal_email}\nSubject:{subject}\n\n{body}"
             )
-            app.logger.debug(f"Email(): sent message to '{my_email}'.")
-            Event().log_event("Email Success", f"Sent message to '{my_email}'")
+            app.logger.debug(f"Email(): sent message to '{brf_personal_email}'.")
+            Event().log_event("Email Success", f"Sent message to '{brf_personal_email}'")
             return True
         except Exception as e:
             app.logger.debug(
-                f"Email(): Failed to send message to '{my_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send message to '{my_email}', "
+                f"Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send message to '{brf_personal_email}', "
                                             f"error code was '{e.args}'.")
+            return False
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Internal system alerts to site owner (BRF)
+# -------------------------------------------------------------------------------------------------------------- #
+def send_system_alert_email(body):
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
+        subject = f"Alert from elsr.co.uk"
+        try:
+            connection.sendmail(
+                from_addr=gmail_admin_acc_email,
+                to_addrs=brf_personal_email,
+                msg=f"To:{brf_personal_email}\nSubject:{subject}\n\n{body}"
+            )
+            app.logger.debug(f"Alert Email(): sent message to '{brf_personal_email}'.")
+            Event().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
+            return True
+        except Exception as e:
+            app.logger.debug(
+                f"Alert Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
+            Event().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
+                                                  f"error code was '{e.args}'.")
             return False
 
 
@@ -195,10 +228,16 @@ def send_sms(user, message):
 # Alert Admin
 # -------------------------------------------------------------------------------------------------------------- #
 def alert_admin_via_sms(from_user: User, message: str):
+    # ----------------------------------------------------------- #
+    #   Loop over all Admins
+    # ----------------------------------------------------------- #
     admins = User().all_admins()
     for admin in admins:
         # All admins should have a valid phone number...
         if admin.has_valid_phone_number():
+            # ----------------------------------------------------------- #
+            #   Send SMS
+            # ----------------------------------------------------------- #
             send_sms(admin, f"ELSR Admin alert from '{from_user.name}': {message}")
         else:
             # Should never get here, but..

@@ -20,7 +20,8 @@ from core import app, current_year
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes
-from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, google_maps_api_key
+from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
+                                  google_maps_api_key, count_map_loads
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
@@ -85,6 +86,9 @@ def cafe_list():
 
     # Map will launch centered here
     map_coords = {"lat": ELSR_LAT, "lng": ELSR_LON}
+
+    # Keep count of Google Map Loads
+    count_map_loads(1)
 
     # Render in main index template
     return render_template("cafe_list.html", year=current_year, cafes=cafes, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
@@ -210,6 +214,9 @@ def cafe_details(cafe_id):
         if cafe.image_name:
             cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
 
+        # Keep count of Google Map Loads
+        count_map_loads(1)
+
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
@@ -229,6 +236,9 @@ def cafe_details(cafe_id):
         # Make sure cafe photo has correct path
         if cafe.image_name:
             cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
+
+        # Keep count of Google Map Loads
+        count_map_loads(1)
 
         # Render using cafe details template
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
@@ -284,6 +294,10 @@ def new_cafe():
             app.logger.debug(f"new_cafe(): Fail, Lat and Lon are {round(range_km, 1)} km from Cambridge.")
             Event().log_event("New Cafe Fail", f"Lat and Lon are {round(range_km, 1)} km from Cambridge.")
             flash(f"Lat and Lon are {round(range_km, 1)} km from Cambridge!")
+
+            # Keep count of Google Map Loads
+            count_map_loads(1)
+
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
                                    GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS,
                                    ELSR_HOME=ELSR_HOME)
@@ -308,6 +322,10 @@ def new_cafe():
             app.logger.debug(f"new_cafe(): Detected duplicate cafe name '{new_cafe.name}'.")
             Event().log_event("New Cafe Fail", f"Detected duplicate cafe name '{new_cafe.name}'.")
             flash("Sorry, that name is already in use, choose another!")
+
+            # Keep count of Google Map Loads
+            count_map_loads(1)
+
             # Back to edit form
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
                                    GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS,
@@ -325,6 +343,10 @@ def new_cafe():
             app.logger.debug(f"new_cafe(): Cafe add failed '{cafe_name}'.")
             Event().log_event("New Cafe Fail", f"Something went wrong! '{cafe_name}'.")
             flash("Sorry, something went wrong.")
+
+            # Keep count of Google Map Loads
+            count_map_loads(1)
+
             # Back to edit form
             return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
                                    GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS,
@@ -362,6 +384,9 @@ def new_cafe():
         # ----------------------------------------------------------- #
         #   GET - Show blank edit form                                                                           #
         # ----------------------------------------------------------- #
+
+        # Keep count of Google Map Loads
+        count_map_loads(1)
 
         return render_template("cafe_add.html", form=form, cafe=None, year=current_year,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS,
@@ -463,6 +488,10 @@ def edit_cafe():
             app.logger.debug(f"edit_cafe(): Detected duplicate cafe name '{updated_cafe.name}'.")
             Event().log_event("Edit Cafe Fail", f"Detected duplicate cafe name '{updated_cafe.name}'.")
             flash("Sorry, that name is already in use, choose another!")
+
+            # Keep count of Google Map Loads
+            count_map_loads(1)
+
             # Back to edit form
             return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year,
                                    GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS,
@@ -521,6 +550,9 @@ def edit_cafe():
     # Make sure cafe photo has correct path
     if cafe.image_name:
         cafe.image_name = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
+
+    # Keep count of Google Map Loads
+    count_map_loads(1)
 
     # Show edit form for the specified cafe
     return render_template("cafe_add.html", cafe=cafe, form=form, year=current_year,

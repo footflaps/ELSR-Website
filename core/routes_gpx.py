@@ -22,7 +22,7 @@ from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes
 from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm, \
-                                  MAP_BOUNDS, google_maps_api_key
+                                  MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
 
@@ -185,6 +185,9 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     if not gpx.public():
         flash("This route is not public yet!")
+
+    # Keep count of Google Map Loads
+    count_map_loads(1)
 
     # Render in main index template
     return render_template("gpx_details.html", gpx=gpx, year=current_year, cafe_markers=cafe_markers,
@@ -610,6 +613,9 @@ def edit_route():
         if current_user.admin():
             user = User().find_user_from_email(gpx.email)
             form.owner.data = f"{user.name} ({user.id})"
+
+    # Keep count of Google Map Loads
+    count_map_loads(1)
 
     # Render the page
     return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=google_maps_api_key(),

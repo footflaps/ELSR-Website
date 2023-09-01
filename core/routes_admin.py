@@ -15,7 +15,7 @@ from core import app, current_year, is_mobile
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID, logout_barred_user
+from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_calendar import Calendar

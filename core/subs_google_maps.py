@@ -4,6 +4,7 @@ import gpxpy.gpx
 import mpu
 import os
 import json
+from datetime import datetime
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -17,7 +18,9 @@ from core import GPX_UPLOAD_FOLDER_ABS
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
+from core.db_users import User, SUPER_ADMIN_USER_ID
 from core.dB_cafes import Cafe
+from core.subs_email_sms import send_system_alert_email, send_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -35,7 +38,7 @@ TRIM_DISTANCE_KM = 2.0
 GPX_COLOURS = ["#9e0142", "#5e4fa2", "#d53e4f", "#3288bd", "#f46d43", "#66c2a5", "#fdae61", "#e6f598"]
 
 # Don't display 100s on a map as total mess
-MAX_NUM_GPX_PER_GRAPH = 10
+MAX_NUM_GPX_PER_GRAPH = 8
 
 # EL coords
 ELSR_HOME = {"lat": 52.203292, "lng": 0.131839}
@@ -48,9 +51,14 @@ MAP_BOUNDS = {
         "east": ELSR_HOME['lng'] + 1,
 }
 
+# Where we store config files etc
+CONFIG_FOLDER = os.environ['ELSR_CONFIG_FOLDER']
+
 # Maps enable status file location
 MAP_STATUS_FILENAME = "map_status.txt"
-CONFIG_FOLDER = os.environ['ELSR_CONFIG_FOLDER']
+
+# Store map counts
+MAP_COUNT_FILENAME = "map_counts.csv"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -317,7 +325,7 @@ def maps_enabled():
     filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_STATUS_FILENAME))
 
     with open(filename) as file:
-        text = file.readline()
+        text = file.readline().strip()
         map_status = text == "True"
 
     return map_status
@@ -332,13 +340,13 @@ def google_maps_api_key():
     else:
         return None
 
+
 print(f"Maps Status = {maps_enabled()}")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Enable maps
 # -------------------------------------------------------------------------------------------------------------- #
-
 def set_enable_maps():
     # ----------------------------------------------------------- #
     #   Write status to file
@@ -348,11 +356,20 @@ def set_enable_maps():
     with open(filename, 'w') as file:
         file.write("True")
 
+    # ----------------------------------------------------------- #
+    #   Alert Super Admin
+    # ----------------------------------------------------------- #
+    # Email alert
+    send_system_alert_email("Maps have been enabled.")
+
+    # SMS Alert
+    site_owner = User().find_user_from_id(SUPER_ADMIN_USER_ID)
+    send_sms(site_owner, "Maps have been enabled")
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Disable maps
 # -------------------------------------------------------------------------------------------------------------- #
-
 def set_disable_maps():
     # ----------------------------------------------------------- #
     #   Write status to file
@@ -361,3 +378,62 @@ def set_disable_maps():
 
     with open(filename, 'w') as file:
         file.write("False")
+
+    # ----------------------------------------------------------- #
+    #   Alert Super Admin
+    # ----------------------------------------------------------- #
+    # Email alert
+    send_system_alert_email("Maps have been disabled.")
+
+    # SMS Alert
+    site_owner = User().find_user_from_id(SUPER_ADMIN_USER_ID)
+    send_sms(site_owner, "Maps have been disabled")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Keep a count of map loads
+# -------------------------------------------------------------------------------------------------------------- #
+def count_map_loads(count: int):
+    # ----------------------------------------------------------- #
+    #   Need today's date
+    # ----------------------------------------------------------- #
+    today_str = datetime.today().strftime("%Y%m%d")
+
+    # ----------------------------------------------------------- #
+    #   Make sure file exists!
+    # ----------------------------------------------------------- #
+    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_COUNT_FILENAME))
+
+    # ----------------------------------------------------------- #
+    #   Read in the whole file
+    # ----------------------------------------------------------- #
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+    else:
+        lines = []
+
+    # ----------------------------------------------------------- #
+    #   Modify file to include count
+    # ----------------------------------------------------------- #
+    if len(lines) > 0:
+        last_line = lines[-1]
+    else:
+        last_line = ""
+
+    # Does the last line cover today?
+    if last_line.split(',')[0].strip() == today_str:
+        # Increment count
+        total_today = int(last_line.split(',')[1]) + count
+        # Update last line
+        lines[-1] = f"{today_str},{total_today}"
+    else:
+        # Must have rolled over to new day
+        lines.append(f"{today_str},{count}")
+
+    # ----------------------------------------------------------- #
+    #   Write file back out
+    # ----------------------------------------------------------- #
+    with open(filename, 'w') as file:
+        file.writelines(lines)
+
