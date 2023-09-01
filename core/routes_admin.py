@@ -2,6 +2,7 @@ from flask import render_template, redirect, url_for, flash, request, abort, ses
 from flask_login import current_user, login_required, logout_user
 from werkzeug import exceptions
 from threading import Thread
+from datetime import datetime
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -21,7 +22,8 @@ from core.dB_events import Event
 from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.subs_email_sms import send_sms, get_twilio_balance
-from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps
+from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, get_current_map_count, \
+                                  MAP_LIMITS_BY_DAY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -109,8 +111,12 @@ def admin_page():
     # ----------------------------------------------------------- #
     # Google Maps Status
     # ----------------------------------------------------------- #
-
     map_status = maps_enabled()
+    map_count = get_current_map_count()
+    map_cost_ukp = 0.0055 * map_count
+    today_str = datetime.today().strftime("%A")
+    map_limit = MAP_LIMITS_BY_DAY[today_str]
+
 
     # ----------------------------------------------------------- #
     # Unread messages
@@ -145,17 +151,22 @@ def admin_page():
         # Jump straight to the 'eventlog'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, twilio_balance=twilio_balance, map_status=map_status, anchor="eventLog")
+                               rides=rides, twilio_balance=twilio_balance, map_status=map_status,
+                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
+                               anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, twilio_balance=twilio_balance, map_status=map_status, anchor="messages")
+                               rides=rides, twilio_balance=twilio_balance, map_status=map_status,
+                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
+                               anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, twilio_balance=twilio_balance, map_status=map_status)
+                               rides=rides, twilio_balance=twilio_balance, map_status=map_status,
+                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

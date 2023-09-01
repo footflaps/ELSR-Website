@@ -11,7 +11,7 @@ from datetime import datetime
 # Import app etc from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import GPX_UPLOAD_FOLDER_ABS
+from core import app, GPX_UPLOAD_FOLDER_ABS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -21,6 +21,7 @@ from core import GPX_UPLOAD_FOLDER_ABS
 from core.db_users import User, SUPER_ADMIN_USER_ID
 from core.dB_cafes import Cafe
 from core.subs_email_sms import send_system_alert_email, send_sms
+from core.dB_events import Event
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -59,6 +60,17 @@ MAP_STATUS_FILENAME = "map_status.txt"
 
 # Store map counts
 MAP_COUNT_FILENAME = "map_counts.csv"
+
+# Map load limits by day
+MAP_LIMITS_BY_DAY = {
+    "Monday": 250,
+    "Tuesday": 250,
+    "Wednesday": 250,
+    "Thursday": 500,
+    "Friday": 500,
+    "Saturday": 250,
+    "Sunday": 250
+}
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -400,13 +412,12 @@ def count_map_loads(count: int):
     today_str = datetime.today().strftime("%Y%m%d")
 
     # ----------------------------------------------------------- #
-    #   Make sure file exists!
-    # ----------------------------------------------------------- #
-    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_COUNT_FILENAME))
-
-    # ----------------------------------------------------------- #
     #   Read in the whole file
     # ----------------------------------------------------------- #
+    # Use abs path
+    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_COUNT_FILENAME))
+
+    # Make sure file exists!
     if os.path.exists(filename):
         with open(filename, 'r') as file:
             lines = file.readlines()
@@ -429,11 +440,67 @@ def count_map_loads(count: int):
         lines[-1] = f"{today_str},{total_today}"
     else:
         # Must have rolled over to new day
-        lines.append(f"{today_str},{count}")
+        total_today = count
+        lines.append(f"{today_str},{total_today}")
 
     # ----------------------------------------------------------- #
     #   Write file back out
     # ----------------------------------------------------------- #
     with open(filename, 'w') as file:
         file.writelines(lines)
+
+    # ----------------------------------------------------------- #
+    #   Compare against our thresholds
+    # ----------------------------------------------------------- #
+    today_str = datetime.today().strftime("%A")
+    map_limit = MAP_LIMITS_BY_DAY[today_str]
+
+    # Exceeded target for the day?
+    if total_today > map_limit:
+        # Disable maps
+        app.logger.debug(f"count_map_loads(): Disabling maps as count is {total_today} / {map_limit}!")
+        Event().log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
+        set_disable_maps()
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Get current count
+# -------------------------------------------------------------------------------------------------------------- #
+def get_current_map_count():
+    # ----------------------------------------------------------- #
+    #   Need today's date
+    # ----------------------------------------------------------- #
+    today_str = datetime.today().strftime("%Y%m%d")
+
+    # ----------------------------------------------------------- #
+    #   Read in the whole file
+    # ----------------------------------------------------------- #
+    # Use abs path
+    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_COUNT_FILENAME))
+
+    # Make sure file exists!
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+    else:
+        lines = []
+
+    # ----------------------------------------------------------- #
+    #   Need last line
+    # ----------------------------------------------------------- #
+    if len(lines) > 0:
+        last_line = lines[-1]
+    else:
+        last_line = ""
+
+    # Does the last line cover today?
+    if last_line.split(',')[0].strip() == today_str:
+        # Use this number
+        total_today = int(last_line.split(',')[1])
+    else:
+        # Must have rolled over to new day
+        total_today = 0
+
+    # Return today's count
+    return total_today
 
