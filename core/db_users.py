@@ -80,8 +80,8 @@ DELETED_NAME = "DELETED"
 @login_manager.user_loader
 def load_user(user_id):
     # Only log user details on the webserver
-    if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
-        app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
+    # if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+    #     app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
     return User.query.get(int(user_id))
 
 
