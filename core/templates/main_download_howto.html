@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/download-bg.jpg')}}')">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Download Guide</h1>
+					<span class="subheading">Import GPX files into Garmin Connect on your mobile</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<h2>iPhone user's guide</h2>
+			<p>NB Android phone version coming as soon as I can borrow an Android phone...</p>
+			
+			<h2>Step 1: Pick a GPX</h2>
+			<p>Locate the GPX file on the ELSR website, which you wish to download. In this example we are using
+			   Anna's decaff Sunday ride to The Tack Room in Newmarket.</p>
+			
+			<img src="{{ url_for('static', filename='img/download_guide_1.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<hr>
+			
+			<h2>Step 2: Start the download</h2>
+			<p>Click on the GPX button to initiate the download to your phone.</p>
+			
+			<img src="{{ url_for('static', filename='img/download_guide_2.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<p>You will need to click on "Download" to start the download.</p>
+			<hr>
+			
+			<h2>Step 3: Locate the download</h2>
+			<p>Once the file has downloaded, a blue circle icon will appear at the top of your browser.</p>
+			<img src="{{ url_for('static', filename='img/download_guide_3.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<p>Click on the blue circle.</p>
+			<hr>
+			
+			<h2>Step 4: Select Downloads</h2>
+			<p>A menu will appear, select 'Downloads'.</p>
+			<img src="{{ url_for('static', filename='img/download_guide_4.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<hr>
+			
+			<h2>Step 5: Select the file</h2>
+			<p>From the list of Downloads, select the first file (which will be the most recent one).</p>
+			<img src="{{ url_for('static', filename='img/download_guide_5.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<p>The file will then open as a text file and look a bit confusing....</p>
+			<hr>
+			
+			<h2>Step 6: Send the file...</h2>
+			<p>Click on the bottom left icon (arrow pointing up from a box). This "sends" the file to another
+			   application on your phone.</p>
+			<img src="{{ url_for('static', filename='img/download_guide_6.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<hr>
+			
+			<h2>Step 7: Select Garmin Connect</h2>
+			<p>A list of application icons will appear, slide the list until you locate Garmin Connect,
+			   which may be off the screen to the right. </p>
+			<img src="{{ url_for('static', filename='img/download_guide_7.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<hr>
+			
+			<h2>Step 8: Click on Connect</h2>
+			<p>Once you can see the Garmin Connect icon, click on it.</p>
+			<img src="{{ url_for('static', filename='img/download_guide_8.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<hr>
+			
+			<h2>Step 9: Select Road Cycling</h2>
+			<p>Garmin asks you what type of activity the file relates to, select "Road Cycling".</p>
+			<img src="{{ url_for('static', filename='img/download_guide_9.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<hr>
+			
+			<h2>Step 10: Et Voila</h2>
+			<p>You have successfully imported a route into Garmin Connect!</p>
+			<img src="{{ url_for('static', filename='img/download_guide_10.jpg')}}"
+			     width="400"
+			     style="border: 5px solid #555;">
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}
