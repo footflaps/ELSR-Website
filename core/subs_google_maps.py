@@ -426,6 +426,8 @@ def count_map_loads(count: int):
         # app.logger.debug(f"count_map_loads(): Couldn't find '{filename}'.")
         lines = []
 
+    print(f"lines = '{lines}'")
+
     # ----------------------------------------------------------- #
     #   Modify file to include count
     # ----------------------------------------------------------- #
@@ -439,11 +441,11 @@ def count_map_loads(count: int):
         # Increment count
         total_today = int(last_line.split(',')[1]) + count
         # Update last line
-        lines[-1] = f"{today_str},{total_today}"
+        lines[-1] = f"{today_str},{total_today}\n"
     else:
         # Must have rolled over to new day
         total_today = count
-        lines.append(f"{today_str},{total_today}")
+        lines.append(f"{today_str},{total_today}\n")
 
     # ----------------------------------------------------------- #
     #   Write file back out
