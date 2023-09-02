@@ -301,7 +301,7 @@ def plan():
 
 @app.route("/gpx_guide", methods=['GET'])
 @update_last_seen
-def gpx_guid():
+def gpx_guide():
     return render_template("main_download_howto.html", year=current_year)
 
 

@@ -352,6 +352,13 @@
 					{% endif %}
 				{% endif %}
 		
+				<!-- GPX Download guide -->
+				{% if rides[day] %}
+					<p>Guide to downloading GPX files on mobiles
+						<a href="{{ url_for('gpx_guide') }}"><strong>here</strong></a>.
+					</p>
+				{% endif %}
+				
 			</div>
 		</div>
 	</div>
