@@ -79,7 +79,7 @@
 		</div>
 	</div>
 	
-	<!-- Collapsed / Hidden table of users -->
+	<!-- Collapsed / Hidden Map options -->
 	<div class="collapse" id="collapseMapControls">
 		<div class="row mt-3">
 			<div class="col-lg-8 col-md-10 mx-auto">
@@ -87,7 +87,8 @@
 	                <div class="clearfix">
 		               
 						{% if map_status %}
-						
+		     
+							<!-- Maps are enabled -->
 		                    <p class="float-left">Disable Google Maps Loading</p>
 		                
 							<button class="btn btn-danger float-right" type="button" data-toggle="modal"
@@ -97,13 +98,22 @@
 			
 						{% else %}
 						
-		                    <p class="float-left">Maps can only be enabled if before daily threshold.</p>
+		                    <!-- Maps are disabled -->
+		                    <p class="float-left">Maps can only be enabled if below daily threshold.
+		                    Currently {{ map_count }} / {{ map_limit }}, {{ "£%.2f"|format(map_cost_ukp) }}</p>
 		                
-							<button class="btn btn-success float-right" type="button" data-toggle="modal"
-							        data-target="#enableMaps">
-								Enable Maps
-							</button>
+		                    {% if map_count <= map_limit %}
+								<button class="btn btn-primary float-right my-2 ml-2" type="button" data-toggle="modal"
+								        data-target="#enableMaps">
+									Enable Maps
+								</button>
+		                    {% endif %}
 						
+		                    <button class="btn btn-primary float-right my-2" type="button" data-toggle="modal"
+							        data-target="#boostMapLimit">
+								Increase Limit by 250 / £1.25
+							</button>
+		     
 						{% endif %}
 				
 					</div>
@@ -1176,7 +1186,7 @@
 					
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
-						<button type="submit" class="btn btn-success">ENABLE</button>
+						<button type="submit" class="btn btn-primary">ENABLE</button>
 					</div>
 					
 				</form>
@@ -1201,6 +1211,9 @@
 			</div>
 			<div class="modal-body">
 				
+				This will disable Google Maps from loading on the site. In place of all the maps, users will see
+				a static image saying the site is experiencing unusual loading and has temporarily disabled maps.
+				
 				<form action="{{ url_for('disable_maps') }}" method="post">
 					
 					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -1215,6 +1228,47 @@
 					<div class="modal-footer">
 						<button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
 						<button type="submit" class="btn btn-danger">DISABLE</button>
+					</div>
+					
+				</form>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                               Modal form for upping Map limit                                  -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="modal fade" id="boostMapLimit" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="boostMapLimit2">Increase Google Maps Limit</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				
+				NB Only use this if the count is slightly over the threshold. If it's miles over, there's no
+				   point, the site is probably under attack.
+				
+				<form action="{{ url_for('boost_maps') }}" method="post">
+					
+					<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+					
+					<div class="form-group">
+						<label class="col-form-label">
+							Enter <strong>your password</strong> below.
+						</label>
+						<input type="password" class="form-control" name="password">
+					</div>
+					
+					<div class="modal-footer">
+						<button type="button" class="btn btn-secondary" data-dismiss="modal">CANCEL</button>
+						<button type="submit" class="btn btn-primary">Up Limit</button>
 					</div>
 					
 				</form>

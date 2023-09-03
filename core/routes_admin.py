@@ -23,7 +23,7 @@ from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.subs_email_sms import send_sms, get_twilio_balance
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, get_current_map_count, \
-                                  MAP_LIMITS_BY_DAY
+                                  boost_map_limit, map_limit_by_day
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -115,7 +115,7 @@ def admin_page():
     map_count = get_current_map_count()
     map_cost_ukp = 0.0055 * map_count
     today_str = datetime.today().strftime("%A")
-    map_limit = MAP_LIMITS_BY_DAY[today_str]
+    map_limit = map_limit_by_day(today_str)
 
 
     # ----------------------------------------------------------- #
@@ -971,3 +971,65 @@ def disable_maps():
 
     # Back to user page
     return redirect(url_for('admin_page', user_id=current_user.id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Boost map limit for the day
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/boost_maps', methods=['POST'])
+@login_required
+@admin_only
+@update_last_seen
+def boost_maps():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    #  Need user
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(current_user.id)
+    if not user:
+        app.logger.debug(f"boost_maps(): Invalid user current_user.id = '{current_user.id}'!")
+        Event().log_event("Boost Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    #  Validate against current_user's (admins) password
+    # ----------------------------------------------------------- #
+    if not user.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"boost_maps(): Incorrect password for '{current_user.email}'!")
+        Event().log_event("Boost Maps Fail", f"Incorrect password for '{current_user.email}'!")
+        flash(f"Incorrect password for '{current_user.name}'.")
+        return redirect(url_for('admin_page', user_id=current_user.id))
+
+    # ----------------------------------------------------------- #
+    #  Boost Maps
+    # ----------------------------------------------------------- #
+    boost_map_limit()
+
+    # Feedback
+    app.logger.debug(f"boost_maps(): Map boost applied by '{current_user.email}'.")
+    Event().log_event("Boost Maps Success", f"Map boost applied by '{current_user.email}'.")
+    flash("Maps boost has been applied")
+
+    # Back to user page
+    return redirect(url_for('admin_page', user_id=current_user.id))
+

@@ -72,6 +72,19 @@ MAP_LIMITS_BY_DAY = {
     "Sunday": 250
 }
 
+# Map Boost number
+MAP_BOOST_NUMBER = 250
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Variables
+# -------------------------------------------------------------------------------------------------------------- #
+
+maps_boost = {
+    'Day': "",
+    'Value': 0
+}
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -350,6 +363,8 @@ def google_maps_api_key():
     if maps_enabled():
         return NEW_GOOGLE_MAPS_API_KEY
     else:
+        # 'None' tells Jinja to show a jpg of a Google Map with a message saying
+        # 'Live maps are temporally disabled'
         return None
 
 
@@ -403,6 +418,54 @@ def set_disable_maps():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Return map limit for the day
+# -------------------------------------------------------------------------------------------------------------- #
+def map_limit_by_day(day: str):
+
+    print(f"map_limit_by_day: maps_boost = {maps_boost}")
+
+    # This is the baseline number
+    limit = MAP_LIMITS_BY_DAY[day]
+    print(f"Default limit is '{limit}'")
+    print(maps_boost)
+
+    # Are we boosting?
+    if maps_boost['Day'] == day:
+        limit += maps_boost['Value']
+
+    return limit
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Boost map limit (until midnight)
+# -------------------------------------------------------------------------------------------------------------- #
+def boost_map_limit():
+    global maps_boost
+
+    # Get today as string eg "Monday"
+    today_str = datetime.today().strftime("%A")
+
+    # Make sure Day is set to today
+    if maps_boost['Day'] == today_str:
+        # Day is the same, so just increment the boost
+        maps_boost['Value'] += MAP_BOOST_NUMBER
+    else:
+        # Different day, so reset
+        maps_boost['Day'] = today_str
+        maps_boost['Value'] = MAP_BOOST_NUMBER
+
+    # ----------------------------------------------------------- #
+    #   Alert Super Admin
+    # ----------------------------------------------------------- #
+    # Email alert
+    send_system_alert_email("Map boost has been applied.")
+
+    # SMS Alert
+    site_owner = User().find_user_from_id(SUPER_ADMIN_USER_ID)
+    send_sms(site_owner, "Map boost has been applied")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Keep a count of map loads
 # -------------------------------------------------------------------------------------------------------------- #
 def count_map_loads(count: int):
@@ -446,6 +509,10 @@ def count_map_loads(count: int):
         # Must have rolled over to new day
         total_today = count
         lines.append(f"{today_str},{total_today}\n")
+        # Reset boost, as it's a new day
+        print("Resetting maps_boost!")
+        maps_boost['Day'] = ""
+        maps_boost['Value'] = 0
 
     # ----------------------------------------------------------- #
     #   Write file back out
@@ -457,7 +524,7 @@ def count_map_loads(count: int):
     #   Compare against our thresholds
     # ----------------------------------------------------------- #
     today_str = datetime.today().strftime("%A")
-    map_limit = MAP_LIMITS_BY_DAY[today_str]
+    map_limit = map_limit_by_day(today_str)
 
     # Exceeded target for the day?
     if total_today > map_limit:
@@ -471,6 +538,8 @@ def count_map_loads(count: int):
 # Get current count
 # -------------------------------------------------------------------------------------------------------------- #
 def get_current_map_count():
+    global maps_boost
+
     # ----------------------------------------------------------- #
     #   Need today's date
     # ----------------------------------------------------------- #
