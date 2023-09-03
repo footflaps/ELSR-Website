@@ -213,24 +213,17 @@ def twr():
     # -------------------------------------------------------------------------------------------- #
     # Show The Bench
     # -------------------------------------------------------------------------------------------- #
-    # Look up the cafe
-    cafe = Cafe().one_cafe(ESPRESSO_LIBRARY_INDEX)
-
-    # Need cafe markers as weird Google proprietary JSON string
     cafe_marker = [{
         "position": {"lat":  52.197020, "lng":  0.111206},
         "title": "The Bench",
         "color": OPEN_CAFE_COLOUR,
     }]
 
-    # Map will launch centered here
-    map_coords = {"lat": cafe.lat, "lng": cafe.lon}
-
     # Increment map counts
     count_map_loads(1)
 
     # Render home page
-    return render_template("main_twr.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,
+    return render_template("main_twr.html", year=current_year, cafes=cafe_marker,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS)
 
 
