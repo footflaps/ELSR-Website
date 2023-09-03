@@ -324,7 +324,7 @@
 		
 					<!-- Start times -->
 					{% if start_times[day] %}
-						<p>All rides start at {{ DEFAULT_START }} except: </p>
+						<p>All rides start at {{ DEFAULT_START }}, except: </p>
 						<ul>
 							{% for start_time in start_times[day] %}
 								<li>{{ start_time }}</li>
