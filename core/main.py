@@ -125,23 +125,21 @@ def user_ip():
 @update_last_seen
 def home():
     # -------------------------------------------------------------------------------------------- #
-    # Show Espresso Library on a map
+    # Show Temporary Meeting Point
     # -------------------------------------------------------------------------------------------- #
-    # Look up the cafe
-    cafe = Cafe().one_cafe(ESPRESSO_LIBRARY_INDEX)
-
-    # Need cafe markers as weird Google proprietary JSON string
     cafe_marker = [{
-        "position": {"lat": cafe.lat, "lng": cafe.lon},
-        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+        "position": {"lat": ELSR_HOME["lat"], "lng": ELSR_HOME["lng"]},
+        "title": f'Food vans by station',
         "color": OPEN_CAFE_COLOUR,
     }]
 
     # Map will launch centered here
-    map_coords = {"lat": cafe.lat, "lng": cafe.lon}
+    map_coords = {"lat": ELSR_HOME["lat"], "lng": ELSR_HOME["lng"]}
 
     # Increment map counts
     count_map_loads(1)
+
+    flash("ELSR has a new Meeting Place!")
 
     # Render home page
     return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,
