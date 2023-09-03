@@ -698,7 +698,12 @@
 										</a>
 									</td>
 									<td scope="row">{{ social.organiser }}</td>
-									<td scope="row">{{ social.destination }}</td>
+									<td scope="row">
+										{{ social.destination }}
+										{% if social.private %}
+											<i class="fa-solid fa-lock"></i>
+										{% endif %}
+									</td>
 									<td scope="row">
 										<a href="{{ url_for('user_page', user_id=get_user_id_from_email(social.email)) }}">
 											{{ get_user_name(social.email) }}

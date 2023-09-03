@@ -355,7 +355,9 @@ def social():
             social.start_time_txt = f"{social.start_time[0:2]}:{social.start_time[2:4]}"
         else:
             social.start_time_txt = "TBC"
+
         # Hide destination for private events
+        social.show_ics = False
         if not current_user.is_authenticated:
             # Not logged in = no info
             social.destination = "Log in to see destination"
@@ -365,6 +367,8 @@ def social():
             # Private events are for write enabled users only ie WA group members
             social.destination = "** Private event **"
             social.details = "<p>Details for private events are visible to regular riders only.</p>"
+        else:
+            social.show_ics = True
 
     return render_template("main_social.html", year=current_year, socials=socials, date=date)
 
@@ -493,6 +497,19 @@ def download_ics():
         app.logger.debug(f"download_ics(): Failed to locate social, social_id = '{social_id}'.")
         Event().log_event("download_ics Fail", f"Failed to locate social, social_id = '{social_id}'.")
         return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Permissions
+    # ----------------------------------------------------------- #
+    if not current_user.readwrite() and \
+        social.destination_status == SOCIAL_DB_PRIVATE:
+        # Failed authentication
+        app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
+                         f"social_id = '{social_id}' as Private.")
+        Event().log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
+                                                 f"social_id = '{social_id}' as Private.")
+        flash("Private events are for regular riders only!")
+        return abort(403)
 
     # ----------------------------------------------------------- #
     # Create ics file

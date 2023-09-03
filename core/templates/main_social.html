@@ -107,15 +107,27 @@
 					{% if current_user.is_authenticated %}
 					<div>
 						
-						<!-- Download ics -->
-						 <a href="{{ url_for('download_ics', social_id=social.id) }}">
-	                        <button class="btn btn-sm btn-primary mr-2"><i class="fa-regular fa-calendar-plus"></i></button>
-						 </a>
+						{% if social.show_ics %}
+						
+							<!-- Download ics -->
+							<a href="{{ url_for('download_ics', social_id=social.id) }}">
+		                        <button class="btn btn-sm btn-primary mr-2"><i class="fa-regular fa-calendar-plus"></i></button>
+							</a>
 			
+						{% else %}
+							
+							<!-- ics is locked out -->
+							<button class="btn btn-sm btn-primary disabled mr-2">
+								<i class="fa-regular fa-calendar-plus"></i>
+								<i class="fa-solid fa-lock"></i>
+							</button>
+							
+						{% endif %}
+						
 						{% if current_user.admin() or current_user.email == social.email %}
 								
 								<!-- Edit social -->
-								 <a href="{{ url_for('add_social', social_id=social.id) }}">
+								<a href="{{ url_for('add_social', social_id=social.id) }}">
 			                        <button class="btn btn-sm btn-secondary mr-2">Edit</button>
 					            </a>
 								

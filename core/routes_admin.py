@@ -20,7 +20,7 @@ from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_I
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_calendar import Calendar
-from core.db_social import Socials
+from core.db_social import Socials, SOCIAL_DB_PRIVATE
 from core.subs_email_sms import send_sms, get_twilio_balance
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, get_current_map_count, \
                                   boost_map_limit, map_limit_by_day
@@ -102,6 +102,11 @@ def admin_page():
     # All scheduled social events
     # ----------------------------------------------------------- #
     socials = Socials().all()
+    for social in socials:
+        if social.destination_status == SOCIAL_DB_PRIVATE:
+            social.private = True
+        else:
+            social.private = False
 
     # ----------------------------------------------------------- #
     # Twilio balance
