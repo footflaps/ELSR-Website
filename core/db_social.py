@@ -23,6 +23,13 @@ from core.db_users import User
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
+# These are in the form and can change
+SOCIAL_FORM_PRIVATE = "Private (Regular riders only)"
+SOCIAL_FORM_PUBLIC = "Public (Anyone on the internet)"
+# Don't change these as they are in the db
+SOCIAL_DB_PRIVATE = "PRIVATE"
+SOCIAL_DB_PUBLIC = "PUBLIC"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -55,6 +62,9 @@ class Socials(db.Model):
 
     # Start time
     start_time = db.Column(db.String(20))
+
+    # Destination Rating (Public / Private)
+    destination_status = db.Column(db.String(20))
 
     # Return all events
     def all(self):
@@ -154,8 +164,11 @@ class CreateSocialForm(FlaskForm):
     date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
     start_time = TimeField("Start time:", format="%H:%M")
     organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
-    destination = StringField("Location:", validators=[InputRequired("Please enter a destination.")])
-    details = CKEditorField("When, where, dress code etc:", validators=[InputRequired("Please provide some details.")])
+    destination = StringField("Location (can be hidden):", validators=[InputRequired("Please enter a destination.")])
+    destination_hidden = SelectField("Social type:",
+                                     choices=["Validated Members Only", "Anyone on the internet"], validators=[])
+    details = CKEditorField("When, where, dress code etc (will be public):",
+                            validators=[InputRequired("Please provide some details.")])
 
     cancel = SubmitField("Maybe not")
     submit = SubmitField("Go for it!")
@@ -177,10 +190,14 @@ class AdminCreateSocialForm(FlaskForm):
     # ----------------------------------------------------------- #
     date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
     start_time = TimeField("Start time:", format="%H:%M")
-    owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[InputRequired("Please enter an owner.")])
+    owner = SelectField("Owner (Admin only field):", choices=all_users,
+                        validators=[InputRequired("Please enter an owner.")])
     organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
-    destination = StringField("Location:", validators=[InputRequired("Please enter a destination.")])
-    details = CKEditorField("When, where, dress code etc:", validators=[InputRequired("Please provide some details.")])
+    destination = StringField("Location (can be hidden):", validators=[InputRequired("Please enter a destination.")])
+    destination_hidden = SelectField("Social type:",
+                                     choices=[SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC], validators=[])
+    details = CKEditorField("When, where, dress code etc:",
+                            validators=[InputRequired("Please provide some details.")])
 
     cancel = SubmitField("Maybe not")
     submit = SubmitField("Go for it!")

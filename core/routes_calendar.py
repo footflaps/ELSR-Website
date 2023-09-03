@@ -20,7 +20,8 @@ from core import app, current_year
 
 from core.db_users import update_last_seen, logout_barred_user
 from core.db_calendar import Calendar
-from core.db_social import Socials, CreateSocialForm, AdminCreateSocialForm
+from core.db_social import Socials, CreateSocialForm, AdminCreateSocialForm, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
+                           SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC
 from core.dB_events import Event
 from core.db_users import User
 
@@ -201,6 +202,12 @@ def add_social():
             form.organiser.data = social.organiser
             form.destination.data = social.destination
             form.details.data = social.details
+            if social.destination_status == SOCIAL_DB_PRIVATE:
+                form.destination_hidden.data = SOCIAL_FORM_PRIVATE
+            else:
+                form.destination_hidden.data = SOCIAL_FORM_PUBLIC
+
+            # Admin owner option
             if current_user.admin():
                 form.owner.data = owner.combo_str()
 
@@ -209,6 +216,16 @@ def add_social():
             form.organiser.data = current_user.name
             if current_user.admin():
                 form.owner.data = current_user.combo_str()
+
+            # Add some guidance
+            form.details.data = "<p>If you set the Social type to <strong>Public</strong>:</p>" \
+                                "<ul><li>Destination and Details are hidden for anyone not logged in.</li>" \
+                                "<li>But, visible to anyone who has registered (ie anyone who can be bothered to give " \
+                                "the site an email address).</li></ul>" \
+                                "<p>However, the Admins maintain a subset of members (same as WA group) and only " \
+                                "these people can see the Destination and Details of <strong>Private</strong> events. " \
+                                "So, <strong>Public</strong> = social down the pub, but BBQ at your house should be " \
+                                "made <strong>Private</strong>!</p>"
 
     elif form.validate_on_submit():
         # ----------------------------------------------------------- #
@@ -263,6 +280,11 @@ def add_social():
         new_social.start_time = form.start_time.data.strftime("%H%M")
         new_social.destination = form.destination.data
         new_social.details = form.details.data
+        # Handle public private
+        if form.destination_hidden.data == SOCIAL_FORM_PUBLIC:
+            new_social.destination_status = SOCIAL_DB_PUBLIC
+        else:
+            new_social.destination_status = SOCIAL_DB_PRIVATE
 
         # ----------------------------------------------------------- #
         # Add to the db
@@ -325,14 +347,24 @@ def social():
         socials = Socials().all_socials_future()
 
     # ----------------------------------------------------------- #
-    # Add more friendly start time
+    # Tweak the data before we show it
     # ----------------------------------------------------------- #
     for social in socials:
+        # Add more friendly start time
         if social.start_time:
             social.start_time_txt = f"{social.start_time[0:2]}:{social.start_time[2:4]}"
         else:
             social.start_time_txt = "TBC"
-
+        # Hide destination for private events
+        if not current_user.is_authenticated:
+            # Not logged in = no info
+            social.destination = "Log in to see destination"
+            social.details = "<p>Log in to see the details</p>"
+        elif social.destination_status == SOCIAL_DB_PRIVATE and \
+                not current_user.readwrite():
+            # Private events are for write enabled users only ie WA group members
+            social.destination = "** Private event **"
+            social.details = "<p>Details for private events are visible to regular riders only.</p>"
 
     return render_template("main_social.html", year=current_year, socials=socials, date=date)
 
