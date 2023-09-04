@@ -359,14 +359,17 @@ def social():
         # Hide destination for private events
         social.show_ics = False
         if not current_user.is_authenticated:
-            # Not logged in = no info
+            # Not logged in = no info other than the date
             social.destination = "Log in to see destination"
+            social.start_time = "Log in to see start time"
             social.details = "<p>Log in to see the details</p>"
+
         elif social.destination_status == SOCIAL_DB_PRIVATE and \
                 not current_user.readwrite():
             # Private events are for write enabled users only ie WA group members
             social.destination = "** Private event **"
             social.details = "<p>Details for private events are visible to regular riders only.</p>"
+            social.start_time = "** Private event **"
         else:
             social.show_ics = True
 
