@@ -362,10 +362,33 @@ def add_ride():
         # ----------------------------------------------------------- #
         # Edit event, so pre-fill form from dB
         # ----------------------------------------------------------- #
-        gpx = Gpx().one_gpx(ride.gpx_id)
-        cafe = Cafe().one_cafe(ride.cafe_id)
-        user = User().find_user_from_email(ride.email)
 
+        # 1: Need to locate the GPX track used by the ride
+        gpx = Gpx().one_gpx(ride.gpx_id)
+        if not gpx:
+            # Should never happen, but...
+            app.logger.debug(f"add_ride(): Failed to locate gpx, ride_id  = '{ride_id}', "
+                             f"ride.gpx_id = '{ride.gpx_id}'.")
+            Event().log_event("Edit Ride Fail", f"Failed to locate gpx, ride_id  = '{ride_id}', "
+                                                f"ride.gpx_id = '{ride.gpx_id}'.")
+            flash("Sorry, something went wrong..")
+            return redirect(url_for('weekend', date=start_date_str))
+
+        # 2: Need to locate the target cafe for the ride (might be a new cafe so None is acceptable)
+        cafe = Cafe().one_cafe(ride.cafe_id)
+
+        # 3: Need to locate the owner of the ride
+        user = User().find_user_from_email(ride.email)
+        if not user:
+            # Should never happen, but...
+            app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{ride_id}', "
+                             f"ride.email = '{ride.email}'.")
+            Event().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
+                                                f"ride.email = '{ride.email}'.")
+            flash("Sorry, something went wrong..")
+            return redirect(url_for('weekend', date=start_date_str))
+
+        # Select form based on Admin status
         if current_user.admin():
             form = AdminCreateRideForm()
         else:
@@ -441,7 +464,8 @@ def add_ride():
         today = datetime.today().date()
         print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
-        if formdate < today:
+        if formdate < today and \
+                not current_user.admin():
             flash("The date is in the past!")
             return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
 
@@ -631,8 +655,18 @@ def add_ride():
         # Admin can allocate events to people
         if current_user.admin():
             # Get user
-            user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
-            new_ride.email = user.email
+            #user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
+            user = User().user_from_combo_string(form.owner.data)
+            if user:
+                new_ride.email = user.email
+            else:
+                # Should never happen, but...
+                app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{ride_id}', "
+                                 f"form.owner.data = '{form.owner.data}'.")
+                Event().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
+                                                    f"form.owner.data = '{form.owner.data}'.")
+                flash("Sorry, something went wrong..")
+                return redirect(url_for('weekend', date=start_date_str))
         else:
             # Not admin, so user owns the ride event
             new_ride.email = current_user.email
