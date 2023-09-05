@@ -3,6 +3,7 @@ from flask_login import current_user, login_required, logout_user
 from werkzeug import exceptions
 from datetime import datetime
 import os
+import subprocess
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -105,8 +106,10 @@ def get_free_space():
     # ----------------------------------------------------------- #
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         # On server
-        row = os.popen("df -h /dev/root").read().splitlines()
-        app.logger.debug(f"row = '{row}'!")
+        p = subprocess.Popen("df -h /dev/root", stdout=subprocess.PIPE, shell=True)
+        (output, err) = p.communicate()
+        p_status = p.wait()
+        app.logger.debug(f"row = '{output}'!")
         # cols = row.split()
         # used_per = cols[4]
         # app.logger.debug(f"used_percentage = '{used_per }'!")
