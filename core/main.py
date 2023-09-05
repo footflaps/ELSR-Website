@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, flash, abort
+from flask import render_template, request, flash, abort, send_from_directory
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFError
 from wtforms import StringField, EmailField, SubmitField
@@ -21,7 +21,7 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_cafes import Cafe, ESPRESSO_LIBRARY_INDEX, OPEN_CAFE_COLOUR
+from core.dB_cafes import OPEN_CAFE_COLOUR
 from core.db_users import update_last_seen
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
@@ -115,6 +115,20 @@ def user_ip():
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# robots.txt
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route('/robots.txt')
+# @app.route('/sitemap.xml')
+def static_from_root():
+    # ----------------------------------------------------------- #
+    # Send link to download the file
+    # ----------------------------------------------------------- #
+    filename = request.path[1:]
+
+    return send_from_directory(directory="../core/static/", path=filename)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

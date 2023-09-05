@@ -1,0 +1,15 @@
+User-agent: CCBot
+Disallow: /
+
+User-agent: ChatGPT-User
+Disallow: /
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: Mediapartners-Google
+Disallow: /
+
+User-agent: *
+Disallow: /cafe/
+Disallow: /route/
