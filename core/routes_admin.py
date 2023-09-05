@@ -48,7 +48,11 @@ def get_file_sizes():
     # ----------------------------------------------------------- #
     # Scan databases
     # ----------------------------------------------------------- #
-    db_dir = "../instance/"
+    if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+        db_dir = "/home/ben_freeman_eu/elsr_website/ELSR-Website/instance/"
+    else:
+        db_dir = "../instance/"
+
     for filename in os.listdir(db_dir):
         f = os.path.join(db_dir, filename)
         # checking if it is a file
