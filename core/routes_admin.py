@@ -109,14 +109,13 @@ def get_free_space():
         result = subprocess.run(['/usr/bin/df', '-h', '/dev/root'], stdout=subprocess.PIPE)
         output = result.stdout.decode('utf-8')
         lines = output.split('\n')
-
-        app.logger.debug(f"lines = '{lines}'")
-
-
-        # cols = row.split()
-        # used_per = cols[4]
-        # app.logger.debug(f"used_percentage = '{used_per }'!")
-
+        data = lines[1].split()
+        used_per = float(data[4].replace('%',''))
+        free_per = 100 - used_per
+        app.logger.debug(f"free_per = '{free_per}%'!")
+        return free_per
+    else:
+        return None
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
