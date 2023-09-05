@@ -71,9 +71,9 @@ def get_file_sizes():
         # On server
         dirs = ["/home/ben_freeman_eu/elsr_website/ELSR-Website/instance",
                 "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/gpx",
-                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/config/",
-                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/ics/",
-                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/static/img/cafe_photos/"]
+                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/config",
+                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/ics",
+                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/static/img/cafe_photos"]
     else:
         # On laptop
         dirs = ["../instance", "../core/gpx", "../core/config", "../core/ics", "../core/static/img/cafe_photos"]
