@@ -106,10 +106,10 @@ def get_free_space():
     # ----------------------------------------------------------- #
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         # On server
-        p = subprocess.Popen("df -h /dev/root", stdout=subprocess.PIPE, shell=True)
-        (output, err) = p.communicate()
-        p_status = p.wait()
-        app.logger.debug(f"row = '{output}'!")
+        result = os.popen("df -h /dev/root").read()
+        app.logger.debug(f"row = '{result}'")
+
+
         # cols = row.split()
         # used_per = cols[4]
         # app.logger.debug(f"used_percentage = '{used_per }'!")
