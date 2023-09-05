@@ -105,11 +105,11 @@ def get_free_space():
     # ----------------------------------------------------------- #
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         # On server
-        row = os.popen("df -h /dev/root").read().splitlines()[1]
+        row = os.popen("df -h /dev/root").read().splitlines()
         app.logger.debug(f"row = '{row}'!")
-        cols = row.split()
-        used_per = cols[4]
-        app.logger.debug(f"used_percentage = '{used_per }'!")
+        # cols = row.split()
+        # used_per = cols[4]
+        # app.logger.debug(f"used_percentage = '{used_per }'!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
