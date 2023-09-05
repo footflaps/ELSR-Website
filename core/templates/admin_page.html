@@ -167,6 +167,43 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                                     Free space on server                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if free_per %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+	
+				<h2>Free space:</h2>
+				{% if free_per < 10  %}
+				
+					<h2 class="my-3" style="color:red">
+						<i class="fa-solid fa-triangle-exclamation fa-2xl"></i> &nbsp;
+						{{ free_per }}%  &nbsp;
+						<i class="fa-solid fa-triangle-exclamation fa-2xl"></i>
+					</h2>
+				
+				{% else %}
+				
+					<h2 class="my-3" style="color: green">
+						<i class="fa-regular fa-thumbs-up fa-xl"></i>
+						{{ free_per }}%
+					</h2>
+				
+				{% endif %}
+				
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                        Messages                                                -->
 <!---------------------------------------------------------------------------------------------------->
 

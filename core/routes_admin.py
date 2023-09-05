@@ -112,10 +112,10 @@ def get_free_space():
         data = lines[1].split()
         used_per = float(data[4].replace('%',''))
         free_per = 100 - used_per
-        app.logger.debug(f"free_per = '{free_per}%'!")
         return free_per
     else:
         return None
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -216,7 +216,7 @@ def admin_page():
     # Database status
     # ----------------------------------------------------------- #
     files = get_file_sizes()
-    get_free_space()
+    free_per = get_free_space()
 
     # ----------------------------------------------------------- #
     # Unread messages
@@ -253,21 +253,21 @@ def admin_page():
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, anchor="eventLog")
+                               files=files, free_per=free_per, anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, anchor="messages")
+                               files=files, free_per=free_per, anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files)
+                               files=files, free_per=free_per)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
