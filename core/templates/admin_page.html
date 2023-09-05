@@ -902,181 +902,78 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--                                 Open page at Events anchor                                     -->
+<!--                                    Database / Directory sizes                                  -->
 <!---------------------------------------------------------------------------------------------------->
 
-<script>
-	
-	{% if anchor == 'messages' %}
-		
-		/* Open collapsed section */
-		$("#collapseMessageList").collapse('show');
-        
-        /* Jump to anchor */
-        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
-	    
-	{% elif anchor == 'eventLog'%}
-	
-		/* Open collapsed section */
-		$("#collapseEventList").collapse('show');
-  
-		/* Jump to anchor */
-        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
-	
-	{% endif %}
-	
-</script>
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
 
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                               Activate jQuery on the Tables                                    -->
-<!--                                SHOW <-> HIDE Button labels                                     -->
-<!---------------------------------------------------------------------------------------------------->
-
-<script>
+			<h2 class="post-title float-left">File / Dir sizes:</h2>
+		
+			<!-- Button to expose hidden table -->
+			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseFileList"
+			   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_files">
+                   SHOW
+            </a>
+			
+		</div>
+	</div>
 	
-	$(document).ready( function () {
+	<!-- Collapsed / Hidden table of rides in Calendar -->
+	<div class="collapse" id="collapseFileList">
+		<div class="row mt-3">
+			<div class="col-lg-8 col-md-10 mx-auto">
+			
+				<table id="fileTable" class="table table-striped table-bordered table-sm table-condensed"
+				       data-order='[[ 2, "dec" ]]' data-page-length="25"
+				       style="width: 100%">
+			
+					<!-- Header -->
+					<thead>
+                        <tr>
+	                        <th scope="col">File / Dir</th>
+		                    <th scope="col">Name</th>
+		                    <th scope="col">Size (MB)</th>
+		                </tr>
+	                </thead>
+			
+					<tbody>
+						{% for file in  files: %}
+							
+							<!-- Colour code row by file size -->
+							{% if file.size > 100 %}
+								<tr class="table-danger">
+							{% elif file.size > 25 %}
+								<tr class="table-warning">
+							{% else %}
+								<tr>
+							{% endif %}
+						
+								<td scope="row">{{ file.type }}</td>
+								<td scope="row">{{ file.name }}</td>
+								<td scope="row">{{ "%.2f"|format(file.size) }}</td>
+							</tr>
+					
+						{% endfor %}
+					
+					</tbody>
+				
+				</table>
+				
+			</div>
+		</div>
+	</div>
 	
-		/* jQuery on our tables where we want dataTables to run */
-		$('#userTable').DataTable({
-			
-			/* Default table length */
-			pageLength: 25,
-			
-			"autoWidth": false,
-			
-			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
-			"pagingType": "simple_numbers",
-			
-			"oLanguage": {
-				"oPaginate": {
-					"sFirst": "<<", // This is the link to the first page
-					"sPrevious": "<", // This is the link to the previous page
-					"sNext": ">", // This is the link to the next page
-					"sLast": ">>" // This is the link to the last page
-				}
-			}
-		});
-		
-		$('#rideTable').DataTable({
-			
-			/* Default table length */
-			pageLength: 25,
-			
-			"autoWidth": false,
-			
-			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
-			"pagingType": "simple_numbers",
-			
-			"oLanguage": {
-				"oPaginate": {
-					"sFirst": "<<", // This is the link to the first page
-					"sPrevious": "<", // This is the link to the previous page
-					"sNext": ">", // This is the link to the next page
-					"sLast": ">>" // This is the link to the last page
-				}
-			}
-		})
-		
-		$('#socialTable').DataTable({
-			
-			/* Default table length */
-			pageLength: 25,
-			
-			"autoWidth": false,
-			
-			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
-			"pagingType": "simple_numbers",
-			
-			"oLanguage": {
-				"oPaginate": {
-					"sFirst": "<<", // This is the link to the first page
-					"sPrevious": "<", // This is the link to the previous page
-					"sNext": ">", // This is the link to the next page
-					"sLast": ">>" // This is the link to the last page
-				}
-			}
-		})
-		
-		$('#eventTable').DataTable({
-			
-			/* Default table length */
-			pageLength: 25,
-			
-			"autoWidth": false,
-			
-			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
-			"pagingType": "simple_numbers",
-			
-			"oLanguage": {
-				"oPaginate": {
-					"sFirst": "<<", // This is the link to the first page
-					"sPrevious": "<", // This is the link to the previous page
-					"sNext": ">", // This is the link to the next page
-					"sLast": ">>" // This is the link to the last page
-				}
-			}
-		})
-		
-		/* Map - Hide <-> Show buttons name change */
-		$("#collapseMapControls").on("show.bs.collapse", function(){
-            document.getElementById('show_mapcontrols').innerHTML = 'HIDE';
-        });
-       $("#collapseMapControls").on("hide.bs.collapse", function(){
-            document.getElementById('show_mapcontrols').innerHTML = 'SHOW';
-        });
-		
-		/* Messages - Hide <-> Show buttons name change */
-		$("#collapseMessageList").on("show.bs.collapse", function(){
-            document.getElementById('show_messages').innerHTML = 'HIDE';
-        });
-       $("#collapseMessageList").on("hide.bs.collapse", function(){
-            document.getElementById('show_messages').innerHTML = 'SHOW';
-        });
-		
-		/* Admins - Hide <-> Show buttons name change */
-		$("#collapseAdminList").on("show.bs.collapse", function(){
-            document.getElementById('show_admins').innerHTML = 'HIDE';
-        });
-       $("#collapseAdminList").on("hide.bs.collapse", function(){
-            document.getElementById('show_admins').innerHTML = 'SHOW';
-        });
-        
-        /* Users - Hide <-> Show buttons name change */
-		$("#collapseUserList").on("show.bs.collapse", function(){
-            document.getElementById('show_users').innerHTML = 'HIDE';
-        });
-       $("#collapseUserList").on("hide.bs.collapse", function(){
-            document.getElementById('show_users').innerHTML = 'SHOW';
-        });
-        
-        /* Rides - Hide <-> Show buttons name change */
-		$("#collapseRideList").on("show.bs.collapse", function(){
-            document.getElementById('show_rides').innerHTML = 'HIDE';
-        });
-       $("#collapseRideList").on("hide.bs.collapse", function(){
-            document.getElementById('show_rides').innerHTML = 'SHOW';
-        });
-        
-        /* Socials - Hide <-> Show buttons name change */
-		$("#collapseSocialList").on("show.bs.collapse", function(){
-            document.getElementById('show_socials').innerHTML = 'HIDE';
-        });
-       $("#collapseSocialList").on("hide.bs.collapse", function(){
-            document.getElementById('show_socials').innerHTML = 'SHOW';
-        });
-        
-		/* Events - Hide <-> Show buttons name change */
-		$("#collapseEventList").on("show.bs.collapse", function(){
-            document.getElementById('show_events').innerHTML = 'HIDE';
-        });
-       $("#collapseEventList").on("hide.bs.collapse", function(){
-            document.getElementById('show_events').innerHTML = 'SHOW';
-        });
-       
-	} );
 	
-</script>
+	<!-- Separator before next section -->
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<hr>
+		</div>
+	</div>
+	
+</div>
 
 
 <!---------------------------------------------------------------------------------------------------->
@@ -1283,6 +1180,214 @@
 		</div>
 	</div>
 </div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Open page at Events anchor                                     -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	{% if anchor == 'messages' %}
+		
+		/* Open collapsed section */
+		$("#collapseMessageList").collapse('show');
+        
+        /* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	    
+	{% elif anchor == 'eventLog'%}
+	
+		/* Open collapsed section */
+		$("#collapseEventList").collapse('show');
+  
+		/* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	
+	{% endif %}
+	
+</script>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                               Activate jQuery on the Tables                                    -->
+<!--                                SHOW <-> HIDE Button labels                                     -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	$(document).ready( function () {
+	
+		/* jQuery on our tables where we want dataTables to run */
+		$('#userTable').DataTable({
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			"autoWidth": false,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
+		});
+		
+		$('#rideTable').DataTable({
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			"autoWidth": false,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
+		})
+		
+		$('#socialTable').DataTable({
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			"autoWidth": false,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
+		})
+		
+		$('#eventTable').DataTable({
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			"autoWidth": false,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
+		})
+		
+		$('#fileTable').DataTable({
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			"autoWidth": false,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
+		})
+		
+		
+		
+		/* Map - Hide <-> Show buttons name change */
+		$("#collapseMapControls").on("show.bs.collapse", function(){
+            document.getElementById('show_mapcontrols').innerHTML = 'HIDE';
+        });
+       $("#collapseMapControls").on("hide.bs.collapse", function(){
+            document.getElementById('show_mapcontrols').innerHTML = 'SHOW';
+        });
+		
+		/* Messages - Hide <-> Show buttons name change */
+		$("#collapseMessageList").on("show.bs.collapse", function(){
+            document.getElementById('show_messages').innerHTML = 'HIDE';
+        });
+       $("#collapseMessageList").on("hide.bs.collapse", function(){
+            document.getElementById('show_messages').innerHTML = 'SHOW';
+        });
+		
+		/* Admins - Hide <-> Show buttons name change */
+		$("#collapseAdminList").on("show.bs.collapse", function(){
+            document.getElementById('show_admins').innerHTML = 'HIDE';
+        });
+       $("#collapseAdminList").on("hide.bs.collapse", function(){
+            document.getElementById('show_admins').innerHTML = 'SHOW';
+        });
+        
+        /* Users - Hide <-> Show buttons name change */
+		$("#collapseUserList").on("show.bs.collapse", function(){
+            document.getElementById('show_users').innerHTML = 'HIDE';
+        });
+       $("#collapseUserList").on("hide.bs.collapse", function(){
+            document.getElementById('show_users').innerHTML = 'SHOW';
+        });
+        
+        /* Rides - Hide <-> Show buttons name change */
+		$("#collapseRideList").on("show.bs.collapse", function(){
+            document.getElementById('show_rides').innerHTML = 'HIDE';
+        });
+       $("#collapseRideList").on("hide.bs.collapse", function(){
+            document.getElementById('show_rides').innerHTML = 'SHOW';
+        });
+        
+        /* Socials - Hide <-> Show buttons name change */
+		$("#collapseSocialList").on("show.bs.collapse", function(){
+            document.getElementById('show_socials').innerHTML = 'HIDE';
+        });
+       $("#collapseSocialList").on("hide.bs.collapse", function(){
+            document.getElementById('show_socials').innerHTML = 'SHOW';
+        });
+        
+		/* Events - Hide <-> Show buttons name change */
+		$("#collapseEventList").on("show.bs.collapse", function(){
+            document.getElementById('show_events').innerHTML = 'HIDE';
+        });
+       $("#collapseEventList").on("hide.bs.collapse", function(){
+            document.getElementById('show_events').innerHTML = 'SHOW';
+        });
+        
+        /* Files - Hide <-> Show buttons name change */
+		$("#collapseFileList").on("show.bs.collapse", function(){
+            document.getElementById('show_files').innerHTML = 'HIDE';
+        });
+       $("#collapseFileList").on("hide.bs.collapse", function(){
+            document.getElementById('show_files').innerHTML = 'SHOW';
+        });
+       
+	} );
+	
+</script>
 
 
 {% endblock %}

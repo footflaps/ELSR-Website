@@ -1,8 +1,8 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
 from flask_login import current_user, login_required, logout_user
 from werkzeug import exceptions
-from threading import Thread
 from datetime import datetime
+import os
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -31,6 +31,53 @@ from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_map
 # -------------------------------------------------------------------------------------------------------------- #
 
 DEFAULT_EVENT_DAYS = 7
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
+def get_file_sizes():
+    # Return this
+    details = []
+
+    # ----------------------------------------------------------- #
+    # Scan databases
+    # ----------------------------------------------------------- #
+    db_dir = "../instance/"
+    for filename in os.listdir(db_dir):
+        f = os.path.join(db_dir, filename)
+        # checking if it is a file
+        if os.path.isfile(f):
+            if f.endswith(".db"):
+                details.append({
+                    'name': os.path.basename(f),
+                    'type': "file",
+                    'size': os.stat(f).st_size / (1024 * 1024)
+                })
+
+    # ----------------------------------------------------------- #
+    # Key directories
+    # ----------------------------------------------------------- #
+    dirs = ["../instance", "../core/gpx", "../core/config", "../core/ics", "../core/static/img/cafe_photos"]
+
+    for dir in dirs:
+        size = 0
+        for path, dirs, files in os.walk(dir):
+            for f in files:
+                fp = os.path.join(path, f)
+                size += os.path.getsize(fp)
+            details.append({
+                'name': f"{os.path.basename(dir)}/",
+                'type': "dir",
+                'size': size / (1024 * 1024)
+            })
+
+    return details
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -128,6 +175,10 @@ def admin_page():
     today_str = datetime.today().strftime("%A")
     map_limit = map_limit_by_day(today_str)
 
+    # ----------------------------------------------------------- #
+    # Database status
+    # ----------------------------------------------------------- #
+    files = get_file_sizes()
 
     # ----------------------------------------------------------- #
     # Unread messages
@@ -164,20 +215,21 @@ def admin_page():
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               anchor="eventLog")
+                               files=files, anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               anchor="messages")
+                               files=files, anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
-                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit)
+                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
+                               files=files)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
