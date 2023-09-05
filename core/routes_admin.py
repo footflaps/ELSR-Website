@@ -106,8 +106,8 @@ def get_free_space():
     # ----------------------------------------------------------- #
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         # On server
-        result = os.popen("df -h /dev/root").read()
-        app.logger.debug(f"row = '{result}'")
+        result = os.system("df -h /dev/root")
+        app.logger.debug(f"result = '{result}'")
 
 
         # cols = row.split()
