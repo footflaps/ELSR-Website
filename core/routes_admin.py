@@ -63,7 +63,16 @@ def get_file_sizes():
     # ----------------------------------------------------------- #
     # Key directories
     # ----------------------------------------------------------- #
-    dirs = ["../instance", "../core/gpx", "../core/config", "../core/ics", "../core/static/img/cafe_photos"]
+    if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+        # On server
+        dirs = ["../instance/",
+                "../core/gpx/",
+                "../core/config/",
+                "../core/ics/",
+                "../core/static/img/cafe_photos/"]
+    else:
+        # On laptop
+        dirs = ["../instance", "../core/gpx", "../core/config", "../core/ics", "../core/static/img/cafe_photos"]
 
     for dir in dirs:
         size = 0
