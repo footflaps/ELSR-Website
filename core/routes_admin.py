@@ -65,11 +65,11 @@ def get_file_sizes():
     # ----------------------------------------------------------- #
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         # On server
-        dirs = ["../instance/",
-                "../core/gpx/",
-                "../core/config/",
-                "../core/ics/",
-                "../core/static/img/cafe_photos/"]
+        dirs = ["/home/ben_freeman_eu/elsr_website/ELSR-Website/instance",
+                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/gpx",
+                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/config/",
+                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/ics/",
+                "/home/ben_freeman_eu/elsr_website/ELSR-Website/core/static/img/cafe_photos/"]
     else:
         # On laptop
         dirs = ["../instance", "../core/gpx", "../core/config", "../core/ics", "../core/static/img/cafe_photos"]
