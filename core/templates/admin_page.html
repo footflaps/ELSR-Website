@@ -474,8 +474,9 @@
 								<th scope="col">Start date</th>
 							{% endif %}
 							<th scope="col">Last Login</th>
-							{% if current_user.admin() %}
-								<th scope="col">Email</th>
+							<th scope="col">Email</th>
+							{% if not mobile %}
+								<th scope="col">Auth codes</th>
 							{% endif %}
 						</tr>
 					</thead>
@@ -514,9 +515,10 @@
 									<td>{{ user.start_date }}</td>
 								{% endif %}
 								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
-								{% if current_user.admin() %}
-									<td>{{ user.email }}
-									    {% if user.phone_number %} {{ user.phone_number }} {% endif %}</td>
+								<td>{{ user.email }}
+								    {% if user.phone_number %} {{ user.phone_number }} {% endif %}</td>
+								{% if not mobile %}
+									<td scope="col">{{ user.verification_code }} / {{ user.verification_code_timestamp }}</td>
 								{% endif %}
 							</tr>
 							

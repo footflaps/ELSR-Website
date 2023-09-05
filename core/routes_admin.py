@@ -88,6 +88,12 @@ def admin_page():
     admins = User().all_admins()
     non_admins = User().all_non_admins()
 
+    # Add readable timestamps
+    for user in non_admins:
+        if user.verification_code_timestamp:
+            user.verification_code_timestamp = \
+                datetime.utcfromtimestamp(user.verification_code_timestamp).strftime('%d%m%Y %H:%M:%S')
+
     # ----------------------------------------------------------- #
     # All messages for Admin (for admin page table)
     # ----------------------------------------------------------- #
