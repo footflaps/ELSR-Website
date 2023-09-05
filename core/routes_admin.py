@@ -106,7 +106,7 @@ def get_free_space():
     # ----------------------------------------------------------- #
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         # On server
-        result = subprocess.run(['/usr/bin/df -h /dev/root'], stdout=subprocess.PIPE)
+        result = subprocess.run(['/usr/bin/df', '-h', '/dev/root'], stdout=subprocess.PIPE)
         output = result.stdout.decode('utf-8')
         lines = output.split('\n')
 
