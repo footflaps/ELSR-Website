@@ -87,11 +87,16 @@ def mark_read():
         Event().log_event("Message Read Fail", f"Failed to mark as read, id = '{message_id}'.")
         flash("Sorry, something went wrong")
 
+    # ----------------------------------------------------------- #
     # Back to calling page
+    # ----------------------------------------------------------- #
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
     if return_to:
         return redirect(return_to)
     else:
-        return redirect(request.referrer)
+        # Should never get here, but default to user page if we didn't get "return_to"
+        user_id = current_user.id
+        return redirect(url_for("user_page", user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -152,11 +157,16 @@ def mark_unread():
         Event().log_event("Message unRead Fail", f"Message().mark_as_unread() failed, message_id = '{message_id}'")
         flash("Sorry, something went wrong")
 
+    # ----------------------------------------------------------- #
     # Back to calling page
+    # ----------------------------------------------------------- #
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
     if return_to:
         return redirect(return_to)
     else:
-        return redirect(request.referrer)
+        # Should never get here, but default to user page if we didn't get "return_to"
+        user_id = current_user.id
+        return redirect(url_for("user_page", user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -172,6 +182,7 @@ def delete_message():
     # Get details from the page
     # ----------------------------------------------------------- #
     message_id = request.args.get('message_id', None)
+    return_to = request.args.get('return_to', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -218,8 +229,16 @@ def delete_message():
         Event().log_event("Message Delete Fail", f"Failed to delete, message_id = '{message_id}'")
         flash("Sorry, something went wrong")
 
+    # ----------------------------------------------------------- #
     # Back to calling page
-    return redirect(request.referrer + "#messages")
+    # ----------------------------------------------------------- #
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
+    if return_to:
+        return redirect(return_to)
+    else:
+        # Should never get here, but default to user page if we didn't get "return_to"
+        user_id = current_user.id
+        return redirect(url_for("user_page", user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -235,6 +254,7 @@ def reply_message():
     # Get details from the page
     # ----------------------------------------------------------- #
     message_id = request.args.get('message_id', None)
+    return_to = request.args.get('return_to', None)
     try:
         body = request.form['body']
     except exceptions.BadRequestKeyError:
@@ -307,14 +327,21 @@ def reply_message():
     # ----------------------------------------------------------- #
     # Alert Admin (if recipient)
     # ----------------------------------------------------------- #
-
     if message.from_email == ADMIN_EMAIL:
         # Threading won't have access to current_user, so need to acquire persistent user to pass on
         user = User().find_user_from_id(current_user.id)
         Thread(target=alert_admin_via_sms, args=(user, f"Reply Message: {body}",)).start()
 
+    # ----------------------------------------------------------- #
     # Back to calling page
-    return redirect(request.referrer.split('#')[0] + "#messages")
+    # ----------------------------------------------------------- #
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
+    if return_to:
+        return redirect(return_to)
+    else:
+        # Should never get here, but default to user page if we didn't get "return_to"
+        user_id = current_user.id
+        return redirect(url_for("user_page", user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -395,8 +422,8 @@ def message_admin():
     # ----------------------------------------------------------- #
     Thread(target=alert_admin_via_sms, args=(user, body,)).start()
 
-    # Back to calling page
-    return redirect(request.referrer)
+    # Back to user page
+    return redirect(url_for("user_page", user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -461,5 +488,5 @@ def message_user():
         Event().log_event("Message User Fail", f"Message send failed to user.email = '{user.email}'.")
         flash("Sorry, something went wrong")
 
-    # Back to calling page
-    return redirect(request.referrer)
+    # Back to user page
+    return redirect(url_for("user_page", user_id=user_id))
