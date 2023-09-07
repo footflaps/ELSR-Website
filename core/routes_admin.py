@@ -358,13 +358,13 @@ def make_admin():
     # Admins must have validated phone number for 2FA login
     # ----------------------------------------------------------- #
     if not user.has_valid_phone_number():
-        # Can't mak admin
+        # Can't make admin
         flash("Sorry, user doesn't have a validated mobile number, so can't use 2FA which is mandatory for Admins!")
         app.logger.debug(f"make_admin(): Rejected request to made user_id = '{user_id}' admin as doesn't have 2FA.")
         Event().log_event(f"Make Admin Fail", f"Rejected request to made user_id = '{user_id}' "
                                               f"admin as doesn't have 2FA.")
         # Back to calling page
-        return redirect(request.referrer)
+        return redirect(url_for('user_page', user_id=user_id))
 
     # ----------------------------------------------------------- #
     # Make admin
@@ -381,7 +381,7 @@ def make_admin():
         flash("Sorry, something went wrong!")
 
     # Back to calling page
-    return redirect(request.referrer)
+    return redirect(url_for('user_page', user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -470,7 +470,7 @@ def unmake_admin():
         flash("Sorry, something went wrong!")
 
     # Back to calling page
-    return redirect(request.referrer)
+    return redirect(url_for('user_page', user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
