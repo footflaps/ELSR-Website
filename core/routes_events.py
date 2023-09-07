@@ -51,7 +51,7 @@ def delete_event():
         Event().log_event("Delete Event Fail", f"Missing event_id!")
         return abort(400)
     elif not user_id \
-            and "user_page" in request.referrer:
+            and url_for("user_page") in request.referrer:
         # NB If we are jumping back to user_page, we must have a valid user_id
         app.logger.debug(f"delete_event(): Missing user_id!")
         Event().log_event("Delete Event Fail", f"Missing user_id!")
@@ -90,8 +90,8 @@ def delete_event():
         # Tell admin page to jump straight to the event table using 'anchor'
         return redirect(url_for("admin_page", anchor="eventLog"))
     else:
-        # Should never get here, but just in case
-        return redirect(request.referrer)
+        # Should never get here, but just in case, go to admin page
+        return redirect(url_for("admin_page", anchor="eventLog"))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -201,8 +201,8 @@ def delete_events():
         # Tell admin page to jump straight to the event table using 'anchor'
         return redirect(url_for("admin_page", anchor="eventLog"))
     else:
-        # Should never get here, but just in case
-        return redirect(request.referrer)
+        # Should never get here, but just in case go to Admin page
+        return redirect(url_for("admin_page", anchor="eventLog"))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
