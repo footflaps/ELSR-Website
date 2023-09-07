@@ -103,7 +103,7 @@ def login():
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
     email = request.args.get('email', None)
-    app.logger.debug(f"login(): Passed email = '{email}'.")
+    # app.logger.debug(f"login(): Passed email = '{email}'.")
 
     # ----------------------------------------------------------- #
     # Need a login form
@@ -232,7 +232,7 @@ def login():
     else:
         session['url'] = request.referrer
 
-    app.logger.debug(f"login(): Saved '{session['url']}' as return page after login.")
+    # app.logger.debug(f"login(): Saved '{session['url']}' as return page after login.")
 
     return render_template("user_login.html", form=form, year=current_year)
 
