@@ -273,7 +273,8 @@ def publish_route():
     Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
 
     # Decide where to go next...
-    if return_path:
+    if return_path and \
+            return_path != "None":
         # Go back to specific page
         return redirect(return_path)
     else:
