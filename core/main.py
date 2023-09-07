@@ -118,21 +118,14 @@ def user_ip():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# robots.txt and Apple icons
+# robots.txt
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/robots.txt')
-@app.route('/apple-touch-icon')
-@app.route('/apple-touch-icon-precomposed.png')
-@app.route('/apple-touch-icon-120x120.png')
-@app.route('/apple-touch-icon-120x120-precomposed.png')
 def static_from_root():
     # ----------------------------------------------------------- #
     # Send link to download the file
     # ----------------------------------------------------------- #
     filename = request.path[1:]
-
-    if "apple-touch" in request.path[1:]:
-        return send_from_directory(directory="../core/static/img/", path="apple-touch-icon-120x120-precomposed.png")
 
     return send_from_directory(directory="../core/static/", path=filename)
 
