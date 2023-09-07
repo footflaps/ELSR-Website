@@ -396,14 +396,14 @@ def new_route():
                 app.logger.debug(f"new_route(): No selected file!")
                 Event().log_event(f"New GPX Fail", f"No selected file!")
                 flash('No selected file')
-                return redirect(request.url)
+                return render_template("gpx_add.html", year=current_year, form=form)
 
             if not file or \
                not allowed_file(file.filename):
                 app.logger.debug(f"new_route(): Invalid file '{file.filename}'!")
                 Event().log_event(f"New GPX Fail", f"Invalid file '{file.filename}'!")
                 flash("That's not a GPX file!")
-                return redirect(request.url)
+                return render_template("gpx_add.html", year=current_year, form=form)
 
             # Create a new GPX object
             # We do this first as we need the id in order to create
