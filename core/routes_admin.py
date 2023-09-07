@@ -172,11 +172,21 @@ def admin_page():
     admins = User().all_admins()
     non_admins = User().all_non_admins()
 
-    # Add readable timestamps
+    # Split users into two camps
+    trusted_users = []
+    untrusted_users = []
     for user in non_admins:
+
+        # Add readable timestamps
         if user.verification_code_timestamp:
             user.verification_code_timestamp = \
                 datetime.utcfromtimestamp(user.verification_code_timestamp).strftime('%d%m%Y %H:%M:%S')
+        # Split by properties
+        if user.readwrite() and \
+                not user.blocked():
+            trusted_users.append(user)
+        else:
+            untrusted_users.append(user)
 
     # ----------------------------------------------------------- #
     # All messages for Admin (for admin page table)
@@ -213,9 +223,11 @@ def admin_page():
     map_limit = map_limit_by_day(today_str)
 
     # ----------------------------------------------------------- #
-    # Database status
+    # Server stats
     # ----------------------------------------------------------- #
+    # This is file and directory sizes
     files = get_file_sizes()
+    # This is free space on the server
     free_per = get_free_space()
 
     # ----------------------------------------------------------- #
@@ -249,25 +261,25 @@ def admin_page():
     if event_period \
             or anchor == "eventLog":
         # Jump straight to the 'eventlog'
-        return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
+        return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, anchor="eventLog")
+                               files=files, free_per=free_per, untrusted_users=untrusted_users, anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
-        return render_template("admin_page.html",  year=current_year, admins=admins, non_admins=non_admins,
+        return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, anchor="messages")
+                               files=files, free_per=free_per, untrusted_users=untrusted_users, anchor="messages")
     else:
         # No jumping, just display the page from the top
-        return render_template("admin_page.html", year=current_year, admins=admins, non_admins=non_admins,
+        return render_template("admin_page.html", year=current_year, admins=admins, trusted_users=trusted_users,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per)
+                               files=files, free_per=free_per, untrusted_users=untrusted_users)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

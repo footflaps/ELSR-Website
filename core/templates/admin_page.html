@@ -472,7 +472,7 @@
 
 	
 <!---------------------------------------------------------------------------------------------------->
-<!--                                       User Table                                               -->
+<!--                                     Trusted User Table                                         -->
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
@@ -480,11 +480,11 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
-			<h2 class="post-title float-left">{{ non_admins | count }} Users:</h2>
+			<h2 class="post-title float-left">{{ trusted_users | count }} Trusted Users:</h2>
 			
 			<!-- Button to expose hidden table -->
-			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseUserList"
-			   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_users">
+			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseTrustedUserList"
+			   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_trusted_users">
 	            SHOW
 	        </a>
 			
@@ -492,11 +492,11 @@
 	</div>
 
 	<!-- Collapsed / Hidden table of users -->
-	<div class="collapse" id="collapseUserList">
+	<div class="collapse" id="collapseTrustedUserList">
 		<div class="row mt-3">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
-				<table id="userTable" class="table table-striped table-bordered table-sm table-condensed"
+				<table id="trustedUserTable" class="table table-striped table-bordered table-sm table-condensed"
 					   style="width: 100%"
 				       data-page-length="25"
 				       data-order='[[ 0, "dec" ]]'>
@@ -519,7 +519,119 @@
 					</thead>
 					
 					<tbody>
-						{% for user in non_admins: %}
+						{% for user in trusted_users: %}
+							
+							<!--
+								Colour code according to status
+								Yellow      Not verified
+								Read        Barred
+							-->
+							{% if user.blocked() %}
+								<tr class="table-danger">
+							{% elif not user.verified() %}
+								<tr class="table-warning">
+							{% else %}
+								<tr>
+							{% endif %}
+							
+								<td scope="row">{{ user.id }}</td>
+								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{ user.name }}</a></td>
+								<td>
+									{{ user.permissions }}
+									{% if user.has_valid_phone_number() %}
+										<i class="fa-solid fa-user-lock"></i>
+									{% endif %}
+									{% if user.readwrite() %}
+										<i class="fa-solid fa-user-pen"></i>
+									{% endif %}
+									{% if user.blocked() %}
+										<i class="fa-solid fa-door-closed"></i>
+									{% endif %}
+								</td>
+								{% if not mobile %}
+									<td>{{ user.start_date }}</td>
+								{% endif %}
+								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
+								<td>{{ user.email }}
+								    {% if user.phone_number %} {{ user.phone_number }} {% endif %}</td>
+								{% if not mobile %}
+									<td scope="col">{{ user.verification_code }} / {{ user.verification_code_timestamp }}</td>
+								{% endif %}
+							</tr>
+							
+						{% endfor %}
+					</tbody>
+				
+				</table>
+			
+				<p>Note: <br>
+				   -- Users in Red have had their email address blocked. <br>
+				   -- Users in yellow haven't verified their email addresses yet.</p>
+						
+			</div>
+			
+		</div>
+	</div>
+	
+	<!-- Separator before next section -->
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<hr>
+		</div>
+	</div>
+	
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                   Untrusted User Table                                         -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="post-title float-left">{{ untrusted_users | count }} Untrusted Users:</h2>
+			
+			<!-- Button to expose hidden table -->
+			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseUntrustedUserList"
+			   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_untrusted_users">
+	            SHOW
+	        </a>
+			
+		</div>
+	</div>
+
+	<!-- Collapsed / Hidden table of users -->
+	<div class="collapse" id="collapseUntrustedUserList">
+		<div class="row mt-3">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				
+				<table id="untrustedUserTable" class="table table-striped table-bordered table-sm table-condensed"
+					   style="width: 100%"
+				       data-page-length="25"
+				       data-order='[[ 0, "dec" ]]'>
+			
+					<!-- Header -->
+					<thead>
+						<tr>
+							<th scope="col">ID</th>
+							<th scope="col">Name</th>
+							<th scope="col">Perm.</th>
+							{% if not mobile %}
+								<th scope="col">Start date</th>
+							{% endif %}
+							<th scope="col">Last Login</th>
+							<th scope="col">Email</th>
+							{% if not mobile %}
+								<th scope="col">Auth codes</th>
+							{% endif %}
+						</tr>
+					</thead>
+					
+					<tbody>
+						{% for user in untrusted_users: %}
 							
 							<!--
 								Colour code according to status
@@ -1256,7 +1368,27 @@
 	$(document).ready( function () {
 	
 		/* jQuery on our tables where we want dataTables to run */
-		$('#userTable').DataTable({
+		$('#trustedUserTable').DataTable({
+			
+			/* Default table length */
+			pageLength: 25,
+			
+			"autoWidth": false,
+			
+			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
+			"pagingType": "simple_numbers",
+			
+			"oLanguage": {
+				"oPaginate": {
+					"sFirst": "<<", // This is the link to the first page
+					"sPrevious": "<", // This is the link to the previous page
+					"sNext": ">", // This is the link to the next page
+					"sLast": ">>" // This is the link to the last page
+				}
+			}
+		});
+		
+		$('#untrustedUserTable').DataTable({
 			
 			/* Default table length */
 			pageLength: 25,
@@ -1382,12 +1514,20 @@
             document.getElementById('show_admins').innerHTML = 'SHOW';
         });
         
-        /* Users - Hide <-> Show buttons name change */
-		$("#collapseUserList").on("show.bs.collapse", function(){
-            document.getElementById('show_users').innerHTML = 'HIDE';
+        /* Trusted Users - Hide <-> Show buttons name change */
+		$("#collapseTrustedUserList").on("show.bs.collapse", function(){
+            document.getElementById('show_trusted_users').innerHTML = 'HIDE';
         });
-       $("#collapseUserList").on("hide.bs.collapse", function(){
-            document.getElementById('show_users').innerHTML = 'SHOW';
+       $("#collapseTrustedUserList").on("hide.bs.collapse", function(){
+            document.getElementById('show_trusted_users').innerHTML = 'SHOW';
+        });
+        
+        /* Untrusted Users - Hide <-> Show buttons name change */
+		$("#collapseUntrustedUserList").on("show.bs.collapse", function(){
+            document.getElementById('show_untrusted_users').innerHTML = 'HIDE';
+        });
+       $("#collapseUntrustedUserList").on("hide.bs.collapse", function(){
+            document.getElementById('show_untrusted_users').innerHTML = 'SHOW';
         });
         
         /* Rides - Hide <-> Show buttons name change */
