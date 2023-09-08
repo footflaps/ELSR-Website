@@ -33,8 +33,8 @@ NEW_CAFE = "New cafe!"
 UPLOAD_ROUTE = "Upload my own route!"
 
 # Default option
-#DEFAULT_START = "8:00am from Espresso Library, East Road"
 DEFAULT_START = "8:00am from the food vans at central Cambridge Train Station"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -209,7 +209,7 @@ class AdminCreateRideForm(FlaskForm):
     # ----------------------------------------------------------- #
     # Generate the list of routes
     # ----------------------------------------------------------- #
-    gpx_choices = []
+    gpx_choices = [UPLOAD_ROUTE]
     gpxes = Gpx().all_gpxes_sorted()
     for gpx in gpxes:
         filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
@@ -217,13 +217,14 @@ class AdminCreateRideForm(FlaskForm):
         if gpx.public() \
                 and os.path.exists(filename):
             gpx_choices.append(gpx.combo_string())
-    gpx_choices.append(UPLOAD_ROUTE)
+        else:
+            app.logger.error(f"AdminCreateRideForm: Skipped gpx.id = {gpx.id}")
 
     # ----------------------------------------------------------- #
     # Generate the list of users
     # ----------------------------------------------------------- #
 
-    users = User().all_users()
+    users = User().all_users_sorted()
     all_users = []
     for user in users:
         all_users.append(user.combo_str())

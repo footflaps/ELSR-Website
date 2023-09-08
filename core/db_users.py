@@ -198,6 +198,11 @@ class User(UserMixin, db.Model):
             users = db.session.query(User).all()
             return users
 
+    def all_users_sorted(self):
+        with app.app_context():
+            users = db.session.query(User).order_by('name').all()
+            return users
+
     def all_admins(self):
         with app.app_context():
             admins = db.session.query(User).filter(User.permissions == MASK_ADMIN + MASK_VERIFIED).all()
