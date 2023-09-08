@@ -230,9 +230,15 @@ def weekend():
                                 and ride.start_time.strip() != "":
                             start_times[day].append(f"{ride.destination}: {ride.start_time}")
 
-                    # Make a not, if we find a non public GPX
+                    # Make a note, if we find a non public GPX
                     if not gpx.public():
                         private_gpx = True
+
+                    # Update destination (as cafe may have changed name)
+                    if ride.cafe_id:
+                        cafe = Cafe().one_cafe(ride.cafe_id)
+                        if cafe:
+                            ride.destination = cafe.name
 
                     # Add gpx object to the list of GPX files for that day
                     gpxes[day].append(gpx)
