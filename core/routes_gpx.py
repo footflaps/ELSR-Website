@@ -25,6 +25,8 @@ from core.subs_google_maps import polyline_json, markers_for_cafes_native, start
                                   MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
+from core.db_messages import Message, ADMIN_EMAIL
+from core.subs_email_sms import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -948,3 +950,86 @@ def route_download(gpx_id):
                                path=os.path.basename(gpx.filename),
                                download_name=download_name)
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Flag a gpx to an admin
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route("/flag_gpx", methods=['POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def flag_gpx():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+    try:
+        reason = request.form['reason']
+    except exceptions.BadRequestKeyError:
+        reason = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if reason == "":
+        reason = " "
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not reason:
+        app.logger.debug(f"flag_gpx(): Missing reason!")
+        Event().log_event("Flag GPX Fail", f"Missing reason!")
+        return abort(400)
+    elif not gpx_id:
+        app.logger.debug(f"flag_gpx(): Missing gpx_id!")
+        Event().log_event("Flag GPX Fail", f"Missing gpx_id!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+    if not gpx:
+        app.logger.debug(f"flag_gpx(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
+        Event().log_event("Flag GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Check permissions
+    # ----------------------------------------------------------- #
+    if not current_user.readwrite():
+        # Failed authentication
+        app.logger.debug(f"flag_gpx(): Rejected request from '{current_user.email}' as no permissions, "
+                         f"gpx_id = '{gpx_id}'.")
+        Event().log_event("Flag GPX Fail", f"Rejected request from '{current_user.email}' as no permissions, "
+                                           f"gpx_id = '{gpx_id}'")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Send a message to Admin
+    # ----------------------------------------------------------- #
+    message = Message(
+        from_email=current_user.email,
+        to_email=ADMIN_EMAIL,
+        body=f"GPX Objection to '{gpx.name}' (id={gpx.id}). Reason: {reason}"
+    )
+
+    if Message().add_message(message):
+        # Success
+        app.logger.debug(f"flag_gpx(): Flagged GPX, gpx_id = '{gpx_id}'.")
+        Event().log_event("Flag GPX Success", f"Flagged GPX, gpx_id = '{gpx_id}', reason = '{reason}'.")
+        flash("Your message has been forwarded to an admin.")
+    else:
+        # Should never get here, but....
+        app.logger.debug(f"flag_gpx(): Message().add_message failed, gpx_id = '{gpx_id}'.")
+        Event().log_event("Flag GPX Fail", f"Message().add_message failed, gpx_id = '{gpx_id}', reason = '{reason}'.")
+        flash("Sorry, something went wrong.")
+
+    # ----------------------------------------------------------- #
+    # Alert admin via SMS
+    # ----------------------------------------------------------- #
+    # Threading won't have access to current_user, so need to acquire persistent user to pass on
+    user = User().find_user_from_id(current_user.id)
+    Thread(target=alert_admin_via_sms, args=(user, f"GPX '{gpx.name}', Reason: '{reason}'",)).start()
+
+    # Back to GPX details page
+    return redirect(url_for('gpx_details', gpx_id=gpx_id))
