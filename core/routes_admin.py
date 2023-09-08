@@ -203,7 +203,7 @@ def admin_page():
     # ----------------------------------------------------------- #
     socials = Socials().all()
     for social in socials:
-        if social.destination_status == SOCIAL_DB_PRIVATE:
+        if social.privacy == SOCIAL_DB_PRIVATE:
             social.private = True
         else:
             social.private = False

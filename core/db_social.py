@@ -63,8 +63,8 @@ class Socials(db.Model):
     # Start time
     start_time = db.Column(db.String(20))
 
-    # Destination Rating (Public / Private)
-    destination_status = db.Column(db.String(20))
+    # Privacy (Public / Private)
+    privacy = db.Column(db.String(20))
 
     # Return all events
     def all(self):

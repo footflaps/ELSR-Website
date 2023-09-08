@@ -202,7 +202,7 @@ def add_social():
             form.organiser.data = social.organiser
             form.destination.data = social.destination
             form.details.data = social.details
-            if social.destination_status == SOCIAL_DB_PRIVATE:
+            if social.privacy == SOCIAL_DB_PRIVATE:
                 form.destination_hidden.data = SOCIAL_FORM_PRIVATE
             else:
                 form.destination_hidden.data = SOCIAL_FORM_PUBLIC
@@ -282,9 +282,9 @@ def add_social():
         new_social.details = form.details.data
         # Handle public private
         if form.destination_hidden.data == SOCIAL_FORM_PUBLIC:
-            new_social.destination_status = SOCIAL_DB_PUBLIC
+            new_social.privacy = SOCIAL_DB_PUBLIC
         else:
-            new_social.destination_status = SOCIAL_DB_PRIVATE
+            new_social.privacy = SOCIAL_DB_PRIVATE
 
         # ----------------------------------------------------------- #
         # Add to the db
@@ -364,7 +364,7 @@ def social():
             social.start_time_txt = "Log in to see start time"
             social.details = "<p>Log in to see the details</p>"
 
-        elif social.destination_status == SOCIAL_DB_PRIVATE and \
+        elif social.privacy == SOCIAL_DB_PRIVATE and \
                 not current_user.readwrite():
             # Private events are for write enabled users only ie WA group members
             social.destination = "** Private event **"
@@ -505,7 +505,7 @@ def download_ics():
     # Permissions
     # ----------------------------------------------------------- #
     if not current_user.readwrite() and \
-        social.destination_status == SOCIAL_DB_PRIVATE:
+        social.privacy == SOCIAL_DB_PRIVATE:
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}' as Private.")
