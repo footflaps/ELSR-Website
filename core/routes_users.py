@@ -391,7 +391,33 @@ def validate_email():
             # Send welcome email
             Message().send_welcome_message(user.email)
 
+            # ----------------------------------------------------------- #
+            # Alert admin via SMS
+            # ----------------------------------------------------------- #
+            sms_body = "New user joined. Remember to set write permissions for user."
+            Thread(target=alert_admin_via_sms, args=(user, sms_body,)).start()
+
+            # ----------------------------------------------------------- #
+            # Alert admin via internal message
+            # ----------------------------------------------------------- #
+            admin_message = Message(
+                from_email=user.email,
+                to_email=ADMIN_EMAIL,
+                body="New user has joined - check permissions."
+            )
+
+            if Message().add_message(admin_message):
+                # Success!
+                app.logger.debug(f"validate_email(): User '{user.email}' has sent message to Admin.")
+                Event().log_event("Validate Pass", f"Message to Admin was sent successfully for '{user.email}'.")
+            else:
+                # Should never get here, but...
+                app.logger.debug(f"validate_email(): Message().add_message() failed, user.email = '{user.email}'.")
+                Event().log_event("Validate Fail", f"Message send failed to Admin for '{user.email}'.")
+
+            # ----------------------------------------------------------- #
             # Forward to login page
+            # ----------------------------------------------------------- #
             return redirect(url_for('login', email=email))
 
         # Fall through to form below
