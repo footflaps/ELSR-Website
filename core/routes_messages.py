@@ -42,7 +42,7 @@ def mark_read():
     # Get details from the page
     # ----------------------------------------------------------- #
     message_id = request.args.get('message_id', None)
-    return_to = request.args.get('return_to', None)
+    return_path = request.args.get('return_path', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -90,11 +90,12 @@ def mark_read():
     # ----------------------------------------------------------- #
     # Back to calling page
     # ----------------------------------------------------------- #
-    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
-    if return_to:
-        return redirect(return_to)
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_path"
+    if return_path and \
+            return_path != "None":
+        return redirect(return_path)
     else:
-        # Should never get here, but default to user page if we didn't get "return_to"
+        # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
         return redirect(url_for("user_page", user_id=user_id))
 
@@ -112,7 +113,7 @@ def mark_unread():
     # Get details from the page
     # ----------------------------------------------------------- #
     message_id = request.args.get('message_id', None)
-    return_to = request.args.get('return_to', None)
+    return_path = request.args.get('return_path', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -160,11 +161,13 @@ def mark_unread():
     # ----------------------------------------------------------- #
     # Back to calling page
     # ----------------------------------------------------------- #
-    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
-    if return_to:
-        return redirect(return_to)
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_path"
+    if return_path and \
+            return_path != "None":
+        # Go back to specific page
+        return redirect(return_path)
     else:
-        # Should never get here, but default to user page if we didn't get "return_to"
+        # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
         return redirect(url_for("user_page", user_id=user_id))
 
@@ -182,7 +185,7 @@ def delete_message():
     # Get details from the page
     # ----------------------------------------------------------- #
     message_id = request.args.get('message_id', None)
-    return_to = request.args.get('return_to', None)
+    return_path = request.args.get('return_path', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -232,11 +235,13 @@ def delete_message():
     # ----------------------------------------------------------- #
     # Back to calling page
     # ----------------------------------------------------------- #
-    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
-    if return_to:
-        return redirect(return_to)
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_path"
+    if return_path and \
+            return_path != "None":
+        # Go back to specific page
+        return redirect(return_path)
     else:
-        # Should never get here, but default to user page if we didn't get "return_to"
+        # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
         return redirect(url_for("user_page", user_id=user_id))
 
@@ -254,7 +259,7 @@ def reply_message():
     # Get details from the page
     # ----------------------------------------------------------- #
     message_id = request.args.get('message_id', None)
-    return_to = request.args.get('return_to', None)
+    return_path = request.args.get('return_path', None)
     try:
         body = request.form['body']
     except exceptions.BadRequestKeyError:
@@ -335,11 +340,13 @@ def reply_message():
     # ----------------------------------------------------------- #
     # Back to calling page
     # ----------------------------------------------------------- #
-    # We could have come from either the Admin page or the User page, both of which should pass us "return_to"
-    if return_to:
-        return redirect(return_to)
+    # We could have come from either the Admin page or the User page, both of which should pass us "return_path"
+    if return_path and \
+            return_path != "None":
+        # Go back to specific page
+        return redirect(return_path)
     else:
-        # Should never get here, but default to user page if we didn't get "return_to"
+        # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
         return redirect(url_for("user_page", user_id=user_id))
 

@@ -155,7 +155,7 @@
 										{% if message.been_read() %}
 										
 											<!-- Mini form to mark a message unread -->
-											<form action="{{ url_for('mark_unread', message_id=message.id, return_to=url_for('user_page', user_id=user.id, anchor='messages')) }}"
+											<form action="{{ url_for('mark_unread', message_id=message.id, return_path=url_for('user_page', user_id=user.id, anchor='messages')) }}"
 											      method="post">
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												<button type="submit" class="btn-sm btn-secondary mr-2 float-left mb-3">Mark as unRead</button>
@@ -164,7 +164,7 @@
 										{% else %}
 										
 											<!-- Mini form to mark a message read -->
-											<form action="{{ url_for('mark_read', message_id=message.id, return_to=url_for('user_page', user_id=user.id, anchor='messages')) }}"
+											<form action="{{ url_for('mark_read', message_id=message.id, return_path=url_for('user_page', user_id=user.id, anchor='messages')) }}"
 											      method="post">
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												<button type="submit" class="btn-sm btn-secondary mr-2 float-left mb-3">Mark as Read</button>
@@ -173,7 +173,7 @@
 										{% endif %}
 										
 										<!-- Mini form to delete a message -->
-										<form action="{{ url_for('delete_message', message_id=message.id, return_to=url_for('user_page', user_id=user.id, anchor='messages')) }}"
+										<form action="{{ url_for('delete_message', message_id=message.id, return_path=url_for('user_page', user_id=user.id, anchor='messages')) }}"
 										      method="post">
 											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 											<button type="submit" class="btn-sm btn-danger float-right mb-3 ">Delete</button>
@@ -210,7 +210,7 @@
 													1. gpx_id = request.args.get('gpx_id', None)
 							                        2. confirm = request.form['confirm']
 											-->
-											<form action="{{ url_for('reply_message', message_id=message.id, return_to=url_for('user_page', anchor='messages', user_id=user.id)) }}" method="post">
+											<form action="{{ url_for('reply_message', message_id=message.id, return_path=url_for('user_page', anchor='messages', user_id=user.id)) }}" method="post">
 												
 												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 												
