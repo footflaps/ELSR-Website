@@ -356,6 +356,17 @@
 					is what it looks like.
 				</li>
 				
+				<!-- Backups -->
+				<li class="my-3"><img src="{{ url_for('static', filename='img/google_cloud_icon.png')}}" width=40>
+					Disaster recovery. In the event someone does manage to hack the site and take it down, the
+					server is automatically
+					<a href="https://cloud.google.com/compute/docs/disks/create-snapshots">
+						<i class="fa fa-external-link fa-2xs"></i> snapshoted
+					</a>
+					once a week by Google and the images are stored somewhere else in the
+					Google Cloud, so restoring the site shouldn't be too difficult! Famous last words...
+				</li>
+				
 			</ul>
 			
 			<!-- Contact me... -->
