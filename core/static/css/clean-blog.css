@@ -332,7 +332,8 @@ header.masthead .post-heading .meta a {
 }
 .form-control {
     font-size: 1.2rem;
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-weight: 650;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 .floating-label-form-group {
   font-size: 14px;
@@ -427,6 +428,12 @@ input[type=file]::file-selector-button {
   -moz-border-radius: 4px;
 }
 
+/* This gets the "No file chosen" text after the "CHOOSE FILE" button */
+input {
+    font-weight: 650;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
 input[type=file]::file-selector-button:hover {
   color: #fff;
   background-color: #00657b !important;
@@ -476,10 +483,12 @@ input[type=file]::file-selector-button:hover {
 .help-block {
     color: red;
     font-weight: 700;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 .control-label {
     font-weight: 600;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 /* Style paginate buttons */
