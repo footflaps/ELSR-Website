@@ -362,7 +362,7 @@ def social():
             # Not logged in = no info other than the date
             social.destination = "Log in to see destination"
             social.start_time_txt = "Log in to see start time"
-            social.details = "<p>Log in to see the details</p>"
+            social.details = f"<a href={url_for('login')}><p style='color: red'>Log in to see the details</p></a>"
 
         elif social.privacy == SOCIAL_DB_PRIVATE and \
                 not current_user.readwrite():

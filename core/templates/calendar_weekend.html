@@ -337,7 +337,9 @@
 				
 					<!-- Remind people to log in -->
 					{% if not current_user.is_authenticated: %}
-						<p style="color: red"><strong>Log in to download GPX files.</strong></p>
+						<a href="{{ url_for('login') }}">
+							<p style="color: red"><strong>Log in to download GPX files.</strong></p>
+						</a>
 					{% endif %}
 				
 				{% endif %}
