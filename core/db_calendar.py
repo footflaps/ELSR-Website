@@ -218,7 +218,10 @@ class AdminCreateRideForm(FlaskForm):
                 and os.path.exists(filename):
             gpx_choices.append(gpx.combo_string())
         else:
-            app.logger.error(f"AdminCreateRideForm: Skipped gpx.id = {gpx.id}")
+            # Something odd is happening, we seem to miss the most recent loaded gpx in the form
+            app.logger.debug(f"AdminCreateRideForm: Skipped gpx.id = {gpx.id}")
+    # Something odd is happening, we seem to miss the most recent loaded gpx in the form
+    app.logger.debug(f"AdminCreateRideForm: found {len(gpxes)} routes!")
 
     # ----------------------------------------------------------- #
     # Generate the list of users

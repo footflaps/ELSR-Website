@@ -431,6 +431,7 @@ def add_ride():
         # ----------------------------------------------------------- #
         if current_user.admin():
             form = AdminCreateRideForm()
+            form.owner.data = current_user.combo_str()
         else:
             form = CreateRideForm()
 
