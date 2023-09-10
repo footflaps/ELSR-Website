@@ -450,11 +450,8 @@ def validate_email():
                 flash("Email has already been verified! Log in with your password.")
                 return redirect(url_for('login', email=new_user.email))
 
-            # Valid email
+            # Check email exists in db
             if User().validate_email(user, code):
-
-                # Debug
-                user = User().find_user_from_email(form.email.data)
 
                 # Go to login page
                 app.logger.debug(f"validate_email(): Form, user '{user.email}' has been validated.")
@@ -500,12 +497,14 @@ def validate_email():
                 flash("Incorrect code (or code has expired), please try again!")
                 return render_template("user_validate.html", form=form, year=current_year)
 
-        # Invalid email
-        app.logger.debug(f"validate_email(): Form, unrecognised email '{new_user.email}'.")
-        Event().log_event("Validate Fail", f"Form, unrecognised email '{new_user.email}'.")
-        flash("Unrecognised email, please try again!")
+        else:
+            # Invalid email
+            app.logger.debug(f"validate_email(): Form, unrecognised email '{new_user.email}'.")
+            Event().log_event("Validate Fail", f"Form, unrecognised email '{new_user.email}'.")
+            flash("Unrecognised email, please try again!")
+            # Just fall through to validate page
 
-    # Show register page / form
+    # Show validate email form
     return render_template("user_validate.html", form=form, year=current_year)
 
 
