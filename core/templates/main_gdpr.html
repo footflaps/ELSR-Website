@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/gdpr-bg.jpg')}}')">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>GDPR</h1>
+					<span class="subheading">For once we have to be serious...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<!------------------------------------------>
+			<!--      Type of data we collect         -->
+			<!------------------------------------------>
+			
+			<h2>The type of personal information we collect</h2>
+			
+			<p>We currently collect and process the following information:</p>
+			
+			<ul>
+				<li class="my-3">Personal identifiers and contacts i.e. email address. If you have opted to use 2FA
+				                 (recommended) then we will also collect your phone number.</li>
+				<li class="my-3">We also log your IP address and access times.</li>
+			</ul>
+			
+			<hr class="mb-4">
+			
+			
+			<!------------------------------------------>
+			<!--               Sources                -->
+			<!------------------------------------------>
+			
+			<h2>How we get the personal information and why we have it</h2>
+			
+			<p>Most of the personal information we process is provided to us directly by you for one of the following reasons:</p>
+			
+			<ul>
+				<li class="my-3">Manage user accounts on the website.</li>
+				<li class="my-3">Keep some group information private to regular members / riders.</li>
+			</ul>
+			
+			<p>
+				We <strong> do not </strong> share this information with any other organisation unless required to
+			    under UK law.
+			</p>
+			
+			<p>
+				Under the UK General Data Protection Regulation (UK GDPR), the lawful bases we rely on for processing
+			    this information are:
+			</p>
+			
+			<ul>
+				<li class="my-3">Your consent. You are able to remove your consent at any time.</li>
+			</ul>
+			
+			<hr class="mb-4">
+			
+			
+			<!------------------------------------------>
+			<!--         Your information             -->
+			<!------------------------------------------>
+			
+			<h2>How we store your personal information</h2>
+			
+			<p>
+				Your personal information is stored on a server in the Google Cloud.
+				Access to personal information stored on the server is restricted to ELSR's Sysadmin and a small group
+				of ELSR members who act as "web admins", moderating the website. Server backups are automated by Google and
+				stored by Google in encrypted form. Any local copies of personal data e.g. for development or
+				diagnostic purposes (eg log files) and stored on a password protected, encrypted PC.
+			</p>
+			
+			<p>
+				Any diagnostic logfiles will be securely deleted once they have served their purpose. Any user accounts
+				inactive for two years or more will be deleted from the server, after making an attempt to contact the
+				user by email to offer them a chance to retain their account before deletion.
+			</p>
+			
+			<hr class="mb-4">
+			
+			<!------------------------------------------>
+			<!--              Your rights             -->
+			<!------------------------------------------>
+			
+			<h2>Your data protection rights</h2>
+			<p>Under data protection law, you have rights including:</p>
+			<ul>
+				<li class="my-3">Your right of <strong>access</strong> - You have the right to ask us for copies of your personal
+				    information. NB You can find everything on your user page.</li>
+				<li class="my-3">Your right to <strong>rectification</strong> - You have the right to ask us to rectify personal
+				    information you think is inaccurate. You also have the right to ask us to complete information you
+				    think is incomplete. </li>
+				<li class="my-3">Your right to <strong>erasure</strong> - You have the right to ask us to erase your personal
+				    information in certain circumstances. NB You can delete your user account from your user page.</li>
+				<li class="my-3">Your right to <strong>restriction of processing</strong> - You have the right to ask us to restrict
+				    the processing of your personal information in certain circumstances. </li>
+				<li class="my-3">Your right to <strong>object to processing</strong> - You have the the right to object to the
+				    processing of your personal information in certain circumstances.</li>
+				<li class="my-3">Your right to <strong>data portability</strong> - You have the right to ask that we transfer the
+				    personal information you gave us to another organisation, or to you, in certain circumstances.</li>
+			</ul>
+		
+			<p>
+				You are not required to pay any charge for exercising your rights. If you make a request, we have one month to respond to you.
+			</p>
+			<p>
+				Please contact us <a href="{{ url_for('contact') }}"><strong>here,</strong> </a> if you wish to make a request.
+			</p>
+			<hr class="mb-4">
+			
+			
+			<!------------------------------------------>
+			<!--               Complain               -->
+			<!------------------------------------------>
+			
+			<h2>How to complain</h2>
+			
+			<p>
+				If you have any concerns about our use of your personal information,
+			    you can make a complaint to us <a href="{{ url_for('contact') }}"><strong>here.</strong> </a>
+				<br> <br>
+				You can also complain to the ICO if you are unhappy with how we have used your data.
+				<br> <br>
+				The ICO’s address:<br>
+				Information Commissioner’s Office<br>
+				Wycliffe House<br>
+				Water Lane<br>
+				Wilmslow<br>
+				Cheshire<br>
+				SK9 5AF<br>
+				<br>
+				Helpline number: 0303 123 1113<br>
+				ICO website: <a href="https://www.ico.org.uk"><strong>https://www.ico.org.uk</strong></a><br>
+			</p>
+
+			<hr class="mb-4">
+			
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}
