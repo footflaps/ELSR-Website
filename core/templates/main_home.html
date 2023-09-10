@@ -122,6 +122,11 @@
 	<div class="row">
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 			
+			
+			<!------------------------------------------>
+			<!--               Who?                   -->
+			<!------------------------------------------>
+			
 			<h2>Who? <i class="fa-solid fa-people-group"></i></h2>
 			<p>EL Social Rides are a collective of riders who meet regularly for social rides. There is no club,
 			   no membership, no committee and almost no hierarchy. Although a small number of riders do most of the
@@ -131,15 +136,20 @@
 			
 			<hr>
 			
+			
+			<!------------------------------------------>
+			<!--               Where?                 -->
+			<!------------------------------------------>
+			
 			<a name="where" ></a>
 			<h2>Where? <i class="fa-solid fa-map-location-dot"></i></h2>
 			<p>ELSR now meet at Bean Theory Cafe (next door to Mill Works, by the Mill Pond) for the main Weekend group
 			   rides. You can access the cafe from both Newnham Road or from across Sheep's Green via Mill Lane.</p>
 			
 			
-			<!---------------------------------------------------------------------------------------------------->
-			<!--                                      Insert Google Map                                         -->
-			<!---------------------------------------------------------------------------------------------------->
+			<!------------------------------------------>
+			<!--                Map                   -->
+			<!------------------------------------------>
 			
 			<div id="map" style="height: 500px">
 				{% if not GOOGLE_MAPS_API_KEY %}
@@ -149,6 +159,10 @@
 			<hr>
 			
 			
+			<!------------------------------------------>
+			<!--               What?                  -->
+			<!------------------------------------------>
+			
 			<h2 class="mt-3">What? <i class="fa-regular fa-circle-question"></i></h2>
 			<p>We then split into groups by pace and destination before starting our regular cafe
 			   rides, which can be anything between 50 km and 200 km, although the norm is around 100 km. Nearly all
@@ -157,6 +171,10 @@
 			   <strong><a href="{{ url_for('cafe_list') }}">here.</a></strong></p>
 			<hr>
 			
+			
+			<!------------------------------------------>
+			<!--               Join us                -->
+			<!------------------------------------------>
 			
 			<h2 class="mt-3">Fancy joining in? <i class="fa-solid fa-person-biking"></i></h2>
 			<p>From 25 Aug 2023, rides, routes and leaders will be announced
@@ -180,6 +198,10 @@
 			<hr>
 			
 			
+			<!------------------------------------------>
+			<!--               Saturday               -->
+			<!------------------------------------------>
+			
 			<h2 class="mt-3">Saturday - main ride</h2>
 			<p>The main event is on Saturday morning. Depending on numbers, there will be anything from one to five
 			   groups departing. We normally strive to have three routes planned:</p>
@@ -199,19 +221,41 @@
 				                            Will split into two groups if too large.</li>
 			</ul>
 			
-			<p>You can see the upcoming rides for this weekend
+			<p>
+				You can see the upcoming rides for this weekend
 				<a href="{{ url_for('weekend') }}"><strong>here</strong></a>. NB Ride
-			   details normally start appearing around Thursday / Friday of each week.</p>
+			    details normally start appearing around Thursday / Friday of each week.
+			</p>
+			<p>
+			    Normal start time for all Saturday rides is 8.00am, but please check the start time for each ride
+				<a href="{{ url_for('weekend') }}"><strong>here</strong></a>,
+			    as occasionally some rides will start earlier or later.
+			</p>
 			<hr>
 			
+			
+			<!------------------------------------------>
+			<!--               Sunday                 -->
+			<!------------------------------------------>
 			
 			<h2 class="mt-3">Sunday - single group</h2>
 			<p>Sunday normally has a smaller turnout with a single group riding at between Decaf and Espresso pace.</p>
-			<p>You can see the upcoming rides for this weekend
+			<p>
+				You can see the upcoming rides for this weekend
 				<a href="{{ url_for('weekend') }}"> <strong>here</strong></a>. NB Ride
-			   details normally start appearing around Thursday / Friday of each week.</p>
+			    details normally start appearing around Thursday / Friday of each week.
+			</p>
+			<p>
+			    Normal start time for all Saturday rides is 8.00am, but please check the start time for each ride
+				<a href="{{ url_for('weekend') }}"><strong>here</strong></a>,
+			    as occasionally some rides will start earlier or later.
+			</p>
 			<hr>
 			
+			
+			<!------------------------------------------>
+			<!--               Chaingang              -->
+			<!------------------------------------------>
 			
 			<h2 class="mt-3">Thursday night Chaingang / Paceline <i class="fa-solid fa-link"></i></h2>
 			<p>For those of you who missed out on a UCI Pro-team contract this year, we have the next best thing.
@@ -220,6 +264,11 @@
 			</p>
 			<hr>
 			
+			
+			<!------------------------------------------>
+			<!--               Socials                -->
+			<!------------------------------------------>
+			
 			<h2 class="mt-3">Socials <i class='fas fa-solid fa-champagne-glasses'></i></h2>
 			<p>We have monthly social gatherings in local drinking establishments. The aim is to use alcohol to
 			   dilute the EPO in our blood to such an extent that we can all pass WADA drug tests.
@@ -227,15 +276,28 @@
 			</p>
 			<hr>
 			
+			<!------------------------------------------>
+			<!--               Website                -->
+			<!------------------------------------------>
+			
 			<h2 class="mt-3">www.elsr.co.uk</h2>
 			<p>This website is a resource aimed at facilitating the group rides by archiving the details of our
 			   preferred cafes and the associated GPX files used to lead the rides. It is fully editable, just
 			   sign up via email, and add cafes and GPX files to the database.</p>
 			
+			
+			<!------------------------------------------>
+			<!--             Disclaimer               -->
+			<!------------------------------------------>
+			
 			<p>ELSR and www.elsr.co.uk are not associated with Espresso Library Cafe in any official way,
 			   we just used to meet at EL1, before it closed.</p>
 			
-			<!-- Register button -->
+			
+			<!------------------------------------------>
+			<!--             Register                 -->
+			<!------------------------------------------>
+			
 			{% if not current_user.is_authenticated %}
 				<a class="btn btn-primary" href="{{ url_for('register') }}" role="button"
 				   aria-expanded="false" aria-controls="collapseExample">
