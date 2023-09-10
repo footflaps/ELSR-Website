@@ -435,7 +435,14 @@
 							{% if user.admin() %}
 							<tr>
 								<th scope="row">{{ user.id }}</th>
-								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{ user.name }}</a></td>
+								<td>
+									<a href="{{ url_for('user_page', user_id=user.id) }}">
+										{{ user.name }}
+										<img src="{{ user.email | gravatar }}"
+							                 width="40"
+									         style="border-radius: 50%;"/>
+									</a>
+								</td>
 								<td>
 									{{ user.permissions }}
 									{% if user.has_valid_phone_number() %}
@@ -535,7 +542,14 @@
 							{% endif %}
 							
 								<td scope="row">{{ user.id }}</td>
-								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{ user.name }}</a></td>
+								<td>
+									<a href="{{ url_for('user_page', user_id=user.id) }}">
+										{{ user.name }}
+										<img src="{{ user.email | gravatar }}"
+							                 width="40"
+									         style="border-radius: 50%;"/>
+									</a>
+								</td>
 								<td>
 									{{ user.permissions }}
 									{% if user.has_valid_phone_number() %}
@@ -647,7 +661,14 @@
 							{% endif %}
 							
 								<td scope="row">{{ user.id }}</td>
-								<td><a href="{{ url_for('user_page', user_id=user.id) }}">{{ user.name }}</a></td>
+								<td>
+									<a href="{{ url_for('user_page', user_id=user.id) }}">
+										{{ user.name }}
+										<img src="{{ user.email | gravatar }}"
+							                 width="40"
+									         style="border-radius: 50%;"/>
+									</a>
+								</td>
 								<td>
 									{{ user.permissions }}
 									{% if user.has_valid_phone_number() %}
