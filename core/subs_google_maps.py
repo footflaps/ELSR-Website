@@ -42,7 +42,7 @@ GPX_COLOURS = ["#9e0142", "#5e4fa2", "#d53e4f", "#3288bd", "#f46d43", "#66c2a5",
 MAX_NUM_GPX_PER_GRAPH = 8
 
 # EL coords
-ELSR_HOME = {"lat": 52.194627, "lng": 0.137538}
+ELSR_HOME = {"lat": 52.199234344363, "lng": 0.113774646436378}
 
 # Google map bounds
 MAP_BOUNDS = {

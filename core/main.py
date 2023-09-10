@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort, send_from_directory
+from flask import render_template, request, flash, abort, send_from_directory, url_for
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFError
 from wtforms import StringField, EmailField, SubmitField
@@ -21,7 +21,7 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_cafes import OPEN_CAFE_COLOUR
+from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
 from core.db_users import update_last_seen
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
@@ -140,14 +140,17 @@ def home():
     # -------------------------------------------------------------------------------------------- #
     # Show Temporary Meeting Point
     # -------------------------------------------------------------------------------------------- #
+
+    cafe = Cafe().one_cafe(BEAN_THEORY_INDEX)
+
     cafe_marker = [{
-        "position": {"lat": ELSR_HOME["lat"], "lng": ELSR_HOME["lng"]},
-        "title": f'Food vans by station',
+        "position": {"lat": cafe.lat, "lng": cafe.lon},
+        "title": f'<a href="{ url_for("cafe_details", cafe_id=BEAN_THEORY_INDEX) }">{cafe.name}</a>',
         "color": OPEN_CAFE_COLOUR,
     }]
 
     # Map will launch centered here
-    map_coords = {"lat": ELSR_HOME["lat"], "lng": ELSR_HOME["lng"]}
+    map_coords = {"lat": cafe.lat, "lng": cafe.lon}
 
     # Increment map counts
     count_map_loads(1)

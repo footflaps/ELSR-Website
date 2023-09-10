@@ -19,6 +19,7 @@ from core import db, app
 # -------------------------------------------------------------------------------------------------------------- #
 
 ESPRESSO_LIBRARY_INDEX = 1
+BEAN_THEORY_INDEX = 65
 OPEN_CAFE_ICON = "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
 CLOSED_CAFE_ICON = "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
 
