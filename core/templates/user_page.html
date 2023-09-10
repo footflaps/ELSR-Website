@@ -1065,6 +1065,8 @@
 			                {% elif user.has_unvalidated_phone_number() %}
 			                    <li>Mobile: '<strong>{{ user.phone_number }}</strong>' [unverified]</li>
 			                {% endif %}
+			                <li>Start date: '<strong>{{ user.start_date }}</strong>'</li>
+			                <li>Last login: '<strong>{{ user.last_login }}</strong>' from '<strong>{{ user.last_login_ip }}</strong>'</li>
 		                </ul>
 		                
 		                <hr>
