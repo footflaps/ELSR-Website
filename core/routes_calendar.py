@@ -97,7 +97,7 @@ def calendar():
             # Request socials from Socials class
             # ----------------------------------------------------------- #
             if Socials().all_socials_date(datestr):
-                markup += f"<a href='{url_for('social')}'>" \
+                markup += f"<a href='{url_for('social', date=f'{datestr}')}'>" \
                           f"<i class='fas fa-solid fa-champagne-glasses fa-bounce fa-2xl'></i></a>"
 
             # ----------------------------------------------------------- #
