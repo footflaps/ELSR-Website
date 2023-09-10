@@ -155,7 +155,7 @@ def home():
     # Increment map counts
     count_map_loads(1)
 
-    flash("ELSR has a new Meeting Place!")
+    flash("Now meeting at Bean Theory Cafe!")
 
     # Render home page
     return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,

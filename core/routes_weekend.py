@@ -312,7 +312,7 @@ def weekend():
     # Keep count of Google Map Loads
     count_map_loads(1)
 
-    flash("ELSR has a new Meeting Place!")
+    flash("Now meeting at Bean Theory Cafe!")
 
     return render_template("calendar_weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
