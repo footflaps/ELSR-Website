@@ -43,7 +43,7 @@ MASK_BLOCKED = 4
 MASK_READWRITE = 8
 
 # Default User Permissions on verification
-DEFAULT_PERMISSIONS = 0
+DEFAULT_PERMISSIONS_VALUE = 0
 
 # One day time out for email
 VERIFICATION_TIMEOUT_SECS = 60 * 60 * 24
@@ -66,6 +66,23 @@ UNVERIFIED_PHONE_PREFIX = "uv"
 
 # For soft deleting users, we change their name to
 DELETED_NAME = "DELETED"
+
+# Notifications
+NOTIFICATIONS_DEFAULT_VALUE = 0
+NOTIFICATIONS = [
+        {"name": "When I receive a message",
+         "mask": 2},
+        {"name": "When someone posts a Doppio ride",
+         "mask": 4},
+        {"name": "When someone posts an Espresso ride",
+         "mask": 8},
+        {"name": "When someone posts a Decaff ride",
+         "mask": 16},
+        {"name": "When someone posts a Mixed ride",
+         "mask": 32},
+        {"name": "When someone posts a social",
+         "mask": 64},
+]
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -129,6 +146,9 @@ class User(UserMixin, db.Model):
     # Phone number
     phone_number = db.Column(db.String(25), unique=False)
 
+    # Notifications
+    notifications = db.Column(db.Integer, unique=False)
+
     # ---------------------------------------------------------------------------------------------------------- #
     # User permissions
     # ---------------------------------------------------------------------------------------------------------- #
@@ -189,6 +209,22 @@ class User(UserMixin, db.Model):
         # Looks OK
         return True
 
+    def notification_choices(self):
+        # Handle unset as new column
+        if not self.notifications:
+            self.notifications = 0
+        # Return this
+        user_choices = []
+        # Loop through our set
+        for notification in NOTIFICATIONS:
+            name = notification['name']
+            mask = notification['mask']
+            user_choices.append({
+                "name": name,
+                "status": self.notifications & mask > 0
+            })
+        return user_choices
+
     # ---------------------------------------------------------------------------------------------------------- #
     # User functions
     # ---------------------------------------------------------------------------------------------------------- #
@@ -222,7 +258,8 @@ class User(UserMixin, db.Model):
         new_user.verification_code = random_code(NUM_DIGITS_CODES)
         new_user.verification_code_timestamp = time.time()
         new_user.start_date = date.today().strftime("%B %d, %Y")
-        new_user.permissions = 0
+        new_user.permissions = DEFAULT_PERMISSIONS_VALUE
+        new_user.notifications = NOTIFICATIONS_DEFAULT_VALUE
         app.logger.debug(f"db.create_user(): User '{new_user.email}' issued with code '{new_user.verification_code}'.")
 
         # Try and add to the dB
@@ -387,7 +424,7 @@ class User(UserMixin, db.Model):
             if int(code) == int(user.verification_code):
                 user.permissions = user.permissions \
                                    | MASK_VERIFIED \
-                                   | DEFAULT_PERMISSIONS
+                                   | DEFAULT_PERMISSIONS_VALUE
 
                 # Clear verification data, so it can't be used again
                 user.verification_code = int(0)
@@ -642,7 +679,7 @@ class User(UserMixin, db.Model):
                     return False
                 try:
                     if user.permissions & MASK_ADMIN == 1:
-                        user.permissions = DEFAULT_PERMISSIONS + MASK_VERIFIED
+                        user.permissions = DEFAULT_PERMISSIONS_VALUE + MASK_VERIFIED
                         db.session.commit()
                     return True
                 except Exception as e:
@@ -666,6 +703,20 @@ class User(UserMixin, db.Model):
             app.logger.error(f"dB.set_phone_number(): Called with invalid user_id = '{user_id}'.")
             return False
 
+    def set_notifications(self, user_id, choices):
+        user = db.session.query(User).filter_by(id=user_id).first()
+        if user:
+            try:
+                user.notifications = choices
+                db.session.commit()
+                return True
+            except Exception as e:
+                app.logger.error(f"dB.set_notifications(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                return False
+        else:
+            app.logger.error(f"dB.set_notifications(): Called with invalid user_id = '{user_id}'.")
+            return False
+
     def combo_str(self):
         return f"{self.name} ({self.id})"
 
@@ -679,6 +730,13 @@ class User(UserMixin, db.Model):
     # NB Names are not unique, but emails are, hence added in brackets
     def __repr__(self):
         return f'<User {self.name} ({self.email})>'
+
+
+
+
+user = User().find_user_from_id(1)
+print(user.notification_choices())
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #

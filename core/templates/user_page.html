@@ -254,119 +254,6 @@
 
 {% endif %}
 
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                   JavaScript for Google Maps (one or more cafes)                               -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if GOOGLE_MAPS_API_KEY %}
-
-	<script>
-		
-		(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-		    key: "{{ GOOGLE_MAPS_API_KEY }}",
-		    v: "weekly",
-		    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
-		    // Add other bootstrap parameters as needed, using camel case.
-	    });
-	
-		
-		
-		let map;
-		
-		async function initMap() {
-	        
-	        // Request needed libraries.
-	        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-	        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
-	        
-	        /* Define the map view */
-	        const map = new Map(document.getElementById("map"), {
-	            restriction: {
-	                latLngBounds: {{ MAP_BOUNDS | tojson }},
-	                strictBounds: false,
-	            },
-	            zoom: 9,
-	            center: { lat: {{ map_coords['lat'] }}, lng: {{ map_coords['lng'] }} },
-	            mapId: "7499929d658a3166",
-	        });
-	
-	        /* This is our set of cafes */
-			const cafes = {{ cafe_markers | tojson }}
-		    
-		    // Create an info window to share between markers.
-		    const infoWindow = new InfoWindow();
-						
-	        // Create the markers.
-	        cafes.forEach( ({ position, title, color }, i) => {
-	            const pin = new PinElement({
-	            glyph: `${i + 1}`,
-	            });
-	            
-	            const marker = new AdvancedMarkerElement({
-	                position,
-	                map,
-	                title: `${title}`,
-	                content: new PinElement({
-	                                background: color,
-	                                borderColor: "black",
-	                                glyphColor: "black",
-								}).element
-	            });
-	            
-	            // Add a click listener for each marker, and set up the info window.
-	            marker.addListener("click", ({ domEvent, latLng }) => {
-	                const { target } = domEvent;
-	                infoWindow.close();
-	                infoWindow.setContent(marker.title);
-	                infoWindow.open(marker.map, marker);
-	            });
-	        });
-		}
-		
-		initMap();
-	
-	</script>
-
-{% endif %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                       Map View of Cafes                                        -->
-<!---------------------------------------------------------------------------------------------------->
-	
-{% if cafes | count > 0: %}
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
-				
-				<!-- Shorter description on smaller screens -->
-				{% if mobile %}
-		            <h2 class="mb-4">Map of your cafes:</h2>
-				{% elif current_user.email == user.email %}
-					<h2 class="mb-4">Map view of your {{ cafes | count }} cafes:</h2>
-				{% else %}
-					<h2 class="mb-4">Map view of {{ user.name }}'s {{ cafes | count }} cafes:</h2>
-				{% endif %}
-				
-				<!---------------------------------------------------------------------------------------------------->
-				<!--                                      Insert Google Map                                         -->
-				<!---------------------------------------------------------------------------------------------------->
-				
-				<div id="map" style="height: 500px">
-					{% if not GOOGLE_MAPS_API_KEY %}
-						<img src="{{ url_for('static', filename='img/fake_map.jpg') }}">
-					{% endif %}
-				</div>
-				
-	            <!-- Break before next section -->
-				<hr>
-				
-			</div>
-		</div>
-	</div>
-{% endif %}
-	
 	
 <!---------------------------------------------------------------------------------------------------->
 <!--                                      List view of cafes                                        -->
@@ -866,7 +753,7 @@
 
 {% if current_user.admin() %}
 
-	<a name="eventLog" ></a>
+	<a name="eventLog"></a>
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
@@ -1079,6 +966,70 @@
 		    
 		                <hr>
 		    
+		                <!---------------------------------------------------------------------------------------->
+						<!--                                 Notifications                                      -->
+		                <!---------------------------------------------------------------------------------------->
+		                <a name="account"></a>
+		                <h4>Receive email notifications:</h4>
+		                <!-- This is our way of passing back the checkbox options -->
+		                <script>
+		                    let choices = 0;
+		                </script>
+		                
+		                {% for notification in notifications %}
+		                
+			                <div class="form-check">
+				                {% if notification.status %}
+							        <input class="form-check-input" type="checkbox" checked=""
+							               id="defaultCheck{{ loop.index }}" style="width: 20px; height: 20px; ">
+							        <!-- Set initial value -->
+				                    <script>
+		                                choices +=  2**{{ loop.index }};
+		                            </script>
+				                {% else %}
+				                    <input class="form-check-input" type="checkbox"
+							               id="defaultCheck{{ loop.index }}" style="width: 20px; height: 20px; ">
+				                {% endif %}
+							           
+							    <label class="form-check-label" for="defaultCheck{{ loop.index }}">
+							        &nbsp; {{ notification.name }}
+							    </label>
+							</div>
+		                
+		                {% endfor %}
+		                
+		                <!-- Update preferences -->
+		                <!-- Button starts disabled and gets enabled by JS when they change something -->
+                         <form id="updatelink" action="" method="post">
+	                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+	                         <input type="hidden" name="user_id" value="{{ user.id }}"/>
+				                <button disabled type="submit" class="btn btn-primary mt-3" id="updatechoices">
+				                    Update choices
+			                    </button>
+                         </form>
+					
+		                <!-- Each checkbox gets its own JS handler -->
+		                 <!-- Trap checkbox changes and 1) un-disable the button 2) update the value of choices -->
+		                <script>
+		                    {% for notification in notifications %}
+		                       $("#defaultCheck{{ loop.index }}").on("change", function(){
+						            // Enable the update button
+						            document.getElementById("updatechoices").disabled = false;
+						            // Update our choices value
+						            if (document.querySelector("#defaultCheck{{ loop.index }}").checked)
+						            {
+						                choices = choices + 2**{{ loop.index }}
+						            } else {
+						                choices = choices - 2**{{ loop.index }}
+						            };
+						            // Update the <a> to have a valid hyperlink and pass back the value of choices
+						            //document.getElementById("updatelink").href = `/?choices=${choices}`;
+						            document.getElementById("updatelink").action = `/set_notifications?choices=${choices}`;
+						       });
+						    {% endfor %}
+		                 </script>
+		                <hr>
+		                
 		                <!---------------------------------------------------------------------------------------->
 						<!--                                     2FA                                            -->
 						<!---------------------------------------------------------------------------------------->
@@ -1380,7 +1331,7 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <script>
-
+	
 	{% if anchor == 'messages' %}
 		
 		/* Open collapsed section */
@@ -1392,13 +1343,24 @@
         /* Jump to anchor */
         window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
 	    
-	{% elif anchor == 'eventLog'%}
+	{% elif anchor == 'eventLog' %}
 	
 		/* Open collapsed section */
 		$("#collapseEventList").collapse('show');
   
         /* Change button name */
         document.getElementById('show_events').innerHTML = 'HIDE';
+  
+		/* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	
+	{% elif anchor == 'account' %}
+	
+		/* Open collapsed section */
+		$("#collapseAccount").collapse('show');
+  
+        /* Change button name */
+        document.getElementById('show_account').innerHTML = 'HIDE';
   
 		/* Jump to anchor */
         window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"

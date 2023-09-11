@@ -822,37 +822,9 @@ def user_page():
     socials = Socials().all_by_email(user.email)
 
     # ----------------------------------------------------------- #
-    # Markers for Google Map of User's Cafes
+    # Notification preferences
     # ----------------------------------------------------------- #
-    cafe_markers = []
-    mean_lat = 0
-    mean_lon = 0
-    num_cafes = 0
-
-    for cafe in cafes:
-        if cafe.active:
-            colour = OPEN_CAFE_COLOUR
-        else:
-            colour = CLOSED_CAFE_COLOUR
-
-        cafe_marker = {
-            "position": {"lat": cafe.lat, "lng": cafe.lon},
-            "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-            "color": colour,
-        }
-        # Add to list
-        cafe_markers.append(cafe_marker)
-
-        # Need central position for map view
-        mean_lat += cafe.lat
-        mean_lon += cafe.lon
-        num_cafes += 1
-
-    # Map will launch centered here
-    if num_cafes > 0:
-        map_coords = {"lat": mean_lat/num_cafes, "lng": mean_lon/num_cafes}
-    else:
-        map_coords = {"lat": 0, "lng": 0}
+    notifications = user.notification_choices()
 
     # -------------------------------------------------------------------------------------------- #
     # Show user page
@@ -864,21 +836,28 @@ def user_page():
     if anchor == "messages":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
+                               rides=rides, socials=socials, notifications=notifications,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
                                anchor="messages")
+
+    elif anchor == "account":
+        return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
+                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
+                               rides=rides, socials=socials, notifications=notifications,
+                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
+                               anchor="account")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
+                               rides=rides, socials=socials, notifications=notifications,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
                                anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               cafe_markers=cafe_markers, map_coords=map_coords, rides=rides, socials=socials,
+                               rides=rides, socials=socials, notifications=notifications,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form)
 
 
@@ -1166,3 +1145,71 @@ def delete_user():
         Event().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
         flash("Sorry, something went wrong.")
         return redirect(url_for('user_page', user_id=user_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Update notification settings
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/set_notifications', methods=['POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def set_notifications():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    choices = request.args.get('choices', None)
+    try:
+        user_id = request.form['user_id']
+    except exceptions.BadRequestKeyError:
+        user_id = None
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not user_id:
+        app.logger.debug(f"set_notifications(): Missing user_id!")
+        Event().log_event("Set Notifications Fail", f"missing user id")
+        abort(400)
+    elif not choices:
+        app.logger.debug(f"set_notifications(): Missing choices!")
+        Event().log_event("Set Notifications Fail", f"Missing choices")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(user_id)
+    if not user:
+        app.logger.debug(f"set_notifications(): Invalid user user_id = '{user_id}'!")
+        Event().log_event("Set Notifications Fail", f"Invalid user user_id = '{user_id}'!")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    if int(current_user.id) != int(user_id) and \
+            not current_user.admin():
+        app.logger.debug(f"set_notifications(): User isn't allowed "
+                         f"current_user.id='{current_user.id}', user_id='{user_id}'.")
+        Event().log_event("Set Notifications Fail", f"User isn't allowed "
+                                                    f"current_user.id='{current_user.id}', user_id='{user_id}'.")
+        abort(403)
+
+    # ----------------------------------------------------------- #
+    # Update notification preferences
+    # ----------------------------------------------------------- #
+    if User().set_notifications(user_id, choices):
+        app.logger.debug(f"set_notifications(): Success, user '{user.email}' has set notifications = '{choices}'.")
+        Event().log_event("Set Notifications Success", f"User '{user.email}' has set notifications = '{choices}'.")
+        flash("Notifications have been updated!")
+    else:
+        # Should never get here, but...
+        app.logger.debug(f"dset_notifications():  user.set_notifications failed for user_id = '{user_id}'.")
+        Event().log_event("Set Notifications Fail", f" user.set_notifications failed for user_id = '{user_id}'.")
+        flash("Sorry, something went wrong.")
+
+    # Back to user page
+    return redirect(url_for('user_page', anchor="account", user_id=user_id))
+
