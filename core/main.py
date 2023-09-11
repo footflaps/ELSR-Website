@@ -22,7 +22,7 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
-from core.db_users import update_last_seen
+from core.db_users import User, update_last_seen
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
 from core.dB_events import Event
@@ -260,7 +260,13 @@ def about():
 @app.route("/gdpr", methods=['GET'])
 @update_last_seen
 def gdpr():
-    return render_template("main_gdpr.html", year=current_year)
+
+    # ----------------------------------------------------------- #
+    # List of all users (for admin page table)
+    # ----------------------------------------------------------- #
+    admins = User().all_admins()
+
+    return render_template("main_gdpr.html", year=current_year, admins=admins)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
