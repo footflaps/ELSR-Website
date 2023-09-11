@@ -399,7 +399,7 @@ def set_enable_maps():
 # -------------------------------------------------------------------------------------------------------------- #
 def set_disable_maps():
     # ----------------------------------------------------------- #
-    #   Write status to file
+    #   Set disabled
     # ----------------------------------------------------------- #
     filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_STATUS_FILENAME))
 
@@ -528,11 +528,15 @@ def count_map_loads(count: int):
 
     # Exceeded target for the day?
     if total_today > map_limit:
-        # Disable maps
-        app.logger.debug(f"count_map_loads(): Disabling maps as count is {total_today} / {map_limit}!")
-        Event().log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
-        set_disable_maps()
-
+        if maps_enabled:
+            # Disable maps
+            app.logger.debug(f"count_map_loads(): Disabling maps as count is {total_today} / {map_limit}!")
+            Event().log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
+            set_disable_maps()
+        else:
+            # Already disabled
+            app.logger.debug(f"count_map_loads(): Maps have already been disabled, "
+                             f"as count is {total_today} / {map_limit}!")
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Get current count

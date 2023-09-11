@@ -59,6 +59,18 @@ RESET_BODY = "Dear [USER], \n\n" \
              "The Admin Team\n\n" \
              "NB: Please do not reply to this email, the account is not monitored."
 
+MESSAGE_BODY = "Dear [USER], \n\n" \
+               "You have received a message from www.elsr.co.uk. \n\n" \
+               "The message is from '[FROM]'.\n\n" \
+               "The message is: \n\n" \
+               "'[BODY]' \n\n" \
+               "Thanks, \n\n" \
+               "The Admin Team\n\n" \
+               "NB: Please do not reply to this email, the account is not monitored.\n" \
+               "You received this email because you have subscribed to email notifications for messages.\n" \
+               "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
+               "One click unsubscribe from ALL link: [UNSUBSCRIBE]\n"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -68,6 +80,53 @@ RESET_BODY = "Dear [USER], \n\n" \
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Send email notification for message to user
+# -------------------------------------------------------------------------------------------------------------- #
+
+def send_message_notification_email(target_email, user_name, from_name, content, user_id):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    target_email = unidecode(target_email)
+    user_name = unidecode(user_name)
+    content = unidecode(content)
+
+    # ----------------------------------------------------------- #
+    # Create hyperlinks
+    # ----------------------------------------------------------- #
+    user_page = f"https://www.elsr.co.uk/user_page?user_id={user_id}&anchor=account"
+    one_click_unsubscribe = "TBD"
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
+        subject = "Message notification"
+        body = MESSAGE_BODY.replace("[USER]", user_name)
+        body = body.replace("[BODY]", content)
+        body = body.replace("[FROM]", from_name)
+        body = body.replace("[ACCOUNT_LINK]", user_page)
+        body = body.replace("[UNSUBSCRIBE]", one_click_unsubscribe)
+
+        try:
+            connection.sendmail(
+                from_addr=gmail_admin_acc_email,
+                to_addrs=target_email,
+                msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
+            )
+            app.logger.debug(f"Email(): sent message email to '{target_email}'")
+            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            return True
+        except Exception as e:
+            app.logger.debug(
+                f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+                                            f"error code was '{e.args}'.")
+            return False
+
+# send_message_notification_email("ben@freeman.net", "Ben Freeman", "Fred", "This is a test alert!", 1)
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send email verification code to new user
