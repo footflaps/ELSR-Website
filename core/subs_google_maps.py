@@ -528,7 +528,7 @@ def count_map_loads(count: int):
 
     # Exceeded target for the day?
     if total_today > map_limit:
-        if maps_enabled:
+        if maps_enabled():
             # Disable maps
             app.logger.debug(f"count_map_loads(): Disabling maps as count is {total_today} / {map_limit}!")
             Event().log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
