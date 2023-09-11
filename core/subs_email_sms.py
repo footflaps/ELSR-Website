@@ -1,12 +1,12 @@
 from flask import url_for
 import smtplib
 import os
-
 from requests.auth import HTTPBasicAuth
 from twilio.rest import Client
 from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX
 import requests
+from unidecode import unidecode
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -73,6 +73,15 @@ RESET_BODY = "Dear [USER], \n\n" \
 # Send email verification code to new user
 # -------------------------------------------------------------------------------------------------------------- #
 def send_verification_email(target_email, user_name, code):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    target_email = unidecode(target_email)
+    user_name = unidecode(user_name)
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = "Verification email."
@@ -100,6 +109,15 @@ def send_verification_email(target_email, user_name, code):
 # Sent reset password code to user
 # -------------------------------------------------------------------------------------------------------------- #
 def send_reset_email(target_email, user_name, code):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    target_email = unidecode(target_email)
+    user_name = unidecode(user_name)
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = "Password reset email."
@@ -127,6 +145,16 @@ def send_reset_email(target_email, user_name, code):
 # Forward message from contact form onto site owner (BRF)
 # -------------------------------------------------------------------------------------------------------------- #
 def contact_form_email(from_name, from_email, body):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    from_name = unidecode(from_name)
+    from_email = unidecode(from_email)
+    body = unidecode(body)
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = f"Message from elsr.co.uk from '{from_name}' ({from_email})"
@@ -151,6 +179,14 @@ def contact_form_email(from_name, from_email, body):
 # Internal system alerts to site owner (BRF)
 # -------------------------------------------------------------------------------------------------------------- #
 def send_system_alert_email(body):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    body = unidecode(body)
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = f"Alert from elsr.co.uk"
@@ -213,10 +249,18 @@ def send_sms_verif_code(user):
 # -------------------------------------------------------------------------------------------------------------- #
 # Generic send SMS
 # -------------------------------------------------------------------------------------------------------------- #
-def send_sms(user, message):
+def send_sms(user, body):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    body = unidecode(body)
+
+    # ----------------------------------------------------------- #
+    # Send SMS
+    # ----------------------------------------------------------- #
     client = Client(twilio_account_sid, twilio_auth_token)
     message = client.messages.create(
-        body=message,
+        body=body,
         from_=twilio_mobile_number,
         to=user.phone_number
     )
@@ -254,5 +298,4 @@ def get_twilio_balance():
     response = requests.get(url=url, auth=auth)
     response.raise_for_status()
     return [float(response.json()['balance']), response.json()['currency']]
-
 
