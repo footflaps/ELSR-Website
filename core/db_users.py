@@ -195,12 +195,12 @@ class User(UserMixin, db.Model):
 
     def all_users(self):
         with app.app_context():
-            users = db.session.query(User).all()
+            users = db.session.query(User).filter(User.name != DELETED_NAME).all()
             return users
 
     def all_users_sorted(self):
         with app.app_context():
-            users = db.session.query(User).order_by('name').all()
+            users = db.session.query(User).order_by('name').filter(User.name != DELETED_NAME).all()
             return users
 
     def all_admins(self):

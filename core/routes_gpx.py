@@ -16,7 +16,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_gpx import Gpx, UploadGPXForm, RenameGPXForm, AdminRenameGPXForm
+from core.dB_gpx import Gpx, UploadGPXForm, create_rename_gpx_form
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_cafes import Cafe
 from core.dB_events import Event
@@ -549,11 +549,7 @@ def edit_route():
     # ----------------------------------------------------------- #
     #   Form to help them rename the route
     # ----------------------------------------------------------- #
-    if current_user.admin():
-        # Admins can also change user
-        form = AdminRenameGPXForm()
-    else:
-        form = RenameGPXForm()
+    form = create_rename_gpx_form(current_user.admin())
 
     if form.validate_on_submit():
         # ----------------------------------------------------------- #

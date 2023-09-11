@@ -377,30 +377,27 @@ class UploadGPXForm(FlaskForm):
 # Edit route name form
 # -------------------------------------------------------------------------------------------------------------- #
 
-class RenameGPXForm(FlaskForm):
-    name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
 
-    submit = SubmitField("Rename")
+def create_rename_gpx_form(admin: bool):
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Admin Edit route name form
-# -------------------------------------------------------------------------------------------------------------- #
-
-class AdminRenameGPXForm(FlaskForm):
     # ----------------------------------------------------------- #
     # Generate the list of users
     # ----------------------------------------------------------- #
-
-    users = User().all_users()
+    users = User().all_users_sorted()
     all_users = []
     for user in users:
         all_users.append(f"{user.name} ({user.id})")
 
-    name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
-    owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[DataRequired()])
+    class Form(FlaskForm):
+        name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
 
-    submit = SubmitField("Rename")
+        # Admin can assign ownership
+        if admin:
+            owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[DataRequired()])
+
+        submit = SubmitField("Rename")
+
+    return Form()
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -410,6 +407,7 @@ class AdminRenameGPXForm(FlaskForm):
 def number_routes_passing_by(cafe_id, user):
     routes = Gpx().find_all_gpx_for_cafe(cafe_id, user)
     return len(routes)
+
 
 app.jinja_env.globals.update(number_routes_passing_by=number_routes_passing_by)
 
