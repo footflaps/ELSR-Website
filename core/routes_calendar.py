@@ -20,7 +20,7 @@ from core import app, current_year
 
 from core.db_users import update_last_seen, logout_barred_user
 from core.db_calendar import Calendar
-from core.db_social import Socials, CreateSocialForm, AdminCreateSocialForm, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
+from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
                            SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC
 from core.dB_events import Event
 from core.db_users import User
@@ -177,10 +177,7 @@ def add_social():
     # ----------------------------------------------------------- #
     # Need a form
     # ----------------------------------------------------------- #
-    if current_user.admin():
-        form = AdminCreateSocialForm()
-    else:
-        form = CreateSocialForm()
+    form = create_social_form(current_user.admin())
 
     if request.method == 'GET':
         if social:

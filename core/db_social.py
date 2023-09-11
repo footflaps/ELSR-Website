@@ -156,51 +156,41 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class CreateSocialForm(FlaskForm):
+def create_social_form(admin: bool):
 
-    # ----------------------------------------------------------- #
-    # The form itself
-    # ----------------------------------------------------------- #
-    date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
-    start_time = TimeField("Start time:", format="%H:%M")
-    organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
-    destination = StringField("Location (can be hidden):", validators=[InputRequired("Please enter a destination.")])
-    destination_hidden = SelectField("Social type:",
-                                     choices=["Validated Members Only", "Anyone on the internet"], validators=[])
-    details = CKEditorField("When, where, dress code etc (will be public):",
-                            validators=[InputRequired("Please provide some details.")])
+    class Form(FlaskForm):
 
-    cancel = SubmitField("Maybe not")
-    submit = SubmitField("Go for it!")
+        # ----------------------------------------------------------- #
+        # Generate the list of users
+        # ----------------------------------------------------------- #
 
+        users = User().all_users_sorted()
+        all_users = []
+        for user in users:
+            all_users.append(user.combo_str())
 
-class AdminCreateSocialForm(FlaskForm):
+        # ----------------------------------------------------------- #
+        # The form itself
+        # ----------------------------------------------------------- #
+        date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
+        start_time = TimeField("Start time:", format="%H:%M")
 
-    # ----------------------------------------------------------- #
-    # Generate the list of users
-    # ----------------------------------------------------------- #
+        # Admin can assign to any user
+        if admin:
+            owner = SelectField("Owner (Admin only field):", choices=all_users,
+                                validators=[InputRequired("Please enter an owner.")])
 
-    users = User().all_users()
-    all_users = []
-    for user in users:
-        all_users.append(user.combo_str())
+        organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
+        destination = StringField("Location (can be hidden):", validators=[InputRequired("Please enter a destination.")])
+        destination_hidden = SelectField("Social type:",
+                                         choices=[SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC], validators=[])
+        details = CKEditorField("When, where, dress code etc:",
+                                validators=[InputRequired("Please provide some details.")])
 
-    # ----------------------------------------------------------- #
-    # The form itself
-    # ----------------------------------------------------------- #
-    date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
-    start_time = TimeField("Start time:", format="%H:%M")
-    owner = SelectField("Owner (Admin only field):", choices=all_users,
-                        validators=[InputRequired("Please enter an owner.")])
-    organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
-    destination = StringField("Location (can be hidden):", validators=[InputRequired("Please enter a destination.")])
-    destination_hidden = SelectField("Social type:",
-                                     choices=[SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC], validators=[])
-    details = CKEditorField("When, where, dress code etc:",
-                            validators=[InputRequired("Please provide some details.")])
+        cancel = SubmitField("Maybe not")
+        submit = SubmitField("Go for it!")
 
-    cancel = SubmitField("Maybe not")
-    submit = SubmitField("Go for it!")
+    return Form()
 
 
 # -------------------------------------------------------------------------------------------------------------- #
