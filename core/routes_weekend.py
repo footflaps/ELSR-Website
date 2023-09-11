@@ -24,7 +24,7 @@ from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, CreateRideForm, AdminCreateRideForm, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START
+from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 
 
@@ -395,10 +395,7 @@ def add_ride():
             return redirect(url_for('weekend', date=start_date_str))
 
         # Select form based on Admin status
-        if current_user.admin():
-            form = AdminCreateRideForm()
-        else:
-            form = CreateRideForm()
+        form = create_ride_form(current_user.admin())
 
         # Date
         form.date.data = datetime.strptime(ride.date.strip(), '%d%m%Y')
@@ -436,10 +433,10 @@ def add_ride():
         # Add event, so start with fresh form
         # ----------------------------------------------------------- #
         if current_user.admin():
-            form = AdminCreateRideForm()
+            form = create_ride_form(True)
             form.owner.data = current_user.combo_str()
         else:
-            form = CreateRideForm()
+            form = create_ride_form(False)
 
         if request.method == 'GET':
             form.start.data = DEFAULT_START
@@ -450,11 +447,11 @@ def add_ride():
             form.date.data = start_date
 
         # Assume the author is the group leader
-        if not form.leader.data:
-            form.leader.data = current_user.name
+        form.leader.data = current_user.name
 
     # Are we posting the completed comment form?
-    if form.validate_on_submit():
+    if request.method == 'POST' \
+            and form.validate_on_submit():
         # ----------------------------------------------------------- #
         # Handle form passing validation
         # ----------------------------------------------------------- #
