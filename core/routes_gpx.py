@@ -556,6 +556,9 @@ def edit_route():
         # Handle form passing validation
         # ----------------------------------------------------------- #
 
+        # Detect change
+        change = False
+
         # Get new GPX name from the form
         new_name = form.name.data
         # Different?
@@ -566,6 +569,7 @@ def edit_route():
                 app.logger.debug(f"edit_route(): Successfully renamed GPX '{gpx.id}'.")
                 Event().log_event("Edit GPX Success", f"Successfully renamed GPX '{gpx_id}'.")
                 flash("GPX file has been renamed!")
+                change = True
             else:
                 # Should never get here, but...
                 app.logger.debug(f"edit_route(): Failed to rename GPX '{gpx.id}'.")
@@ -586,11 +590,15 @@ def edit_route():
                     Event().log_event("Edit GPX Success", f"Successfully changed ownership of "
                                                           f"GPX '{gpx.id}' to '{new_user.email}'.")
                     flash("GPX file has changed ownership!")
+                    change = True
                 else:
                     # Should never get here, but...
                     app.logger.debug(f"edit_route(): Failed to change ownership of GPX '{gpx.id}'.")
                     Event().log_event("Edit GPX Fail", f"Failed to change ownership GPX '{gpx_id}'.")
                     flash("Sorry, something went wrong!")
+
+        if not change:
+            flash("Name and owner unchanged.")
 
     elif request.method == 'POST':
         # ----------------------------------------------------------- #
