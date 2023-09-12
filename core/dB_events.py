@@ -256,3 +256,5 @@ app.jinja_env.globals.update(toandfro_event=toandfro_event)
 with app.app_context():
     events = db.session.query(Event).all()
     print(f"Found {len(events)} events in the dB")
+    app.logger.debug(f"Start of day: Found {len(events)} events in the dB")
+

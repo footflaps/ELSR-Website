@@ -209,3 +209,5 @@ def create_social_form(admin: bool):
 with app.app_context():
     rides = db.session.query(Socials).all()
     print(f"Found {len(rides)} socials in the dB")
+    app.logger.debug(f"Start of day: Found {len(rides)} socials in the dB")
+

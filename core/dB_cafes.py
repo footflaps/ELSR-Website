@@ -241,6 +241,7 @@ class CreateCafeForm(FlaskForm):
 with app.app_context():
     cafes = db.session.query(Cafe).all()
     print(f"Found {len(cafes)} cafes in the dB")
+    app.logger.debug(f"Start of day: Found {len(cafes)} cafes in the dB")
 
 
 # -------------------------------------------------------------------------------------------------------------- #

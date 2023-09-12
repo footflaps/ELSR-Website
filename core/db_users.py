@@ -949,6 +949,7 @@ class ChangeUserNameForm(FlaskForm):
 with app.app_context():
     users = db.session.query(User).all()
     print(f"Found {len(users)} users in the dB")
+    app.logger.debug(f"Start of day: Found {len(users)} users in the dB")
 
 
 # -------------------------------------------------------------------------------------------------------------- #

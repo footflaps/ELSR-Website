@@ -216,3 +216,5 @@ app.jinja_env.globals.update(admin_has_mail=admin_has_mail)
 with app.app_context():
     messages = db.session.query(Message).all()
     print(f"Found {len(messages)} messages in the dB")
+    app.logger.debug(f"Start of day: Found {len(messages)} messages in the dB")
+

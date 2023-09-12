@@ -419,3 +419,5 @@ app.jinja_env.globals.update(number_routes_passing_by=number_routes_passing_by)
 with app.app_context():
     gpxes = db.session.query(Gpx).all()
     print(f"Found {len(gpxes)} GPXes in the dB")
+    app.logger.debug(f"Start of day: Found {len(gpxes)} GPXes in the dB")
+

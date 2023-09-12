@@ -232,3 +232,5 @@ def create_ride_form(admin: bool):
 with app.app_context():
     rides = db.session.query(Calendar).all()
     print(f"Found {len(rides)} calendar entries in the dB")
+    app.logger.debug(f"Start of day: Found {len(rides)} calendar entries in the dB")
+

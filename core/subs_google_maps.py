@@ -352,10 +352,12 @@ def maps_enabled():
     # Better check file is there
     if not os.path.exists(filename):
         # Create it disabled just to be safe
+        app.logger.error(f"maps_enabled(): Missing file '{filename}'. Created new one.")
+        Event().log_event("maps_enabled()", f"Missing file '{filename}'. Created new one.")
         with open(filename, 'w') as file:
             file.write("False")
 
-    with open(filename) as file:
+    with open(filename, 'r') as file:
         text = file.readline().strip()
         map_status = text == "True"
 
@@ -372,10 +374,6 @@ def google_maps_api_key():
         # 'None' tells Jinja to show a jpg of a Google Map with a message saying
         # 'Live maps are temporally disabled'
         return None
-
-
-print(f"Maps Status = {maps_enabled()}")
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Enable maps
@@ -488,14 +486,12 @@ def count_map_loads(count: int):
 
     # Make sure file exists!
     if os.path.exists(filename):
-        # app.logger.debug(f"count_map_loads(): Found '{filename}'.")
         with open(filename, 'r') as file:
             lines = file.readlines()
     else:
-        # app.logger.debug(f"count_map_loads(): Couldn't find '{filename}'.")
+        app.logger.error(f"count_map_loads(): Missing file '{filename}'.")
+        Event().log_event("count_map_loads()", f"Missing file '{filename}'.")
         lines = []
-
-    print(f"lines = '{lines}'")
 
     # ----------------------------------------------------------- #
     #   Modify file to include count
@@ -544,6 +540,7 @@ def count_map_loads(count: int):
             app.logger.debug(f"count_map_loads(): Maps have already been disabled, "
                              f"as count is {total_today} / {map_limit}!")
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Get current count
 # -------------------------------------------------------------------------------------------------------------- #
@@ -566,6 +563,8 @@ def get_current_map_count():
         with open(filename, 'r') as file:
             lines = file.readlines()
     else:
+        app.logger.error(f"get_current_map_count(): Missing file '{filename}'.")
+        Event().log_event("get_current_map_count()", f"Missing file '{filename}'.")
         lines = []
 
     # ----------------------------------------------------------- #
@@ -587,3 +586,11 @@ def get_current_map_count():
     # Return today's count
     return total_today
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Start of day record in the logfile / console etc
+# -------------------------------------------------------------------------------------------------------------- #
+
+print(f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
+app.logger.debug(f"Start of day: Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
+Event().log_event("Start of day:", f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")

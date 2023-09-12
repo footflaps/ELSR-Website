@@ -122,3 +122,5 @@ app.jinja_env.globals.update(remove_html_tags=remove_html_tags)
 with app.app_context():
     comments = db.session.query(CafeComment).all()
     print(f"Found {len(comments)} comments in the dB")
+    app.logger.debug(f"Start of day: Found {len(comments)} comments in the dB")
+
