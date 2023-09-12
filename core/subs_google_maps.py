@@ -349,6 +349,12 @@ def maps_enabled():
     # ----------------------------------------------------------- #
     filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_STATUS_FILENAME))
 
+    # Better check file is there
+    if not os.path.exists(filename):
+        # Create it disabled just to be safe
+        with open(filename, 'w') as file:
+            file.write("False")
+
     with open(filename) as file:
         text = file.readline().strip()
         map_status = text == "True"
