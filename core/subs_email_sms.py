@@ -13,8 +13,9 @@ from unidecode import unidecode
 
 from core import app
 from core.dB_events import Event
-from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name
+from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS
 from core.db_messages import Message, ADMIN_EMAIL
+from core.db_calendar import Calendar, GROUP_CHOICES
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -72,6 +73,18 @@ MESSAGE_BODY = "Dear [USER], \n\n" \
                "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
                "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
 
+RIDE_BODY = "Dear [USER], \n\n" \
+            "A new [GROUP] ride has been posted to the Calendar for [DATE] by member [POSTER].\n" \
+            "Here are some useful links:\n\n" \
+            "See the calendar here: [CAL_LINK]\n" \
+            "Download the GPX file here: [DL_LINK]\n\n" \
+            "Thanks, \n\n" \
+            "The Admin Team\n\n" \
+            "NB: Please do not reply to this email, the account is not monitored.\n" \
+            "You received this email because you have subscribed to email notifications for [GROUP] rides.\n" \
+            "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
+            "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -82,10 +95,87 @@ MESSAGE_BODY = "Dear [USER], \n\n" \
 # -------------------------------------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Send ride notifications
+# -------------------------------------------------------------------------------------------------------------- #
+
+def send_ride_notification_emails(ride: Calendar()):
+    # ----------------------------------------------------------- #
+    # Scan all users
+    # ----------------------------------------------------------- #
+    for user in User().all_users():
+        for choice, notification in zip(GROUP_CHOICES, GROUP_NOTIFICATIONS):
+            if ride.group == choice and \
+                    user.notification_choice(notification):
+                # ----------------------------------------------------------- #
+                # Send email
+                # ----------------------------------------------------------- #
+                send_one_ride_notification_email(user, ride)
+
+
+def send_one_ride_notification_email(user: User(), ride: Calendar()):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    target_email = unidecode(user.email)
+    user_name = unidecode(user.name)
+    group = ride.group
+    date = ride.date
+    leader = unidecode(ride.leader)
+
+    # ----------------------------------------------------------- #
+    # Create hyperlinks
+    # ----------------------------------------------------------- #
+    cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
+    dl_link = f"https://www.elsr.co.uk/gpx_download/{ride.gpx_id}"
+    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
+    one_click_unsubscribe = "TBD"
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
+        subject = f"New {group} ride notification"
+        body = RIDE_BODY.replace("[USER]", user_name)
+        body = body.replace("[GROUP]", group)
+        body = body.replace("[DATE]", date)
+        body = body.replace("[POSTER]", leader)
+        body = body.replace("[CAL_LINK]", cal_link)
+        body = body.replace("[DL_LINK]", dl_link)
+        body = body.replace("[ACCOUNT_LINK]", user_page)
+        body = body.replace("[UNSUBSCRIBE]", one_click_unsubscribe)
+
+        try:
+            connection.sendmail(
+                from_addr=gmail_admin_acc_email,
+                to_addrs=target_email,
+                msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
+            )
+            app.logger.debug(f"Email(): sent message email to '{target_email}'")
+            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            return True
+        except Exception as e:
+            app.logger.debug(
+                f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+                                            f"error code was '{e.args}'.")
+            return False
+
+user = User().find_user_from_id(1)
+ride = Calendar().one_ride_id(1)
+send_one_ride_notification_email(user, ride)
+
+
+# for group in GROUP_CHOICES:
+#     ride = Calendar(group=group)
+#     print(f"Testing ride {ride.group}")
+#     send_ride_notification_emails(ride)
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Send email notification for message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_message_notification_email(message, user):
+def send_message_notification_email(message: Message(), user: User()):
     # ----------------------------------------------------------- #
     # Check user wants email alerts for messages
     # ----------------------------------------------------------- #
@@ -103,7 +193,6 @@ def send_message_notification_email(message, user):
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
-    # message = Message().find_messages_by_id(message_id)
     target_email = unidecode(user.email)
     user_name = unidecode(user.name)
     content = unidecode(message.body)

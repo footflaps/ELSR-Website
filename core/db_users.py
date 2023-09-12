@@ -69,21 +69,28 @@ DELETED_NAME = "DELETED"
 
 # Notifications
 NOTIFICATIONS_DEFAULT_VALUE = 0
-
 MESSAGE_NOTIFICATION = "When I receive a message"
+SOCIAL_NOTIFICATION = "When someone posts a social"
+
+# This set must match the order of GROUP_CHOICES in dB_calendar.py
+# GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed"]
+GROUP_NOTIFICATIONS = ["When someone posts a Decaff ride",
+                       "When someone posts an Espresso ride",
+                       "When someone posts a Doppio ride",
+                       "When someone posts a Mixed ride"]
 
 NOTIFICATIONS = [
         {"name": MESSAGE_NOTIFICATION,
          "mask": 2},
-        {"name": "When someone posts a Doppio ride",
+        {"name": GROUP_NOTIFICATIONS[2],
          "mask": 4},
-        {"name": "When someone posts an Espresso ride",
+        {"name": GROUP_NOTIFICATIONS[1],
          "mask": 8},
-        {"name": "When someone posts a Decaff ride",
+        {"name": GROUP_NOTIFICATIONS[0],
          "mask": 16},
-        {"name": "When someone posts a Mixed ride",
+        {"name": GROUP_NOTIFICATIONS[3],
          "mask": 32},
-        {"name": "When someone posts a social",
+        {"name": SOCIAL_NOTIFICATION,
          "mask": 64},
 ]
 

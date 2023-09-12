@@ -111,12 +111,12 @@ class Calendar(db.Model):
             try:
                 db.session.add(new_ride)
                 db.session.commit()
-                # Return new GPX id
-                return True
+                # Have to re-acquire the message to return it (else we get Detached Instance Error)
+                return db.session.query(Calendar).filter_by(id=new_ride.id).first()
             except Exception as e:
                 app.logger.error(f"db_calendar: Failed to add ride '{new_ride}', "
                                  f"error code '{e.args}'.")
-                return False
+                return None
 
     # Delete a ride by id
     def delete_ride(self, ride_id):

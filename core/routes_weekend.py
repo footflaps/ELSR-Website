@@ -5,6 +5,7 @@ from bbc_feeds import weather
 from datetime import datetime, timedelta
 import json
 import os
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -26,6 +27,7 @@ from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
 from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START
 from core.subs_gpx_edit import strip_excess_info_from_gpx
+from core.subs_email_sms import send_ride_notification_emails
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -631,7 +633,7 @@ def add_ride():
                 Event().log_event(f"Add ride Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
 
         # ----------------------------------------------------------- #
-        # We can now add / update the event
+        # We can now add / update the ride in the Calendar
         # ----------------------------------------------------------- #
         if ride:
             # Updating an existing ride
@@ -659,7 +661,6 @@ def add_ride():
         # Admin can allocate events to people
         if current_user.admin():
             # Get user
-            #user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
             user = User().user_from_combo_string(form.owner.data)
             if user:
                 new_ride.email = user.email
@@ -676,10 +677,12 @@ def add_ride():
             new_ride.email = current_user.email
 
         # Add to the dB
-        if Calendar().add_ride(new_ride):
+        new_ride = Calendar().add_ride(new_ride)
+        if new_ride:
             # Success
             app.logger.debug(f"add_ride(): Successfully added new ride.")
             Event().log_event("Add ride Pass", f"Successfully added new_ride.")
+            Thread(target=send_ride_notification_emails, args=(new_ride,)).start()
             if ride:
                 flash("Ride updated!")
             else:
