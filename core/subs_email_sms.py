@@ -100,12 +100,26 @@ RIDE_BODY = "Dear [USER], \n\n" \
 
 def send_ride_notification_emails(ride: Calendar()):
     # ----------------------------------------------------------- #
+    # Make sure ride exists
+    # ----------------------------------------------------------- #
+    if not ride:
+        app.logger.debug(f"send_ride_notification_emails(): Passed invalid ride object")
+        Event().log_event("send_ride_notification_emails() Fail", f"Passed invalid ride object")
+        return
+
+    # ----------------------------------------------------------- #
     # Scan all users
     # ----------------------------------------------------------- #
     for user in User().all_users():
+
+        # Match group, slightly complex as we use different strings in the ride object and the user object
+        # GROUP_CHOICES is the set used by Calendar() (of which ride in an instantiation)
+        # GROUP_NOTIFICATIONS is the set used by User()
         for choice, notification in zip(GROUP_CHOICES, GROUP_NOTIFICATIONS):
+            # Match both the ride and the user's email preference
             if ride.group == choice and \
                     user.notification_choice(notification):
+
                 # ----------------------------------------------------------- #
                 # Send email
                 # ----------------------------------------------------------- #
@@ -113,6 +127,18 @@ def send_ride_notification_emails(ride: Calendar()):
 
 
 def send_one_ride_notification_email(user: User(), ride: Calendar()):
+    # ----------------------------------------------------------- #
+    # Make sure user and ride exist
+    # ----------------------------------------------------------- #
+    if not user:
+        app.logger.debug(f"send_one_ride_notification_email(): Passed invalid user object")
+        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid user object")
+        return
+    if not ride:
+        app.logger.debug(f"send_one_ride_notification_email(): Passed invalid ride object")
+        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid ride object")
+        return
+
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
@@ -176,6 +202,18 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def send_message_notification_email(message: Message(), user: User()):
+    # ----------------------------------------------------------- #
+    # Make sure user and message exist
+    # ----------------------------------------------------------- #
+    if not user:
+        app.logger.debug(f"send_message_notification_email(): Passed invalid user object")
+        Event().log_event("send_message_notification_email() Fail", f"Passed invalid user object")
+        return
+    if not message:
+        app.logger.debug(f"send_message_notification_email(): Passed invalid message object")
+        Event().log_event("send_message_notification_email() Fail", f"Passed invalid message object")
+        return
+
     # ----------------------------------------------------------- #
     # Check user wants email alerts for messages
     # ----------------------------------------------------------- #
