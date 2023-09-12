@@ -161,9 +161,9 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
                                             f"error code was '{e.args}'.")
             return False
 
-user = User().find_user_from_id(1)
-ride = Calendar().one_ride_id(1)
-send_one_ride_notification_email(user, ride)
+# user = User().find_user_from_id(1)
+# ride = Calendar().one_ride_id(1)
+# send_one_ride_notification_email(user, ride)
 
 
 # for group in GROUP_CHOICES:
