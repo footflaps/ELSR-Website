@@ -62,43 +62,46 @@ def check_new_cafe_with_all_gpxes(cafe):
         # Use absolute path for filename
         filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
-        # Open the file
-        with open(filename, 'r') as file_ref:
-            gpx_file = gpxpy.parse(file_ref)
+        # Check GPX file actually exists
+        if os.path.exists(filename):
 
-            # Max distance
-            min_km = 100
-            dist_km = 0
-            min_km_dist = 100
+            # Open the file
+            with open(filename, 'r') as file_ref:
+                gpx_file = gpxpy.parse(file_ref)
 
-            for track in gpx_file.tracks:
-                for segment in track.segments:
+                # Max distance
+                min_km = 100
+                dist_km = 0
+                min_km_dist = 100
 
-                    last_lat = segment.points[0].latitude
-                    last_lon = segment.points[0].longitude
+                for track in gpx_file.tracks:
+                    for segment in track.segments:
 
-                    for point in segment.points:
+                        last_lat = segment.points[0].latitude
+                        last_lon = segment.points[0].longitude
 
-                        # How far along the route we are
-                        dist_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+                        for point in segment.points:
 
-                        # How far is the cafe from the GPX file
-                        range_km = mpu.haversine_distance((cafe.lat, cafe.lon), (point.latitude, point.longitude))
+                            # How far along the route we are
+                            dist_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
 
-                        if range_km < min_km:
-                            min_km = range_km
-                            min_km_dist = dist_km
+                            # How far is the cafe from the GPX file
+                            range_km = mpu.haversine_distance((cafe.lat, cafe.lon), (point.latitude, point.longitude))
 
-                        last_lat = point.latitude
-                        last_lon = point.longitude
+                            if range_km < min_km:
+                                min_km = range_km
+                                min_km_dist = dist_km
 
-        # Close enough?
-        if min_km <= MIN_DIST_TO_CAFE_KM:
-            app.logger.debug(f"-- Closest to cafe {cafe.name} was {round(min_km, 1)} km"
-                             f" at {round(min_km_dist, 1)} km along the route. Total length was {round(dist_km, 1)} km")
-            Gpx().update_cafe_list(gpx.id, cafe.id, round(min_km, 1), round(min_km_dist, 1))
-        else:
-            Gpx().remove_cafe_list(gpx.id, cafe.id)
+                            last_lat = point.latitude
+                            last_lon = point.longitude
+
+            # Close enough?
+            if min_km <= MIN_DIST_TO_CAFE_KM:
+                app.logger.debug(f"-- Closest to cafe {cafe.name} was {round(min_km, 1)} km"
+                                 f" at {round(min_km_dist, 1)} km along the route. Total length was {round(dist_km, 1)} km")
+                Gpx().update_cafe_list(gpx.id, cafe.id, round(min_km, 1), round(min_km_dist, 1))
+            else:
+                Gpx().remove_cafe_list(gpx.id, cafe.id)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -136,43 +139,47 @@ def check_new_gpx_with_all_cafes(gpx_id):
     # Use absolute path for filename
     filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
 
-    with open(filename, 'r') as file_ref:
+    # Check GPX file actually exists
+    if os.path.exists(filename):
 
-        gpx_file = gpxpy.parse(file_ref)
+        # Open and parse the file
+        with open(filename, 'r') as file_ref:
 
-        for track in gpx_file.tracks:
-            for segment in track.segments:
+            gpx_file = gpxpy.parse(file_ref)
 
-                last_lat = segment.points[0].latitude
-                last_lon = segment.points[0].longitude
-                dist_along_route_km = 0
+            for track in gpx_file.tracks:
+                for segment in track.segments:
 
-                for point in segment.points:
+                    last_lat = segment.points[0].latitude
+                    last_lon = segment.points[0].longitude
+                    dist_along_route_km = 0
 
-                    # How far along the route we are
-                    dist_along_route_km += mpu.haversine_distance((last_lat, last_lon),
-                                                                  (point.latitude, point.longitude))
+                    for point in segment.points:
 
-                    for cafe in cafes:
+                        # How far along the route we are
+                        dist_along_route_km += mpu.haversine_distance((last_lat, last_lon),
+                                                                      (point.latitude, point.longitude))
 
-                        # How far is the cafe from the GPX file
-                        dist_to_cafe_km = mpu.haversine_distance((cafe.lat, cafe.lon),
-                                                                 (point.latitude, point.longitude))
+                        for cafe in cafes:
 
-                        if dist_to_cafe_km < min_distance_km[cafe.id - 1]:
-                            min_distance_km[cafe.id - 1] = dist_to_cafe_km
-                            min_distance_path_km[cafe.id - 1] = dist_along_route_km
+                            # How far is the cafe from the GPX file
+                            dist_to_cafe_km = mpu.haversine_distance((cafe.lat, cafe.lon),
+                                                                     (point.latitude, point.longitude))
 
-                    last_lat = point.latitude
-                    last_lon = point.longitude
+                            if dist_to_cafe_km < min_distance_km[cafe.id - 1]:
+                                min_distance_km[cafe.id - 1] = dist_to_cafe_km
+                                min_distance_path_km[cafe.id - 1] = dist_along_route_km
 
-        # ----------------------------------------------------------- #
-        # Summarise what we found
-        # ----------------------------------------------------------- #
-        for cafe in cafes:
-            if min_distance_km[cafe.id - 1] <= MIN_DIST_TO_CAFE_KM:
-                app.logger.debug(f"-- Route passes within {round(min_distance_km[cafe.id - 1], 1)} km of {cafe.name} "
-                                 f"after {round(min_distance_path_km[cafe.id - 1], 1)} km.")
-                # Push update to GPX file
-                Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
-                                       min_distance_path_km[cafe.id - 1])
+                        last_lat = point.latitude
+                        last_lon = point.longitude
+
+            # ----------------------------------------------------------- #
+            # Summarise what we found
+            # ----------------------------------------------------------- #
+            for cafe in cafes:
+                if min_distance_km[cafe.id - 1] <= MIN_DIST_TO_CAFE_KM:
+                    app.logger.debug(f"-- Route passes within {round(min_distance_km[cafe.id - 1], 1)} km of {cafe.name} "
+                                     f"after {round(min_distance_path_km[cafe.id - 1], 1)} km.")
+                    # Push update to GPX file
+                    Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
+                                           min_distance_path_km[cafe.id - 1])
