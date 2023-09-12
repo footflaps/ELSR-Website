@@ -26,7 +26,7 @@ from core.subs_google_maps import polyline_json, markers_for_cafes_native, start
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
 from core.db_messages import Message, ADMIN_EMAIL
-from core.subs_email_sms import alert_admin_via_sms
+from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -1019,6 +1019,7 @@ def flag_gpx():
 
     if Message().add_message(message):
         # Success
+        send_message_notification_email(message, current_user)
         app.logger.debug(f"flag_gpx(): Flagged GPX, gpx_id = '{gpx_id}'.")
         Event().log_event("Flag GPX Success", f"Flagged GPX, gpx_id = '{gpx_id}', reason = '{reason}'.")
         flash("Your message has been forwarded to an admin.")

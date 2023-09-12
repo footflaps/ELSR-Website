@@ -3,8 +3,6 @@ import smtplib
 import os
 from requests.auth import HTTPBasicAuth
 from twilio.rest import Client
-from core.dB_events import Event
-from core.db_users import User, UNVERIFIED_PHONE_PREFIX
 import requests
 from unidecode import unidecode
 
@@ -14,6 +12,9 @@ from unidecode import unidecode
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app
+from core.dB_events import Event
+from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name
+from core.db_messages import Message, ADMIN_EMAIL
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -69,7 +70,7 @@ MESSAGE_BODY = "Dear [USER], \n\n" \
                "NB: Please do not reply to this email, the account is not monitored.\n" \
                "You received this email because you have subscribed to email notifications for messages.\n" \
                "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
-               "One click unsubscribe from ALL link: [UNSUBSCRIBE]\n"
+               "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -84,18 +85,37 @@ MESSAGE_BODY = "Dear [USER], \n\n" \
 # Send email notification for message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_message_notification_email(target_email, user_name, from_name, content, user_id):
+def send_message_notification_email(message, user):
+    # ----------------------------------------------------------- #
+    # Check user wants email alerts for messages
+    # ----------------------------------------------------------- #
+    if user == ADMIN_EMAIL:
+        # Send email to admins not really supported
+        print(f"Message to admins.... TBC")
+        return
+    elif not user.notification_choice(MESSAGE_NOTIFICATION):
+        # Nope, so just return
+        print(f"User '{user.email}' doesn't want email alerts for messages.")
+        return
+    else:
+        print(f"User '{user.email}' does want email alerts for messages.")
+
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
-    target_email = unidecode(target_email)
-    user_name = unidecode(user_name)
-    content = unidecode(content)
+    # message = Message().find_messages_by_id(message_id)
+    target_email = unidecode(user.email)
+    user_name = unidecode(user.name)
+    content = unidecode(message.body)
+    if message.from_email == ADMIN_EMAIL:
+        from_name = "The Admin Team"
+    else:
+        from_name = unidecode(get_user_name(message.from_email))
 
     # ----------------------------------------------------------- #
     # Create hyperlinks
     # ----------------------------------------------------------- #
-    user_page = f"https://www.elsr.co.uk/user_page?user_id={user_id}&anchor=account"
+    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
     one_click_unsubscribe = "TBD"
 
     # ----------------------------------------------------------- #
@@ -103,7 +123,7 @@ def send_message_notification_email(target_email, user_name, from_name, content,
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = "Message notification"
+        subject = f"Message notification from {from_name}"
         body = MESSAGE_BODY.replace("[USER]", user_name)
         body = body.replace("[BODY]", content)
         body = body.replace("[FROM]", from_name)
@@ -126,7 +146,17 @@ def send_message_notification_email(target_email, user_name, from_name, content,
                                             f"error code was '{e.args}'.")
             return False
 
-# send_message_notification_email("ben@freeman.net", "Ben Freeman", "Fred", "This is a test alert!", 1)
+
+# user = User().find_user_from_id(1)
+# print(f"user.notifications = '{user.notifications}'")
+# message = Message(
+#     from_email=ADMIN_EMAIL,
+#     to_email="ben@freeman.net",
+#     body=f"Hi Ben. from fred"
+# )
+# send_message_notification_email(message, user)
+
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send email verification code to new user

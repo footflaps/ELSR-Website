@@ -824,7 +824,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Notification preferences
     # ----------------------------------------------------------- #
-    notifications = user.notification_choices()
+    notifications = user.notification_choices_set()
 
     # -------------------------------------------------------------------------------------------- #
     # Show user page

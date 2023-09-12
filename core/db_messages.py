@@ -107,13 +107,14 @@ class Message(db.Model):
         message.status = NEW_MESSAGE_STATUS
         with app.app_context():
             try:
+                # Update db
                 db.session.add(message)
                 db.session.commit()
-                # Return success
-                return True
+                # Have to re-acquire the message to return it (else we get Detached Instance Error)
+                return db.session.query(Message).filter_by(id=message.id).first()
             except Exception as e:
                 app.logger.error(f"dB.add_message(): Failed with error code '{e.args}'.")
-                return False
+                return None
 
     def send_welcome_message(self, target_email):
         message = Message(

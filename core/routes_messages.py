@@ -18,7 +18,7 @@ from core import app
 from core.db_users import User, admin_only, update_last_seen, logout_barred_user
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.subs_email_sms import alert_admin_via_sms
+from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -412,9 +412,12 @@ def message_admin():
         to_email=ADMIN_EMAIL,
         body=body
     )
-
-    if Message().add_message(message):
-        # Success!
+    # Send it
+    message = Message().add_message(message)
+    # Either get back the message or None
+    if message:
+        # Success
+        Thread(target=send_message_notification_email, args=(message, ADMIN_EMAIL,)).start()
         app.logger.debug(f"message_admin(): User '{user.email}' has sent message = '{body}'")
         Event().log_event("Message Admin Success", f"Message was sent successfully.")
         flash("Your message has been forwarded to the Admin Team")
@@ -484,8 +487,12 @@ def message_user():
         to_email=user.email,
         body=body
     )
-
-    if Message().add_message(message):
+    # Send it
+    message = Message().add_message(message)
+    # Either get back the message or None
+    if message:
+        # Success
+        Thread(target=send_message_notification_email, args=(message, user,)).start()
         app.logger.debug(f"message_user(): Admin has sent message to '{user.name}', body = '{body}'.")
         Event().log_event("Message User Success", f"Message was sent successfully to '{user.email}'.")
         flash(f"Your message has been forwarded to {user.name}")

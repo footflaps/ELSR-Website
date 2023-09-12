@@ -69,8 +69,11 @@ DELETED_NAME = "DELETED"
 
 # Notifications
 NOTIFICATIONS_DEFAULT_VALUE = 0
+
+MESSAGE_NOTIFICATION = "When I receive a message"
+
 NOTIFICATIONS = [
-        {"name": "When I receive a message",
+        {"name": MESSAGE_NOTIFICATION,
          "mask": 2},
         {"name": "When someone posts a Doppio ride",
          "mask": 4},
@@ -209,7 +212,7 @@ class User(UserMixin, db.Model):
         # Looks OK
         return True
 
-    def notification_choices(self):
+    def notification_choices_set(self):
         # Handle unset as new column
         if not self.notifications:
             self.notifications = 0
@@ -224,6 +227,18 @@ class User(UserMixin, db.Model):
                 "status": self.notifications & mask > 0
             })
         return user_choices
+
+    def notification_choice(self, chosen_name):
+        # Handle unset as new column
+        if not self.notifications:
+            self.notifications = 0
+        # Loop through our set
+        for notification in NOTIFICATIONS:
+            name = notification['name']
+            mask = notification['mask']
+            if name == chosen_name:
+                return self.notifications & mask
+        return False
 
     # ---------------------------------------------------------------------------------------------------------- #
     # User functions
@@ -732,11 +747,8 @@ class User(UserMixin, db.Model):
         return f'<User {self.name} ({self.email})>'
 
 
-
-
-user = User().find_user_from_id(1)
-print(user.notification_choices())
-
+# user = User().find_user_from_id(1)
+# print(user.notification_choices_set())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -26,7 +26,7 @@ from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
-from core.subs_email_sms import alert_admin_via_sms
+from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 from core.subs_cafe_photos import update_cafe_photo
 
 
@@ -754,9 +754,12 @@ def flag_cafe():
         to_email=ADMIN_EMAIL,
         body=f"Cafe Objection to '{cafe.name}' (id={cafe.id}). Reason: {reason}"
     )
-
-    if Message().add_message(message):
+    # Send it
+    message = Message().add_message(message)
+    # Either get back the message or None
+    if message:
         # Success
+        Thread(target=send_message_notification_email, args=(message, ADMIN_EMAIL,)).start()
         app.logger.debug(f"flag_cafe(): Flagged cafe, cafe_id = '{cafe_id}'.")
         Event().log_event("Flag Cafe Success", f"Flagged cafe, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Your message has been forwarded to an admin.")

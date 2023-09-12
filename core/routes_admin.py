@@ -4,6 +4,7 @@ from werkzeug import exceptions
 from datetime import datetime
 import os
 import subprocess
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -18,11 +19,11 @@ from core import app, current_year, is_mobile
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID
-from core.db_messages import Message, ADMIN_EMAIL
+from core.db_messages import Message, ADMIN_EMAIL, READONLY_MESSAGE, READWRITE_MESSAGE, WELCOME_MESSAGE
 from core.dB_events import Event
 from core.db_calendar import Calendar
 from core.db_social import Socials, SOCIAL_DB_PRIVATE
-from core.subs_email_sms import send_sms, get_twilio_balance
+from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notification_email
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, get_current_map_count, \
                                   boost_map_limit, map_limit_by_day
 
@@ -737,7 +738,8 @@ def user_readwrite():
         app.logger.debug(f"user_readwrite(): Success, user can now write, user.email = '{user.email}'.")
         Event().log_event("ReadWrite Success", f"User can now write, user.email = '{user.email}'.")
         flash(f"User '{user.name}' now has Write permissions.")
-        Message().send_readwrite_message(user.email)
+        message = Message().send_readwrite_message(user.email)
+        Thread(target=send_message_notification_email, args=(message, user,)).start()
         return redirect(url_for('user_page', user_id=user_id))
     else:
         # Should never get here, but...
@@ -829,7 +831,8 @@ def user_readonly():
         app.logger.debug(f"user_readonly(): Success, user is Readonly, user.email = '{user.email}'.")
         Event().log_event("ReadOnly Success", f"User is Readonly, user.email = '{user.email}'.")
         flash(f"User '{user.name}' is now Read ONLY.")
-        Message().send_readonly_message(user.email)
+        message = Message().send_readonly_message(user.email)
+        Thread(target=send_message_notification_email, args=(message, user,)).start()
         return redirect(url_for('user_page', user_id=user_id))
     else:
         # Should never get here, but...
