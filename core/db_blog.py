@@ -102,7 +102,7 @@ class Blog(db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
     def all(self):
         with app.app_context():
-            blogs = db.session.query(Blog).order_by('date_unix').all()
+            blogs = db.session.query(Blog).order_by(Blog.date_unix.desc()).all()
             return blogs
 
     def find_blog_from_id(self, blog_id):
