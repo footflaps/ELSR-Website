@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/news-bg.jpg')}}')">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>ELSR Blog</h1>
+					<span class="subheading">Random goings on...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if not blogs %}
+
+	<!-- Billy no mates -->
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<p>
+					How sad, it looks like we don't have any blog posts yet....
+				</p>
+				
+			</div>
+		</div>
+	
+		<!-- Add a blog post -->
+		{% if current_user.is_authenticated %}
+			{% if current_user.readwrite() %}
+				<!-- Button to expose hidden options -->
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						<a href="{{ url_for('add_blog') }}" class="btn btn-primary float-right" role="button">
+			                  Add Post
+			            </a>
+					</div>
+				</div>
+			{% endif %}
+		{% endif %}
+
+		<!-- Separator before footer -->
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<hr>
+			</div>
+		</div>
+		
+	</div>
+
+{% else %}
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                      Stickies first                                            -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	{% for blog in blogs %}
+		{% if blog.sticky %}
+	
+			<div class="container">
+				
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						<h2 class="float-left">
+							{{ blog.title }}
+							{% if blog.sticky %}
+							    &nbsp; <i class="fa-solid fa-thumbtack  fas-xl"></i>
+							{% endif %}
+							{% if blog.private %}
+								 &nbsp; <i class="fa-solid fa-lock fas-xl"></i>
+							{% endif %}
+						</h2>
+						<h2 class="float-right">{{ blog.category }}</h2>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						<img class="float-left" src="{{ blog.email | gravatar }}"
+							 width="40" style="border-radius: 50%;"/>
+						<h4 class="float-left mt-2"> &nbsp; {{ get_user_name(blog.email) }}</h4>
+						<h4 class="float-right mt-2">{{ blog.date }}</h4>
+					</div>
+				</div>
+				
+				<!-- Add image -->
+				{% if blog.filenames %}
+					<div class="row mt-3">
+						<div class="col-lg-8 col-md-10 mx-auto">
+							<img src="{{ url_for('static', filename=blog.filenames[0]) }}"
+							     style="width: 100%; border: 4px solid #000;">
+							
+						</div>
+					</div>
+				{% endif %}
+				
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						{{ blog.details | safe }}
+						
+						<hr>
+					</div>
+				</div>
+
+			</div>
+
+		{% endif %}
+	{% endfor %}
+
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                      Non sticky next                                           -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	{% for blog in blogs %}
+		{% if not blog.sticky %}
+	
+			<div class="container">
+				
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						<h2 class="float-left">
+							{{ blog.title }}
+							{% if blog.sticky %}
+							    &nbsp; <i class="fa-solid fa-thumbtack  fas-xl"></i>
+							{% endif %}
+							{% if blog.private %}
+								 &nbsp; <i class="fa-solid fa-lock fas-xl"></i>
+							{% endif %}
+						</h2>
+						<h2 class="float-right">{{ blog.category }}</h2>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						<img class="float-left" src="{{ blog.email | gravatar }}"
+							 width="40" style="border-radius: 50%;"/>
+						<h4 class="float-left mt-2"> &nbsp; {{ get_user_name(blog.email) }}</h4>
+						<h4 class="float-right mt-2">{{ blog.date }}</h4>
+					</div>
+				</div>
+				
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						{{ blog.details | safe }}
+						
+						<hr>
+					</div>
+				</div>
+
+			</div>
+
+		{% endif %}
+	{% endfor %}
+
+{% endif %}
+
+
+
+{% endblock %}

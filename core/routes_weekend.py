@@ -363,7 +363,7 @@ def add_ride():
         ride = None
 
     # ----------------------------------------------------------- #
-    # Need the form
+    # Work out what we're doing (Add / Edit)
     # ----------------------------------------------------------- #
     if ride_id \
             and request.method == 'GET':

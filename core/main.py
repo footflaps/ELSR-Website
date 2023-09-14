@@ -43,6 +43,7 @@ from core.routes_messages import mark_read
 from core.routes_events import delete_event
 from core.routes_weekend import weekend
 from core.routes_calendar import calendar
+from core.routes_blog import blog
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -253,6 +254,7 @@ def about():
     return render_template("main_about.html", year=current_year)
 
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # GDPR
 # -------------------------------------------------------------------------------------------------------------- #
@@ -262,7 +264,7 @@ def about():
 def gdpr():
 
     # ----------------------------------------------------------- #
-    # List of all users (for admin page table)
+    # List of all admins
     # ----------------------------------------------------------- #
     admins = User().all_admins()
 
@@ -512,7 +514,7 @@ def internal_server_error(e):
     return render_template("500.html", e=e), 500
 
 
-# Have to register 500 with app to over rule the default built in 500 page
+# Have to register 500 with app to overrule the default built in 500 page
 app.register_error_handler(500, internal_server_error)
 
 
@@ -523,7 +525,6 @@ app.register_error_handler(500, internal_server_error)
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
-
 
 if __name__ == "__main__":
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):

@@ -14,7 +14,7 @@ import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
 
 
-# We have our own hacked Gravatar
+# We have our own hacked Gravatar module
 from core.gravatar_hack import Gravatar
 
 
@@ -115,7 +115,9 @@ app.config['SQLALCHEMY_BINDS'] = {'users': 'sqlite:///users.db',
                                   'messages': 'sqlite:///messages.db',
                                   'events': 'sqlite:///events.db',
                                   'calendar': 'sqlite:///calendar.db',
-                                  'socials': 'sqlite:///socials.db'}
+                                  'socials': 'sqlite:///socials.db',
+                                  'blog': 'sqlite:///blog.db'}
+
 db = SQLAlchemy(app)
 
 
