@@ -138,23 +138,23 @@ def static_from_root():
 @update_last_seen
 def home():
     # -------------------------------------------------------------------------------------------- #
-    # Show Temporary Meeting Point
+    # Show Current Meeting Place
     # -------------------------------------------------------------------------------------------- #
 
+    # Get the cafe
     cafe = Cafe().one_cafe(BEAN_THEORY_INDEX)
 
+    # Create a GM marker
     cafe_marker = [{
         "position": {"lat": cafe.lat, "lng": cafe.lon},
         "title": f'<a href="{ url_for("cafe_details", cafe_id=BEAN_THEORY_INDEX) }">{cafe.name}</a>',
         "color": OPEN_CAFE_COLOUR,
     }]
 
-    # Map will launch centered here
-    map_coords = {"lat": cafe.lat, "lng": cafe.lon}
-
     # Increment map counts
     count_map_loads(1)
 
+    # Temporary alert for change of meeting point
     flash("Now meeting at Bean Theory Cafe!")
 
     # Render home page
