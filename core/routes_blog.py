@@ -1,13 +1,7 @@
-from flask import render_template, request, flash, abort, send_from_directory, redirect, url_for
+from flask import render_template, request, flash, abort, redirect, url_for
 from flask_login import login_required, current_user
-from flask_wtf import FlaskForm
-from flask_wtf.csrf import CSRFError
-from wtforms import StringField, EmailField, SubmitField
-from wtforms.validators import InputRequired
-from flask_ckeditor import CKEditorField
-from threading import Thread
+from werkzeug import exceptions
 import os
-import requests
 from datetime import date, datetime, timedelta
 
 
@@ -299,5 +293,83 @@ def delete_blog():
     # Did we get passed a blog_id?
     # ----------------------------------------------------------- #
     blog_id = request.args.get('blog_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Must have parameters
+    # ----------------------------------------------------------- #
+    if not blog_id:
+        app.logger.debug(f"delete_blog(): Missing blog_id!")
+        Event().log_event("Delete Blog Fail", f"Missing blog_id!")
+        return abort(400)
+    if not password:
+        app.logger.debug(f"delete_blog(): Missing Password!")
+        Event().log_event("Delete Blog Fail", f"Missing Password!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Validate blog_id
+    # ----------------------------------------------------------- #
+    blog = Blog().find_blog_from_id(blog_id)
+    if not blog:
+        app.logger.debug(f"delete_blog(): Failed to locate blog, blog_id = '{blog_id}'.")
+        Event().log_event("Delete Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Must be admin or the current author
+    if current_user.email != blog.email \
+            and not current_user.admin() or \
+            not current_user.readwrite():
+        # Failed authentication
+        app.logger.debug(f"delete_blog(): Refusing permission for '{current_user.email}' and "
+                         f"blog_id = '{blog_id}'.")
+        Event().log_event("Delete Blog Fail", f"Refusing permission for '{current_user.email}', "
+                                                 f"blog_id = '{blog_id}'.")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    #  Validate password
+    # ----------------------------------------------------------- #
+    # Need current user
+    user = User().find_user_from_id(current_user.id)
+
+    # Validate against current_user's password
+    if not user.validate_password(user, password, user_ip):
+        app.logger.debug(f"delete_blog(): Delete failed, incorrect password for user_id = '{user.id}'!")
+        Event().log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
+        flash(f"Incorrect password for user {user.name}!")
+        # Go back to socials page
+        return redirect(url_for('blog'))
+
+    # ----------------------------------------------------------- #
+    # Delete blog
+    # ----------------------------------------------------------- #
+    if Blog().delete_blog(blog_id):
+        app.logger.debug(f"delete_blog(): Deleted social, blog_id = '{blog_id}'.")
+        Event().log_event("Delete Blog Success", f"Deleted social, blog_id = '{blog_id}'.")
+        flash("Blog has been deleted.")
+    else:
+        app.logger.debug(f"delete_blog(): Failed to delete Blog, blog_id = '{blog_id}'.")
+        Event().log_event("Delete Blog Fail", f"Failed to delete Blog, blog_id = '{blog_id}'.")
+        flash("Sorry, something went wrong.")
 
     return redirect(url_for('blog'))
+

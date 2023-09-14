@@ -434,7 +434,7 @@ def delete_social():
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}'.")
-        Event().log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
+        Event().log_event("Delete Social Fail", f"Refusing permission for '{current_user.email}', "
                                                  f"social_id = '{social_id}'.")
         return abort(403)
 
@@ -461,7 +461,7 @@ def delete_social():
         flash("Social has been deleted.")
     else:
         app.logger.debug(f"delete_social(): Failed to delete social, social_id = '{social_id}'.")
-        Event().log_event("Delete Social Fail", f"Failed to add social, social_id = '{social_id}'.")
+        Event().log_event("Delete Social Fail", f"Failed to delete social, social_id = '{social_id}'.")
         flash("Sorry, something went wrong.")
 
     return redirect(url_for('social'))
