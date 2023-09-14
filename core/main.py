@@ -158,7 +158,7 @@ def home():
     flash("Now meeting at Bean Theory Cafe!")
 
     # Render home page
-    return render_template("main_home.html", year=current_year, cafes=cafe_marker, map_coords=map_coords,
+    return render_template("main_home.html", year=current_year, cafes=cafe_marker,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS)
 
 
