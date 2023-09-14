@@ -2,7 +2,6 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, DateField, FileField
 from wtforms.validators import InputRequired, DataRequired
 from flask_ckeditor import CKEditorField
-from datetime import datetime
 import os
 
 
@@ -36,8 +35,10 @@ NO_CAFE = "NO CAFE"
 NO_GPX = "NO GPX"
 
 # Don't change these as they are in the db
+DRUNK_OPTION = "Drunken Ramblings"
+CCC_OPTION = "Slagging off CCC"
 CATEGORIES = ["Announcement", "Ride Report", "Adventure report", "News",
-              "Drunken Ramblings", "Slagging off CCC", "Other"]
+              DRUNK_OPTION, CCC_OPTION, "Other"]
 
 # Sticky options
 STICKY = "Sticky"
@@ -141,6 +142,20 @@ class Blog(db.Model):
                     return True
                 except Exception as e:
                     app.logger.error(f"db_delete_blog: Failed to delete Blog for blog_id = '{blog_id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+        return False
+
+    def update_photo(self, blog_id: int, photo_id: str):
+        with app.app_context():
+            blog = db.session.query(Blog).filter_by(id=blog_id).first()
+            if blog:
+                try:
+                    blog.images = photo_id
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_update_photo: Failed to update Blog for blog_id = '{blog_id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False

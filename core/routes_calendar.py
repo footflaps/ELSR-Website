@@ -239,7 +239,7 @@ def add_social():
         else:
             formdate = form.date.data
         today = datetime.today().date()
-        print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
+        # print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         if formdate < today:
             flash("The date is in the past!")

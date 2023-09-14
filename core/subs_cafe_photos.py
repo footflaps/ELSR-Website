@@ -15,15 +15,14 @@ from core import app,  delete_file_if_exists
 
 from core.dB_cafes import Cafe
 from core.dB_events import Event
+from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used for uploading pictures of the cafes
 # -------------------------------------------------------------------------------------------------------------- #
 
-IMAGE_ALLOWED_EXTENSIONS = {'jpg', 'jpeg'}
 CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
-TARGET_PHOTO_SIZE = 150000
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -33,11 +32,6 @@ TARGET_PHOTO_SIZE = 150000
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
-
-
-def allowed_file(filename):
-    return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in IMAGE_ALLOWED_EXTENSIONS
 
 
 def new_cafe_photo_filename(cafe):
@@ -67,32 +61,10 @@ def new_cafe_photo_filename(cafe):
                 return f"cafe_{cafe.id}_1.jpg"
 
 
-def shrink_image(filename):
-    # Get the image size for the os
-    image_size = os.path.getsize(filename)
-
-    # Quit now if the file is already a sensible size
-    if image_size <= TARGET_PHOTO_SIZE:
-        app.logger.debug(f"shrink_image(): Photo '{os.path.basename(filename)}' is small enough already.")
-
-    else:
-        app.logger.debug(f"shrink_image(): Photo '{os.path.basename(filename)}' will be shrunk!")
-
-        # Shrinkage factor (trial and error led to the method)
-        scaler = (TARGET_PHOTO_SIZE / image_size)**0.45
-
-        # Open and shrink teh image
-        img = Image.open(filename)
-        img = img.resize((int(img.size[0] * scaler), int(img.size[1] * scaler)))
-
-        # Save as same file
-        img.save(filename, optimize=True)
-
-
 def update_cafe_photo(form, cafe):
     app.logger.debug(f"update_cafe_photo(): Passed photo '{form.cafe_photo.data.filename}'")
 
-    if allowed_file(form.cafe_photo.data.filename):
+    if allowed_image_files(form.cafe_photo.data.filename):
         # Create a new filename for the image
         filename = os.path.join(CAFE_FOLDER, new_cafe_photo_filename(cafe))
         app.logger.debug(f"update_cafe_photo(): New filename for photo = '{filename}'")
