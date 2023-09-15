@@ -15,7 +15,7 @@ from core import app
 from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS
 from core.db_messages import Message, ADMIN_EMAIL
-from core.db_calendar import Calendar, GROUP_CHOICES
+from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -75,6 +75,8 @@ MESSAGE_BODY = "Dear [USER], \n\n" \
 
 RIDE_BODY = "Dear [USER], \n\n" \
             "A new [GROUP] ride has been posted to the Calendar for [DATE] by member [POSTER].\n" \
+            "The ride start details are: [START]\n" \
+            "The ride destination is: [DESTINATION]\n" \
             "Here are some useful links:\n\n" \
             "See the calendar here: [CAL_LINK]\n" \
             "Download the GPX file here: [DL_LINK]\n\n" \
@@ -147,6 +149,11 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     group = ride.group
     date = ride.date
     leader = unidecode(ride.leader)
+    if ride.start_time:
+        start = unidecode(ride.start_time)
+    else:
+        start = unidecode(DEFAULT_START)
+    destination = unidecode(ride.destination)
 
     # ----------------------------------------------------------- #
     # Create hyperlinks
@@ -166,6 +173,8 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
         body = body.replace("[GROUP]", group)
         body = body.replace("[DATE]", date)
         body = body.replace("[POSTER]", leader)
+        body = body.replace("[START]", start)
+        body = body.replace("[DESTINATION]", destination)
         body = body.replace("[CAL_LINK]", cal_link)
         body = body.replace("[DL_LINK]", dl_link)
         body = body.replace("[ACCOUNT_LINK]", user_page)
@@ -282,7 +291,6 @@ def send_message_notification_email(message: Message(), user: User()):
 #     body=f"Hi Ben. from fred"
 # )
 # send_message_notification_email(message, user)
-
 
 
 # -------------------------------------------------------------------------------------------------------------- #
