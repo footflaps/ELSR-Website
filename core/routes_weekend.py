@@ -684,11 +684,12 @@ def add_ride():
             # Success
             app.logger.debug(f"add_ride(): Successfully added new ride.")
             Event().log_event("Add ride Pass", f"Successfully added new_ride.")
-            Thread(target=send_ride_notification_emails, args=(new_ride,)).start()
             if ride:
                 flash("Ride updated!")
             else:
                 flash("Ride added to Calendar!")
+                # Send all the email notifications
+                Thread(target=send_ride_notification_emails, args=(new_ride,)).start()
 
             # Do they need to edit the just uploaded GPX file to make it public?
             if not gpx.public():
