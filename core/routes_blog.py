@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from werkzeug import exceptions
 import os
 from datetime import date, datetime, timedelta
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -23,6 +24,7 @@ from core.dB_events import Event
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo
+from core.subs_email_sms import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -301,6 +303,8 @@ def add_blog():
             flash("Blog updated!")
         else:
             flash("New Blog created!")
+            user = User().find_user_from_id(current_user.id)
+            Thread(target=alert_admin_via_sms, args=(user, "New blog post alert, please check it's OK!",)).start()
 
         return redirect(url_for('blog'))
 
