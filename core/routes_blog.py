@@ -274,33 +274,35 @@ def add_blog():
             new_blog.images = blog.images
 
         # ----------------------------------------------------------- #
-        #   Did we get passed a path for a photo?
-        # ----------------------------------------------------------- #
-        if form.photo_filename.data != "" and \
-                form.photo_filename.data is not None:
-            # Upload the photo
-            update_blog_photo(form, new_blog)
-
-        # ----------------------------------------------------------- #
         # Try and add the blog post
         # ----------------------------------------------------------- #
+        # Need to add before we upload the photo as we need new_blog to have a valid id
         new_blog = Blog().add_blog(new_blog)
-        if new_blog:
-            # Success
-            app.logger.debug(f"add_blog(): Successfully added new blog post.")
-            Event().log_event("Add Blog Pass", f"Successfully added new blog post.")
-            if blog:
-                flash("Blog updated!")
-            else:
-                flash("New Blog created!")
-            return redirect(url_for('blog'))
-
-        else:
+        if not new_blog:
             # Should never happen, but...
             app.logger.debug(f"add_blog(): Failed to add ride from '{new_blog}'.")
             Event().log_event("Add blog Fail", f"Failed to add ride '{new_blog}'.")
             flash("Sorry, something went wrong.")
             return render_template("blog_new.html", year=current_year, form=form)
+
+        # ----------------------------------------------------------- #
+        #   Did we get passed a path for a photo?
+        # ----------------------------------------------------------- #
+        if form.photo_filename.data.filename != "":
+            # Upload the photo
+            update_blog_photo(form, new_blog)
+
+        # ----------------------------------------------------------- #
+        #   Success
+        # ----------------------------------------------------------- #
+        app.logger.debug(f"add_blog(): Successfully added new blog post.")
+        Event().log_event("Add Blog Pass", f"Successfully added new blog post.")
+        if blog:
+            flash("Blog updated!")
+        else:
+            flash("New Blog created!")
+
+        return redirect(url_for('blog'))
 
     # ----------------------------------------------------------- #
     # Handle POST (but form validation failed)

@@ -126,11 +126,11 @@ class Blog(db.Model):
             try:
                 db.session.add(new_blog)
                 db.session.commit()
-                # Return success
-                return True
+                # Return blog item
+                return db.session.query(Blog).filter_by(id=new_blog.id).first()
             except Exception as e:
                 app.logger.error(f"db.add_blog(): Failed with error code '{e.args}'.")
-                return False
+                return None
 
     def delete_blog(self, blog_id):
         with app.app_context():
