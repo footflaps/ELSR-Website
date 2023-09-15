@@ -764,7 +764,7 @@
 				<h2 class="post-title float-left">{{ user.name }} has {{ blogs|length }} blog posts:</h2>
 			{% endif %}
 			
-			{% if socials | count > 0: %}
+			{% if blogs | count > 0: %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseBlogList"
