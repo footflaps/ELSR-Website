@@ -436,7 +436,7 @@ def add_ride():
         # ----------------------------------------------------------- #
         if current_user.admin():
             form = create_ride_form(True)
-            form.owner.data = current_user.combo_str()
+        #    form.owner.data = current_user.combo_str()
         else:
             form = create_ride_form(False)
 
@@ -449,7 +449,7 @@ def add_ride():
             form.date.data = start_date
 
         # Assume the author is the group leader
-        form.leader.data = current_user.name
+       #form.leader.data = current_user.name
 
     # Are we posting the completed comment form?
     if request.method == 'POST' \
