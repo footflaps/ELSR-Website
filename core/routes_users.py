@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from threading import Thread
 import os
 import re
+from datetime import datetime
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -31,6 +32,7 @@ from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loa
 from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.subs_email_sms import alert_admin_via_sms
+from core.db_blog import Blog
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -722,7 +724,7 @@ def user_page():
         abort(403)
 
     # ----------------------------------------------------------- #
-    # Need a form
+    # Need a form for changing user name
     # ----------------------------------------------------------- #
     form = ChangeUserNameForm()
 
@@ -826,6 +828,16 @@ def user_page():
     # ----------------------------------------------------------- #
     notifications = user.notification_choices_set()
 
+    # ----------------------------------------------------------- #
+    # Blog posts
+    # ----------------------------------------------------------- #
+    blogs = Blog().all_by_email(user.email)
+    for blog in blogs:
+
+        # 1. Human-readable date
+        if blog.date_unix:
+            blog.date = datetime.utcfromtimestamp(blog.date_unix).strftime('%d %b %Y')
+
     # -------------------------------------------------------------------------------------------- #
     # Show user page
     # -------------------------------------------------------------------------------------------- #
@@ -836,28 +848,28 @@ def user_page():
     if anchor == "messages":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications,
+                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
                                anchor="messages")
 
     elif anchor == "account":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications,
+                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
                                anchor="account")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications,
+                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
                                anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications,
+                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form)
 
 

@@ -40,11 +40,52 @@ from core.subs_blog_photos import update_blog_photo
 @app.route("/blog", methods=['GET'])
 @update_last_seen
 def blog():
+    # ----------------------------------------------------------- #
+    # Did we get passed a blog_id? (Optional)
+    # ----------------------------------------------------------- #
+    blog_id = request.args.get('blog_id', None)
+
+    # ----------------------------------------------------------- #
+    # Validate blog_id
+    # ----------------------------------------------------------- #
+    if blog_id:
+        blog = Blog().find_blog_from_id(blog_id)
+        if not blog:
+            app.logger.debug(f"blog(): Failed to locate blog, blog_id = '{blog_id}'.")
+            Event().log_event("Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+            return abort(404)
+    else:
+        blog = None
+
+    # ----------------------------------------------------------- #
+    # Permissions (only apply if trying to see a Private blog post)
+    # ----------------------------------------------------------- #
+    if blog:
+        if blog.privacy == PRIVATE_NEWS:
+            # Need to check user is trusted
+            if not current_user.is_authenticated:
+                # Not logged in
+                app.logger.debug(f"blog(): Refusing permission for unregistered user.")
+                Event().log_event("Blog Fail", f"Refusing permission for unregistered user.")
+                flash("You must be logged in to see private blog posts!")
+                return abort(403)
+            elif not current_user.readwrite():
+                # Failed authentication
+                app.logger.debug(f"blog(): Refusing permission for '{current_user.email}'.")
+                Event().log_event("Blog Fail", f"Refusing permission for '{current_user.email}'.")
+                flash("You do not have permission to see private blog posts!")
+                return abort(403)
 
     # ----------------------------------------------------------- #
     # List of all news articles
     # ----------------------------------------------------------- #
-    blogs = Blog().all()
+    # Did they request a specific blog post?
+    if blog:
+        # Just this one
+        blogs = [blog]
+    else:
+        # The whole lot
+        blogs = Blog().all()
 
     # ----------------------------------------------------------- #
     # Add some extra things for jinja
