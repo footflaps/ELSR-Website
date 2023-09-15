@@ -33,7 +33,7 @@ NEW_CAFE = "New cafe!"
 UPLOAD_ROUTE = "Upload my own route!"
 
 # Default option
-DEFAULT_START = "8:00am from the food vans at central Cambridge Train Station"
+DEFAULT_START = "8:00am from Bean Theory Cafe"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
