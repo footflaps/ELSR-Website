@@ -1244,6 +1244,16 @@
 									</td>
 								</tr>
 		                        <tr>
+									<td class="small">Can add blog posts</td>
+									<td class="small">
+										{% if user.readwrite() %}
+											<i class="fa-regular fa-face-smile fa-xl"></i>
+										{% else %}
+											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
+										{% endif %}
+									</td>
+								</tr>
+		                        <tr>
 									<td class="small">Can see Private events</td>
 									<td class="small">
 										{% if user.readwrite() %}

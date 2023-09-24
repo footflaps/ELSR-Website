@@ -191,8 +191,35 @@
 			{% endif %}
 		{% endfor %}
 	{% endfor %}
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                      Add a blog post                                           -->
+	<!---------------------------------------------------------------------------------------------------->
 	
-	
+	<!-- Add a blog post -->
+	{% if current_user.is_authenticated %}
+		{% if current_user.readwrite() %}
+			<div class="container">
+				
+				<!-- Add Post button -->
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						<a href="{{ url_for('add_blog') }}" class="btn btn-primary float-right" role="button">
+			                  Add Blog
+			            </a>
+					</div>
+				</div>
+				
+				<!-- Break before footer -->
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						<hr>
+					</div>
+				</div>
+				
+			</div>
+		{% endif %}
+	{% endif %}
 
 	<!---------------------------------------------------------------------------------------------------->
 	<!--                                      Modal forms for delete                                    -->
