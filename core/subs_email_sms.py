@@ -13,9 +13,11 @@ from unidecode import unidecode
 
 from core import app
 from core.dB_events import Event
-from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS
+from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
+                          SOCIAL_NOTIFICATION
 from core.db_messages import Message, ADMIN_EMAIL
 from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START
+from core.db_social import Socials
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -87,6 +89,19 @@ RIDE_BODY = "Dear [USER], \n\n" \
             "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
             "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
 
+SOCIAL_BODY = "Dear [USER], \n\n" \
+              "A new social post has appeared on the website.\n" \
+              "The date of the social is [DATE] and the location will be [LOCATION].\n" \
+              "Here are some useful links:\n\n" \
+              "See the calendar here: [CAL_LINK]\n" \
+              "See the social event details here: [SOCIAL_LINK]\n\n" \
+              "Thanks, \n\n" \
+              "The Admin Team\n\n" \
+              "NB: Please do not reply to this email, the account is not monitored.\n" \
+              "You received this email because you have subscribed to email notifications for social events.\n" \
+              "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
+              "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -95,6 +110,94 @@ RIDE_BODY = "Dear [USER], \n\n" \
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Send Social notifications
+# -------------------------------------------------------------------------------------------------------------- #
+
+def send_social_notification_emails(social: Socials()):
+    # ----------------------------------------------------------- #
+    # Make sure social exists
+    # ----------------------------------------------------------- #
+    if not social:
+        app.logger.debug(f"send_social_notification_emails(): Passed invalid social object")
+        Event().log_event("send_social_notification_emails() Fail", f"Passed invalid social object")
+        return
+
+    # ----------------------------------------------------------- #
+    # Scan all users
+    # ----------------------------------------------------------- #
+    for user in User().all_users():
+        if user.notification_choice(SOCIAL_NOTIFICATION):
+            # ----------------------------------------------------------- #
+            # Send email
+            # ----------------------------------------------------------- #
+            send_one_social_notification_email(user, social)
+
+
+def send_one_social_notification_email(user: User(), social: Socials()):
+    # ----------------------------------------------------------- #
+    # Make sure user and ride exist
+    # ----------------------------------------------------------- #
+    if not user:
+        app.logger.debug(f"send_one_ride_notification_email(): Passed invalid user object")
+        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid user object")
+        return
+    if not social:
+        app.logger.debug(f"send_one_ride_notification_email(): Passed invalid social object")
+        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid social object")
+        return
+
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    target_email = unidecode(user.email)
+    user_name = unidecode(user.name)
+    destination = unidecode(social.destination)
+    date = social.date
+
+    # ----------------------------------------------------------- #
+    # Create hyperlinks
+    # ----------------------------------------------------------- #
+    cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
+    social_link = f"https://www.elsr.co.uk/social?date={date}"
+    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
+    one_click_unsubscribe = "TBD"
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
+        subject = f"ELSR: New social event notification"
+        body = SOCIAL_BODY.replace("[USER]", user_name)
+        body = body.replace("[DATE]", date)
+        body = body.replace("[LOCATION]", destination)
+        body = body.replace("[CAL_LINK]", cal_link)
+        body = body.replace("[SOCIAL_LINK]", social_link)
+        body = body.replace("[ACCOUNT_LINK]", user_page)
+        body = body.replace("[UNSUBSCRIBE]", one_click_unsubscribe)
+
+        try:
+            connection.sendmail(
+                from_addr=gmail_admin_acc_email,
+                to_addrs=target_email,
+                msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
+            )
+            app.logger.debug(f"Email(): sent message email to '{target_email}'")
+            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            return True
+        except Exception as e:
+            app.logger.debug(
+                f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+                                            f"error code was '{e.args}'.")
+            return False
+
+# user = User().find_user_from_id(1)
+# social = Socials().one_social_id(1)
+# send_one_social_notification_email(user, social)
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send ride notifications
@@ -168,7 +271,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = f"New {group} ride notification"
+        subject = f"ELSR: New {group} ride notification"
         body = RIDE_BODY.replace("[USER]", user_name)
         body = body.replace("[GROUP]", group)
         body = body.replace("[DATE]", date)
@@ -259,7 +362,7 @@ def send_message_notification_email(message: Message(), user: User()):
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = f"Message notification from {from_name}"
+        subject = f"ELSR: Message notification from '{from_name}'"
         body = MESSAGE_BODY.replace("[USER]", user_name)
         body = body.replace("[BODY]", content)
         body = body.replace("[FROM]", from_name)
@@ -308,7 +411,7 @@ def send_verification_email(target_email, user_name, code):
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = "Verification email."
+        subject = "ELSR: Verification email."
         body = VERIFICATION_BODY.replace("[USER]", user_name)
         body = body.replace("[CODE]", str(code))
         body = body.replace("[EMAIL]", target_email)
@@ -344,7 +447,7 @@ def send_reset_email(target_email, user_name, code):
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = "Password reset email."
+        subject = "ELSR: Password reset email."
         body = RESET_BODY.replace("[USER]", user_name)
         body = body.replace("[CODE]", str(code))
         body = body.replace("[EMAIL]", target_email)
@@ -381,7 +484,7 @@ def contact_form_email(from_name, from_email, body):
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = f"Message from elsr.co.uk from '{from_name}' ({from_email})"
+        subject = f"ELSR: Message from '{from_name}' ({from_email})"
         try:
             connection.sendmail(
                 from_addr=gmail_admin_acc_email,
@@ -413,7 +516,7 @@ def send_system_alert_email(body):
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = f"Alert from elsr.co.uk"
+        subject = f"ELSR: Alert notification!"
         try:
             connection.sendmail(
                 from_addr=gmail_admin_acc_email,

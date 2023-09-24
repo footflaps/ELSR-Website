@@ -5,6 +5,7 @@ from datetime import datetime
 import calendar as cal
 from ics import Calendar as icsCalendar, Event as icsEvent
 import os
+from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -24,6 +25,7 @@ from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOC
                            SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC
 from core.dB_events import Event
 from core.db_users import User
+from core.subs_email_sms import send_social_notification_emails
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -286,7 +288,8 @@ def add_social():
         # ----------------------------------------------------------- #
         # Add to the db
         # ----------------------------------------------------------- #
-        if Socials().add_social(new_social):
+        new_social = Socials().add_social(new_social)
+        if new_social:
             # Success
             app.logger.debug(f"add_social(): Successfully added new social.")
             Event().log_event("Add social Pass", f"Successfully added new social.")
@@ -294,6 +297,7 @@ def add_social():
                 flash("Social updated!")
             else:
                 flash("Social added to Calendar!")
+                Thread(target=send_social_notification_emails, args=(new_social,)).start()
             return redirect(url_for('calendar'))
 
         else:

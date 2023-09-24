@@ -88,11 +88,11 @@ class Socials(db.Model):
             try:
                 db.session.add(new_social)
                 db.session.commit()
-                # Return success
-                return True
+                # Return social object
+                return db.session.query(Socials).filter_by(id=new_social.id).first()
             except Exception as e:
                 app.logger.error(f"dB.add_social(): Failed with error code '{e.args}'.")
-                return False
+                return None
 
     def delete_social(self, social_id):
         with app.app_context():
