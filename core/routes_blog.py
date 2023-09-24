@@ -124,7 +124,7 @@ def blog():
                     print(f"Found image: {filename}")
                     blog.filenames.append(filename)
 
-    return render_template("blog.html", year=current_year, blogs=blogs)
+    return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=NO_CAFE, no_gpx=NO_GPX)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
