@@ -46,10 +46,10 @@ ELSR_HOME = {"lat": 52.199234344363, "lng": 0.113774646436378}
 
 # Google map bounds
 MAP_BOUNDS = {
-        "north": ELSR_HOME['lat'] + 0.5,
-        "south": ELSR_HOME['lat'] - 0.5,
-        "west": ELSR_HOME['lng'] - 1,
-        "east": ELSR_HOME['lng'] + 1,
+        "north": ELSR_HOME['lat'] + 2,
+        "south": ELSR_HOME['lat'] - 2,
+        "west": ELSR_HOME['lng'] - 2,
+        "east": ELSR_HOME['lng'] + 2,
 }
 
 # Where we store config files etc
