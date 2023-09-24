@@ -24,7 +24,7 @@ from core.dB_events import Event
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo
-from core.subs_email_sms import alert_admin_via_sms
+from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -304,6 +304,7 @@ def add_blog():
         else:
             flash("New Blog created!")
             user = User().find_user_from_id(current_user.id)
+            Thread(target=send_blog_notification_emails, args=(new_blog,)).start()
             Thread(target=alert_admin_via_sms, args=(user, "New blog post alert, please check it's OK!",)).start()
 
         return redirect(url_for('blog'))

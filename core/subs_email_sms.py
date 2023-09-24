@@ -14,10 +14,11 @@ from unidecode import unidecode
 from core import app
 from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
-                          SOCIAL_NOTIFICATION
+                          SOCIAL_NOTIFICATION, BLOG_NOTIFICATION
 from core.db_messages import Message, ADMIN_EMAIL
 from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START
 from core.db_social import Socials
+from core.db_blog import Blog, PUBLIC_NEWS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -90,7 +91,7 @@ RIDE_BODY = "Dear [USER], \n\n" \
             "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
 
 SOCIAL_BODY = "Dear [USER], \n\n" \
-              "A new social post has appeared on the website.\n" \
+              "A new social event has appeared on the website.\n" \
               "The date of the social is [DATE] and the location will be [LOCATION].\n" \
               "Here are some useful links:\n\n" \
               "See the calendar here: [CAL_LINK]\n" \
@@ -102,6 +103,19 @@ SOCIAL_BODY = "Dear [USER], \n\n" \
               "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
               "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
 
+BLOG_BODY = "Dear [USER], \n\n" \
+            "A new blog post has appeared on the website.\n" \
+            "The subject of the blog post is [TITLE].\n" \
+            "Here are some useful links:\n\n" \
+            "See the blog page here: [BLOG_LINK]\n" \
+            "See this particular blog post here: [THIS_LINK]\n\n" \
+            "Thanks, \n\n" \
+            "The Admin Team\n\n" \
+            "NB: Please do not reply to this email, the account is not monitored.\n" \
+            "You received this email because you have subscribed to email notifications for social events.\n" \
+            "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
+            "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -110,6 +124,96 @@ SOCIAL_BODY = "Dear [USER], \n\n" \
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Send Blog notifications
+# -------------------------------------------------------------------------------------------------------------- #
+
+def send_blog_notification_emails(blog: Blog()):
+    # ----------------------------------------------------------- #
+    # Make sure social exists
+    # ----------------------------------------------------------- #
+    if not blog:
+        app.logger.debug(f"send_blog_notification_emails(): Passed invalid blog object")
+        Event().log_event("send_blog_notification_emails() Fail", f"Passed invalid blog object")
+        return
+
+    # ----------------------------------------------------------- #
+    # Scan all users
+    # ----------------------------------------------------------- #
+    for user in User().all_users():
+        if user.notification_choice(BLOG_NOTIFICATION):
+            # Users without write permissions can't see private blog posts
+            if blog.privacy == PUBLIC_NEWS \
+                    or user.readwrite():
+                # ----------------------------------------------------------- #
+                # Send email
+                # ----------------------------------------------------------- #
+                send_one_blog_notification_email(user, blog)
+
+
+def send_one_blog_notification_email(user: User(), blog: Blog()):
+    # ----------------------------------------------------------- #
+    # Make sure user and ride exist
+    # ----------------------------------------------------------- #
+    if not user:
+        app.logger.debug(f"send_one_blog_notification_email(): Passed invalid user object")
+        Event().log_event("send_one_blog_notification_email() Fail", f"Passed invalid user object")
+        return
+    if not blog:
+        app.logger.debug(f"send_one_blog_notification_email(): Passed invalid blog object")
+        Event().log_event("send_one_blog_notification_email() Fail", f"Passed invalid blog object")
+        return
+
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    target_email = unidecode(user.email)
+    user_name = unidecode(user.name)
+    title = unidecode(blog.title)
+
+    # ----------------------------------------------------------- #
+    # Create hyperlinks
+    # ----------------------------------------------------------- #
+    blog_link = f"https://www.elsr.co.uk/blog"
+    this_link = f"https://www.elsr.co.uk/blog?blog_id={blog.id}"
+    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
+    one_click_unsubscribe = "TBD"
+
+    # ----------------------------------------------------------- #
+    # Send an email
+    # ----------------------------------------------------------- #
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
+        subject = f"ELSR: New blog post notification"
+        body = BLOG_BODY.replace("[USER]", user_name)
+        body = body.replace("[TITLE]", title)
+        body = body.replace("[BLOG_LINK]", blog_link)
+        body = body.replace("[THIS_LINK]", this_link)
+        body = body.replace("[ACCOUNT_LINK]", user_page)
+        body = body.replace("[UNSUBSCRIBE]", one_click_unsubscribe)
+
+        try:
+            connection.sendmail(
+                from_addr=gmail_admin_acc_email,
+                to_addrs=target_email,
+                msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
+            )
+            app.logger.debug(f"Email(): sent message email to '{target_email}'")
+            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            return True
+        except Exception as e:
+            app.logger.debug(
+                f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
+            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+                                            f"error code was '{e.args}'.")
+            return False
+
+
+# user = User().find_user_from_id(1)
+# blog = Blog().find_blog_from_id(1)
+# send_one_blog_notification_email(user, blog)
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send Social notifications
@@ -140,12 +244,12 @@ def send_one_social_notification_email(user: User(), social: Socials()):
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
     if not user:
-        app.logger.debug(f"send_one_ride_notification_email(): Passed invalid user object")
-        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid user object")
+        app.logger.debug(f"send_one_social_notification_email(): Passed invalid user object")
+        Event().log_event("send_one_social_notification_email() Fail", f"Passed invalid user object")
         return
     if not social:
-        app.logger.debug(f"send_one_ride_notification_email(): Passed invalid social object")
-        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid social object")
+        app.logger.debug(f"send_one_social_notification_email(): Passed invalid social object")
+        Event().log_event("send_one_social_notification_email() Fail", f"Passed invalid social object")
         return
 
     # ----------------------------------------------------------- #

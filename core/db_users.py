@@ -71,6 +71,7 @@ DELETED_NAME = "DELETED"
 NOTIFICATIONS_DEFAULT_VALUE = 0
 MESSAGE_NOTIFICATION = "When I receive a message"
 SOCIAL_NOTIFICATION = "When someone posts a social"
+BLOG_NOTIFICATION = "When someone posts a blog entry"
 
 # This set must match the order of GROUP_CHOICES in dB_calendar.py
 # GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed"]
@@ -92,6 +93,8 @@ NOTIFICATIONS = [
          "mask": 32},
         {"name": SOCIAL_NOTIFICATION,
          "mask": 64},
+        {"name": BLOG_NOTIFICATION,
+         "mask": 128},
 ]
 
 
