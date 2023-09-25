@@ -52,7 +52,14 @@ def work_out_days(target_date_str):
         # ----------------------------------------------------------- #
         # Scenario #1 - Passed a specific date, so find that day
         # ----------------------------------------------------------- #
-        target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0, 00)
+        # NB We may have been parsed garbage as the date
+        try:
+            target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0, 00)
+        except:
+            # Flag back fail
+            return None
+
+        # Get the day of week
         day_str = target_date.strftime("%A")
 
         # If it's a Sat or Sunday, we'll show the full WE
@@ -180,11 +187,19 @@ def weekend():
     # ----------------------------------------------------------- #
     # Workout which weekend we're displaying
     # ----------------------------------------------------------- #
-
     tmp = work_out_days(target_date_str)
-    days = tmp[0]
-    dates_long = tmp[1]
-    dates_short = tmp[2]
+
+    # The above returns None if the date was garbage
+    if not tmp:
+        # Fed invalid date
+        app.logger.debug(f"weekend(): Failed to understand target_date_str = '{target_date_str}'.")
+        Event().log_event("Weekend Fail", f"Failed to understand target_date_str = '{target_date_str}'.")
+        return abort(404)
+    else:
+        # Get what we actually wanted from work_out_days()
+        days = tmp[0]
+        dates_long = tmp[1]
+        dates_short = tmp[2]
 
     # ----------------------------------------------------------- #
     # Add GPX details
