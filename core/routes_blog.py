@@ -244,6 +244,8 @@ def add_blog():
         # Fill in today's date
         if request.method == 'GET':
             form.date.data = date.today()
+            if current_user.admin():
+                form.owner.data = User().find_user_from_id(current_user.id).combo_str()
 
     # Are we posting the completed comment form?
     if request.method == 'POST' \
