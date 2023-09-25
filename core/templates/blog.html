@@ -245,35 +245,55 @@
 		{% endfor %}
 	{% endfor %}
 
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                        Pagination                                              -->
+	<!---------------------------------------------------------------------------------------------------->
 
-	<!---------------------------------------------------------------------------------------------------->
-	<!--                                      Add a blog post                                           -->
-	<!---------------------------------------------------------------------------------------------------->
-	
-	<!-- Add a blog post -->
-	{% if current_user.is_authenticated %}
-		{% if current_user.readwrite() %}
-			<div class="container">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				Showing page {{ page + 1 }} of {{ num_pages }} pages.
 				
-				<!-- Add Post button -->
-				<div class="row">
-					<div class="col-lg-8 col-md-10 mx-auto">
-						<a href="{{ url_for('add_blog') }}" class="btn btn-primary float-right" role="button">
+				{% for button_page in range(num_pages) %}
+					
+					{% if button_page == page %}
+						<a href="{{ url_for('blog', page=button_page) }}" class="btn btn-sm btn-primary disabled float-left mr-2" role="button">
+				            {{ button_page + 1 }}
+				        </a>
+					{% else %}
+						<a href="{{ url_for('blog', page=button_page) }}" class="btn btn-sm btn-primary float-left mr-2" role="button">
+				            {{ button_page  + 1 }}
+				        </a>
+					{% endif %}
+				
+				{% endfor %}
+				
+	
+				<!---------------------------------------------------------------------------------------------------->
+				<!--                                      Add a blog post                                           -->
+				<!---------------------------------------------------------------------------------------------------->
+				
+				{% if current_user.is_authenticated %}
+					{% if current_user.readwrite() %}
+						
+						<a href="{{ url_for('add_blog') }}" class="btn btn-sm btn-primary float-right" role="button">
 			                  Add Blog
 			            </a>
-					</div>
-				</div>
-				
-				<!-- Break before footer -->
-				<div class="row">
-					<div class="col-lg-8 col-md-10 mx-auto">
-						<hr>
-					</div>
-				</div>
+						
+					{% endif %}
+				{% endif %}
 				
 			</div>
-		{% endif %}
-	{% endif %}
+		</div>
+		
+		<!-- Break before footer -->
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<hr>
+			</div>
+		</div>
+		
+	</div>
 
 
 {% endif %}

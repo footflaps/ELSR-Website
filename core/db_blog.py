@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, SelectField, DateField, FileField
 from wtforms.validators import InputRequired, DataRequired
 from flask_ckeditor import CKEditorField
 import os
-
+import math
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -105,6 +105,37 @@ class Blog(db.Model):
             blogs = db.session.query(Blog).order_by(Blog.date_unix.desc()).all()
             return blogs
 
+    def all_sticky(self):
+        with app.app_context():
+            blogs = db.session.query(Blog).filter_by(sticky="True").order_by(Blog.date_unix.desc()).all()
+            return blogs
+
+    def non_sticky(self, page: int, page_size: int):
+        with app.app_context():
+            print(f"Called with page = '{page}', page_size = '{page_size}'")
+            # Get all the non-sticky blogs in time order
+            # NB This is not going to be very efficient long term as we get everything, then filter it.
+            # Problem is, right now we don't have our rows in time order as I'm back filling stuff at the start.
+            # Over time, it will become mainly time ordered and then we can maybe filter by id, although older stuff
+            # will still then appear in non-chronological order...
+            blogs = db.session.query(Blog).filter_by(sticky="False").order_by(Blog.date_unix.desc())
+            print(f"Found '{blogs.count()}' blog posts before pagination.")
+
+            blogs = blogs.limit(page_size)
+            print(f"Found '{blogs.count()}' blog posts after applying limit().")
+
+            offset_val = page * page_size
+
+            blogs = blogs.offset(offset_val)
+            print(f"Found '{blogs.count()}' blog posts after applying offset({offset_val}).")
+
+            return blogs.all()
+
+    def number_pages(self, page_size):
+        with app.app_context():
+            num_rows = db.session.query(Blog).count()
+            return math.ceil(num_rows / page_size)
+
     def find_blog_from_id(self, blog_id):
         with app.app_context():
             blog = db.session.query(Blog).filter_by(id=blog_id).first()
@@ -114,11 +145,6 @@ class Blog(db.Model):
         with app.app_context():
             blogs = db.session.query(Blog).filter_by(email=email).all()
             return blogs
-
-    def one_social_id(self, blog_id):
-        with app.app_context():
-            blog = db.session.query(Blog).filter_by(id=blog_id).first()
-            return blog
 
     def add_blog(self, new_blog):
         # Try and add to the dB

@@ -28,6 +28,14 @@ from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emai
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Constants
+# -------------------------------------------------------------------------------------------------------------- #
+
+PAGE_SIZE = 10
+FIRST_PAGE = 0
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # html routes
@@ -46,6 +54,18 @@ def blog():
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
     blog_id = request.args.get('blog_id', None)
+    page = request.args.get('page', None)
+
+    # ----------------------------------------------------------- #
+    # Validate page
+    # ----------------------------------------------------------- #
+    if page:
+        # Must be integer (get string back from html)
+        try:
+            page = int(page)
+        except:
+            # Handle being passed garbage
+            page = None
 
     # ----------------------------------------------------------- #
     # Validate blog_id
@@ -85,9 +105,25 @@ def blog():
     if blog:
         # Just this one
         blogs = [blog]
+        # Tell jinja to ignore pagination
+        page = None
+    elif page:
+        # They have requested a specific page
+        blogs = Blog().non_sticky(page, PAGE_SIZE)
+        print(f"Used page = '{page}' and got back '{len(blogs)}' blogs...")
     else:
-        # The whole lot
-        blogs = Blog().all()
+        # No page specified so just do front page
+        blogs = Blog().all_sticky()
+        # Then we add a number of non sticky ones
+        # NB This means the first page will be slightly longer than normal as we add stickies
+        # but, otherwise pagination would be a PITA as we'd have to offset every page by the number
+        # of stickies in the first page and I really can't be arsed...
+        # Tell jinja which page this is
+        page = FIRST_PAGE
+        blogs = blogs + Blog().non_sticky(page, PAGE_SIZE)
+
+    # jinja will need to know how many pages there are...
+    num_pages = Blog().number_pages(PAGE_SIZE)
 
     # ----------------------------------------------------------- #
     # Add some extra things for jinja
@@ -124,7 +160,8 @@ def blog():
                     print(f"Found image: {filename}")
                     blog.filenames.append(filename)
 
-    return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=NO_CAFE, no_gpx=NO_GPX)
+    return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=NO_CAFE, no_gpx=NO_GPX, page=page,
+                           num_pages=num_pages, page_size=PAGE_SIZE)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
