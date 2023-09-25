@@ -371,7 +371,7 @@ def csrf_error(e):
     flash("Detected a potential Cross Site Request Forgery (CSRF) with the form.")
     flash("NB Forms time out after 60 minutes.")
     app.logger.debug(f"400: CSRF Error '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("400", f"CSRF Error for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
@@ -390,7 +390,7 @@ def bad_request(e):
 
     # Log error in event log
     app.logger.debug(f"400: Bad request for '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("400", f"Bad request for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
@@ -407,9 +407,11 @@ def unauthorized(e):
     requested_route = request.path
     users_ip = user_ip()
 
+
+
     # Log error in event log
     app.logger.debug(f"401: Unauthorized for '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("401", f"Unauthorized for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
@@ -429,7 +431,7 @@ def forbidden(e):
 
     # Log error in event log
     app.logger.debug(f"403: Forbidden for '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("403", f"Forbidden for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
@@ -448,7 +450,7 @@ def page_not_found(e):
 
     # Log error in event log
     app.logger.debug(f"404: Not found for '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("404", f"Not found for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
@@ -467,7 +469,7 @@ def method_not_allowed(e):
 
     # Log error in event log
     app.logger.debug(f"405: Not allowed for '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("405", f"Not allowed for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
@@ -487,7 +489,7 @@ def file_too_large(e):
     # Log error in event log
     flash("The file was too large, limit is 10 MB.")
     app.logger.debug(f"413: File too large for '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("413", f"File too large for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
@@ -506,7 +508,7 @@ def internal_server_error(e):
 
     # Log error in event log
     app.logger.debug(f"500: Internal server error for '{requested_route}', previous page was "
-                     f"'{request.referrer}', '{users_ip}'.")
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
     Event().log_event("500", f"Internal server error for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
