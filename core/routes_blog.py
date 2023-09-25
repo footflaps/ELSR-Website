@@ -23,7 +23,7 @@ from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NE
 from core.dB_events import Event
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
-from core.subs_blog_photos import update_blog_photo
+from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
 
 
@@ -441,6 +441,11 @@ def delete_blog():
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
         return redirect(url_for('blog'))
+
+    # ----------------------------------------------------------- #
+    # Delete blog photos first
+    # ----------------------------------------------------------- #
+    delete_blog_photos(blog)
 
     # ----------------------------------------------------------- #
     # Delete blog

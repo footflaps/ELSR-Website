@@ -111,3 +111,20 @@ def update_blog_photo(form, blog):
                                        f"permitted file types are '{IMAGE_ALLOWED_EXTENSIONS}'.")
         flash("Invalid file type for image!")
 
+
+def delete_blog_photos(blog: Blog()):
+    # Check it has an id!
+    if not blog.id:
+        app.logger.debug(f"delete_blog_photos(): Passed blog object with no id!")
+        Event().log_event("Blog Fail", "delete_blog_photos(): Passed blog object with no id!")
+        return
+
+    # Delete the base name
+    filename = os.path.join(BLOG_PHOTO_FOLDER, f"blog_{blog.id}.jpg")
+    delete_file_if_exists(filename)
+
+    # Now cycle through any updates
+    for index in range(1, 10):
+        filename = os.path.join(BLOG_PHOTO_FOLDER, f"blog_{blog.id}_{index}.jpg")
+        delete_file_if_exists(filename)
+
