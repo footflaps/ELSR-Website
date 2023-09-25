@@ -133,7 +133,7 @@ class Blog(db.Model):
 
     def number_pages(self, page_size):
         with app.app_context():
-            num_rows = db.session.query(Blog).count()
+            num_rows = db.session.query(Blog).filter_by(sticky="False").count()
             return math.ceil(num_rows / page_size)
 
     def find_blog_from_id(self, blog_id):
