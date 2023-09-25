@@ -128,10 +128,10 @@
 						</div>
 						
 						<!-- 3rd row: Image -->
-						{% if blog.filenames %}
+						{% if blog.filename %}
 							<div class="row mt-3">
 								<div class="col-lg-8 col-md-10 mx-auto">
-									<img src="{{ url_for('static', filename=blog.filenames[0]) }}"
+									<img src="{{ url_for('static', filename=blog.filename) }}"
 									     style="width: 100%; border: 4px solid #000;">
 								</div>
 							</div>

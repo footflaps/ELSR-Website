@@ -33,29 +33,39 @@ CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-
+# If we change a photo, we need to change the filename as well as otherwise browsers won't download the new one and
+# just use the previously cached photo.
+#
+# The filename structure is:
+#    cafe_<cafe_id>.jpg             for the 1st photo
+#    cafe_<cafe_id>_<n>.jpg         for subsequent photos where n starts at 1
+#
 def new_cafe_photo_filename(cafe):
+    # What are we up to...
     if not cafe.image_name:
         # First photo for this cafe
         return f"cafe_{cafe.id}.jpg"
+
     elif not os.path.exists(os.path.join(CAFE_FOLDER, os.path.basename(cafe.image_name))):
         # The current referenced photo isn't there, so just reset
         return f"cafe_{cafe.id}.jpg"
+
     else:
         # Already have a photo in use
         current_name = os.path.basename(cafe.image_name)
-        # If we use the same filename the browser won't realise it's changed and just uses the cached one, so we
-        # have to create a new filename.
+
         if current_name == f"cafe_{cafe.id}.jpg":
             # This will be the first new photo, so start at index 1
             return f"cafe_{cafe.id}_1.jpg"
+
         else:
-            # Already using indices, so need to increment by one
+            # Already using indices, so need to extract index and increment by one
             try:
                 # Split[2] might fail if there aren't enough '_' in the filename
                 index = current_name.split('_')[2].split('.')[0]
                 index = int(index) + 1
                 return f"cafe_{cafe.id}_{index}.jpg"
+
             except IndexError:
                 # Just reset to 1
                 return f"cafe_{cafe.id}_1.jpg"

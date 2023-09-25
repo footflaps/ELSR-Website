@@ -172,12 +172,12 @@ class Blog(db.Model):
                     return False
         return False
 
-    def update_photo(self, blog_id: int, photo_id: str):
+    def update_photo(self, blog_id: int, filename: str):
         with app.app_context():
             blog = db.session.query(Blog).filter_by(id=blog_id).first()
             if blog:
                 try:
-                    blog.images = photo_id
+                    blog.images = filename
                     db.session.commit()
                     return True
                 except Exception as e:

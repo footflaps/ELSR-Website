@@ -2,7 +2,6 @@ from flask import flash
 import os
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -19,12 +18,57 @@ from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EX
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Constants used for uploading pictures of the blogs
+# -------------------------------------------------------------------------------------------------------------- #
+
+BLOG_FOLDER = os.environ['ELSR_BLOG_PHOTO_FOLDER']
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # Functions
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
+
+# If we change a photo, we need to change the filename as well as otherwise browsers won't download the new one and
+# just use the previously cached photo.
+#
+# The filename structure is:
+#    blog_<blog_id>.jpg             for the 1st photo
+#    blog_<blog_id>_<n>.jpg         for subsequent photos where n starts at 1
+#
+# def new_blog_photo_filename(blog):
+#     # What are we up to...
+#     if not blog.image_name:
+#         # First photo for this blog post
+#         return f"blog_{blog.id}.jpg"
+#
+#     elif not os.path.exists(os.path.join(BLOG_FOLDER, os.path.basename(blog.image_name))):
+#         # The current referenced photo isn't there, so just reset
+#         return f"cafe_{cafe.id}.jpg"
+#
+#     else:
+#         # Already have a photo in use
+#         current_name = os.path.basename(cafe.image_name)
+#
+#         if current_name == f"cafe_{cafe.id}.jpg":
+#             # This will be the first new photo, so start at index 1
+#             return f"cafe_{cafe.id}_1.jpg"
+#
+#         else:
+#             # Already using indices, so need to extract index and increment by one
+#             try:
+#                 # Split[2] might fail if there aren't enough '_' in the filename
+#                 index = current_name.split('_')[2].split('.')[0]
+#                 index = int(index) + 1
+#                 return f"cafe_{cafe.id}_{index}.jpg"
+#
+#             except IndexError:
+#                 # Just reset to 1
+#                 return f"cafe_{cafe.id}_1.jpg"
+
 
 def update_blog_photo(form, blog):
     app.logger.debug(f"update_blog_photo(): Passed photo '{form.photo_filename.data.filename}'")
@@ -67,3 +111,8 @@ def update_blog_photo(form, blog):
                                        f"permitted file types are '{IMAGE_ALLOWED_EXTENSIONS}'.")
         flash("Invalid file type for image!")
 
+blogs = Blog().all()
+for blog in blogs:
+    if blog.images == "1":
+        print(f"Updating id = '{blog.id}'")
+        Blog().update_photo(blog.id, f"blog_{blog.id}_{blog.images}.jpg")

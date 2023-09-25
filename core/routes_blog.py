@@ -147,18 +147,15 @@ def blog():
             blog.private = False
 
         # 4. Filenames for images
-        blog.filenames = []
+        blog.filename = None
 
         if blog.images:
-            indices = blog.images.split()
-
-            for index in indices:
-                filename = f"/img/blog_photos/blog_{blog.id}_{index}.jpg"
-
-                # Check file(s) actually exist
-                if os.path.exists(os.path.join(BLOG_PHOTO_FOLDER, os.path.basename(filename))):
-                    print(f"Found image: {filename}")
-                    blog.filenames.append(filename)
+            print(f"blog.images = '{blog.images}' for blog id = '{blog.id}'")
+            filename = f"/img/blog_photos/{blog.images}"
+            # Check file(s) actually exist
+            if os.path.exists(os.path.join(BLOG_PHOTO_FOLDER, os.path.basename(filename))):
+                print(f"Found '{filename}' for blog id = '{blog.id}'")
+                blog.filename = filename
 
     return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=NO_CAFE, no_gpx=NO_GPX, page=page,
                            num_pages=num_pages, page_size=PAGE_SIZE)
