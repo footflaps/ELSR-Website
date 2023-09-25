@@ -342,7 +342,8 @@ def add_blog():
             if current_user.id != SUPER_ADMIN_USER_ID:
                 Thread(target=alert_admin_via_sms, args=(user, "New blog post alert, please check it's OK!",)).start()
 
-        return redirect(url_for('blog'))
+        # Point them at their blog entry
+        return redirect(url_for('blog', blog_id=new_blog.id))
 
     # ----------------------------------------------------------- #
     # Handle POST (but form validation failed)

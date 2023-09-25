@@ -252,7 +252,11 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
-				Showing page {{ page + 1 }} of {{ num_pages }} pages.
+				{% if page %}
+					Showing page {{ page + 1 }} of {{ num_pages }} pages.
+				{% elif blogs | length == 1 %}
+					Showing blog post #{{ blogs[0].id }}
+				{% endif %}
 				
 				{% for button_page in range(num_pages) %}
 					
