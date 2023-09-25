@@ -252,7 +252,7 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
-				{% if page %}
+				{% if page != None %}
 					Showing page {{ page + 1 }} of {{ num_pages }} pages.
 				{% elif blogs | length == 1 %}
 					Showing blog post #{{ blogs[0].id }}
