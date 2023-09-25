@@ -17,7 +17,7 @@ from core import app, current_year
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user
+from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID
 from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_PHOTO_FOLDER, NO_CAFE, \
                          NO_GPX, DRUNK_OPTION, CCC_OPTION
 from core.dB_events import Event
@@ -342,7 +342,9 @@ def add_blog():
             flash("New Blog created!")
             user = User().find_user_from_id(current_user.id)
             Thread(target=send_blog_notification_emails, args=(new_blog,)).start()
-            Thread(target=alert_admin_via_sms, args=(user, "New blog post alert, please check it's OK!",)).start()
+            # Suppress SMS alerts for me as I post 95% of blogs and I'm just wasting my own money alerting myself!
+            if current_user.id != SUPER_ADMIN_USER_ID:
+                Thread(target=alert_admin_via_sms, args=(user, "New blog post alert, please check it's OK!",)).start()
 
         return redirect(url_for('blog'))
 
