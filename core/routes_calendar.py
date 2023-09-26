@@ -108,7 +108,7 @@ def calendar():
             # ----------------------------------------------------------- #
             for event in Blog().all_by_date(datestr):
                 markup += f"<a href='{url_for('blog', blog_id=f'{event.id}')}'>" \
-                          f"<i class='fas fa-solid fa-flag-checkered fa-2xl'></i></a>"
+                          f"<i class='fas fa-solid fa-flag-checkered fa-xl'></i></a>"
 
             # ----------------------------------------------------------- #
             # Add chaingangs
