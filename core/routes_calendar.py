@@ -26,6 +26,7 @@ from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOC
 from core.dB_events import Event
 from core.db_users import User
 from core.subs_email_sms import send_social_notification_emails
+from core.db_blog import Blog
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -100,7 +101,14 @@ def calendar():
             # ----------------------------------------------------------- #
             if Socials().all_socials_date(datestr):
                 markup += f"<a href='{url_for('social', date=f'{datestr}')}'>" \
-                          f"<i class='fas fa-solid fa-champagne-glasses fa-bounce fa-2xl'></i></a>"
+                          f"<i class='fas fa-solid fa-champagne-glasses fa-2xl'></i></a>"
+
+            # ----------------------------------------------------------- #
+            # Request events from Blog class
+            # ----------------------------------------------------------- #
+            for event in Blog().all_by_date(datestr):
+                markup += f"<a href='{url_for('blog', blog_id=f'{event.id}')}'>" \
+                          f"<i class='fas fa-solid fa-flag-checkered fa-2xl'></i></a>"
 
             # ----------------------------------------------------------- #
             # Add chaingangs

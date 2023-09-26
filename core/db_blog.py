@@ -4,6 +4,7 @@ from wtforms.validators import InputRequired, DataRequired
 from flask_ckeditor import CKEditorField
 import os
 import math
+from datetime import datetime, timedelta
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -145,6 +146,18 @@ class Blog(db.Model):
     def all_by_email(self, email):
         with app.app_context():
             blogs = db.session.query(Blog).filter_by(email=email).all()
+            return blogs
+
+    def all_by_date(self, date):
+        # Need to convert calendar date string to date_unix
+        try:
+            date_obj = datetime(int(date[4:8]), int(date[2:4]), int(date[0:2]), 0, 00)
+            date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
+        except Exception as e:
+            app.logger.error(f"all_by_date(): Failed to convert date = '{date}', error code '{e.args}'.")
+            return []
+        with app.app_context():
+            blogs = db.session.query(Blog).filter_by(date_unix=date_unix).filter_by(category=EVENT_OPTION).all()
             return blogs
 
     def add_blog(self, new_blog):
