@@ -104,27 +104,32 @@
 				</div>
 			</div>
 			
-			<!-- 2nd row of header: Gravatar, username and date -->
+			<!-- 2nd row of header: Gravatar, username and price -->
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">
 					<img class="float-left" src="{{ classified.email | gravatar }}"
 						 width="40" style="border-radius: 50%;"/>
 					<h4 class="float-left mt-2"> &nbsp; {{ get_user_name(classified.email) }}</h4>
-					<h4 class="float-right mt-2">{{ classified.date }}</h4>
+					<h2 class="float-right mt-2">£{{ classified.price }}</h2>
 				</div>
 			</div>
-
+		
 			<!-- 3rd row: Image -->
 			{% if classified.images %}
 			
 				<div class="row mt-3">
 					<div class="col-lg-8 col-md-10 mx-auto">
-						<div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+						<div id="carouselExampleIndicators" class="carousel slide" data-interval="false">
+							
 							<!-- slide selector -->
 							<ol class="carousel-indicators">
-								<li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
-								<li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
-								<li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+								{% for image in classified.images %}
+									{% if loop.index == 1 %}
+										<li data-target="#carouselExampleIndicators" data-slide-to="{{ loop.index - 1 }}" class="active"></li>
+									{% else %}
+										<li data-target="#carouselExampleIndicators" data-slide-to="{{ loop.index - 1 }}"></li>
+									{% endif %}
+								{% endfor %}
 							</ol>
 							
 							<!-- Images -->
@@ -144,7 +149,6 @@
 									{% endif %}
 								
 								{% endfor %}
-								
 							</div>
 							
 							<!-- Left and right buttons -->
