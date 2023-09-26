@@ -19,14 +19,8 @@ from core import app, current_year
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID
-from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_PHOTO_FOLDER, NO_CAFE, \
-                         NO_GPX, DRUNK_OPTION, CCC_OPTION, EVENT_OPTION
-from core.dB_events import Event
-from core.dB_cafes import Cafe
-from core.dB_gpx import Gpx
-from core.subs_blog_photos import update_blog_photo, delete_blog_photos
-from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
-from core.routes_calendar import ICS_DIRECTORY
+from core.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER
+
 
 
 
@@ -45,9 +39,31 @@ from core.routes_calendar import ICS_DIRECTORY
 @app.route("/classifieds", methods=['GET'])
 @update_last_seen
 def classifieds():
+    # ----------------------------------------------------------- #
+    # Get all our classifieds
+    # ----------------------------------------------------------- #
+    classifieds = Classified().all()
 
-    return render_template("classifieds.html", year=current_year)
+    # ----------------------------------------------------------- #
+    # Update image filenames with paths
+    # ----------------------------------------------------------- #
+    for classified in classifieds:
+        classified.images = []
+        for image_name in classified.image_filenames.split(','):
+            print(f"image_name = '{image_name}'")
+            filename = f"/img/classifieds_photos/{image_name}"
+            # Check file(s) actually exist
+            if os.path.exists(os.path.join(CLASSIFIEDS_PHOTO_FOLDER, os.path.basename(filename))):
+                print(f"Found image '{image_name}'")
+                classified.images.append(filename)
 
+
+    return render_template("classifieds.html", year=current_year, classifieds=classifieds)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add a buy advert
+# -------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/add_buy", methods=['GET'])
 @update_last_seen
@@ -57,6 +73,10 @@ def add_buy():
 
     return render_template("classifieds.html", year=current_year)
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add a sell advert
+# -------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/add_sell", methods=['GET'])
 @update_last_seen
