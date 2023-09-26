@@ -1,9 +1,10 @@
-from flask import render_template, request, flash, abort, redirect, url_for
+from flask import render_template, request, flash, abort, redirect, url_for, send_from_directory
 from flask_login import login_required, current_user
 from werkzeug import exceptions
 import os
 from datetime import date, datetime, timedelta
 from threading import Thread
+from ics import Calendar as icsCalendar, Event as icsEvent
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -19,12 +20,13 @@ from core import app, current_year
 
 from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID
 from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_PHOTO_FOLDER, NO_CAFE, \
-                         NO_GPX, DRUNK_OPTION, CCC_OPTION
+                         NO_GPX, DRUNK_OPTION, CCC_OPTION, EVENT_OPTION
 from core.dB_events import Event
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
+from core.routes_calendar import ICS_DIRECTORY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -155,7 +157,7 @@ def blog():
                 blog.filename = filename
 
     return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=NO_CAFE, no_gpx=NO_GPX, page=page,
-                           num_pages=num_pages, page_size=PAGE_SIZE)
+                           num_pages=num_pages, page_size=PAGE_SIZE, event_option=EVENT_OPTION)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -461,4 +463,65 @@ def delete_blog():
         flash("Sorry, something went wrong.")
 
     return redirect(url_for('blog'))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Download ics file for Blog Event
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route("/blog_ics", methods=['GET', 'POST'])
+@update_last_seen
+@logout_barred_user
+@login_required
+def blog_ics():
+    # ----------------------------------------------------------- #
+    # Did we get passed a blog_id?
+    # ----------------------------------------------------------- #
+    blog_id = request.args.get('blog_id', None)
+
+    # ----------------------------------------------------------- #
+    # Must have parameters
+    # ----------------------------------------------------------- #
+    if not blog_id:
+        app.logger.debug(f"blog_ics(): Missing blog_id.")
+        Event().log_event("Blog ICS Fail", f"Missing blog_id.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Validate blog_id
+    # ----------------------------------------------------------- #
+    blog = Blog().find_blog_from_id(blog_id)
+    if not blog:
+        app.logger.debug(f"blog_icsg(): Failed to locate blog, blog_id = '{blog_id}'.")
+        Event().log_event("Blog ICS Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Create ics file
+    # ----------------------------------------------------------- #
+    new_event = icsEvent()
+    new_event.name = f"ELSR Event: {blog.title}"
+    # NB Time is set to midnight as we don't have start times in the Blog db (currently)
+    new_event.begin = f"{datetime.utcfromtimestamp(blog.date_unix).strftime('%Y-%m-%d')} 00:00:00"
+    new_event.description = blog.details
+
+    # Add to ics calendar
+    new_cal = icsCalendar()
+    new_cal.events.add(new_event)
+
+    # Save as file
+    filename = os.path.join(ICS_DIRECTORY, f"Blog_Event_{blog.id}.ics")
+    with open(filename, 'w') as my_file:
+        my_file.writelines(new_cal.serialize_iter())
+
+    # ----------------------------------------------------------- #
+    # Send link to download the file
+    # ----------------------------------------------------------- #
+    download_name = f"ELSR_Event_{blog.id}.ics"
+
+    app.logger.debug(f"download_ics(): Serving ICS blog_id = '{blog_id}' ({blog.title}), "
+                     f"download_name = '{download_name}'.")
+    Event().log_event("ICS Downloaded", f"Serving ICS blog_id = '{blog_id}' ({blog.title}).")
+    return send_from_directory(directory=ICS_DIRECTORY,
+                               path=os.path.basename(filename),
+                               download_name=download_name)
 

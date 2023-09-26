@@ -162,8 +162,19 @@
 						            </a>
 								{% endif %}
 								
-								<!-- Only admin and owner can edit / delete -->
+								<!-- Logged in users get some privileges -->
 								{% if current_user.is_authenticated %}
+								
+									<!-- Download ics -->
+									{% if blog.category == event_option %}
+										<a href="{{ url_for('blog_ics', blog_id=blog.id) }}">
+					                        <button class="btn btn-sm btn-primary mr-2">
+						                        <i class="fa-regular fa-calendar-plus"></i>
+					                        </button>
+										</a>
+									{% endif %}
+								
+									<!-- Only admin and owner can edit / delete -->
 									{% if current_user.email == blog.email or current_user.admin() %}
 										
 										<!-- Delete blog -->

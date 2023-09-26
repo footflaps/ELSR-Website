@@ -37,7 +37,8 @@ NO_GPX = "NO GPX"
 # Don't change these as they are in the db
 DRUNK_OPTION = "Drunken Ramblings"
 CCC_OPTION = "Slagging off CCC"
-CATEGORIES = ["Announcement", "Ride Report", "Adventure report", "News",
+EVENT_OPTION = "Event"
+CATEGORIES = ["Announcement", "Ride Report", EVENT_OPTION, "News",
               DRUNK_OPTION, CCC_OPTION, "Other"]
 
 # Sticky options
