@@ -44,6 +44,8 @@ from core.routes_events import delete_event
 from core.routes_weekend import weekend
 from core.routes_calendar import calendar
 from core.routes_blog import blog
+from core.routes_classifieds import classifieds
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
