@@ -41,17 +41,17 @@ BLOG_FOLDER = os.environ['ELSR_BLOG_PHOTO_FOLDER']
 #
 def new_blog_photo_filename(blog):
     # What are we up to...
-    if not blog.images:
+    if not blog.image_filename:
         # First photo for this blog post
         return f"blog_{blog.id}.jpg"
 
-    elif not os.path.exists(os.path.join(BLOG_FOLDER, os.path.basename(blog.images))):
+    elif not os.path.exists(os.path.join(BLOG_FOLDER, os.path.basename(blog.image_filename))):
         # The current referenced photo isn't there, so just reset
         return f"blog_{blog.id}.jpg"
 
     else:
         # Already have a photo in use
-        current_name = os.path.basename(blog.images)
+        current_name = os.path.basename(blog.image_filename)
 
         if current_name == f"blog_{blog.id}.jpg":
             # This will be the first new photo, so start at index 1

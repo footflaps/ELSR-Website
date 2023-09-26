@@ -78,8 +78,8 @@ class Blog(db.Model):
     # Title
     title = db.Column(db.String(50))
 
-    # Images (list of numbers 1,2,3)
-    images = db.Column(db.String(30))
+    # Filename (no path) for the image
+    image_filename = db.Column(db.String(30))
 
     # Privacy <"Public", "Private">
     privacy = db.Column(db.String(20))
@@ -191,7 +191,7 @@ class Blog(db.Model):
             blog = db.session.query(Blog).filter_by(id=blog_id).first()
             if blog:
                 try:
-                    blog.images = filename
+                    blog.image_filename = filename
                     db.session.commit()
                     return True
                 except Exception as e:

@@ -150,8 +150,8 @@ def blog():
 
         # 4. Filename for image
         blog.filename = None
-        if blog.images:
-            filename = f"/img/blog_photos/{blog.images}"
+        if blog.image_filename:
+            filename = f"/img/blog_photos/{blog.image_filename}"
             # Check file(s) actually exist
             if os.path.exists(os.path.join(BLOG_PHOTO_FOLDER, os.path.basename(filename))):
                 blog.filename = filename
@@ -305,10 +305,10 @@ def add_blog():
             new_blog.sticky = "False"
             new_blog.email = current_user.email
 
-        # 4. Images
+        # 4. Image filename
         if blog:
-            # Move across existing images
-            new_blog.images = blog.images
+            # Move across existing image filename
+            new_blog.image_filename = blog.image_filename
 
         # ----------------------------------------------------------- #
         # Try and add the blog post
