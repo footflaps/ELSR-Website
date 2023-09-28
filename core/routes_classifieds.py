@@ -17,7 +17,8 @@ from core import app, current_year
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, update_last_seen, logout_barred_user, get_user_name
-from core.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER, create_classified_form, MAX_NUM_PHOTOS, SELL
+from core.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER, create_classified_form, MAX_NUM_PHOTOS, SELL, \
+                                STATUS_SOLD
 from core.dB_events import Event
 from core.subs_classified_photos import delete_classifieds_photos, delete_all_classified_photos, add_classified_photos
 from core.subs_email_sms import send_message_to_seller
@@ -80,7 +81,7 @@ def classifieds():
                         print(f"Appending '{filename}'")
                         classified.images.append(filename)
 
-    return render_template("classifieds.html", year=current_year, classifieds=classifieds)
+    return render_template("classifieds.html", year=current_year, classifieds=classifieds, status_sold=STATUS_SOLD)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

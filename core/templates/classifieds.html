@@ -84,7 +84,7 @@
 {% else %}
 
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                          Blog Posts                                            -->
+	<!--                                     Classified Posts                                           -->
 	<!---------------------------------------------------------------------------------------------------->
 
 	{% for classified in classifieds %}
@@ -107,7 +107,7 @@
 					<img class="float-left" src="{{ classified.email | gravatar }}"
 						 width="40" style="border-radius: 50%;"/>
 					<h4 class="float-left mt-2"> &nbsp; {{ get_user_name(classified.email) }}</h4>
-					<h2 class="float-right mt-2">£{{ classified.price }}</h2>
+					<h2 class="float-right mt-2">{{ classified.status }} &nbsp; £{{ classified.price }}</h2>
 				</div>
 			</div>
 		
@@ -116,15 +116,15 @@
 			
 				<div class="row mt-3">
 					<div class="col-lg-8 col-md-10 mx-auto">
-						<div id="carouselExampleIndicators" class="carousel slide" data-interval="false">
+						<div id="carousel{{ classified.id }}" class="carousel slide" data-interval="false">
 							
 							<!-- slide selector -->
 							<ol class="carousel-indicators">
 								{% for image in classified.images %}
 									{% if loop.index == 1 %}
-										<li data-target="#carouselExampleIndicators" data-slide-to="{{ loop.index - 1 }}" class="active"></li>
+										<li data-target="#carousel{{ classified.id }}" data-slide-to="{{ loop.index - 1 }}" class="active"></li>
 									{% else %}
-										<li data-target="#carouselExampleIndicators" data-slide-to="{{ loop.index - 1 }}"></li>
+										<li data-target="#carousel{{ classified.id }}" data-slide-to="{{ loop.index - 1 }}"></li>
 									{% endif %}
 								{% endfor %}
 							</ol>
@@ -149,11 +149,11 @@
 							</div>
 							
 							<!-- Left and right buttons -->
-							<a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+							<a class="carousel-control-prev" href="#carousel{{ classified.id }}" role="button" data-slide="prev">
 								<span class="carousel-control-prev-icon" aria-hidden="true"></span>
 								<span class="sr-only">Previous</span>
 							</a>
-							<a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+							<a class="carousel-control-next" href="#carousel{{ classified.id }}" role="button" data-slide="next">
 								<span class="carousel-control-next-icon" aria-hidden="true"></span>
 								<span class="sr-only">Next</span>
 							</a>
@@ -178,10 +178,12 @@
 				<div class="col-lg-8 col-md-10 mx-auto">
 					{% if current_user.is_authenticated %}
 						
-						<!-- Contact Seller button -->
-						<a data-toggle="modal" data-target="#contactClass{{ classified.id }}">
-		                    <button class="btn btn-sm btn-primary float-left">Contact Seller</button>
-						</a>
+						{% if classified.status != status_sold %}
+							<!-- Contact Seller button -->
+							<a data-toggle="modal" data-target="#contactClass{{ classified.id }}">
+			                    <button class="btn btn-sm btn-primary float-left">Contact Seller</button>
+							</a>
+						{% endif %}
 					
 						{% if current_user.admin() or current_user.email == classified.email %}
 						
@@ -220,52 +222,56 @@
 		<!---------------------------------------------------------------------------------------------------->
 		
 		{% if current_user.is_authenticated %}
-			
-			<!---------------------------------------------------------------------------------------------------->
-			<!--                               Modal form for contacting user                                   -->
-			<!---------------------------------------------------------------------------------------------------->
 
-			<div class="modal fade" id="contactClass{{ classified.id }}" tabindex="-1" role="dialog"
-			     aria-labelledby="exampleModalLabel" aria-hidden="true">
-				<div class="modal-dialog" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">Contact Seller for: {{ classified.title }} </h5>
-							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-								<span aria-hidden="true">&times;</span>
-							</button>
-						</div>
-						<div class="modal-body">
-							<!--
-								NB To get the two parameters use:
-									1. gpx_id = request.args.get('gpx_id', None)
-			                        2. confirm = request.form['confirm']
-							-->
-							<form action="{{ url_for('message_seller', classified_id=classified.id) }}" method="post">
-								
-								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-								
-								<div class="form-group">
-									Please enter your name:
-									<input type="text" class="form-control" name="name" value="{{ current_user.name }}">
-									Please enter your email:
-									<input type="text" class="form-control" name="email" value="{{ current_user.email }}">
-									Please enter your mobile number:
-									<input type="text" class="form-control" name="mobile" value="{{ current_user.phone_number }}">
-									Please enter a message for {{ get_user_name(classified.email) }}:
-									<textarea  class="form-control" name="message" rows="4"></textarea>
-								</div>
-								
-								<div class="modal-footer">
-									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-									<button type="submit" class="btn btn-primary">Send!</button>
-								</div>
-								
-							</form>
+			{% if classified.status != status_sold %}
+			
+				<!---------------------------------------------------------------------------------------------------->
+				<!--                               Modal form for contacting user                                   -->
+				<!---------------------------------------------------------------------------------------------------->
+	
+				<div class="modal fade" id="contactClass{{ classified.id }}" tabindex="-1" role="dialog"
+				     aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title">Contact Seller for: {{ classified.title }} </h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<!--
+									NB To get the two parameters use:
+										1. gpx_id = request.args.get('gpx_id', None)
+				                        2. confirm = request.form['confirm']
+								-->
+								<form action="{{ url_for('message_seller', classified_id=classified.id) }}" method="post">
+									
+									<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+									
+									<div class="form-group">
+										Please enter your name:
+										<input type="text" class="form-control" name="name" value="{{ current_user.name }}">
+										Please enter your email:
+										<input type="text" class="form-control" name="email" value="{{ current_user.email }}">
+										Please enter your mobile number:
+										<input type="text" class="form-control" name="mobile" value="{{ current_user.phone_number }}">
+										Please enter a message for {{ get_user_name(classified.email) }}:
+										<textarea  class="form-control" name="message" rows="4"></textarea>
+									</div>
+									
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										<button type="submit" class="btn btn-primary">Send!</button>
+									</div>
+									
+								</form>
+							</div>
 						</div>
 					</div>
-				</div>
-			</div>  <!-- End of modal form -->
+				</div>  <!-- End of modal form -->
+
+			{% endif %}
 
 			{% if current_user.email == classified.email or current_user.admin() %}
 
