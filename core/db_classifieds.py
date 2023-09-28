@@ -264,3 +264,15 @@ def create_classified_form(num_photos: int):
 
     return Form()
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with app.app_context():
+    classifieds = db.session.query(Classified).all()
+    print(f"Found {len(classifieds)} classifieds in the dB")
+    app.logger.debug(f"Start of day: Found {len(classifieds)} classifieds in the dB")
+
+
+
