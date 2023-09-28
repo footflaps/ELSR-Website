@@ -18,13 +18,6 @@ from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EX
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Constants used for uploading pictures of the blogs
-# -------------------------------------------------------------------------------------------------------------- #
-
-BLOG_FOLDER = os.environ['ELSR_BLOG_PHOTO_FOLDER']
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # Functions
@@ -45,7 +38,7 @@ def new_blog_photo_filename(blog):
         # First photo for this blog post
         return f"blog_{blog.id}.jpg"
 
-    elif not os.path.exists(os.path.join(BLOG_FOLDER, os.path.basename(blog.image_filename))):
+    elif not os.path.exists(os.path.join(BLOG_PHOTO_FOLDER, os.path.basename(blog.image_filename))):
         # The current referenced photo isn't there, so just reset
         return f"blog_{blog.id}.jpg"
 

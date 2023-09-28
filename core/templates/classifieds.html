@@ -64,10 +64,7 @@
 			{% if current_user.readwrite() %}
 				<div class="row">
 					<div class="col-lg-8 col-md-10 mx-auto">
-						<a href="{{ url_for('add_buy') }}" class="btn btn-primary float-right ml-2" role="button">
-			                  Buy
-			            </a>
-						<a href="{{ url_for('add_sell') }}" class="btn btn-primary float-right ml-2" role="button">
+						<a href="{{ url_for('add_sell') }}" class="btn btn-primary float-right" role="button">
 			                  Sell
 			            </a>
 					</div>
@@ -170,14 +167,169 @@
 			<!-- 4th row: Guts of the post -->
 			<div class="row mt-3">
 				<div class="col-lg-8 col-md-10 mx-auto">
+					
 					{{ classified.details | safe }}
+					
+				</div>
+			</div>
+			
+			<!-- 5th row: Buttons -->
+			<div class="row mt-3">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					{% if current_user.is_authenticated %}
+						
+						<!-- Contact Seller button -->
+						<a data-toggle="modal" data-target="#contactClass{{ classified.id }}">
+		                    <button class="btn btn-sm btn-primary float-left">Contact Seller</button>
+						</a>
+					
+						{% if current_user.admin() or current_user.email == classified.email %}
+						
+							<!-- Delete blog -->
+							<a data-toggle="modal" data-target="#deleteClass{{ classified.id }}">
+		                        <button class="btn btn-sm btn-danger float-right">DEL</button>
+				            </a>
+							
+							<!-- Edit blog -->
+							<a href="{{ url_for('add_sell', classified_id=classified.id) }}">
+		                        <button class="btn btn-sm btn-primary float-right mr-2">Edit</button>
+				            </a>
+					
+						{% endif %}
+						
+					{% else %}
+						Log in to contact seller
+					{% endif %}
+					
+				</div>
+			</div>
+			
+			<!-- 6th row: Line before next post -->
+			<div class="row mt-3">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					
+					<hr>
+					
 				</div>
 			</div>
 			
 		</div>
 
+		<!---------------------------------------------------------------------------------------------------->
+		<!--                               Modal forms for each classified                                  -->
+		<!---------------------------------------------------------------------------------------------------->
+		
+		{% if current_user.is_authenticated %}
+			
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                               Modal form for contacting user                                   -->
+			<!---------------------------------------------------------------------------------------------------->
+
+			<div class="modal fade" id="contactClass{{ classified.id }}" tabindex="-1" role="dialog"
+			     aria-labelledby="exampleModalLabel" aria-hidden="true">
+				<div class="modal-dialog" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Contact Seller for: {{ classified.title }} </h5>
+							<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+								<span aria-hidden="true">&times;</span>
+							</button>
+						</div>
+						<div class="modal-body">
+							<!--
+								NB To get the two parameters use:
+									1. gpx_id = request.args.get('gpx_id', None)
+			                        2. confirm = request.form['confirm']
+							-->
+							<form action="{{ url_for('message_seller', classified_id=classified.id) }}" method="post">
+								
+								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+								
+								<div class="form-group">
+									Please enter your name:
+									<input type="text" class="form-control" name="name" value="{{ current_user.name }}">
+									Please enter your email:
+									<input type="text" class="form-control" name="email" value="{{ current_user.email }}">
+									Please enter your mobile number:
+									<input type="text" class="form-control" name="mobile" value="{{ current_user.phone_number }}">
+									Please enter a message for {{ get_user_name(classified.email) }}:
+									<textarea  class="form-control" name="message" rows="4"></textarea>
+								</div>
+								
+								<div class="modal-footer">
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+									<button type="submit" class="btn btn-primary">Send!</button>
+								</div>
+								
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>  <!-- End of modal form -->
+
+			{% if current_user.email == classified.email or current_user.admin() %}
+
+				<!---------------------------------------------------------------------------------------------------->
+				<!--                               Modal form for confirming delete                                 -->
+				<!---------------------------------------------------------------------------------------------------->
+
+				<div class="modal fade" id="deleteClass{{ classified.id }}" tabindex="-1" role="dialog"
+				     aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">Delete Classified from database</h5>
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="modal-body">
+								<!--
+									NB To get the two parameters use:
+										1. gpx_id = request.args.get('gpx_id', None)
+				                        2. confirm = request.form['confirm']
+								-->
+								<form action="{{ url_for('delete_classified', classified_id=classified.id) }}" method="post">
+									
+									<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+									
+									<div class="form-group">
+										<label class="col-form-label">
+											Please enter <strong>your password</strong> in the box below:</label>
+										<input type="password" class="form-control" name="password">
+									</div>
+									
+									<div class="modal-footer">
+										<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+										<button type="submit" class="btn btn-danger">Submit</button>
+									</div>
+									
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>  <!-- End of modal form -->
+
+			{% endif %}
+		{% endif %}
 	{% endfor %}
 
+	<!-- Add a classifieds post -->
+	<div class="container">
+		{% if current_user.is_authenticated %}
+			{% if current_user.readwrite() %}
+				<div class="row">
+					<div class="col-lg-8 col-md-10 mx-auto">
+						
+						<a href="{{ url_for('add_sell') }}" class="btn btn-primary float-right" role="button">
+			                   Sell something
+			            </a>
+						
+					</div>
+				</div>
+			{% endif %}
+		{% endif %}
+	</div>
 	
 	<div class="container">
 		<!-- Break before footer -->

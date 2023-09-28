@@ -19,6 +19,7 @@ from core.db_messages import Message, ADMIN_EMAIL
 from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START
 from core.db_social import Socials
 from core.db_blog import Blog, PUBLIC_NEWS
+from core.db_classifieds import Classified
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -116,6 +117,20 @@ BLOG_BODY = "Dear [USER], \n\n" \
             "You can disable this option from your user account page here: [ACCOUNT_LINK] \n\n" \
             "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
 
+CLASSIFIED_BODY = "Dear [USER], \n\n" \
+                  "You have a message about your classified post [TITLE].\n" \
+                  "The message is from [BUYER_NAME].\n" \
+                  "Their email is [BUYER_EMAIL].\n" \
+                  "Their mobile number is [BUYER_MOBILE].\n" \
+                  "Their message is '[BUYER_MESSAGE]'\n\n" \
+                  "Here are some useful links:\n\n" \
+                  "See your classified post here: [CLASSIFIED_LINK]\n\n" \
+                  "Thanks, \n" \
+                  "The Admin Team\n\n" \
+                  "NB 1: Please do not reply to this email, the account is not monitored.\n" \
+                  "NB 2: You received this email because you agreed to email messages when you posted your classified " \
+                  "advert. To stop messages being forwarded to you, either mark your post as Sold or delete it from " \
+                  "the website.\n"
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -407,11 +422,11 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
 # ride = Calendar().one_ride_id(1)
 # send_one_ride_notification_email(user, ride)
 
-
 # for group in GROUP_CHOICES:
 #     ride = Calendar(group=group)
 #     print(f"Testing ride {ride.group}")
 #     send_ride_notification_emails(ride)
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send email notification for message to user
@@ -498,6 +513,54 @@ def send_message_notification_email(message: Message(), user: User()):
 #     body=f"Hi Ben. from fred"
 # )
 # send_message_notification_email(message, user)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Send message to classified seller
+# -------------------------------------------------------------------------------------------------------------- #
+def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, buyer_message):
+    # ----------------------------------------------------------- #
+    # Strip out any non ascii chars
+    # ----------------------------------------------------------- #
+    buyer_name = unidecode(buyer_name)
+    buyer_email = unidecode(buyer_email)
+    buyer_mobile = unidecode(buyer_mobile)
+    buyer_message = unidecode(buyer_message)
+    classified_link = f"https://www.elsr.co.uk/classifieds?classified_id={classified.id}"
+
+    # ----------------------------------------------------------- #
+    # Construct the email
+    # ----------------------------------------------------------- #
+    subject = f"ELSR: Classified Message for {classified.title}!"
+
+    body = CLASSIFIED_BODY.replace("[USER]", get_user_name(classified.email))
+    body = body.replace("[TITLE]", classified.title)
+    body = body.replace("[BUYER_NAME]", buyer_name)
+    body = body.replace("[BUYER_EMAIL]", buyer_email)
+    body = body.replace("[BUYER_MOBILE]", buyer_mobile)
+    body = body.replace("[BUYER_MESSAGE]", buyer_message)
+    body = body.replace("CLASSIFIED_LINK", classified_link)
+
+    # ----------------------------------------------------------- #
+    # Send the email
+    # ----------------------------------------------------------- #
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
+        connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
+        try:
+            connection.sendmail(
+                from_addr=gmail_admin_acc_email,
+                to_addrs=classified.email,
+                msg=f"To:{classified.email}\nSubject:{subject}\n\n{body}"
+            )
+            app.logger.debug(f"Alert Email(): sent message to '{brf_personal_email}'.")
+            Event().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
+            return True
+        except Exception as e:
+            app.logger.debug(
+                f"Alert Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
+            Event().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
+                                                  f"error code was '{e.args}'.")
+            return False
 
 
 # -------------------------------------------------------------------------------------------------------------- #
