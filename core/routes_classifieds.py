@@ -209,6 +209,20 @@ def add_sell():
             print(f"Images after = '{new_classified.image_filenames}'")
 
             # ----------------------------------------------------------- #
+            # Add to dB
+            # ----------------------------------------------------------- #
+            # Meed to add before we upload photos to get a id
+            new_classified = Classified().add_classified(new_classified)
+            if not new_classified:
+                # Should never happen, but...
+                app.logger.debug(f"add_sell(): Failed to add classified: '{new_classified}'.")
+                Event().log_event("Add Sell Fail", f"Failed to add classified: '{new_classified}'.")
+                flash("Sorry, something went wrong.")
+                return render_template("classifieds_sell.html", year=current_year, form=form,
+                                       num_photos_used=num_photos_used,
+                                       classified=classified)
+
+            # ----------------------------------------------------------- #
             # Upload photos
             # ----------------------------------------------------------- #
             print(f"Images before = '{new_classified.image_filenames}'")
@@ -218,6 +232,7 @@ def add_sell():
             # ----------------------------------------------------------- #
             # Add to dB
             # ----------------------------------------------------------- #
+            # Now add again to update photos
             new_classified = Classified().add_classified(new_classified)
             if not new_classified:
                 # Should never happen, but...

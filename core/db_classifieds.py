@@ -145,8 +145,6 @@ class Classified(db.Model):
                 app.logger.error(f"dB.number_photos(): Called with invalid classified_id = '{classified_id}'.")
                 return None
 
-
-
     def add_classified(self, new_classified):
         # Try and add to the dB
         with app.app_context():
