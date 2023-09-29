@@ -123,7 +123,7 @@ class Classified(db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
     def all(self):
         with app.app_context():
-            classifieds = db.session.query(Classified).all()
+            classifieds = db.session.query(Classified).order_by(Classified.id.desc()).all()
             return classifieds
 
     def all_by_email(self, email):
