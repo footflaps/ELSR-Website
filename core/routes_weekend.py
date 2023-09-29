@@ -220,6 +220,7 @@ def weekend():
 
         # We need to check all the GPXes still exist etc
         tmp_rides = Calendar().all_calendar_date(dates_short[day])
+        app.logger.debug(f"weekend(): Passed '{dates_short[day]}' to calendar and got back '{tmp_rides}'")
 
         # Create empty sets for all the data we will need to populate for each day
         rides[day] = []
