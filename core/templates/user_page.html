@@ -848,7 +848,7 @@
 			{% elif current_user.email == user.email %}
 				<h2 class="post-title float-left">You have {{ classifieds|length }} classifieds:</h2>
 			{% else %}
-				<h2 class="post-title float-left">{{ user.name }} has {{ classifieds|length }} classifieds posts:</h2>
+				<h2 class="post-title float-left">{{ user.name }} has {{ classifieds|length }} classified posts:</h2>
 			{% endif %}
 			
 			{% if classifieds | count > 0: %}
@@ -883,6 +883,7 @@
 			                    <th scope="col">Title</th>
 			                    <th scope="col">Category</th>
 			                    <th scope="col">Price</th>
+			                    <th scope="col">Status</th>
 			                </tr>
 		                </thead>
 				
@@ -897,6 +898,7 @@
 									</td>
 									<td scope="row">{{ classified.category }}</td>
 									<td scope="row">£{{ classified.price }}</td>
+									<td scope="row">{{ classified.status }}</td>
 								</tr>
 						
 							{% endfor %}
@@ -919,7 +921,6 @@
 	</div>
 	
 </div>
-
 
 
 <!---------------------------------------------------------------------------------------------------->

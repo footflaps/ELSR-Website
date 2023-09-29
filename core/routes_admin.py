@@ -27,6 +27,7 @@ from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notif
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, get_current_map_count, \
                                   boost_map_limit, map_limit_by_day
 from core.db_blog import Blog
+from core.db_classifieds import Classified
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -221,6 +222,11 @@ def admin_page():
             blog.date = datetime.utcfromtimestamp(blog.date_unix).strftime('%d %b %Y')
 
     # ----------------------------------------------------------- #
+    # All classifieds
+    # ----------------------------------------------------------- #
+    classifieds = Classified().all()
+
+    # ----------------------------------------------------------- #
     # Twilio balance
     # ----------------------------------------------------------- #
     twilio_balance = get_twilio_balance()
@@ -277,21 +283,23 @@ def admin_page():
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, untrusted_users=untrusted_users, anchor="eventLog")
+                               files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
+                               anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, untrusted_users=untrusted_users, anchor="messages")
+                               files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
+                               anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, trusted_users=trusted_users,
                                messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, untrusted_users=untrusted_users)
+                               files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
