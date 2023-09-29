@@ -537,7 +537,7 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
     buyer_mobile = unidecode(buyer_mobile)
     buyer_message = unidecode(buyer_message)
     classified_link = f"https://www.elsr.co.uk/classifieds?classified_id={classified.id}"
-    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
+    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}"
 
     # ----------------------------------------------------------- #
     # Construct the email
