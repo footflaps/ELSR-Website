@@ -124,7 +124,8 @@ CLASSIFIED_BODY = "Dear [USER], \n\n" \
                   "Their mobile number is [BUYER_MOBILE].\n" \
                   "Their message is '[BUYER_MESSAGE]'\n\n" \
                   "Here are some useful links:\n\n" \
-                  "See your classified post here: [CLASSIFIED_LINK]\n\n" \
+                  "See your classified post here: [CLASSIFIED_LINK]\n" \
+                  "You can see all your classified posts from your user account page here: [ACCOUNT_LINK] \n\n" \
                   "Thanks, \n" \
                   "The Admin Team\n\n" \
                   "NB 1: Please do not reply to this email, the account is not monitored.\n" \
@@ -520,6 +521,15 @@ def send_message_notification_email(message: Message(), user: User()):
 # -------------------------------------------------------------------------------------------------------------- #
 def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, buyer_message):
     # ----------------------------------------------------------- #
+    # Find user
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_email(classified.email)
+    if not user:
+        app.logger.debug(f"send_message_to_seller(): Can't locate user from email = '{classified.email}'.")
+        Event().log_event("send_message_to_seller() Fail", f"Can't locate user from email = '{classified.email}'.")
+        return
+
+    # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
     buyer_name = unidecode(buyer_name)
@@ -527,6 +537,7 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
     buyer_mobile = unidecode(buyer_mobile)
     buyer_message = unidecode(buyer_message)
     classified_link = f"https://www.elsr.co.uk/classifieds?classified_id={classified.id}"
+    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
 
     # ----------------------------------------------------------- #
     # Construct the email
@@ -539,7 +550,8 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
     body = body.replace("[BUYER_EMAIL]", buyer_email)
     body = body.replace("[BUYER_MOBILE]", buyer_mobile)
     body = body.replace("[BUYER_MESSAGE]", buyer_message)
-    body = body.replace("CLASSIFIED_LINK", classified_link)
+    body = body.replace("[CLASSIFIED_LINK]", classified_link)
+    body = body.replace("[ACCOUNT_LINK]", user_page)
 
     # ----------------------------------------------------------- #
     # Send the email
