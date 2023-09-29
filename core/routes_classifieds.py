@@ -21,7 +21,7 @@ from core.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER, create_cla
                                 STATUS_SOLD
 from core.dB_events import Event
 from core.subs_classified_photos import delete_classifieds_photos, delete_all_classified_photos, add_classified_photos
-from core.subs_email_sms import send_message_to_seller
+from core.subs_email_sms import send_message_to_seller, alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -242,6 +242,19 @@ def add_sell():
                 return render_template("classifieds_sell.html", year=current_year, form=form,
                                        num_photos_used=num_photos_used,
                                        classified=classified)
+
+            # ----------------------------------------------------------- #
+            # Alert admin to new post
+            # ----------------------------------------------------------- #
+            # But only if a new post and not an edit
+            if not classified:
+                flash("New Classified post has been created!")
+                # Can't use current_user with Threading as it doesn't persist past return, so re-acquire user
+                user = User().find_user_from_id(current_user.id)
+                Thread(target=alert_admin_via_sms,
+                       args=(user, "New Classified post alert, please check it's OK!",)).start()
+            else:
+                flash("Your Classified post has been updated!")
 
             # Show them their completed post
             return redirect(url_for('classifieds', classified_id=new_classified.id))
