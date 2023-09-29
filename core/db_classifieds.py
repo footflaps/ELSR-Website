@@ -126,6 +126,11 @@ class Classified(db.Model):
             classifieds = db.session.query(Classified).all()
             return classifieds
 
+    def all_by_email(self, email):
+        with app.app_context():
+            classifieds = db.session.query(Classified).filter_by(email=email).all()
+            return classifieds
+
     def find_by_id(self, classified_id):
         with app.app_context():
             classified = db.session.query(Classified).filter_by(id=classified_id).first()

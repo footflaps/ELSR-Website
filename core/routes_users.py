@@ -33,6 +33,7 @@ from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.subs_email_sms import alert_admin_via_sms
 from core.db_blog import Blog
+from core.db_classifieds import Classified
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -824,6 +825,11 @@ def user_page():
     socials = Socials().all_by_email(user.email)
 
     # ----------------------------------------------------------- #
+    # All classifieds
+    # ----------------------------------------------------------- #
+    classifieds = Classified().all_by_email(user.email)
+
+    # ----------------------------------------------------------- #
     # Notification preferences
     # ----------------------------------------------------------- #
     notifications = user.notification_choices_set()
@@ -850,27 +856,28 @@ def user_page():
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               anchor="messages")
+                               classifieds=classifieds, anchor="messages")
 
     elif anchor == "account":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               anchor="account")
+                               classifieds=classifieds, anchor="account")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               anchor="eventLog")
+                               classifieds=classifieds, anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
-                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form)
+                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
+                               classifieds=classifieds)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
