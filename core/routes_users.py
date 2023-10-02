@@ -21,7 +21,7 @@ from core import app, current_year
 
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
                           update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
-                          TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm
+                          TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm, NOTIFICATIONS_DEFAULT_VALUE
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
@@ -1231,4 +1231,66 @@ def set_notifications():
 
     # Back to user page
     return redirect(url_for('user_page', anchor="account", user_id=user_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Update notification settings
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/unsubscribe_all', methods=['GET'])
+@logout_barred_user
+@update_last_seen
+def unsubscribe_all():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    email = request.args.get('email', None)
+    code = request.args.get('code', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not email:
+        app.logger.debug(f"unsubscribe_all(): Missing email!")
+        Event().log_event("unsubscribe_all Fail", f"missing email!")
+        abort(400)
+    elif not code:
+        app.logger.debug(f"unsubscribe_all(): Missing code!")
+        Event().log_event("unsubscribe_all Fail", f"Missing code!")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Validate parameters
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_email(email)
+    if not user:
+        app.logger.debug(f"unsubscribe_all(): Invalid email = '{email}'!")
+        Event().log_event("unsubscribe_all Fail", f"Invalid email = '{email}'!")
+        abort(404)
+    if code != user.unsubscribe_code():
+        app.logger.debug(f"unsubscribe_all(): Invalid code = '{code}' for user '{user.email}'!")
+        Event().log_event("unsubscribe_all Fail", f"Invalid code = '{code}' for user '{user.email}'!")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Success
+    # ----------------------------------------------------------- #
+    flash("You have been unsubscribed from all email notifications EXCEPT classifieds!")
+    flash("You must delete any classifieds to prevent emails from buyers.")
+    app.logger.debug(f"unsubscribe_all(): Successfully unsubscribed user '{user.email}'!")
+    Event().log_event("unsubscribe_all Fail", f"Successfully unsubscribed user '{user.email}'!")
+    User().set_notifications(user.id, NOTIFICATIONS_DEFAULT_VALUE)
+
+    # ----------------------------------------------------------- #
+    # Return page
+    # ----------------------------------------------------------- #
+    # Are they logged in?
+    if current_user.is_authenticated:
+        # Better check this so as not to forward to a user page they don't have permission to see
+        if current_user.id == user.id:
+            # Back to their user page
+            return redirect(url_for('user_page', user_id=user.id))
+
+    # Revert to home page
+    return redirect(url_for('home'))
 

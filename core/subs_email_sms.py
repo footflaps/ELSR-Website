@@ -194,7 +194,7 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
     blog_link = f"https://www.elsr.co.uk/blog"
     this_link = f"https://www.elsr.co.uk/blog?blog_id={blog.id}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = "TBD"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
 
     # ----------------------------------------------------------- #
     # Send an email
@@ -282,7 +282,7 @@ def send_one_social_notification_email(user: User(), social: Socials()):
     cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
     social_link = f"https://www.elsr.co.uk/social?date={date}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = "TBD"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
 
     # ----------------------------------------------------------- #
     # Send an email
@@ -384,7 +384,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
     dl_link = f"https://www.elsr.co.uk/gpx_download/{ride.gpx_id}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = "TBD"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
 
     # ----------------------------------------------------------- #
     # Send an email
@@ -475,7 +475,7 @@ def send_message_notification_email(message: Message(), user: User()):
     # Create hyperlinks
     # ----------------------------------------------------------- #
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = "TBD"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
 
     # ----------------------------------------------------------- #
     # Send an email

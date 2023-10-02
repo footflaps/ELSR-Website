@@ -9,6 +9,7 @@ import time
 from datetime import date, datetime
 import random
 import os
+import hashlib
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -751,6 +752,10 @@ class User(UserMixin, db.Model):
         user_id = combo_string.split('(')[-1].split(')')[0]
         return self.find_user_from_id(user_id)
 
+    def unsubscribe_code(self):
+        # Need something secret, that no one else would know, so hash their password hash
+        return hashlib.md5(f"{self.password}".encode('utf-8')).hexdigest()
+
     # Optional: this will allow each user object to be identified by its name when printed.
     # NB Names are not unique, but emails are, hence added in brackets
     def __repr__(self):
@@ -972,26 +977,6 @@ with app.app_context():
     users = db.session.query(User).all()
     print(f"Found {len(users)} users in the dB")
     app.logger.debug(f"Start of day: Found {len(users)} users in the dB")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# One off correct permissions
-# -------------------------------------------------------------------------------------------------------------- #
-#
-# for user in User().all_users():
-#     with app.app_context():
-#         user = db.session.query(User).filter_by(id=user.id).first()
-#         if user:
-#             if user.permissions >= 64:
-#                 user.permissions -= 64
-#             if user.permissions >= 32:
-#                 user.permissions -= 32
-#             if user.permissions >= 16:
-#                 user.permissions -= 16
-#             db.session.commit()
-
-
-
 
 
 
