@@ -188,7 +188,6 @@
 		            });
 		        });
 		        
-		     
 			}
 		
 			init{{day}}Map();
@@ -197,7 +196,7 @@
 	
 	{% endif %}
 
-
+	<a name="{{ dates_short[day] }}" ></a>
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
@@ -237,7 +236,7 @@
 									</i>  &nbsp;
 								{% endif %}
 							
-								 <!-- Download button -->
+								<!-- Download button -->
 					            {% if current_user.is_authenticated: %}
 									{% if ride.public %}
 						                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
@@ -282,47 +281,49 @@
 								
 							</li>
 						
-							<!--------------------------------------------------------------------------------------------->
-							<!--                         Modal form for deleting rides                                   -->
-							<!--------------------------------------------------------------------------------------------->
-							
-							<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
-							    <div class="modal-dialog" role="document">
-									<div class="modal-content">
-										<div class="modal-header">
-											<h5 class="modal-title" id="blockModalLabel">
-												Delete ride '{{ ride.group }}: {{ ride.leader }}, {{ ride.destination }}'
-											</h5>
-											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-												<span aria-hidden="true">&times;</span>
-											</button>
-										</div>
-										<div class="modal-body">
-	
-											<form action="{{ url_for('delete_ride', ride_id=ride.id, date=dates_short[day]) }}" method="post">
-												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-												
-												<div class="form-group">
-													<label class="col-form-label">
-														Enter <strong>your password</strong> below.
-													</label>
-													<input type="password" class="form-control" name="password">
-												</div>
-												
-												<div class="modal-footer">
-													<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-													<button type="submit" class="btn btn-danger">Submit</button>
-												</div>
-												
-											</form>
-										</div>
+						</ul>
+				
+						<!--------------------------------------------------------------------------------------------->
+						<!--                         Modal form for deleting ride                                    -->
+						<!--------------------------------------------------------------------------------------------->
+						
+						<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
+						    <div class="modal-dialog" role="document">
+								<div class="modal-content">
+									<div class="modal-header">
+										<h5 class="modal-title" id="blockModalLabel">
+											Delete ride '{{ ride.group }}: {{ ride.leader }}, {{ ride.destination }}'
+										</h5>
+										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+											<span aria-hidden="true">&times;</span>
+										</button>
+									</div>
+									<div class="modal-body">
+
+										<form action="{{ url_for('delete_ride', ride_id=ride.id, date=dates_short[day]) }}" method="post">
+											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+											
+											<div class="form-group">
+												<label class="col-form-label">
+													Enter <strong>your password</strong> below.
+												</label>
+												<input type="password" class="form-control" name="password">
+											</div>
+											
+											<div class="modal-footer">
+												<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+												<button type="submit" class="btn btn-danger">Submit</button>
+											</div>
+											
+										</form>
 									</div>
 								</div>
-							</div>  <!-- End of modal form -->
+							</div>
+						</div>  <!-- End of modal form -->
+					
+					{% endfor %}
 						
-						{% endfor %}
-						
-					</ul>
+					
 		
 					<!-- Start times -->
 					{% if start_times[day] %}
@@ -535,6 +536,24 @@
 	{% endif %}
 
 {% endfor %}  <!-- for day in days -->
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                              Script to allow page jump to anchor                               -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	{% if anchor != "" %}
+		
+	    /* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	
+	{% endif %}
+	
+</script>
+
+
 
 
 {% endblock %}

@@ -337,7 +337,7 @@ def weekend():
                            days=days, dates_long=dates_long, dates_short=dates_short, DEFAULT_START=DEFAULT_START,
                            rides=rides, start_times=start_times, weather_data=weather_data,
                            polylines=polylines, cafe_coords=cafe_coords,
-                           elevation_data=elevation_data, elevation_cafes=elevation_cafes)
+                           elevation_data=elevation_data, elevation_cafes=elevation_cafes, anchor=target_date_str)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
