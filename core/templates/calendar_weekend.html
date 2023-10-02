@@ -96,104 +96,108 @@
 	<!--             JavaScript for Google Map showing multiple GPX plus one of more Cafes              -->
 	<!---------------------------------------------------------------------------------------------------->
 	
-	{% if GOOGLE_MAPS_API_KEY %}
+	<!-- Only load JS if we have amy rides this day -->
+	{% if rides[day] %}
 
-		<script>
-		
-			let {{day}}_map;
+		{% if GOOGLE_MAPS_API_KEY %}
+	
+			<script>
 			
-			async function init{{day}}Map() {
-		        
-		        /* Request needed libraries */
-		        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-		        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
-		        
-		        /* Define the map view */
-		        const {{day}}_map = new Map(document.getElementById("{{day}}_map"), {
-		            restriction: {
-		                latLngBounds: {{ MAP_BOUNDS | tojson }},
-		                strictBounds: false,
-		            },
-		            zoom: 9,
-		            center: {{ ELSR_HOME | tojson }},
-		            mapId: "7499929d658a3166",
-		        });
-		        
-		        /* Loop over Polylines */
-		        {% for polyline in polylines[day]['polylines'] %}
-		        
-			        /* Define our polyline */
-			        const flightPath{{ loop.index }} = new google.maps.Polyline({
-			            path: {{ polyline['polyline'] }},
-			            geodesic: true,
-			            strokeColor: "{{ polyline['color'] }}",
-			            strokeOpacity: 1.0,
-			            strokeWeight: 4,
+				let {{day}}_map;
+				
+				async function init{{day}}Map() {
+			        
+			        /* Request needed libraries */
+			        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
+			        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
+			        
+			        /* Define the map view */
+			        const {{day}}_map = new Map(document.getElementById("{{day}}_map"), {
+			            restriction: {
+			                latLngBounds: {{ MAP_BOUNDS | tojson }},
+			                strictBounds: false,
+			            },
+			            zoom: 9,
+			            center: {{ ELSR_HOME | tojson }},
+			            mapId: "7499929d658a3166",
 			        });
-			
-					/* We want a pop up info box for thr GPX route */
-					google.maps.event.addListener(flightPath{{ loop.index }}, 'mouseover', function(event) {
-			            current_lat = event.latLng.lat();
-			            current_lon = event.latLng.lng();
-			            
-			            // Create a new InfoWindow.
-			            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
-			                content: '{{ polyline['name'] | safe }}',
-			                position: event.latLng,
+			        
+			        /* Loop over Polylines */
+			        {% for polyline in polylines[day]['polylines'] %}
+			        
+				        /* Define our polyline */
+				        const flightPath{{ loop.index }} = new google.maps.Polyline({
+				            path: {{ polyline['polyline'] }},
+				            geodesic: true,
+				            strokeColor: "{{ polyline['color'] }}",
+				            strokeOpacity: 1.0,
+				            strokeWeight: 4,
+				        });
+				
+						/* We want a pop up info box for thr GPX route */
+						google.maps.event.addListener(flightPath{{ loop.index }}, 'mouseover', function(event) {
+				            current_lat = event.latLng.lat();
+				            current_lon = event.latLng.lng();
+				            
+				            // Create a new InfoWindow.
+				            gpxInfoWindow{{loop.index}} = new google.maps.InfoWindow({
+				                content: '{{ polyline['name'] | safe }}',
+				                position: event.latLng,
+				            });
+				            
+				            gpxInfoWindow{{loop.index}}.open({{day}}_map);
+						});
+				
+						/* and close the info box when they move elsewhere */
+						google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
+				            gpxInfoWindow{{loop.index}}.close();
+						});
+				
+						/* Add the path to the map */
+				        flightPath{{loop.index}}.setMap({{day}}_map);
+			        
+			        {% endfor %}
+			        
+			        
+			        /* This is our set of cafes */
+					const cafes = {{ cafe_coords[day] | tojson }}
+				    
+				    // Create an info window to share between markers.
+				    const infoWindow = new InfoWindow();
+								
+			        // Create the markers.
+			        cafes.forEach( ({ position, title, color }, i) => {
+			            const pin = new PinElement({
+			            glyph: `${i + 1}`,
 			            });
 			            
-			            gpxInfoWindow{{loop.index}}.open({{day}}_map);
-					});
+			            const marker = new AdvancedMarkerElement({
+			                position,
+			                map: {{day}}_map,
+			                title: `${title}`,
+			                content: new PinElement({
+			                                background: color,
+			                                borderColor: "black",
+			                                glyphColor: "black",
+										}).element
+			            });
+			            
+			            // Add a click listener for each marker, and set up the info window.
+			            marker.addListener("click", ({ domEvent, latLng }) => {
+			                const { target } = domEvent;
+			                infoWindow.close();
+			                infoWindow.setContent(marker.title);
+			                infoWindow.open(marker.map, marker);
+			            });
+			        });
+			        
+				}
 			
-					/* and close the info box when they move elsewhere */
-					google.maps.event.addListener(flightPath{{loop.index}}, 'mouseout', function() {
-			            gpxInfoWindow{{loop.index}}.close();
-					});
-			
-					/* Add the path to the map */
-			        flightPath{{loop.index}}.setMap({{day}}_map);
-		        
-		        {% endfor %}
-		        
-		        
-		        /* This is our set of cafes */
-				const cafes = {{ cafe_coords[day] | tojson }}
-			    
-			    // Create an info window to share between markers.
-			    const infoWindow = new InfoWindow();
-							
-		        // Create the markers.
-		        cafes.forEach( ({ position, title, color }, i) => {
-		            const pin = new PinElement({
-		            glyph: `${i + 1}`,
-		            });
-		            
-		            const marker = new AdvancedMarkerElement({
-		                position,
-		                map: {{day}}_map,
-		                title: `${title}`,
-		                content: new PinElement({
-		                                background: color,
-		                                borderColor: "black",
-		                                glyphColor: "black",
-									}).element
-		            });
-		            
-		            // Add a click listener for each marker, and set up the info window.
-		            marker.addListener("click", ({ domEvent, latLng }) => {
-		                const { target } = domEvent;
-		                infoWindow.close();
-		                infoWindow.setContent(marker.title);
-		                infoWindow.open(marker.map, marker);
-		            });
-		        });
-		        
-			}
+				init{{day}}Map();
+				
+			</script>
 		
-			init{{day}}Map();
-			
-		</script>
-	
+		{% endif %}
 	{% endif %}
 
 	<a name="{{ dates_short[day] }}" ></a>
@@ -322,7 +326,6 @@
 						</div>  <!-- End of modal form -->
 					
 					{% endfor %}
-						
 					
 		
 					<!-- Start times -->

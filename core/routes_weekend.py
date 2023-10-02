@@ -297,6 +297,14 @@ def weekend():
         polylines[day] = create_polyline_set(gpxes[day])
 
     # ----------------------------------------------------------- #
+    # Keep track of map loads
+    # ----------------------------------------------------------- #
+    for day in days:
+        if rides[day]:
+            # Weekend page has one map per day
+            count_map_loads(1)
+
+    # ----------------------------------------------------------- #
     # Get elevation graph data
     # ----------------------------------------------------------- #
     elevation_data = {}
@@ -326,9 +334,6 @@ def weekend():
 
     if private_gpx:
         flash("One or more routes hasn't been made public yet!")
-
-    # Keep count of Google Map Loads
-    count_map_loads(1)
 
     flash("Now meeting at Bean Theory Cafe!")
 
