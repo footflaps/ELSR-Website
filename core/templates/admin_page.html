@@ -3,6 +3,17 @@
 
 {% block content %}
 
+<head>
+	
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                Load JavaScript for chart.js                                    -->
+	<!---------------------------------------------------------------------------------------------------->
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	
+</head>
+
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                     Page Header                                                -->
@@ -51,6 +62,77 @@
 				<li>Map Count since midnight is {{ map_count }} / {{ map_limit }}, {{ "£%.2f"|format(map_cost_ukp) }}</li>
 			</ul>
 			
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h3>Graph of Google Map Counts</h3>
+			
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                 Show Google maps usage graph                                   -->
+			<!---------------------------------------------------------------------------------------------------->
+
+			<div style="height: 300px; width: 100%;">
+				
+				<canvas id="myChart"></canvas>
+			</div>
+			
+			<script>
+			
+				var custom_icon = new Image();
+          
+		        const data = {
+		            labels: {{ dataset['dates'] | tojson }},
+		            datasets: [{
+		                label: 'Google Map Counts',
+		                data: {{ dataset['counts'] | tojson }},
+		                fill: false,
+		                borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    },
+                    {
+		                label: 'Map Limit',
+		                data: {{ dataset['limits'] | tojson }},
+		                fill: false,
+		                borderColor: 'rgb(200, 55, 85)',
+                        tension: 0.1
+                    }],
+				};
+
+	            const config = {
+					  type: 'line',
+					  data: data,
+					  options: {
+					        maintainAspectRatio: false,
+					        scales: {
+					            x: {
+					                type: 'linear',
+					                position: 'bottom'
+					            },
+					        },
+					        plugins: {
+		                       legend: {
+	                                display: false
+                               }
+					        }
+					  }
+				};
+	        	
+		        const myChart = new Chart(
+		            document.getElementById('myChart'),
+		            config
+		        );
+	         
+	        </script>
+			
+		</div>
+	</div>
+	
+	<div class="row mt-5">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
 			{% if map_status %}
 				
 				<!-- Maps are enabled -->
@@ -69,6 +151,7 @@
 				</h2>
 		
 			{% endif %}
+			
 			
 			<!-- Button to expose hidden table -->
 			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseMapControls"

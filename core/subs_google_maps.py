@@ -4,7 +4,7 @@ import gpxpy.gpx
 import mpu
 import os
 import json
-from datetime import datetime
+from datetime import datetime, date
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -588,7 +588,67 @@ def get_current_map_count():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Generate graph of maps counts vs cap
+# -------------------------------------------------------------------------------------------------------------- #
+def graph_map_counts():
+    # ----------------------------------------------------------- #
+    #   Read in the whole map usage file
+    # ----------------------------------------------------------- #
+    # Use abs path
+    filename = os.path.join(CONFIG_FOLDER, os.path.basename(MAP_COUNT_FILENAME))
+
+    # Make sure file exists!
+    if os.path.exists(filename):
+        with open(filename, 'r') as file:
+            lines = file.readlines()
+    else:
+        return None
+
+    # ----------------------------------------------------------- #
+    #   Need three arrays
+    # ----------------------------------------------------------- #
+    dates = []
+    counts = []
+    limits = []
+
+    # ----------------------------------------------------------- #
+    #   Generate our map count data sets
+    # ----------------------------------------------------------- #
+    for line in lines:
+        # Get date and number map reads
+        line = line.rstrip('\n')
+        data = line.split(',')
+
+        # Need the day of week
+        date_str = data[0].strip()
+        date_obj = date(int(date_str[0:4]), int(date_str[4:6]), int(date_str[6:8]))
+        day_of_week = date_obj.strftime('%A')
+
+        # Need map count
+        count = int(data[1])
+
+        # Need limit by day of week
+        limit = MAP_LIMITS_BY_DAY[day_of_week]
+
+        # Stick in our lists
+        dates.append(date_str)
+        counts.append(count)
+        limits.append(limit)
+
+    # ----------------------------------------------------------- #
+    #   Return all
+    # ----------------------------------------------------------- #
+    return {"dates": dates,
+            "counts": counts,
+            "limits": limits}
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 # Start of day record in the logfile / console etc
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
 print(f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
