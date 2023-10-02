@@ -234,7 +234,7 @@ def gpx_direction(gpx_id):
                 # Skip 1st point and then use every 4th point for speed
                 for point in segment.points[1::4]:
                     # https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
-                    edge = (point.longitude - prev_lon) * (point.latitude + prev_lat)
+                    edge = (point.longitude + prev_lon) * (point.latitude - prev_lat)
                     sum_edges += edge
 
     # ----------------------------------------------------------- #
