@@ -1,4 +1,5 @@
-from flask import render_template, request, flash, abort, send_from_directory, url_for
+from flask import render_template, request, flash, abort, send_from_directory, url_for, redirect
+from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFError
 from wtforms import StringField, EmailField, SubmitField
@@ -134,10 +135,29 @@ def static_from_root():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Home
+# Front page
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/', methods=['GET'])
+@update_last_seen
+def welcome():
+    # -------------------------------------------------------------------------------------------- #
+    # Decide where to send them
+    # -------------------------------------------------------------------------------------------- #
+
+    if current_user.is_authenticated:
+        # Logged in users see the blog
+        return redirect(url_for('blog'))
+    else:
+        # New users see home
+        return redirect(url_for('home'))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Home
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/home', methods=['GET'])
 @update_last_seen
 def home():
     # -------------------------------------------------------------------------------------------- #
