@@ -132,8 +132,12 @@
 	            {% endif %}
 	            
             </div>
-	           
-	        <p>{{ gpx.length_km|int }} km and {{ gpx.ascent_m|int }} m climbing</p>
+	        
+			<ul>
+	            <li>{{ gpx.length_km|int }} km long</li>
+	            <li>Approx. {{ gpx.ascent_m|int }} m climbing (from GPX altitude data).</li>
+				<li>Route is <strong>{{ direction }}.</strong></li>
+			</ul>
 			
 			<p class="my-0"> Cafe options:</p>
 			<ul>
@@ -145,7 +149,10 @@
 				{% endfor %}
 			</ul>
 			
-			<p> Uploaded by {{ author }} on {{ gpx.date }} </p>
+			<p>
+				Uploaded by <img src="{{ gpx.email | gravatar }}"
+			         width="40" style="border-radius: 50%;"/> {{ author }} on {{ gpx.date }}
+			</p>
 			
 			<!-- Separator before next section -->
 			<hr>

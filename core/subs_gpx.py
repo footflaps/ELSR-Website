@@ -3,6 +3,7 @@ import gpxpy.gpx
 import mpu
 import os
 
+from dominate.tags import sub
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -183,3 +184,60 @@ def check_new_gpx_with_all_cafes(gpx_id):
                     # Push update to GPX file
                     Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
                                            min_distance_path_km[cafe.id - 1])
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Work out if a route is Clockwise or anti-Clockwise
+# -------------------------------------------------------------------------------------------------------------- #
+def gpx_direction(gpx_id):
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+
+    # Make sure gpx_id is valid
+    if not gpx:
+        app.logger.debug(f"gpx_direction(): Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        Event().log_event("gpx_direction Fail", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        return None
+
+    # ----------------------------------------------------------- #
+    # Check we have an actual file
+    # ----------------------------------------------------------- #
+
+    # Use absolute path for filename
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+
+    # Check GPX file actually exists
+    if not os.path.exists(filename):
+        app.logger.debug(f"gpx_direction(): Failed to locate file: gpx_id = '{gpx_id}'.")
+        Event().log_event("gpx_direction Fail", f"Failed to locate file: gpx_id = '{gpx_id}'.")
+        return None
+
+    # ----------------------------------------------------------- #
+    # Work out the direction the route goes in
+    # ----------------------------------------------------------- #
+
+    # Open and parse the file
+    with open(filename, 'r') as file_ref:
+
+        gpx_file = gpxpy.parse(file_ref)
+
+        for track in gpx_file.tracks:
+            for segment in track.segments:
+
+                # We'll need these
+                sum_edges = 0
+                prev_lat = segment.points[0].latitude
+                prev_lon = segment.points[0].longitude
+
+                # Skip 1st point and then use every 4th point for speed
+                for point in segment.points[1::4]:
+                    # https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
+                    edge = (point.longitude - prev_lon) * (point.latitude - prev_lat)
+                    sum_edges += edge
+
+    # ----------------------------------------------------------- #
+    # Return the sum of edges (+ve => CW, -ve => CCW)
+    # ----------------------------------------------------------- #
+    return sum_edges
