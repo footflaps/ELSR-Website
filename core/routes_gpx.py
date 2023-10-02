@@ -902,7 +902,7 @@ def route_delete():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Download a GPX route
+# Download a GPX route (logged in user)
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/gpx_download/<int:gpx_id>', methods=['GET'])
@@ -950,6 +950,94 @@ def route_download(gpx_id):
 
     app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
     Event().log_event("GPX Downloaded", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
+    return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
+                               path=os.path.basename(gpx.filename),
+                               download_name=download_name)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Download a GPX route (no login link in email)
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/gpx_download2', methods=['GET'])
+@logout_barred_user
+@update_last_seen
+def gpx_download2():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    gpx_id = request.args.get('gpx_id', None)
+    email = request.args.get('email', None)
+    code = request.args.get('code', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not gpx_id:
+        app.logger.debug(f"gpx_download2(): Missing gpx_id!")
+        Event().log_event("gpx_download2 Fail", f"missing gpx_id!")
+        abort(400)
+    elif not email:
+        app.logger.debug(f"gpx_download2(): Missing email!")
+        Event().log_event("gpx_download2 Fail", f"Missing email!")
+        abort(400)
+    elif not code:
+        app.logger.debug(f"gpx_download2(): Missing code!")
+        Event().log_event("gpx_download2 Fail", f"Missing code!")
+        abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(gpx_id)
+    if not gpx:
+        app.logger.debug(f"gpx_download2(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
+        Event().log_event("gpx_download2 Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        flash("Sorry, we couldn't find that GPX file in the database!")
+        return abort(404)
+
+    user = User().find_user_from_email(email)
+    if not user:
+        app.logger.debug(f"gpx_download2(): Failed to locate user email = '{email}'.")
+        Event().log_event("gpx_download2 Fail", f"Failed to locate user email = '{email}'.")
+        flash("Sorry, we couldn't find that email address in the database!")
+        return abort(404)
+
+    # Validate download code
+    if code != user.gpx_download_code(gpx.id):
+        app.logger.debug(f"gpx_download2(): Passed invalid download code = '{code}'.")
+        Event().log_event("gpx_download2 Fail", f"Passed invalid download code = '{code}'.")
+        flash("Invalid download code!")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Check GPX file exists
+    # ----------------------------------------------------------- #
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+
+    if not os.path.exists(filename):
+        # Should never get here, but..
+        app.logger.debug(f"gpx_download2(): Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
+        Event().log_event("gpx_download2 Fail", f"Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
+        flash("Sorry, we couldn't find that GPX file on the server!")
+        flash("You should probably fire the web developer...")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Update the GPX file with the correct name (in case it's changed)
+    # ----------------------------------------------------------- #
+
+    check_route_name(gpx)
+
+    # ----------------------------------------------------------- #
+    # Send link to download the file
+    # ----------------------------------------------------------- #
+
+    # This is the filename the user will see
+    download_name = f"ELSR_{gpx.name.replace(' ','_')}.gpx"
+
+    app.logger.debug(f"gpx_download2d(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
+    Event().log_event("gpx_download2", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
     return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
                                path=os.path.basename(gpx.filename),
                                download_name=download_name)

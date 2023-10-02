@@ -57,7 +57,6 @@ class Gpx(db.Model):
     # Is the GPX valid
     valid = db.Column(db.Integer, nullable=True)
 
-
     def public(self):
         return self.valid == 1
 

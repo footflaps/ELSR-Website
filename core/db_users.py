@@ -756,6 +756,10 @@ class User(UserMixin, db.Model):
         # Need something secret, that no one else would know, so hash their password hash
         return hashlib.md5(f"{self.password}".encode('utf-8')).hexdigest()
 
+    def gpx_download_code(self, gpx_id):
+        # Need something secret, that no one else would know, so hash their password hash
+        return hashlib.md5(f"{self.password}{gpx_id}".encode('utf-8')).hexdigest()
+
     # Optional: this will allow each user object to be identified by its name when printed.
     # NB Names are not unique, but emails are, hence added in brackets
     def __repr__(self):
