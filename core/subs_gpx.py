@@ -233,15 +233,14 @@ def gpx_direction(gpx_id):
                 start_lon = segment.points[0].longitude
                 app.logger.debug(f"start_lat = '{start_lat}', start_lon = '{start_lon}'")
 
-
                 num_points = len(segment.points)
 
-                # Outward point (25%)
+                # Outward point is 25% along the path
                 out_lat = segment.points[math.floor(num_points*0.25)].latitude
                 out_lon = segment.points[math.floor(num_points*0.25)].longitude
                 app.logger.debug(f"out_lat = '{out_lat}', out_lon = '{out_lon}'")
 
-                # Return point (75%)
+                # Return point is 75% along the path
                 ret_lat = segment.points[math.floor(num_points * 0.75)].latitude
                 ret_lon = segment.points[math.floor(num_points * 0.75)].longitude
                 app.logger.debug(f"ret_lat = '{ret_lat}', ret_lon = '{ret_lon}'")
@@ -249,20 +248,84 @@ def gpx_direction(gpx_id):
     # ----------------------------------------------------------- #
     # Derive angle of two vectors
     # ----------------------------------------------------------- #
+    return cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, False)
 
+
+def cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, debug):
+    # ----------------------------------------------------------- #
+    # Derive angle of two vectors
+    # ----------------------------------------------------------- #
     outward_angle_deg = numpy.arctan2(out_lat - start_lat, out_lon - start_lon) / math.pi * 180
     return_angle_deg = numpy.arctan2(ret_lat - start_lat, ret_lon - start_lon) / math.pi * 180
 
-    app.logger.debug(f"outward_angle_deg = '{outward_angle_deg}'")
-    app.logger.debug(f"return_angle_deg = '{return_angle_deg}'")
+    if debug:
+        print(f"outward_angle_deg = '{round( outward_angle_deg, 3)}', return_angle_deg = '{round(return_angle_deg, 3)}'")
+
+    # ----------------------------------------------------------- #
+    # We have to cope with two exceptions, the vectors spanning 180/-180
+    # ----------------------------------------------------------- #
+    if outward_angle_deg > 90 and \
+            return_angle_deg < -90:
+        return_angle_deg += 360
+
+    if return_angle_deg > 90 and \
+            outward_angle_deg < -90:
+        outward_angle_deg += 360
 
     # ----------------------------------------------------------- #
     # Make them both +ve
     # ----------------------------------------------------------- #
     if outward_angle_deg > return_angle_deg:
-        app.logger.debug("outward_angle_deg > return_angle_deg => CW")
-        return 10
+        return "CW"
     else:
-        app.logger.debug("outward_angle_deg < return_angle_deg => CCW")
-        return -10
+        return "CCW"
+
+
+def test_cw_ccw():
+    start_lon = 52.2
+    start_lat = 0.11
+    range_deg = 0.2
+
+    # 0 deg = due North, 90 deg = due East
+    for deg in range(-90, 391, 10):
+        out_deg = deg
+        ret_deg = deg - 20
+
+        out_lat = start_lat + math.sin(out_deg/180 * math.pi) * range_deg
+        out_lon = start_lon + math.cos(out_deg/180 * math.pi) * range_deg
+        ret_lat = start_lat + math.sin(ret_deg / 180 * math.pi) * range_deg
+        ret_lon = start_lon + math.cos(ret_deg / 180 * math.pi) * range_deg
+
+        if cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, False) == "CW":
+            pass
+        else:
+            print("CW FAIL")
+            print(f"deg = '{deg}'")
+            print(f"out_deg = '{out_deg}': out_lon = '{round(out_lon, 3)}', out_lat = '{round(out_lat, 3)}'")
+            print(f"ret_deg = '{ret_deg}': ret_lon = '{round(ret_lon, 3)}',ret_lat = '{round(ret_lat, 3)}'")
+            cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, True)
+
+    for deg in range(-90, 391, 10):
+        out_deg = deg
+        ret_deg = deg + 20
+
+        out_lat = start_lat + math.sin(out_deg / 180 * math.pi) * range_deg
+        out_lon = start_lon + math.cos(out_deg / 180 * math.pi) * range_deg
+        ret_lat = start_lat + math.sin(ret_deg / 180 * math.pi) * range_deg
+        ret_lon = start_lon + math.cos(ret_deg / 180 * math.pi) * range_deg
+
+        if cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, False) == "CCW":
+            pass
+        else:
+            print("CCW FAIL")
+            print(f"deg = '{deg}'")
+            print(f"out_deg = '{out_deg}': out_lon = '{round(out_lon, 3)}', out_lat = '{round(out_lat, 3)}'")
+            print(f"ret_deg = '{ret_deg}': ret_lon = '{round(ret_lon, 3)}',ret_lat = '{round(ret_lat, 3)}'")
+            cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, True)
+
+test_cw_ccw()
+
+
+
+
 

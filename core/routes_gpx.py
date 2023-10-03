@@ -158,13 +158,10 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     # Need direction (CW / CCW)
     # ----------------------------------------------------------- #
-    raw_value = gpx_direction(gpx.id)
-    if raw_value > 0:
+    if gpx_direction(gpx.id) == "CW":
         direction = "Clockwise"
     else:
         direction = "Anti-clockwise"
-    app.logger.debug(f"GPX: '{gpx.name}' has sum edges of '{raw_value}' ie '{direction}'.")
-
 
     # ----------------------------------------------------------- #
     # Need path as weird Google proprietary JSON string thing
