@@ -259,18 +259,15 @@ def gpx_direction(gpx_id):
     # ----------------------------------------------------------- #
     # Make them both +ve
     # ----------------------------------------------------------- #
-    if outward_angle_deg < 0:
-        outward_angle_deg += 360
-    if return_angle_deg < 0:
-        return_angle_deg += 360
-
-    app.logger.debug(f"outward_angle_deg = '{outward_angle_deg}'")
-    app.logger.debug(f"return_angle_deg = '{return_angle_deg}'")
-
-    # ----------------------------------------------------------- #
-    # Return the sum of edges (+ve => CW, -ve => CCW)
-    # ----------------------------------------------------------- #
-    if outward_angle_deg > return_angle_deg:
-        return 10
+    if outward_angle_deg * return_angle_deg < 0:
+        app.logger.debug(f"Inverting direction'")
+        if outward_angle_deg > return_angle_deg:
+            return -10
+        else:
+            return 10
     else:
-        return -10
+        if outward_angle_deg > return_angle_deg:
+            return 10
+        else:
+            return -10
+
