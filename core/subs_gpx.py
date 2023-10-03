@@ -2,8 +2,8 @@ import gpxpy
 import gpxpy.gpx
 import mpu
 import os
-import math
-import numpy
+# import math
+# import numpy
 
 from dominate.tags import sub
 
@@ -220,46 +220,47 @@ def gpx_direction(gpx_id):
     # Work out the direction the route goes in
     # ----------------------------------------------------------- #
 
-    # Open and parse the file
-    with open(filename, 'r') as file_ref:
-
-        gpx_file = gpxpy.parse(file_ref)
-
-        for track in gpx_file.tracks:
-            for segment in track.segments:
-
-                # We'll need these
-                start_lat = segment.points[0].latitude
-                start_lon = segment.points[0].longitude
-                print(f"start_lat = '{start_lat}', start_lon = '{start_lon}'")
-
-
-                num_points = len(segment.points)
-
-                # Outward point (25%)
-                out_lat = segment.points[math.floor(num_points*0.25)].latitude
-                out_lon = segment.points[math.floor(num_points*0.25)].longitude
-                print(f"out_lat = '{out_lat}', out_lon = '{out_lon}'")
-
-                # Return point (75%)
-                ret_lat = segment.points[math.floor(num_points * 0.75)].latitude
-                ret_lon = segment.points[math.floor(num_points * 0.75)].longitude
-                print(f"ret_lat = '{ret_lat}', ret_lon = '{ret_lon}'")
-
-    # ----------------------------------------------------------- #
-    # Derive angle of two vectors
-    # ----------------------------------------------------------- #
-
-    outward_angle = numpy.arctan2(out_lat - start_lat, out_lon - start_lon)
-    return_angle = numpy.arctan2(ret_lat - start_lat, ret_lon - start_lon)
-
-    print(f"outward_angle = '{outward_angle}'")
-    print(f"return_angle = '{return_angle}'")
-
-    # ----------------------------------------------------------- #
-    # Return the sum of edges (+ve => CW, -ve => CCW)
-    # ----------------------------------------------------------- #
-    if outward_angle > return_angle:
-        return 10
-    else:
-        return -10
+    # # Open and parse the file
+    # with open(filename, 'r') as file_ref:
+    #
+    #     gpx_file = gpxpy.parse(file_ref)
+    #
+    #     for track in gpx_file.tracks:
+    #         for segment in track.segments:
+    #
+    #             # We'll need these
+    #             start_lat = segment.points[0].latitude
+    #             start_lon = segment.points[0].longitude
+    #             print(f"start_lat = '{start_lat}', start_lon = '{start_lon}'")
+    #
+    #
+    #             num_points = len(segment.points)
+    #
+    #             # Outward point (25%)
+    #             out_lat = segment.points[math.floor(num_points*0.25)].latitude
+    #             out_lon = segment.points[math.floor(num_points*0.25)].longitude
+    #             print(f"out_lat = '{out_lat}', out_lon = '{out_lon}'")
+    #
+    #             # Return point (75%)
+    #             ret_lat = segment.points[math.floor(num_points * 0.75)].latitude
+    #             ret_lon = segment.points[math.floor(num_points * 0.75)].longitude
+    #             print(f"ret_lat = '{ret_lat}', ret_lon = '{ret_lon}'")
+    #
+    # # ----------------------------------------------------------- #
+    # # Derive angle of two vectors
+    # # ----------------------------------------------------------- #
+    #
+    # outward_angle = numpy.arctan2(out_lat - start_lat, out_lon - start_lon)
+    # return_angle = numpy.arctan2(ret_lat - start_lat, ret_lon - start_lon)
+    #
+    # print(f"outward_angle = '{outward_angle}'")
+    # print(f"return_angle = '{return_angle}'")
+    #
+    # # ----------------------------------------------------------- #
+    # # Return the sum of edges (+ve => CW, -ve => CCW)
+    # # ----------------------------------------------------------- #
+    # if outward_angle > return_angle:
+    #     return 10
+    # else:
+    #     return -10
+    return 10
