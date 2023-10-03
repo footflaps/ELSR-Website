@@ -259,15 +259,10 @@ def gpx_direction(gpx_id):
     # ----------------------------------------------------------- #
     # Make them both +ve
     # ----------------------------------------------------------- #
-    if outward_angle_deg * return_angle_deg < 0:
-        app.logger.debug(f"Inverting direction'")
-        if outward_angle_deg > return_angle_deg:
-            return -10
-        else:
-            return 10
+    if outward_angle_deg > return_angle_deg:
+        app.logger.debug("outward_angle_deg > return_angle_deg => CW")
+        return 10
     else:
-        if outward_angle_deg > return_angle_deg:
-            return 10
-        else:
-            return -10
+        app.logger.debug("outward_angle_deg < return_angle_deg => CCW")
+        return -10
 
