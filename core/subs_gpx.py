@@ -250,16 +250,24 @@ def gpx_direction(gpx_id):
     # Derive angle of two vectors
     # ----------------------------------------------------------- #
 
-    outward_angle = numpy.arctan2(out_lat - start_lat, out_lon - start_lon)
-    return_angle = numpy.arctan2(ret_lat - start_lat, ret_lon - start_lon)
+    outward_angle_deg = numpy.arctan2(out_lat - start_lat, out_lon - start_lon) / math.pi * 180
+    return_angle_deg = numpy.arctan2(ret_lat - start_lat, ret_lon - start_lon) / math.pi * 180
 
-    app.logger.debug(f"outward_angle = '{outward_angle}'")
-    app.logger.debug(f"return_angle = '{return_angle}'")
+    app.logger.debug(f"outward_angle_deg = '{outward_angle_deg}'")
+    app.logger.debug(f"return_angle_deg = '{return_angle_deg}'")
+
+    # ----------------------------------------------------------- #
+    # Make them both +ve
+    # ----------------------------------------------------------- #
+    if outward_angle_deg < 0:
+        outward_angle_deg += 360
+    if return_angle_deg < 0:
+        return_angle_deg += 360
 
     # ----------------------------------------------------------- #
     # Return the sum of edges (+ve => CW, -ve => CCW)
     # ----------------------------------------------------------- #
-    if outward_angle > return_angle:
+    if outward_angle_deg > return_angle_deg:
         return 10
     else:
         return -10
