@@ -2,6 +2,8 @@ import gpxpy
 import gpxpy.gpx
 import mpu
 import os
+import math
+import numpy
 
 from dominate.tags import sub
 
@@ -227,17 +229,37 @@ def gpx_direction(gpx_id):
             for segment in track.segments:
 
                 # We'll need these
-                sum_edges = 0
-                prev_lat = segment.points[0].latitude
-                prev_lon = segment.points[0].longitude
+                start_lat = segment.points[0].latitude
+                start_lon = segment.points[0].longitude
+                print(f"start_lat = '{start_lat}', start_lon = '{start_lon}'")
 
-                # Skip 1st point and then use every 4th point for speed
-                for point in segment.points[1::4]:
-                    # https://stackoverflow.com/questions/1165647/how-to-determine-if-a-list-of-polygon-points-are-in-clockwise-order
-                    edge = (point.longitude + prev_lon) * (point.latitude - prev_lat)
-                    sum_edges += edge
+
+                num_points = len(segment.points)
+
+                # Outward point (25%)
+                out_lat = segment.points[math.floor(num_points*0.25)].latitude
+                out_lon = segment.points[math.floor(num_points*0.25)].longitude
+                print(f"out_lat = '{out_lat}', out_lon = '{out_lon}'")
+
+                # Return point (75%)
+                ret_lat = segment.points[math.floor(num_points * 0.75)].latitude
+                ret_lon = segment.points[math.floor(num_points * 0.75)].longitude
+                print(f"ret_lat = '{ret_lat}', ret_lon = '{ret_lon}'")
+
+    # ----------------------------------------------------------- #
+    # Derive angle of two vectors
+    # ----------------------------------------------------------- #
+
+    outward_angle = numpy.arctan2(out_lat - start_lat, out_lon - start_lon)
+    return_angle = numpy.arctan2(ret_lat - start_lat, ret_lon - start_lon)
+
+    print(f"outward_angle = '{outward_angle}'")
+    print(f"return_angle = '{return_angle}'")
 
     # ----------------------------------------------------------- #
     # Return the sum of edges (+ve => CW, -ve => CCW)
     # ----------------------------------------------------------- #
-    return sum_edges
+    if outward_angle > return_angle:
+        return 10
+    else:
+        return -10
