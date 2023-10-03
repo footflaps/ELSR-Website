@@ -264,6 +264,9 @@ def gpx_direction(gpx_id):
     if return_angle_deg < 0:
         return_angle_deg += 360
 
+    app.logger.debug(f"outward_angle_deg = '{outward_angle_deg}'")
+    app.logger.debug(f"return_angle_deg = '{return_angle_deg}'")
+
     # ----------------------------------------------------------- #
     # Return the sum of edges (+ve => CW, -ve => CCW)
     # ----------------------------------------------------------- #
