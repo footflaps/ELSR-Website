@@ -104,7 +104,7 @@ class Calendar(db.Model):
 
     def all_calender_group(self, group: str):
         with app.app_context():
-            rides = db.session.query(Calendar).filter_by(group=group).order_by(Calendar.unix_date(self)).all()
+            rides = db.session.query(Calendar).filter_by(group=group).order_by(Calendar.unix_date.desc()).all()
             return rides
 
     # Look up event by ID
@@ -147,25 +147,14 @@ class Calendar(db.Model):
         return f'<Ride "{self.destination} , lead by {self.leader}">'
 
 
-
-
-rides = Calendar().all_calendar()
-for ride in rides:
-    if not ride.unix_date:
-        date_obj = datetime(int(ride.date[4:8]), int(ride.date[2:4]), int(ride.date[0:2]), 0, 00)
-        date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
-        ride.unix_date = date_unix
-        Calendar().add_ride(ride)
-
-
-
-
-
-
-
-
-
-
+# # One off code to populate unix dates
+# rides = Calendar().all_calendar()
+# for ride in rides:
+#     if not ride.unix_date:
+#         date_obj = datetime(int(ride.date[4:8]), int(ride.date[2:4]), int(ride.date[0:2]), 0, 00)
+#         date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
+#         ride.unix_date = date_unix
+#         Calendar().add_ride(ride)
 
 
 
