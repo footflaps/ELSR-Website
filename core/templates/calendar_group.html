@@ -180,9 +180,9 @@
 								<td scope="row">{{ loop.index }}</td>
 								<td scope="row">{{ ride.date }}</td>
 								<td scope="row">{{ get_user_name(ride.email) }}</td>
-								<td scope="row">{{ ride.destination }}</td>
-								<td scope="row">{{ ride.length_km }}</td>
-								<td scope="row">{{ ride.ascent_m }}</td>
+								<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.destination }}</a></td>
+								<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.length_km }}</a></td>
+								<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.ascent_m }}</a></td>
 							</tr>
 						{% endfor %}
 					</tbody>
