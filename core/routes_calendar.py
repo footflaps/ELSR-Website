@@ -585,7 +585,7 @@ def ride_history(request):
     # ----------------------------------------------------------- #
     # Extract all the rides from the calendar
     # ----------------------------------------------------------- #
-    rides = Calendar().all_calender_group(group)
+    rides = Calendar().all_calender_group_in_past(group)
 
     # ----------------------------------------------------------- #
     # Extract details from the GPX and add to the ride objects

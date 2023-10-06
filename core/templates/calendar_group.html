@@ -162,34 +162,32 @@
 				       style="width: 100%"
 					   data-page-length="25">
 					
-					<!-- Header -->
-					<thead>
+				<!-- Header -->
+				<thead>
+					<tr>
+						<th scope="col">#</th>
+						<th scope="col">Date</th>
+						<th scope="col">Leader</th>
+						<th scope="col">Destination</th>
+						<th scope="col">Distance (km)</th>
+						<th scope="col">Ascent (m)</th>
+					</tr>
+				</thead>
+			
+				<tbody>
+					{% for ride in rides: %}
 						<tr>
-							<th scope="col">#</th>
-							<th scope="col">Date</th>
-							<th scope="col">Leader</th>
-							<th scope="col">Destination</th>
-							<th scope="col">Distance (km)</th>
-							<th scope="col">Ascent (m)</th>
+							<td scope="row">{{ loop.index }}</td>
+							<td scope="row">{{ ride.date }}</td>
+							<td scope="row">{{ get_user_name(ride.email) }}</td>
+							<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.destination }}</a></td>
+							<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.length_km }}</a></td>
+							<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.ascent_m }}</a></td>
 						</tr>
-					</thead>
-				
-					<tbody>
-						{% for ride in rides: %}
-							<tr>
-								<td scope="row">{{ loop.index }}</td>
-								<td scope="row">{{ ride.date }}</td>
-								<td scope="row">{{ get_user_name(ride.email) }}</td>
-								<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.destination }}</a></td>
-								<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.length_km }}</a></td>
-								<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">{{ ride.ascent_m }}</a></td>
-							</tr>
-						{% endfor %}
-					</tbody>
+					{% endfor %}
+				</tbody>
 			
-				</table>
-			
-			
+			</table>
 			
 			<hr>
 			

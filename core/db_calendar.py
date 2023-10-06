@@ -4,6 +4,7 @@ from flask_wtf.file import FileField
 from wtforms.validators import DataRequired
 import os
 from datetime import datetime, timedelta
+import time
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -102,9 +103,13 @@ class Calendar(db.Model):
                     rides.append(ride)
             return rides
 
-    def all_calender_group(self, group: str):
+    def all_calender_group_in_past(self, group: str):
+        # Get current Unix Epoch time, plus a bit (6 hours)
+        # This is because we add 2 hours to Unix Epoch timestamps to get round GMT/BST problem
+        now = time.time() + 60*60*6
         with app.app_context():
-            rides = db.session.query(Calendar).filter_by(group=group).order_by(Calendar.unix_date.desc()).all()
+            rides = db.session.query(Calendar).filter_by(group=group).\
+                            filter(Calendar.unix_date < now).order_by(Calendar.unix_date.desc()).all()
             return rides
 
     # Look up event by ID
@@ -155,7 +160,6 @@ class Calendar(db.Model):
 #         date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
 #         ride.unix_date = date_unix
 #         Calendar().add_ride(ride)
-
 
 
 # -------------------------------------------------------------------------------------------------------------- #
