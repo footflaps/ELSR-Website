@@ -174,6 +174,15 @@
 			    Vegetarian / Vegan options are normally available. You can see a list of our regular stops
 			    <strong><a href="{{ url_for('cafe_list') }}">here.</a></strong>
 			</p>
+		
+			<p>If you want to see our groups rides over the past couple of months, you can find them here:</p>
+			<ul>
+				<li><a href="{{ url_for('ride_history', request='Doppio') }}"><strong>Doppio</strong> Ride History</a></li>
+				<li><a href="{{ url_for('ride_history', request='Espresso') }}"><strong>Espresso</strong> Ride History</a></li>
+				<li><a href="{{ url_for('ride_history', request='Decaff') }}"><strong>Decaff</strong> Ride History</a></li>
+				<li><a href="{{ url_for('ride_history', request='Mixed') }}"><strong>Mixed</strong> Ride History (Sunday Rides)</a></li>
+			</ul>
+			
 			<hr>
 			
 			
@@ -292,7 +301,6 @@
 					   style=" color:#c9c8cd; font-family:Arial,sans-serif; font-size:14px; font-style:normal; font-weight:normal; line-height:17px; text-decoration:none;"
 					   target="_blank">A post shared by EL social rides (@elsr_cambridge_uk)</a></p></div></blockquote>
 			<script async src="//www.instagram.com/embed.js"></script>
-			
 			
 			<hr>
 			

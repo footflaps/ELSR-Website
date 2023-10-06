@@ -91,10 +91,16 @@ class Calendar(db.Model):
     def all_calendar_date(self, ride_date: str):
         with app.app_context():
             rides = []
+            # We want them ordered by group so they are ordered on the webpage
             for group in GROUP_CHOICES:
                 ride_set = db.session.query(Calendar).filter_by(date=ride_date).filter_by(group=group).all()
                 for ride in ride_set:
                     rides.append(ride)
+            return rides
+
+    def all_calender_group(self, group: str):
+        with app.app_context():
+            rides = db.session.query(Calendar).filter_by(group=group).order_by(Calendar.id.desc()).all()
             return rides
 
     # Look up event by ID
@@ -105,7 +111,6 @@ class Calendar(db.Model):
             return ride
 
     def add_ride(self, new_ride):
-
         # Try and add to dB
         with app.app_context():
             try:

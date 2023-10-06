@@ -130,12 +130,17 @@ def cafe_details(cafe_id):
     # -------------------------------------------------------------------------------------------- #
     # Map for where the cafe is
     # -------------------------------------------------------------------------------------------- #
+    # Is cafe open or closed?
+    if cafe.active:
+        cafe_colour = OPEN_CAFE_COLOUR
+    else:
+        cafe_colour = CLOSED_CAFE_COLOUR
 
     # Need cafe markers as weird Google proprietary JSON string
     cafe_markers = [{
         "position": {"lat": cafe.lat, "lng": cafe.lon},
         "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-        "color": OPEN_CAFE_COLOUR,
+        "color": cafe_colour,
     }]
 
     # Map will launch centered here

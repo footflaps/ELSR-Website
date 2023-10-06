@@ -250,8 +250,18 @@
 			<!--                                      Insert Google Map                                         -->
 			<!---------------------------------------------------------------------------------------------------->
 			
-			<div id="cafe_map" style="height: 500px"></div>
-
+			{% if GOOGLE_MAPS_API_KEY %}
+				
+                <!-- Live Maps -->
+				<div id="cafe_map" style="height: 500px"></div>
+			
+            {% else %}
+			
+				<!-- Maps have been disabled -->
+				<img src="{{ url_for('static', filename='img/fake_map.jpg') }}">
+			
+            {% endif %}
+			
 			<!-- Break before next section -->
 			<hr>
 			
@@ -398,10 +408,20 @@
 				<!--                                      Insert Google Map                                         -->
 				<!---------------------------------------------------------------------------------------------------->
 			
-				<div id="gpx_map" style="height: 500px"></div>
+				{% if GOOGLE_MAPS_API_KEY %}
+					
+					<!-- Live Maps -->
+					<div id="gpx_map" style="height: 500px"></div>
 				
-				{% if warning: %}
-					<h4 class="my-3">{{ warning }}</h4>
+					{% if warning: %}
+						<h4 class="my-3">{{ warning }}</h4>
+					{% endif %}
+				
+				{% else %}
+				
+					<!-- Maps have been disabled -->
+					<img src="{{ url_for('static', filename='img/fake_map.jpg') }}">
+				
 				{% endif %}
 				
 				<!-- Break before next section -->

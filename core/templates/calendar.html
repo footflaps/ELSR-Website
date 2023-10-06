@@ -68,19 +68,29 @@
 			<p>NB Weekend rides are normally scheduled the Thursday / Friday of that week, when we have
 			   good visibility of wind direction etc.</p>
 			
+			<p>If you want to see our groups rides over the past couple of months, you can find them here:</p>
+			<ul>
+				<li><a href="{{ url_for('ride_history', request='Doppio') }}"><strong>Doppio</strong> Ride History</a></li>
+				<li><a href="{{ url_for('ride_history', request='Espresso') }}"><strong>Espresso</strong> Ride History</a></li>
+				<li><a href="{{ url_for('ride_history', request='Decaff') }}"><strong>Decaff</strong> Ride History</a></li>
+				<li><a href="{{ url_for('ride_history', request='Mixed') }}"><strong>Mixed</strong> Ride History (Sunday Rides)</a></li>
+			</ul>
+			
+			<hr>
+			
 		</div>
 	</div>
 </div>
 
 
-<div class="container">
-	<div class="row mt-4">
-		<div class="col-lg-8 col-md-10 mx-auto">
-			
-			<!-- Logged in users can add rides -->
-			{% if current_user.is_authenticated: %}
-				{% if current_user.readwrite() %}
-			
+<!-- Logged in users can add rides -->
+{% if current_user.is_authenticated: %}
+	{% if current_user.readwrite() %}
+
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					
 					<!-- Add social button -->
 					<a href="{{ url_for('add_social', date=None) }}">
 						<button type="button" class="btn btn-primary float-left">Add social</button>
@@ -90,26 +100,24 @@
 					<a href="{{ url_for('add_ride', date=None) }}">
 						<button type="button" class="btn btn-primary float-right">Add ride</button>
 					</a>
-			
-				{% endif %}
-			{% endif %}
-
+					
+				</div>
+			</div>
 		</div>
-	</div>
-</div>
 
-
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 mx-auto">
-			
-			<!-- Break before footer -->
-			<hr>
-			
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					
+					<!-- Break before footer -->
+					<hr>
+					
+				</div>
+			</div>
 		</div>
-	</div>
-</div>
 
+	{% endif %}
+{% endif %}
 
 <style>
 	table.lightgrey-weekends tbody td:nth-child(n+6) {
