@@ -3,6 +3,7 @@ from wtforms import StringField, SubmitField, SelectField, DateField
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired
 import os
+from datetime import date
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -98,9 +99,16 @@ class Calendar(db.Model):
                     rides.append(ride)
             return rides
 
+    def unix_date(self):
+        if self.date:
+            date_obj = date(int(self.date[4:8]), int(self.date[2:4]), int(self.date[0:2]))
+            unix_int = int(date_obj.strftime('%s'))
+            return unix_int
+        return 0
+
     def all_calender_group(self, group: str):
         with app.app_context():
-            rides = db.session.query(Calendar).filter_by(group=group).order_by(Calendar.id.desc()).all()
+            rides = db.session.query(Calendar).filter_by(group=group).order_by(Calendar.unix_date(self)).all()
             return rides
 
     # Look up event by ID

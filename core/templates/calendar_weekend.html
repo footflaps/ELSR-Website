@@ -282,51 +282,49 @@
 								</a>,
 								{{ ride.distance }}km, {{ ride.elevation }}m
 								
-								
 							</li>
 						
-						</ul>
-				
-						<!--------------------------------------------------------------------------------------------->
-						<!--                         Modal form for deleting ride                                    -->
-						<!--------------------------------------------------------------------------------------------->
-						
-						<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
-						    <div class="modal-dialog" role="document">
-								<div class="modal-content">
-									<div class="modal-header">
-										<h5 class="modal-title" id="blockModalLabel">
-											Delete ride '{{ ride.group }}: {{ ride.leader }}, {{ ride.destination }}'
-										</h5>
-										<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-											<span aria-hidden="true">&times;</span>
-										</button>
-									</div>
-									<div class="modal-body">
-
-										<form action="{{ url_for('delete_ride', ride_id=ride.id, date=dates_short[day]) }}" method="post">
-											<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-											
-											<div class="form-group">
-												<label class="col-form-label">
-													Enter <strong>your password</strong> below.
-												</label>
-												<input type="password" class="form-control" name="password">
-											</div>
-											
-											<div class="modal-footer">
-												<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
-												<button type="submit" class="btn btn-danger">Submit</button>
-											</div>
-											
-										</form>
+							<!--------------------------------------------------------------------------------------------->
+							<!--                         Modal form for deleting ride                                    -->
+							<!--------------------------------------------------------------------------------------------->
+							
+							<div class="modal fade" id="deleteRoute{{ ride.id }}" tabindex="-1" role="dialog">
+							    <div class="modal-dialog" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h5 class="modal-title" id="blockModalLabel">
+												Delete ride '{{ ride.group }}: {{ ride.leader }}, {{ ride.destination }}'
+											</h5>
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">&times;</span>
+											</button>
+										</div>
+										<div class="modal-body">
+	
+											<form action="{{ url_for('delete_ride', ride_id=ride.id, date=dates_short[day]) }}" method="post">
+												<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+												
+												<div class="form-group">
+													<label class="col-form-label">
+														Enter <strong>your password</strong> below.
+													</label>
+													<input type="password" class="form-control" name="password">
+												</div>
+												
+												<div class="modal-footer">
+													<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+													<button type="submit" class="btn btn-danger">Submit</button>
+												</div>
+												
+											</form>
+										</div>
 									</div>
 								</div>
-							</div>
-						</div>  <!-- End of modal form -->
-					
-					{% endfor %}
-					
+							</div>  <!-- End of modal form -->
+						
+						{% endfor %}
+						
+					</ul>
 		
 					<!-- Start times -->
 					{% if start_times[day] %}
