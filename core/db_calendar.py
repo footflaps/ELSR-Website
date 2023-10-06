@@ -3,7 +3,7 @@ from wtforms import StringField, SubmitField, SelectField, DateField
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired
 import os
-from datetime import date
+from datetime import datetime, timedelta
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -75,6 +75,9 @@ class Calendar(db.Model):
     # Start time
     start_time = db.Column(db.String(250))
 
+    # Added Unix date for sorting by ride date
+    unix_date = db.Column(db.Integer)
+
     # Return all events
     def all_calendar(self):
         with app.app_context():
@@ -98,13 +101,6 @@ class Calendar(db.Model):
                 for ride in ride_set:
                     rides.append(ride)
             return rides
-
-    def unix_date(self):
-        if self.date:
-            date_obj = date(int(self.date[4:8]), int(self.date[2:4]), int(self.date[0:2]))
-            unix_int = int(date_obj.strftime('%s'))
-            return unix_int
-        return 0
 
     def all_calender_group(self, group: str):
         with app.app_context():
@@ -149,6 +145,28 @@ class Calendar(db.Model):
     # Optional: this will allow each event object to be identified by its details when printed.
     def __repr__(self):
         return f'<Ride "{self.destination} , lead by {self.leader}">'
+
+
+
+
+rides = Calendar().all_calendar()
+for ride in rides:
+    if not ride.unix_date:
+        date_obj = datetime(int(ride.date[4:8]), int(ride.date[2:4]), int(ride.date[0:2]), 0, 00)
+        date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
+        ride.unix_date = date_unix
+        Calendar().add_ride(ride)
+
+
+
+
+
+
+
+
+
+
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
