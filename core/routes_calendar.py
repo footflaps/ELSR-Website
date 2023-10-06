@@ -592,6 +592,9 @@ def ride_history(request):
     # ----------------------------------------------------------- #
     # We need a set of GPX files later on
     gpxes = []
+    # We need a set of cafe markers for the map
+    cafe_markers = []
+
     for ride in rides:
         gpx_id = ride.gpx_id
         gpx = Gpx().one_gpx(gpx_id)
@@ -599,6 +602,21 @@ def ride_history(request):
             gpxes.append(gpx)
             ride.length_km = gpx.length_km
             ride.ascent_m = gpx.ascent_m
+
+            # Also add marker for the cafe (but only if we're showing the GPX)
+            cafe_id = ride.cafe_id
+            cafe = Cafe().one_cafe(cafe_id)
+            if cafe:
+                if cafe.active:
+                    cafe_colour = OPEN_CAFE_COLOUR
+                else:
+                    cafe_colour = CLOSED_CAFE_COLOUR
+                cafe_markers.append({
+                    "position": {"lat": cafe.lat, "lng": cafe.lon},
+                    "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+                    "color": cafe_colour,
+                })
+
         else:
             ride.length_km = "n/a"
             ride.ascent_m = "n/a"
@@ -614,23 +632,6 @@ def ride_history(request):
     else:
         warning = None
 
-    # ----------------------------------------------------------- #
-    # Also want cafes from the GPXes
-    # ----------------------------------------------------------- #
-    cafe_markers = []
-    for ride in rides:
-        cafe_id = ride.cafe_id
-        cafe = Cafe().one_cafe(cafe_id)
-        if cafe:
-            if cafe.active:
-                cafe_colour = OPEN_CAFE_COLOUR
-            else:
-                cafe_colour = CLOSED_CAFE_COLOUR
-            cafe_markers.append({
-                "position": {"lat": cafe.lat, "lng": cafe.lon},
-                "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                "color": cafe_colour,
-            })
 
     # ----------------------------------------------------------- #
     # Render the page
