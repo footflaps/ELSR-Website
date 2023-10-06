@@ -165,6 +165,7 @@
 					<!-- Header -->
 					<thead>
 						<tr>
+							<th scope="col">#</th>
 							<th scope="col">Date</th>
 							<th scope="col">Leader</th>
 							<th scope="col">Destination</th>
@@ -176,6 +177,7 @@
 					<tbody>
 						{% for ride in rides: %}
 							<tr>
+								<td scope="row">{{ loop.index }}</td>
 								<td scope="row">{{ ride.date }}</td>
 								<td scope="row">{{ get_user_name(ride.email) }}</td>
 								<td scope="row">{{ ride.destination }}</td>
