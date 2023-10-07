@@ -839,7 +839,7 @@
 						<!-- Header -->
 						<thead>
 		                    <tr>
-		                        <th scope="col">#</th>
+		                        <th scope="col">ID</th>
 			                    <th scope="col">Date</th>
 			                    <th scope="col">Leader</th>
 			                    <th scope="col">Destination</th>
@@ -852,7 +852,7 @@
 							{% for ride in rides: %}
 								
 								<tr>
-									<td scope="row">{{ loop.index }}</td>
+									<td scope="row">{{ ride.id }}</td>
 									<td scope="row">
 										<a href="{{ url_for('weekend', date=ride.date) }}">
 											{{ ride.date }}
@@ -937,7 +937,7 @@
 						<!-- Header -->
 						<thead>
 		                    <tr>
-		                        <th scope="col">#</th>
+		                        <th scope="col">ID</th>
 			                    <th scope="col">Date</th>
 			                    <th scope="col">Host</th>
 			                    <th scope="col">Destination</th>
@@ -949,7 +949,7 @@
 							{% for social in socials: %}
 								
 								<tr>
-									<td scope="row">{{ loop.index }}</td>
+									<td scope="row">{{ social.id }}</td>
 									<td scope="row">
 										<a href="{{ url_for('social', date=social.date) }}">
 											{{ social.date }}
@@ -1034,7 +1034,7 @@
 						<!-- Header -->
 						<thead>
 		                    <tr>
-		                        <th scope="col">#</th>
+		                        <th scope="col">ID</th>
 			                    <th scope="col">Date</th>
 			                    <th scope="col">Author</th>
 			                    <th scope="col">Title</th>
@@ -1047,7 +1047,7 @@
 							{% for blog in blogs: %}
 								
 								<tr>
-									<td scope="row">{{ loop.index }}</td>
+									<td scope="row">{{ blog.id }}</td>
 									<td scope="row">{{ blog.date }}</td>
 									<td scope="row">{{ get_user_name(blog.email) }} ({{ blog.email }})</td>
 									<td scope="row">
@@ -1121,7 +1121,7 @@
 						<!-- Header -->
 						<thead>
 		                    <tr>
-		                        <th scope="col">#</th>
+		                        <th scope="col">ID</th>
 			                    <th scope="col">Date</th>
 			                    <th scope="col">Owner</th>
 			                    <th scope="col">Title</th>
@@ -1135,7 +1135,7 @@
 							{% for classified in classifieds: %}
 								
 								<tr>
-									<td scope="row">{{ loop.index }}</td>
+									<td scope="row">{{ classified.id }}</td>
 									<td scope="row">{{ classified.date }}</td>
 									<td scope="row">{{ get_user_name(classified.email) }} ({{ classified.email }})</td>
 									<td scope="row">

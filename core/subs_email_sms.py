@@ -336,7 +336,6 @@ def send_ride_notification_emails(ride: Calendar()):
     # Scan all users
     # ----------------------------------------------------------- #
     for user in User().all_users():
-
         # Match group, slightly complex as we use different strings in the ride object and the user object
         # GROUP_CHOICES is the set used by Calendar() (of which ride in an instantiation)
         # GROUP_NOTIFICATIONS is the set used by User()

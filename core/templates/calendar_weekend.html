@@ -240,6 +240,15 @@
 									</i>  &nbsp;
 								{% endif %}
 							
+								<!-- Warn if not public -->
+								{% if not ride.public %}
+									<strong style="color: red">
+										<i class="fa-solid fa-triangle-exclamation fa-beat fa-2xl"></i>
+										WARNING ROUTE NOT PUBLIC YET!
+										<i class="fa-solid fa-triangle-exclamation fa-beat fa-2xl"></i>
+									</strong>
+								{% endif %}
+								
 								<!-- Download button -->
 					            {% if current_user.is_authenticated: %}
 									{% if ride.public %}
@@ -247,9 +256,6 @@
 					                        <button class="btn btn-sm btn-primary">
 					                            <i class="fa-solid fa-file-arrow-down"></i> GPX</button>
 							            </a>
-									{% else %}
-										<button class="btn btn-sm disabled btn-dark">
-											<i class="fa-solid fa-file-arrow-down"></i> GPX</button>
 									{% endif %}
 								{% endif %}
 								
@@ -281,6 +287,15 @@
 									<strong>{{ ride.destination }}</strong>
 								</a>,
 								{{ ride.distance }}km, {{ ride.elevation }}m
+								
+								<!-- Warn if not public -->
+								{% if not ride.public %}
+									<strong style="color: red">
+										<i class="fa-solid fa-triangle-exclamation fa-beat fa-2xl"></i>
+										WARNING ROUTE NOT PUBLIC YET!
+										<i class="fa-solid fa-triangle-exclamation fa-beat fa-2xl"></i>
+									</strong>
+								{% endif %}
 								
 							</li>
 						

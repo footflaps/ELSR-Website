@@ -7,7 +7,6 @@ import json
 import os
 from threading import Thread
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -29,7 +28,6 @@ from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE,
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
@@ -46,7 +44,6 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 # -------------------------------------------------------------------------------------------------------------- #
 
 def work_out_days(target_date_str):
-
     # Step 1: Create a set of date strings eg ["23082023", "24082023" ]
     if target_date_str:
         # ----------------------------------------------------------- #
@@ -54,7 +51,8 @@ def work_out_days(target_date_str):
         # ----------------------------------------------------------- #
         # NB We may have been parsed garbage as the date
         try:
-            target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0, 00)
+            target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0,
+                                   00)
         except:
             # Flag back fail
             return None
@@ -74,7 +72,7 @@ def work_out_days(target_date_str):
             days = ["Saturday", "Sunday"]
             dates_short = {
                 "Saturday": (target_date - timedelta(days=1)).strftime("%d%m%Y"),
-                "Sunday":   target_date.strftime("%d%m%Y")
+                "Sunday": target_date.strftime("%d%m%Y")
             }
 
         else:
@@ -97,22 +95,22 @@ def work_out_days(target_date_str):
             # Today and tomorrow
             dates_short = {
                 "Saturday": today.strftime("%d%m%Y"),
-                "Sunday":  (today + timedelta(days=1)).strftime("%d%m%Y")
+                "Sunday": (today + timedelta(days=1)).strftime("%d%m%Y")
             }
 
         elif today_str == "Sunday":
             # Yesterday and today
             dates_short = {
                 "Saturday": (today - timedelta(days=1)).strftime("%d%m%Y"),
-                "Sunday":  today.strftime("%d%m%Y")
-        }
+                "Sunday": today.strftime("%d%m%Y")
+            }
 
         else:
             # Next weekend
             saturday = today + timedelta((5 - today.weekday()) % 7)
             dates_short = {
                 "Saturday": saturday.strftime("%d%m%Y"),
-                "Sunday":   (saturday + timedelta(days=1)).strftime("%d%m%Y")
+                "Sunday": (saturday + timedelta(days=1)).strftime("%d%m%Y")
             }
 
     # ----------------------------------------------------------- #
@@ -248,9 +246,13 @@ def weekend():
                                 and ride.start_time.strip() != "":
                             start_times[day].append(f"{ride.destination}: {ride.start_time}")
 
-                    # Make a note, if we find a non public GPX
+                    # Make a note, if we find a non-public GPX
                     if not gpx.public():
                         private_gpx = True
+
+                    # ----------------------------------------------------------- #
+                    # Include this ride in the webpage
+                    # ----------------------------------------------------------- #
 
                     # Update destination (as cafe may have changed name)
                     if ride.cafe_id:
@@ -278,11 +280,13 @@ def weekend():
                     else:
                         # Just add a blank cafe object
                         cafes[day].append(Cafe())
+
                 else:
                     # Missing GPX file
                     app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
                     Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
                     flash(f"Looks like GPX file for ride {ride.id} has been deleted!")
+
             else:
                 # Missing GPX row in the table
                 app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
@@ -331,7 +335,6 @@ def weekend():
     # ----------------------------------------------------------- #
     # Render the page
     # ----------------------------------------------------------- #
-
     if private_gpx:
         flash("One or more routes hasn't been made public yet!")
 
@@ -473,7 +476,7 @@ def add_ride():
 
         # Assume the author is the group leader
         if not ride and \
-                    request.method == 'GET':
+                request.method == 'GET':
             form.leader.data = current_user.name
 
     # Are we posting the completed comment form?
