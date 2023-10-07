@@ -68,8 +68,8 @@ MAP_LIMITS_BY_DAY = {
     "Wednesday": 250,
     "Thursday": 500,
     "Friday": 500,
-    "Saturday": 250,
-    "Sunday": 250
+    "Saturday": 400,
+    "Sunday": 250,
 }
 
 # Map Boost number
