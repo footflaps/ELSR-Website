@@ -120,6 +120,11 @@ class Calendar(db.Model):
             return ride
 
     def add_ride(self, new_ride):
+        # Add unix time
+        date_obj = datetime(int(new_ride.date[4:8]), int(new_ride.date[2:4]), int(new_ride.date[0:2]), 0, 00)
+        date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
+        new_ride.unix_date = date_unix
+
         # Try and add to dB
         with app.app_context():
             try:
