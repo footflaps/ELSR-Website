@@ -17,7 +17,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.dB_gpx import Gpx, UploadGPXForm, create_rename_gpx_form
-from core.db_users import User, update_last_seen, logout_barred_user
+from core.db_users import User, update_last_seen, logout_barred_user, get_user_name
 from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes, gpx_direction
@@ -918,12 +918,10 @@ def route_delete():
 @login_required
 @update_last_seen
 def route_download(gpx_id):
-
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
     gpx = Gpx().one_gpx(gpx_id)
-
     if not gpx:
         app.logger.debug(f"route_download(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         Event().log_event("GPX Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -934,7 +932,6 @@ def route_download(gpx_id):
     # Check GPX file exists
     # ----------------------------------------------------------- #
     filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
-
     if not os.path.exists(filename):
         # Should never get here, but..
         app.logger.debug(f"route_download(): Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
@@ -944,9 +941,18 @@ def route_download(gpx_id):
         return abort(404)
 
     # ----------------------------------------------------------- #
+    # Check GPX is public
+    # ----------------------------------------------------------- #
+    if not gpx.public():
+        owner_name = get_user_name(gpx.email)
+        app.logger.debug(f"route_download(): Private GPX, gpx_id = '{gpx_id}' in dB.")
+        Event().log_event("GPX Download Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")
+        flash(f"Sorry, that GPX file has been marked as Private by '{owner_name}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
     # Update the GPX file with the correct name (in case it's changed)
     # ----------------------------------------------------------- #
-
     check_route_name(gpx)
 
     # ----------------------------------------------------------- #
@@ -1032,9 +1038,18 @@ def gpx_download2():
         return abort(404)
 
     # ----------------------------------------------------------- #
+    # Check GPX is public
+    # ----------------------------------------------------------- #
+    if not gpx.public():
+        owner_name = get_user_name(gpx.email)
+        app.logger.debug(f"route_download2(): Private GPX, gpx_id = '{gpx_id}' in dB.")
+        Event().log_event("gpx_download2 Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")
+        flash(f"Sorry, that GPX file has been marked as Private by '{owner_name}'")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
     # Update the GPX file with the correct name (in case it's changed)
     # ----------------------------------------------------------- #
-
     check_route_name(gpx)
 
     # ----------------------------------------------------------- #
