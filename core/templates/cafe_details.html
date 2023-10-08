@@ -41,6 +41,8 @@
 						<h2>{{ gpxes | count }} routes pass this cafe</h2>
 					{% endif %}
 					<h2 class="subheading">ELSR Rating &nbsp;&nbsp; {{ cafe.rating }}</h2>
+					
+					<!-- Gravatar and author -->
 					<span class="meta">Added by
 						<img src="{{ cafe.added_email | gravatar }}"
 							         width="40"
