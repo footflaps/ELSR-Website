@@ -6,13 +6,11 @@ import os
 from datetime import datetime, timedelta
 import time
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db, GPX_UPLOAD_FOLDER_ABS
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our own classes
@@ -21,7 +19,6 @@ from core import app, db, GPX_UPLOAD_FOLDER_ABS
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.db_users import User
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -106,10 +103,10 @@ class Calendar(db.Model):
     def all_calender_group_in_past(self, group: str):
         # Get current Unix Epoch time, plus a bit (6 hours)
         # This is because we add 2 hours to Unix Epoch timestamps to get round GMT/BST problem
-        now = time.time() + 60*60*6
+        now = time.time() + 60 * 60 * 6
         with app.app_context():
-            rides = db.session.query(Calendar).filter_by(group=group).\
-                            filter(Calendar.unix_date < now).order_by(Calendar.unix_date.desc()).all()
+            rides = db.session.query(Calendar).filter_by(group=group). \
+                filter(Calendar.unix_date < now).order_by(Calendar.unix_date.desc()).all()
             return rides
 
     # Look up event by ID
@@ -193,8 +190,7 @@ with app.app_context():
 # We create the form in a function as the form's select fields have to updated as we add users and rides etc,
 # to databases. If we just create a class, then it runs once at start of day and never updates.
 
-def create_ride_form(admin: bool):
-
+def create_ride_form(admin: bool, gpx_id=None):
     class Form(FlaskForm):
 
         # ----------------------------------------------------------- #
@@ -214,14 +210,13 @@ def create_ride_form(admin: bool):
         for gpx in gpxes:
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
             # Route must be public and double check we have an actual GPX file on tap....
-            if gpx.public() \
-                    and os.path.exists(filename):
+            if (gpx.public() and os.path.exists(filename)) \
+                    or gpx.id == gpx_id:
                 gpx_choices.append(gpx.combo_string())
 
         # ----------------------------------------------------------- #
         # Generate the list of users
         # ----------------------------------------------------------- #
-
         users = User().all_users_sorted()
         all_users = []
         for user in users:
@@ -268,4 +263,3 @@ with app.app_context():
     rides = db.session.query(Calendar).all()
     print(f"Found {len(rides)} calendar entries in the dB")
     app.logger.debug(f"Start of day: Found {len(rides)} calendar entries in the dB")
-

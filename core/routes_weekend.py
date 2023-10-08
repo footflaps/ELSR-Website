@@ -233,59 +233,60 @@ def weekend():
 
             # Should exist, but..
             if gpx:
+                # Extract ride stats
+                ride.distance = gpx.length_km
+                ride.elevation = gpx.ascent_m
+                ride.public = gpx.public()
+                if ride.start_time:
+                    if ride.start_time.strip() != DEFAULT_START \
+                            and ride.start_time.strip() != "":
+                        start_times[day].append(f"{ride.destination}: {ride.start_time}")
+
+                # Make a note, if we find a non-public GPX
+                if not gpx.public():
+                    private_gpx = True
+
+                # ----------------------------------------------------------- #
+                # Include this ride in the webpage
+                # ----------------------------------------------------------- #
+
+                # Update destination (as cafe may have changed name)
+                if ride.cafe_id:
+                    cafe = Cafe().one_cafe(ride.cafe_id)
+                    if cafe:
+                        ride.destination = cafe.name
+
+                # Add gpx object to the list of GPX files for that day
+                gpxes[day].append(gpx)
+
+                # Add ride to the list of rides that day
+                rides[day].append(ride)
+
+                # Look up the cafe
+                cafe = Cafe().one_cafe(ride.cafe_id)
+
+                # NB Might not exist if a new cafe, not in our existing db
+                if cafe:
+                    cafe_coords[day].append({
+                        "position": {"lat": cafe.lat, "lng": cafe.lon},
+                        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+                        "color": OPEN_CAFE_COLOUR,
+                    })
+                    cafes[day].append(cafe)
+                else:
+                    # Just add a blank cafe object
+                    cafes[day].append(Cafe())
+
                 # Double check we can find the file
                 filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
                 if os.path.exists(filename):
-
-                    # Extract ride stats
-                    ride.distance = gpx.length_km
-                    ride.elevation = gpx.ascent_m
-                    ride.public = gpx.public()
-                    if ride.start_time:
-                        if ride.start_time.strip() != DEFAULT_START \
-                                and ride.start_time.strip() != "":
-                            start_times[day].append(f"{ride.destination}: {ride.start_time}")
-
-                    # Make a note, if we find a non-public GPX
-                    if not gpx.public():
-                        private_gpx = True
-
-                    # ----------------------------------------------------------- #
-                    # Include this ride in the webpage
-                    # ----------------------------------------------------------- #
-
-                    # Update destination (as cafe may have changed name)
-                    if ride.cafe_id:
-                        cafe = Cafe().one_cafe(ride.cafe_id)
-                        if cafe:
-                            ride.destination = cafe.name
-
-                    # Add gpx object to the list of GPX files for that day
-                    gpxes[day].append(gpx)
-
-                    # Add ride to the list of rides that day
-                    rides[day].append(ride)
-
-                    # Look up the cafe
-                    cafe = Cafe().one_cafe(ride.cafe_id)
-
-                    # NB Might not exist if a new cafe, not in our existing db
-                    if cafe:
-                        cafe_coords[day].append({
-                            "position": {"lat": cafe.lat, "lng": cafe.lon},
-                            "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                            "color": OPEN_CAFE_COLOUR,
-                        })
-                        cafes[day].append(cafe)
-                    else:
-                        # Just add a blank cafe object
-                        cafes[day].append(Cafe())
-
+                    ride.missing_gpx = False
                 else:
-                    # Missing GPX file
+                    # Missing GPX file (will only be shown to Admins)
+                    ride.missing_gpx = True
                     app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
                     Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
-                    flash(f"Looks like GPX file for ride {ride.id} has been deleted!")
+                    flash(f"Looks like GPX file for ride '{ride.destination}' (ride.id = {ride.id}, leader = '{ride.leader}') has been deleted!")
 
             else:
                 # Missing GPX row in the table
@@ -394,7 +395,6 @@ def add_ride():
         # ----------------------------------------------------------- #
         # Edit event, so pre-fill form from dB
         # ----------------------------------------------------------- #
-
         # 1: Need to locate the GPX track used by the ride
         gpx = Gpx().one_gpx(ride.gpx_id)
         if not gpx:
@@ -421,7 +421,7 @@ def add_ride():
             return redirect(url_for('weekend', date=start_date_str))
 
         # Select form based on Admin status
-        form = create_ride_form(current_user.admin())
+        form = create_ride_form(current_user.admin(), gpx.id)
 
         # Date
         form.date.data = datetime.strptime(ride.date.strip(), '%d%m%Y')
@@ -453,6 +453,13 @@ def add_ride():
 
         # Change submission button name
         form.submit.label.text = "Update Ride"
+
+        # Add warnings for GPX issues
+        if not gpx.public():
+            flash(f"Warning the GPX file '{gpx.name}' is still PRIVATE")
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+        if not os.path.exists(filename):
+            flash(f"Warning the GPX '{gpx.name}' file is MISSING! You can't use this route!")
 
     else:
         # ----------------------------------------------------------- #
