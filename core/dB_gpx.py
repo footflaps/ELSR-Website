@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField
 from flask_wtf.file import FileField
-from wtforms.validators import DataRequired, Length
+from wtforms.validators import DataRequired, Length, InputRequired
 from datetime import date
 import json
 
@@ -20,6 +20,9 @@ from core.db_users import User
 
 GPX_ALLOWED_EXTENSIONS = {'gpx'}
 
+TYPES = ["Road",
+         "Gravel",
+         "MTB"]
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Define GPX Class
@@ -154,6 +157,25 @@ class Gpx(db.Model):
                     return True
                 except Exception as e:
                     app.logger.error(f"db_gpx: Failed to update name for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+        return False
+
+    def update_type(self, gpx_id, type):
+        with app.app_context():
+
+            # Locate the GPX file
+            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
+
+            if gpx:
+                try:
+                    # Update filename
+                    gpx.type = type
+                    # Write to dB
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_gpx: Failed to update type for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
         return False
@@ -381,6 +403,9 @@ with app.app_context():
 
 class UploadGPXForm(FlaskForm):
     name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
+    type = SelectField("Type of route:", choices=TYPES,
+                       validators=[InputRequired("Please enter a type.")])
+
     filename = FileField("", validators=[DataRequired()])
 
     submit = SubmitField("Upload GPX")
@@ -404,11 +429,14 @@ def create_rename_gpx_form(admin: bool):
     class Form(FlaskForm):
         name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
 
+        type = SelectField("Type of route:", choices=TYPES,
+                           validators=[InputRequired("Please enter a type.")])
+
         # Admin can assign ownership
         if admin:
             owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[DataRequired()])
 
-        submit = SubmitField("Rename")
+        submit = SubmitField("Update")
 
     return Form()
 

@@ -432,6 +432,7 @@ def new_route():
             gpx.ascent_m = 0
             gpx.length_km = 0
             gpx.filename = "tmp"
+            gpx.type = form.type.data
 
             # Add to the dB
             new_id = gpx.add_gpx(gpx)
@@ -527,7 +528,6 @@ def edit_route():
     # Check params are valid
     # ----------------------------------------------------------- #
     gpx = Gpx().one_gpx(gpx_id)
-
     if not gpx:
         app.logger.debug(f"edit_route(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
         Event().log_event("Edit GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -575,6 +575,8 @@ def edit_route():
 
         # Get new GPX name from the form
         new_name = form.name.data
+        new_type = form.type.data
+
         # Different?
         if new_name != gpx.name:
             # Try and write it
@@ -611,8 +613,23 @@ def edit_route():
                     Event().log_event("Edit GPX Fail", f"Failed to change ownership GPX '{gpx_id}'.")
                     flash("Sorry, something went wrong!")
 
+        # Has type changed
+        if new_type != type:
+            # Try and write it
+            if Gpx().update_type(gpx_id, new_type):
+                # Success
+                app.logger.debug(f"edit_route(): Successfully retyped GPX '{gpx.id}'.")
+                Event().log_event("Edit GPX Success", f"Successfully retyped GPX '{gpx_id}'.")
+                flash("GPX type has been updated!")
+                change = True
+            else:
+                # Should never get here, but...
+                app.logger.debug(f"edit_route(): Failed to retype GPX '{gpx.id}'.")
+                Event().log_event("Edit GPX Fail", f"Failed to retype GPX '{gpx_id}'.")
+                flash("Sorry, something went wrong!")
+
         if not change:
-            flash("Name and owner unchanged.")
+            flash("Name, type and owner unchanged.")
 
     elif request.method == 'POST':
         # ----------------------------------------------------------- #
@@ -630,6 +647,7 @@ def edit_route():
     if request.method == 'GET':
         # Pre-fill form with existing name
         form.name.data = gpx.name
+        form.type.data = gpx.type
         # And existing owner
         if current_user.admin():
             user = User().find_user_from_email(gpx.email)
