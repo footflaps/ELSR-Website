@@ -4,13 +4,11 @@ from werkzeug import exceptions
 import os
 from threading import Thread
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists, is_mobile
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -22,11 +20,12 @@ from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes, gpx_direction
 from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm, \
-                                  MAP_BOUNDS, google_maps_api_key, count_map_loads
+    MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
+from core.db_calendar import Calendar
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -45,7 +44,6 @@ from core.subs_email_sms import alert_admin_via_sms, send_message_notification_e
 @app.route('/routes', methods=['GET'])
 @update_last_seen
 def gpx_list():
-
     # Grab all our routes
     gpxes = Gpx().all_gpxes()
 
@@ -73,7 +71,7 @@ def gpx_list():
             flash(f"We are missing the GPX file for route {missing}!")
 
     # Render in gpx_list template
-    return render_template("gpx_list.html", year=current_year,  gpxes=gpxes, mobile=is_mobile(),
+    return render_template("gpx_list.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
                            missing_files=missing_files)
 
 
@@ -84,7 +82,6 @@ def gpx_list():
 @app.route('/route/<int:gpx_id>', methods=['GET'])
 @update_last_seen
 def gpx_details(gpx_id):
-
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -101,16 +98,16 @@ def gpx_details(gpx_id):
     # Rules:
     # 1. Must be admin or the current author
     # 2. Route must be public
-    # Tortuous logic as a non logged-in user doesn't have any of our custom attributes eg email etc
+    # Tortuous logic as a non-logged-in user doesn't have any of our custom attributes eg email etc
     if not gpx.public() and \
-       not current_user.is_authenticated:
+            not current_user.is_authenticated:
         app.logger.debug(f"gpx_details(): Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         Event().log_event("One GPX Fail", f"Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         return abort(403)
 
     elif not gpx.public() and \
-         current_user.email != gpx.email and \
-         not current_user.admin():
+            current_user.email != gpx.email and \
+            not current_user.admin():
         app.logger.debug(f"gpx_details(): Refusing permission for user '{current_user.email}' to see "
                          f"hidden GPX route '{gpx.id}'!")
         Event().log_event("One GPX Fail", f"Refusing permission for user {current_user.email} to see "
@@ -191,6 +188,15 @@ def gpx_details(gpx_id):
         cafe_elevation_data = []
 
     # ----------------------------------------------------------- #
+    # Do we allow owner to hide the route
+    # ----------------------------------------------------------- #
+    # If the route in attached to a ride in the Calendar, then they can't hide it as it would break the ride
+    if Calendar().one_ride_gpx_id(gpx.id):
+        allow_hide = False
+    else:
+        allow_hide = True
+
+    # ----------------------------------------------------------- #
     # Flag if hidden
     # ----------------------------------------------------------- #
     if not gpx.public():
@@ -204,7 +210,7 @@ def gpx_details(gpx_id):
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
                            cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
-                           MAP_BOUNDS=MAP_BOUNDS, direction=direction)
+                           MAP_BOUNDS=MAP_BOUNDS, direction=direction, allow_hide=allow_hide)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -410,7 +416,7 @@ def new_route():
                 return render_template("gpx_add.html", year=current_year, form=form)
 
             if not file or \
-               not allowed_file(file.filename):
+                    not allowed_file(file.filename):
                 app.logger.debug(f"new_route(): Invalid file '{file.filename}'!")
                 Event().log_event(f"New GPX Fail", f"Invalid file '{file.filename}'!")
                 flash("That's not a GPX file!")
@@ -548,7 +554,7 @@ def edit_route():
     # 2. Must not be barred (NB Admins cannot be barred)
     if (current_user.email != gpx.email
         and not current_user.admin()) \
-       or not current_user.readwrite():
+            or not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"edit_route(): Refusing permission for '{current_user.email}' and route '{gpx.id}'.")
         Event().log_event("Edit GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
@@ -960,7 +966,7 @@ def route_download(gpx_id):
     # ----------------------------------------------------------- #
 
     # This is the filename the user will see
-    download_name = f"ELSR_{gpx.name.replace(' ','_')}.gpx"
+    download_name = f"ELSR_{gpx.name.replace(' ', '_')}.gpx"
 
     app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
     Event().log_event("GPX Downloaded", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
@@ -1057,7 +1063,7 @@ def gpx_download2():
     # ----------------------------------------------------------- #
 
     # This is the filename the user will see
-    download_name = f"ELSR_{gpx.name.replace(' ','_')}.gpx"
+    download_name = f"ELSR_{gpx.name.replace(' ', '_')}.gpx"
 
     app.logger.debug(f"gpx_download2d(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
     Event().log_event("gpx_download2", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")

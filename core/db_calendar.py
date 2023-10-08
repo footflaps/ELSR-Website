@@ -119,6 +119,12 @@ class Calendar(db.Model):
             # Will return nothing if id is invalid
             return ride
 
+    def one_ride_gpx_id(self, gpx_id):
+        with app.app_context():
+            ride = db.session.query(Calendar).filter_by(gpx_id=gpx_id).first()
+            # Will return nothing if id is invalid
+            return ride
+
     def add_ride(self, new_ride):
         # Add unix time
         date_obj = datetime(int(new_ride.date[4:8]), int(new_ride.date[2:4]), int(new_ride.date[0:2]), 0, 00)
