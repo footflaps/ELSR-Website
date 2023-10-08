@@ -107,6 +107,7 @@
                         <th scope="col">Name</th>
                         <th scope="col">Length (km)</th>
                         <th scope="col">Ascent (m)</th>
+	                    <th scope="col">Type</th>
 	                    {% if not mobile %}
 	                        <th scope="col">Uploaded by</th>
 	                    {% endif %}
@@ -147,6 +148,7 @@
 							<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{ gpx.name }}</a></td>
 							<td scope="row">{{ gpx.length_km }}</td>
                             <td scope="row">{{ gpx.ascent_m }}</td>
+							<td scope="row">{{ gpx.type }}</td>
 							{% if not mobile %}
 								<td scope="row">{{ get_user_name(gpx.email) }}</td>
 							{% endif %}
