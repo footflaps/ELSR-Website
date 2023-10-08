@@ -29,7 +29,8 @@ WELCOME_MESSAGE = "Welcome to the new ELSR website. Now you have registered you 
                   "edit content."
 
 READWRITE_MESSAGE = "Congratulations, the Admin team have now given you read and write permissions. You can now add " \
-                    "and edit content on the site, e.g. organise rides and add events to the Calendar."
+                    "and edit content on the site, e.g. organise rides and add events to the Calendar. There is also " \
+                    "a link to join our WhatsApp group on your user page."
 
 READONLY_MESSAGE = "Sorry, but the Admins have removed your write permissions to the site."
 
