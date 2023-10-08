@@ -360,13 +360,11 @@ class Gpx(db.Model):
 # One off hack to set type on dB
 # -------------------------------------------------------------------------------------------------------------- #
 
-gpxes = Gpx().all_gpxes()
-for gpx in gpxes:
-    if not gpx.type:
-        gpx.type = "Road"
-        Gpx().add_gpx(gpx)
-
-
+# gpxes = Gpx().all_gpxes()
+# for gpx in gpxes:
+#     if not gpx.type:
+#         gpx.type = "Road"
+#         Gpx().add_gpx(gpx)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
