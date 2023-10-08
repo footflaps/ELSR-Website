@@ -57,6 +57,9 @@ class Gpx(db.Model):
     # Is the GPX valid
     valid = db.Column(db.Integer, nullable=True)
 
+    # Type (road / offroad)
+    type = db.Column(db.String(20))
+
     def public(self):
         return self.valid == 1
 
