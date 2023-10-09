@@ -20,7 +20,6 @@ p a {
 /*  text-decoration: underline; */
 }
 
-
 .nav-link {
   text-decoration: none;
 }
@@ -524,4 +523,16 @@ input[type=file]::file-selector-button:hover {
 
 .paginate_button > a{
     color: #ffffff !important;
+}
+
+/* Table Header uses class='sorting' */
+.sorting {
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+tr > td {
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.dataTables_info, .dataTables_length {
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
