@@ -309,6 +309,12 @@ def gravel():
     # ----------------------------------------------------------- #
     polylines = create_polyline_set(gpxes)
 
+    # Warn if we skipped any
+    if len(gpxes) > MAX_NUM_GPX_PER_GRAPH:
+        warning = f"NB: Only showing first {MAX_NUM_GPX_PER_GRAPH} routes on map."
+    else:
+        warning = None
+
     # ----------------------------------------------------------- #
     # Add to map counts
     # ----------------------------------------------------------- #
@@ -320,7 +326,7 @@ def gravel():
     # ----------------------------------------------------------- #
     return render_template("main_gravel.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
                            missing_files=missing_files, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
-                           MAP_BOUNDS=MAP_BOUNDS,
+                           MAP_BOUNDS=MAP_BOUNDS, warning=warning,
                            polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
 
 # -------------------------------------------------------------------------------------------------------------- #
