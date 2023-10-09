@@ -26,7 +26,7 @@ from core.db_users import User
 
 # These are our standard groups
 TWR_CHOICE = "TWR"
-GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed", TWR_CHOICE]
+GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed", "Gravel", TWR_CHOICE]
 
 # Option for user defined choices
 NEW_CAFE = "New cafe!"
