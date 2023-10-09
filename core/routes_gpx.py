@@ -430,6 +430,7 @@ def new_route():
             gpx.length_km = 0
             gpx.filename = "tmp"
             gpx.type = form.type.data
+            gpx.details = form.details.data
 
             # Add to the dB
             new_id = gpx.add_gpx(gpx)
@@ -567,66 +568,44 @@ def edit_route():
         # Handle form passing validation
         # ----------------------------------------------------------- #
 
-        # Detect change
-        change = False
-
         # Get new GPX name from the form
         new_name = form.name.data
         new_type = form.type.data
-
-        # Different?
-        if new_name != gpx.name:
-            # Try and write it
-            if Gpx().update_name(gpx_id, new_name):
-                # Success
-                app.logger.debug(f"edit_route(): Successfully renamed GPX '{gpx.id}'.")
-                Event().log_event("Edit GPX Success", f"Successfully renamed GPX '{gpx_id}'.")
-                flash("GPX file has been renamed!")
-                change = True
-            else:
-                # Should never get here, but...
-                app.logger.debug(f"edit_route(): Failed to rename GPX '{gpx.id}'.")
-                Event().log_event("Edit GPX Fail", f"Failed to rename GPX '{gpx_id}'.")
-                flash("Sorry, something went wrong!")
+        new_details = form.details.data
 
         # Admin can change ownership
         if current_user.admin():
             # Get new owner
             new_user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
-            # Changed?
-            if new_user.email != gpx.email:
-                # Write the change
-                if Gpx().update_email(gpx_id, new_user.email):
-                    # Success
-                    app.logger.debug(f"edit_route(): Successfully changed ownership of "
-                                     f"GPX '{gpx.id}' to '{new_user.email}'.")
-                    Event().log_event("Edit GPX Success", f"Successfully changed ownership of "
-                                                          f"GPX '{gpx.id}' to '{new_user.email}'.")
-                    flash("GPX file has changed ownership!")
-                    change = True
-                else:
-                    # Should never get here, but...
-                    app.logger.debug(f"edit_route(): Failed to change ownership of GPX '{gpx.id}'.")
-                    Event().log_event("Edit GPX Fail", f"Failed to change ownership GPX '{gpx_id}'.")
-                    flash("Sorry, something went wrong!")
+        else:
+            # Make sure we have new_user defined if not admin user
+            new_user = User().find_user_from_email(gpx.email)
 
-        # Has type changed
-        if new_type != type:
-            # Try and write it
-            if Gpx().update_type(gpx_id, new_type):
-                # Success
-                app.logger.debug(f"edit_route(): Successfully retyped GPX '{gpx.id}'.")
-                Event().log_event("Edit GPX Success", f"Successfully retyped GPX '{gpx_id}'.")
-                flash("GPX type has been updated!")
-                change = True
+        # Do we need to update anything?
+        if new_name != gpx.name \
+                or new_user.email != gpx.email \
+                or new_type != gpx.type \
+                or new_details != gpx.details:
+
+            # Update GPX
+            gpx.name = new_name
+            gpx.type = new_type
+            gpx.email = new_user.email
+            gpx.details = new_details
+
+            # Write to db
+            if Gpx().add_gpx(gpx):
+                app.logger.debug(f"edit_route(): Successfully updated GPX '{gpx.id}'.")
+                Event().log_event("Edit GPX Success", f"Successfully updated GPX '{gpx_id}'.")
+                flash("GPX file has been renamed!")
             else:
                 # Should never get here, but...
-                app.logger.debug(f"edit_route(): Failed to retype GPX '{gpx.id}'.")
-                Event().log_event("Edit GPX Fail", f"Failed to retype GPX '{gpx_id}'.")
+                app.logger.debug(f"edit_route(): Failed to update GPX '{gpx.id}'.")
+                Event().log_event("Edit GPX Fail", f"Failed to update GPX '{gpx_id}'.")
                 flash("Sorry, something went wrong!")
 
-        if not change:
-            flash("Name, type and owner unchanged.")
+        else:
+            flash("Nothing was changed!")
 
     elif request.method == 'POST':
         # ----------------------------------------------------------- #
@@ -645,6 +624,7 @@ def edit_route():
         # Pre-fill form with existing name
         form.name.data = gpx.name
         form.type.data = gpx.type
+        form.details.data = gpx.details
         # And existing owner
         if current_user.admin():
             user = User().find_user_from_email(gpx.email)
