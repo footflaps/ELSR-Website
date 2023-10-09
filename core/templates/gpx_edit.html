@@ -273,7 +273,7 @@
 						<button type="submit" class="btn btn-primary float-left">Publish Route</button>
 					</form>
 			
-				{% else: %}
+				{% elif allow_hide %}
 
 					<!-- Mini form to hide route -->
 					<form action="{{ url_for('hide_route', gpx_id=gpx.id, return_path=return_path) }}"
@@ -281,6 +281,11 @@
 						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
 						<button type="submit" class="btn btn-warning float-left">Hide Route</button>
 					</form>
+
+				{% else %}
+				
+					<!-- Not allowed to hide route -->
+					<button class="btn btn-dark disabled float-left">Hide Route</button>
 				
 				{% endif %}
 			
@@ -290,6 +295,12 @@
 				
 			</div>
 			
+			{% if not allow_hide %}
+                <div class="clearfix mt-2">
+                    Route is in use by one or more rides in the Calendar, so can't be hidden.
+                </div>
+            {% endif %}
+
 			<hr>
 			
 		</div>
