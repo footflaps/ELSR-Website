@@ -1,8 +1,6 @@
-/*!
- * Start Bootstrap - Clean Blog v5.0.9 (https://startbootstrap.com/themes/clean-blog)
- * Copyright 2013-2020 Start Bootstrap
- * Licensed under MIT (https://github.com/StartBootstrap/startbootstrap-clean-blog/blob/master/LICENSE)
- */
+/* **************************************************************************
+                                 Body and Headings
+   ************************************************************************** */
 
 body {
   background-color:#f2f7fb;
@@ -27,13 +25,10 @@ p a {
 h1,
 h2,
 h3,
-h4,
-h5,
-h6 {
+h4 {
   font-weight: 800;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-
 
 h2 {
     font-size: 26px;
@@ -46,7 +41,6 @@ h3 {
 h4 {
     font-size: 18px;
 }
-
 
 a {
   color: #212529;
@@ -106,6 +100,10 @@ img::-moz-selection {
   color: #fff;
   background: transparent;
 }
+
+/* **************************************************************************
+                               Page Heading Navigation
+   ************************************************************************** */
 
 #mainNav {
   position: absolute;
@@ -287,6 +285,10 @@ header.masthead .post-heading .meta a {
   }
 }
 
+/* **************************************************************************
+                                 Blog posts?
+   ************************************************************************** */
+
 .post-preview > a {
   color: #212529;
 }
@@ -329,11 +331,17 @@ header.masthead .post-heading .meta a {
     font-size: 36px;
   }
 }
+
+/* **************************************************************************
+                                   Forms
+   ************************************************************************** */
+
 .form-control {
     font-size: 1.2rem;
     font-weight: 650;
     font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
+
 .floating-label-form-group {
   font-size: 14px;
   position: relative;
@@ -391,6 +399,11 @@ form .form-group:first-child .floating-label-form-group {
   border-top: 1px solid #dee2e6;
 }
 
+
+/* **************************************************************************
+                                       Footer
+   ************************************************************************** */
+
 footer {
   padding: 50px 0 65px;
 }
@@ -406,8 +419,9 @@ footer .copyright {
   text-align: center;
 }
 
-
-/* Define style for the Find File box */
+/* **************************************************************************
+                            Find File box in Forms
+   ************************************************************************** */
 
 input[type=file]::file-selector-button {
   color: #fff;
@@ -440,7 +454,9 @@ input[type=file]::file-selector-button:hover {
 }
 
 
-/* Format Bootstrap's button */
+/* **************************************************************************
+                          Format Bootstrap's buttons
+   ************************************************************************** */
 
 .btn {
   font-size: 14px;
@@ -490,7 +506,10 @@ input[type=file]::file-selector-button:hover {
     font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-/* Style paginate buttons */
+/* **************************************************************************
+                                 Table Pagination
+   ************************************************************************** */
+
 .paginate_button {
     color: #ffffff !important;
     background-color: #0085A1;
@@ -525,14 +544,18 @@ input[type=file]::file-selector-button:hover {
     color: #ffffff !important;
 }
 
+/* **************************************************************************
+                                  Style Tables
+   ************************************************************************** */
+
 /* Table Header uses class='sorting' */
 .sorting {
-    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
 }
 tr > td {
-    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
 }
 
 .dataTables_info, .dataTables_length {
-    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
 }
