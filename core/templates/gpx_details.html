@@ -177,35 +177,19 @@
 					<!-- Edit button -->
 					<a class="btn btn-primary float-left" href="{{ url_for('edit_route', gpx_id=gpx.id) }}">Edit Route</a>
 					
-					<!-- (un)Publish button -->
-					{% if not gpx.public(): %}
+					<!-- Mini form to publish route -->
+					<form action="{{ url_for('publish_route', gpx_id=gpx.id) }}"
+					      method="post">
+						<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+						<button type="submit" class="btn btn-primary float-left mx-3">Publish Route</button>
+					</form>
 					
-						<!-- Mini form to publish route -->
-						<form action="{{ url_for('publish_route', gpx_id=gpx.id) }}"
-						      method="post">
-							<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-							<button type="submit" class="btn btn-primary float-left mx-3">Publish Route</button>
-						</form>
-			
-					{% else: %}
-
-						<!-- Mini form to hide route -->
-						{% if allow_hide %}
-							<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
-							      method="post">
-								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-								<button type="submit" class="btn btn-warning float-left mx-3">Hide Route</button>
-							</form>
-						{% endif %}
-					
-					{% endif %}
-				
 					<!-- Delete button -->
 					<a class="btn btn-danger float-right"
 					   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
 					
 				</div>
-				
+			
 				<!-- Separator before next section -->
 				<hr>
 				
@@ -475,6 +459,7 @@
 							   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
 		        
 						</div>
+	                    
 	                    {% if not allow_hide %}
 		                    <div class="clearfix">
 			                    Route is in use by one or more rides in the Calendar, so can't be hidden.
