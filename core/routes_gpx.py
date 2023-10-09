@@ -188,13 +188,10 @@ def gpx_details(gpx_id):
         cafe_elevation_data = []
 
     # ----------------------------------------------------------- #
-    # Do we allow owner to hide the route
+    # Is this GPX in the calendar as a ride or rides
     # ----------------------------------------------------------- #
     # If the route in attached to a ride in the Calendar, then they can't hide it as it would break the ride
-    if Calendar().one_ride_gpx_id(gpx.id):
-        allow_hide = False
-    else:
-        allow_hide = True
+    rides = Calendar().all_rides_gpx_id(gpx.id)
 
     # ----------------------------------------------------------- #
     # Flag if hidden
@@ -210,7 +207,7 @@ def gpx_details(gpx_id):
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
                            cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
-                           MAP_BOUNDS=MAP_BOUNDS, direction=direction, allow_hide=allow_hide)
+                           MAP_BOUNDS=MAP_BOUNDS, direction=direction, rides=rides)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

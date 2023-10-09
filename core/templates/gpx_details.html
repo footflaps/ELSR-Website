@@ -230,6 +230,9 @@
 	            <li>Approx. {{ gpx.ascent_m|int }} m climbing (from GPX altitude data).</li>
 				<li>Route is <strong>{{ direction }}.</strong></li>
 				<li>Route type is <strong>{{ gpx.type }}.</strong></li>
+				{% if rides %}
+					<li>Route is used by {{ rides | count }} ride(s) in the Calendar</li>
+				{% endif %}
 			</ul>
 			
 			<p>
@@ -397,6 +400,39 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                                     Calendar entries                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if rides %}
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				
+				<h2>GPX is used by rides in the Calendar</h2>
+	
+				<ul>
+					{% for ride in rides %}
+					
+						<li class="my-2">
+							<a href="{{ url_for('weekend', date=ride.date) }}">
+								{{ ride.date }}: {{ ride.group }} to {{ ride.destination }}
+							</a>
+						</li>
+					
+					{% endfor %}
+				</ul>
+				
+				<!-- Separator before next section -->
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                     Owner / Admin control panel - Show after if public                         -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -442,7 +478,7 @@
 							{% else: %}
 
 								<!-- Mini form to hide route -->
-		                        {% if allow_hide %}
+		                        {% if not rides %}
 									<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
 									      method="post">
 										<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
@@ -460,7 +496,7 @@
 		        
 						</div>
 	                    
-	                    {% if not allow_hide %}
+	                    {% if rides %}
 		                    <div class="clearfix">
 			                    Route is in use by one or more rides in the Calendar, so can't be hidden.
 		                    </div>
