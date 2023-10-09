@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
+from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, is_mobile
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -28,6 +28,7 @@ from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
 from core.dB_events import Event
 from core.subs_email_sms import contact_form_email
+from core.dB_gpx import Gpx
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -260,9 +261,47 @@ def twr():
     # Increment map counts
     count_map_loads(1)
 
-    # Render home page
+    # Render page
     return render_template("main_twr.html", year=current_year, cafes=cafe_marker,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Gravel
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/gravel', methods=['GET'])
+@update_last_seen
+def gravel():
+    # Grab all our routes
+    gpxes = Gpx().all_gravel()
+
+    # Double check we have all the files present
+    missing_files = []
+
+    for gpx in gpxes:
+        # Absolute path name
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+
+        # Check the file is actually there, before we try and parse it etc
+        if not os.path.exists(filename):
+            missing_files.append(gpx.id)
+
+    # Need different path for Admin
+    if not current_user.is_authenticated:
+        admin = False
+    elif current_user.admin():
+        admin = True
+    else:
+        admin = False
+
+    if admin:
+        for missing in missing_files:
+            flash(f"We are missing the GPX file for route {missing}!")
+
+    # Render page
+    return render_template("main_gravel.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
+                           missing_files=missing_files)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

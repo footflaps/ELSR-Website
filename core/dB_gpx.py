@@ -20,9 +20,9 @@ from core.db_users import User
 # -------------------------------------------------------------------------------------------------------------- #
 
 GPX_ALLOWED_EXTENSIONS = {'gpx'}
-
+TYPE_GRAVEL = "Gravel"
 TYPES = ["Road",
-         "Gravel",
+         TYPE_GRAVEL,
          "MTB"]
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -79,6 +79,11 @@ class Gpx(db.Model):
     def all_gpxes_sorted(self):
         with app.app_context():
             gpxes = db.session.query(Gpx).order_by('name').all()
+            return gpxes
+
+    def all_gravel(self):
+        with app.app_context():
+            gpxes = db.session.query(Gpx).filter_by(type=TYPE_GRAVEL).all()
             return gpxes
 
     def all_gpxes_by_email(self, email):
