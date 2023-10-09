@@ -58,8 +58,14 @@
 			
 			<h2 class="mb-3">Rename the ride</h2>
 			
+			<!-- Load ckeditor -->
+			{{ ckeditor.load() }}
+			
 			<!-- This is where the form will go -->
 			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary", "cancel": "secondary"}) }}
+			
+			<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
+			{{ ckeditor.config(name='details') }}
 			
 			<!-- Break before next section -->
 			<hr>

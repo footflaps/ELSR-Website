@@ -61,10 +61,16 @@
 			<h2 class="post-title">Select the GPX file</h2>
 			<p> Once the file is uploaded, you will be able to edit the GPX file to remove any points near where you live.
 			    The route will remain 'hidden' until you have completed editing it and are happy with the modified file. </p>
-						
+
+			<!-- Load ckeditor -->
+			{{ ckeditor.load() }}
+			
 			<!-- This is where the form will go -->
 			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
 		
+			<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
+			{{ ckeditor.config(name='details') }}
+			
 			<p>NB: It may take a while to upload / process the file.....</p>
 			
 			<hr>
