@@ -633,6 +633,12 @@ def ride_history(request):
         warning = None
 
     # ----------------------------------------------------------- #
+    # Add to map counts
+    # ----------------------------------------------------------- #
+    if polylines.polylines:
+        count_map_loads(1)
+
+    # ----------------------------------------------------------- #
     # Render the page
     # ----------------------------------------------------------- #
     return render_template("calendar_group.html", year=current_year, group_name=group, rides=rides,

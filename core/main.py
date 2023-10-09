@@ -25,10 +25,12 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, is_mobile
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
 from core.db_users import User, update_last_seen
 from core.subs_graphjs import get_elevation_data
-from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
+from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads, \
+                                  create_polyline_set, MAX_NUM_GPX_PER_GRAPH
 from core.dB_events import Event
 from core.subs_email_sms import contact_form_email
 from core.dB_gpx import Gpx
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -273,12 +275,15 @@ def twr():
 @app.route('/gravel', methods=['GET'])
 @update_last_seen
 def gravel():
+    # ----------------------------------------------------------- #
     # Grab all our routes
+    # ----------------------------------------------------------- #
     gpxes = Gpx().all_gravel()
 
+    # ----------------------------------------------------------- #
     # Double check we have all the files present
+    # ----------------------------------------------------------- #
     missing_files = []
-
     for gpx in gpxes:
         # Absolute path name
         filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
@@ -299,10 +304,24 @@ def gravel():
         for missing in missing_files:
             flash(f"We are missing the GPX file for route {missing}!")
 
-    # Render page
-    return render_template("main_gravel.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
-                           missing_files=missing_files)
+    # ----------------------------------------------------------- #
+    # Map for the possible routes
+    # ----------------------------------------------------------- #
+    polylines = create_polyline_set(gpxes)
 
+    # ----------------------------------------------------------- #
+    # Add to map counts
+    # ----------------------------------------------------------- #
+    if polylines['polylines']:
+        count_map_loads(1)
+
+    # ----------------------------------------------------------- #
+    # Render page
+    # ----------------------------------------------------------- #
+    return render_template("main_gravel.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
+                           missing_files=missing_files, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
+                           MAP_BOUNDS=MAP_BOUNDS,
+                           polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
 
 # -------------------------------------------------------------------------------------------------------------- #
 # About
