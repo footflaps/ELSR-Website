@@ -38,7 +38,7 @@ TRIM_DISTANCE_KM = 2.0
 # based on https://loading.io/color/feature/Spectral-10/
 # GPX_COLOURS = ["#9e0142", "#5e4fa2", "#d53e4f", "#3288bd", "#f46d43", "#66c2a5", "#fdae61", "#e6f598"]
 # GPX_COLOURS = ["#b30000", "#7c1158", "#4421af", "#1a53ff", "#0d88e6", "#00b7c7", "#5ad45a", "#8be04e", "#ebdc78"]
-GPX_COLOURS = ["#b30000", "#7c1158", "#4421af", "#1a53ff", "#0d88e6", "#00b7c7", "#5ad45a", "#e60049", "#dc0ab4"]
+GPX_COLOURS = ["#b30000", "#7c1158", "#4421af", "#1a53ff", "#0d88e6", "#00b7c7", "#2e2b28", "#e60049", "#dc0ab4"]
 
 # Don't display 100s on a map as total mess
 MAX_NUM_GPX_PER_GRAPH = 9
