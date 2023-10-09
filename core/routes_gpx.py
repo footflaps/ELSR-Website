@@ -597,7 +597,7 @@ def edit_route():
             if Gpx().add_gpx(gpx):
                 app.logger.debug(f"edit_route(): Successfully updated GPX '{gpx.id}'.")
                 Event().log_event("Edit GPX Success", f"Successfully updated GPX '{gpx_id}'.")
-                flash("GPX file has been renamed!")
+                flash("Details have been updated!")
             else:
                 # Should never get here, but...
                 app.logger.debug(f"edit_route(): Failed to update GPX '{gpx.id}'.")
