@@ -49,7 +49,7 @@ MAP_BOUNDS = {
         "north": ELSR_HOME['lat'] + 2,
         "south": ELSR_HOME['lat'] - 2,
         "west": ELSR_HOME['lng'] - 2,
-        "east": ELSR_HOME['lng'] + 2,
+        "east": ELSR_HOME['lng'] + 3,
 }
 
 # Where we store config files etc
