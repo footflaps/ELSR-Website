@@ -63,6 +63,9 @@ class Gpx(db.Model):
     # Type (road / offroad)
     type = db.Column(db.String(20))
 
+    # Details (really just for offroad routes)
+    details = db.Column(db.Text)
+
     def public(self):
         return self.valid == 1
 
