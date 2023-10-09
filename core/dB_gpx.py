@@ -146,63 +146,6 @@ class Gpx(db.Model):
                     return False
         return False
 
-    def update_name(self, gpx_id, name):
-        with app.app_context():
-
-            # Locate the GPX file
-            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
-            if gpx:
-                try:
-                    # Update filename
-                    gpx.name = name
-                    # Write to dB
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"db_gpx: Failed to update name for gpx_id = '{gpx.id}', "
-                                     f"error code '{e.args}'.")
-                    return False
-        return False
-
-    def update_type(self, gpx_id, type):
-        with app.app_context():
-
-            # Locate the GPX file
-            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
-            if gpx:
-                try:
-                    # Update filename
-                    gpx.type = type
-                    # Write to dB
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"db_gpx: Failed to update type for gpx_id = '{gpx.id}', "
-                                     f"error code '{e.args}'.")
-                    return False
-        return False
-
-    def update_email(self, gpx_id, email):
-        with app.app_context():
-
-            # Locate the GPX file
-            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
-            if gpx:
-                try:
-                    # Update filename
-                    gpx.email = email
-                    # Write to dB
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"db_gpx: Failed to update email for gpx_id = '{gpx.id}', "
-                                     f"error code '{e.args}'.")
-                    return False
-        return False
-
     def clear_cafe_list(self, gpx_id):
         with app.app_context():
 
