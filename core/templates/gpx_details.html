@@ -15,156 +15,6 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--                                       Page Header                                              -->
-<!---------------------------------------------------------------------------------------------------->
-
-<header class="masthead" style="background-image: url({{ url_for('static', filename='img/gpx-bg.jpg')}})">
-	<div class="overlay"></div>
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
-				<div class="page-heading">
-					<h1>Route: '{{ gpx.name }}'</h1>
-					<span class="subheading">{{ gpx.length_km|int }} km and {{ gpx.ascent_m|int }} m climbing</span>
-				</div>
-			</div>
-		</div>
-	</div>
-</header>
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                 Show flash messages                                            -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% with messages = get_flashed_messages() %}
-	{% if messages %}
-		{% for message in messages %}
-			<div class="alert alert-warning text-center">
-				{{ message }}
-			</div>
-		{% endfor %}
-	{% endif %}
-{% endwith %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--               Owner / Admin control panel - Show before if not public                          -->
-<!---------------------------------------------------------------------------------------------------->
-
-{% if not current_user.is_authenticated: %}
-
-	<!--
-		Tortuous logic as if current_user isn't logged in they won't have inherited .email etc.
-		So, have to test for that first and handle that separately.
-	-->
-
-{% elif (current_user.email == gpx.email or current_user.admin()) and not gpx.public() %}
-
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
-				<h2 class="my-5">Route management</h2>
-				
-				<div class="clearfix">
-				
-					<!-- Edit button -->
-					<a class="btn btn-primary float-left" href="{{ url_for('edit_route', gpx_id=gpx.id) }}">Edit Route</a>
-					
-					<!-- (un)Publish button -->
-					{% if not gpx.public(): %}
-					
-						<!-- Mini form to publish route -->
-						<form action="{{ url_for('publish_route', gpx_id=gpx.id) }}"
-						      method="post">
-							<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-							<button type="submit" class="btn btn-primary float-left mx-3">Publish Route</button>
-						</form>
-			
-					{% else: %}
-
-						<!-- Mini form to hide route -->
-						<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
-						      method="post">
-							<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-							<button type="submit" class="btn btn-warning float-left mx-3">Hide Route</button>
-						</form>
-					
-					{% endif %}
-				
-					<!-- Delete button -->
-					<a class="btn btn-danger float-right"
-					   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
-					
-				</div>
-				
-				<!-- Separator before next section -->
-				<hr>
-				
-			</div>
-		</div>
-	</div>
-
-{% endif %}
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                                       Route details                                            -->
-<!---------------------------------------------------------------------------------------------------->
-
-<div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 mx-auto">
-	
-            <div class="clearfix">
-               
-                <h2 style="text-align:left;float:left;">Route details</h2>
-	            
-	            <!-- Download button -->
-	            {% if current_user.is_authenticated: %}
-	                <a href="{{ url_for('route_download', gpx_id=gpx.id) }}">
-                        <button class="btn btn-primary " style="text-align:right;float:right;">
-                                Download GPX</button>
-		            </a>
-	            {% else %}
-	                <button class="btn btn-primary" disabled style="text-align:right;float:right;"
-	                        href="">Log in to Download</button>
-	            {% endif %}
-	            
-            </div>
-	        
-			<ul>
-	            <li>{{ gpx.length_km|int }} km long</li>
-	            <li>Approx. {{ gpx.ascent_m|int }} m climbing (from GPX altitude data).</li>
-				<li>Route is <strong>{{ direction }}.</strong></li>
-				<li>Route type is <strong>{{ gpx.type }}.</strong></li>
-			</ul>
-			
-			<p class="my-0"> Cafe options:</p>
-			<ul>
-				{% for cafe in cafe_list: %}
-				<li> <a href="{{ url_for('cafe_details', cafe_id=cafe['id']) }}">
-					<b>{{ cafe['name'] }}</b> </a> is {{ cafe['dist_km'] }} km away at {{ cafe['range_km'] }} km along the route
-                </li>
-				
-				{% endfor %}
-			</ul>
-			
-			<p>
-				Uploaded by <img src="{{ gpx.email | gravatar }}"
-			         width="40" style="border-radius: 50%;"/> {{ author }} on {{ gpx.date }}
-			</p>
-			
-			<!-- Separator before next section -->
-			<hr>
-			
-		</div>
-	</div>
-</div>
-
-
-
-<!---------------------------------------------------------------------------------------------------->
 <!--             JavaScript for Google Map showing a single GPX plus one of more Cafes              -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -269,6 +119,199 @@
 
 {% endif %}
 
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/gpx-bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Route: '{{ gpx.name }}'</h1>
+					<span class="subheading">{{ gpx.length_km|int }} km and {{ gpx.ascent_m|int }} m climbing</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--               Owner / Admin control panel - Show before if not public                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if not current_user.is_authenticated: %}
+
+	<!--
+		Tortuous logic as if current_user isn't logged in they won't have inherited .email etc.
+		So, have to test for that first and handle that separately.
+	-->
+
+{% elif (current_user.email == gpx.email or current_user.admin()) and not gpx.public() %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<h2 class="my-5">Route management</h2>
+				
+				<div class="clearfix">
+				
+					<!-- Edit button -->
+					<a class="btn btn-primary float-left" href="{{ url_for('edit_route', gpx_id=gpx.id) }}">Edit Route</a>
+					
+					<!-- (un)Publish button -->
+					{% if not gpx.public(): %}
+					
+						<!-- Mini form to publish route -->
+						<form action="{{ url_for('publish_route', gpx_id=gpx.id) }}"
+						      method="post">
+							<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+							<button type="submit" class="btn btn-primary float-left mx-3">Publish Route</button>
+						</form>
+			
+					{% else: %}
+
+						<!-- Mini form to hide route -->
+						<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
+						      method="post">
+							<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+							<button type="submit" class="btn btn-warning float-left mx-3">Hide Route</button>
+						</form>
+					
+					{% endif %}
+				
+					<!-- Delete button -->
+					<a class="btn btn-danger float-right"
+					   data-toggle="modal" data-target="#deleteRouteModal">Delete Route</a>
+					
+				</div>
+				
+				<!-- Separator before next section -->
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Route details                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+	
+            <div class="clearfix">
+               
+                <h2 style="text-align:left;float:left;">Route Summary</h2>
+	            
+	            <!-- Download button -->
+	            {% if current_user.is_authenticated: %}
+	                <a href="{{ url_for('route_download', gpx_id=gpx.id) }}">
+                        <button class="btn btn-primary " style="text-align:right;float:right;">
+                                Download GPX</button>
+		            </a>
+	            {% else %}
+	                <button class="btn btn-primary" disabled style="text-align:right;float:right;"
+	                        href="">Log in to Download</button>
+	            {% endif %}
+	            
+            </div>
+	        
+			<ul>
+	            <li>{{ gpx.length_km|int }} km long</li>
+	            <li>Approx. {{ gpx.ascent_m|int }} m climbing (from GPX altitude data).</li>
+				<li>Route is <strong>{{ direction }}.</strong></li>
+				<li>Route type is <strong>{{ gpx.type }}.</strong></li>
+			</ul>
+			
+			<p>
+				Uploaded by <img src="{{ gpx.email | gravatar }}"
+			         width="40" style="border-radius: 50%;"/> {{ author }} on {{ gpx.date }}
+			</p>
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                        Route Details                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if gpx.details %}
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+	
+                <h2>Additional Details</h2>
+
+				{{ gpx.details | safe }}
+
+				<!-- Separator before next section -->
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                         Cafe Options                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+	
+            <div class="clearfix">
+			
+			<h2 class="mt-2"> Cafe options</h2>
+			<ul>
+				{% for cafe in cafe_list: %}
+				<li> <a href="{{ url_for('cafe_details', cafe_id=cafe['id']) }}">
+					<b>{{ cafe['name'] }}</b> </a> is {{ cafe['dist_km'] }} km away at {{ cafe['range_km'] }} km along the route
+                </li>
+				
+				{% endfor %}
+			</ul>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                    Map view of route                                           -->
+<!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
 	<div class="row">
