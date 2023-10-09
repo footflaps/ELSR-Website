@@ -190,11 +190,13 @@
 					{% else: %}
 
 						<!-- Mini form to hide route -->
-						<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
-						      method="post">
-							<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-							<button type="submit" class="btn btn-warning float-left mx-3">Hide Route</button>
-						</form>
+						{% if allow_hide %}
+							<form action="{{ url_for('hide_route', gpx_id=gpx.id) }}"
+							      method="post">
+								<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+								<button type="submit" class="btn btn-warning float-left mx-3">Hide Route</button>
+							</form>
+						{% endif %}
 					
 					{% endif %}
 				
