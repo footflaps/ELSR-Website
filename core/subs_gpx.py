@@ -5,7 +5,6 @@ import os
 import math
 import numpy
 
-from dominate.tags import sub
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py

@@ -8,13 +8,13 @@
 <!--                                       Page Header                                              -->
 <!---------------------------------------------------------------------------------------------------->
 
-<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/gravel-all-bg.jpg')}}')">
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/gravel-ldt-bg.jpg')}}')">
 	<div class="overlay"></div>
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<div class="page-heading">
-					<h1>All Gravel GPXes</h1>
+					<h1>Long Distance Trails</h1>
 				</div>
 			</div>
 		</div>
@@ -53,9 +53,47 @@
 				<li><a href="{{ url_for('gravel_ldt') }}"><strong>Long Distance Trails</strong></a></li>
 				<li><a href="{{ url_for('gravel_all') }}"><strong>All Gravel GPXes</strong></a></li>
 			</ul>
+		
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Long Distance Trails                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>Long Distance Trails</h2>
+			<p>
+				We also have a few long distance trails in our region which are ideal for gravel packing. Whilst they
+				don't start from Cambridge, they are easy to reach by train eg Peddars Way and Rebellion Way can be
+				reached by a short train ride to Thetford.
+			</p>
+			
+			<p>
+				It's also pretty easy to combine bits of them to make loops e.g.
+				<a href="{{ url_for('gpx_details', gpx_id=109) }}"><strong>Thetford to Hunstanton</strong></a> via
+				Rebellion Way, overnight in Hustanton and the Peddars way from
+				<a href="{{ url_for('gpx_details', gpx_id=110) }}"><strong>Hunstanton back to Thetford.</strong></a>
+			</p>
+			
+			<ul>
+				<li>Peddars Way: Details
+					<a href="https://www.norfolk.gov.uk/out-and-about-in-norfolk/norfolk-trails/cycle-routes/peddars-way"><strong>here.</strong></a></li>
+				<li>Rebellion Way: Details
+					<a href="https://www.cyclinguk.org/rebellion-way"><strong>here.</strong></a></li>
+				<li>Wolf Way and it's various derivatives: Details
+					<a href="https://www.cyclinguk.org/route/wolf-way"><strong>here.</strong></a></li>
+			</ul>
 			
 			<hr>
-	
+			
 		</div>
 	</div>
 </div>
