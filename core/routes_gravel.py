@@ -21,7 +21,7 @@ from core.db_users import User, update_last_seen
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads, \
                                   create_polyline_set, MAX_NUM_GPX_PER_GRAPH
 from core.dB_gpx import Gpx
-from subs_gpx import ELSR_LAT, ELSR_LON
+from core.subs_gpx import ELSR_LAT, ELSR_LON
 
 
 # -------------------------------------------------------------------------------------------------------------- #
