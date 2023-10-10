@@ -182,3 +182,8 @@ def delete_file_if_exists(filename):
     # If file not there, return True as can continue etc
     return True
 
+
+# Useful to know if this is the live site or not
+def live_site():
+    return os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py")
+

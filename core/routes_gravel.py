@@ -10,7 +10,7 @@ import mpu
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, is_mobile
+from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, is_mobile, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -57,7 +57,7 @@ def gravel():
     # ----------------------------------------------------------- #
     # Render page
     # ----------------------------------------------------------- #
-    return render_template("gravel_main.html", year=current_year)
+    return render_template("gravel_main.html", year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -118,7 +118,7 @@ def gravel_all():
     # ----------------------------------------------------------- #
     return render_template("gravel_all.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
                            missing_files=missing_files, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
-                           MAP_BOUNDS=MAP_BOUNDS, warning=warning,
+                           MAP_BOUNDS=MAP_BOUNDS, warning=warning, live_site=live_site(),
                            polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
 
 
@@ -185,7 +185,7 @@ def gravel_ldt():
     # ----------------------------------------------------------- #
     return render_template("gravel_ldt.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
                            missing_files=missing_files, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
-                           MAP_BOUNDS=MAP_BOUNDS, warning=warning,
+                           MAP_BOUNDS=MAP_BOUNDS, warning=warning, live_site=live_site(),
                            polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
 
 
@@ -268,6 +268,6 @@ def gravel_local():
     # ----------------------------------------------------------- #
     return render_template("gravel_local.html", year=current_year, gpxes=local_gpxes, mobile=is_mobile(),
                            missing_files=missing_files, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
-                           MAP_BOUNDS=MAP_BOUNDS, warning=warning,
+                           MAP_BOUNDS=MAP_BOUNDS, warning=warning, live_site=live_site(),
                            polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
 

@@ -11,7 +11,7 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year
+from core import app, current_year, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -157,7 +157,7 @@ def blog():
                 blog.filename = filename
 
     return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=NO_CAFE, no_gpx=NO_GPX, page=page,
-                           num_pages=num_pages, page_size=PAGE_SIZE, event_option=EVENT_OPTION)
+                           num_pages=num_pages, page_size=PAGE_SIZE, event_option=EVENT_OPTION, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -260,10 +260,10 @@ def add_blog():
         # 1. Killjoy!
         if form.category.data == DRUNK_OPTION:
             flash("Best not post stuff when drunk!")
-            return render_template("blog_new.html", year=current_year, form=form)
+            return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
         elif form.category.data == CCC_OPTION:
             flash("Yep, we all know they're miserable bastards, but no need to shout about it!")
-            return render_template("blog_new.html", year=current_year, form=form)
+            return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
 
         # ----------------------------------------------------------- #
         # Create new_blog instance
@@ -320,7 +320,7 @@ def add_blog():
             app.logger.debug(f"add_blog(): Failed to add ride from '{new_blog}'.")
             Event().log_event("Add blog Fail", f"Failed to add ride '{new_blog}'.")
             flash("Sorry, something went wrong.")
-            return render_template("blog_new.html", year=current_year, form=form)
+            return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
 
         # ----------------------------------------------------------- #
         #   Did we get passed a path for a photo?
@@ -358,13 +358,13 @@ def add_blog():
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
-        return render_template("blog_new.html", year=current_year, form=form)
+        return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
 
     # ----------------------------------------------------------- #
     # Handle GET
     # ----------------------------------------------------------- #
 
-    return render_template("blog_new.html", year=current_year, form=form)
+    return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

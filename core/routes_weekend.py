@@ -11,7 +11,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, delete_file_if_exists
+from core import app, current_year, delete_file_if_exists, live_site
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -345,7 +345,7 @@ def weekend():
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            days=days, dates_long=dates_long, dates_short=dates_short, DEFAULT_START=DEFAULT_START,
                            rides=rides, start_times=start_times, weather_data=weather_data,
-                           polylines=polylines, cafe_coords=cafe_coords,
+                           polylines=polylines, cafe_coords=cafe_coords, live_site=live_site(),
                            elevation_data=elevation_data, elevation_cafes=elevation_cafes, anchor=target_date_str)
 
 
@@ -508,13 +508,15 @@ def add_ride():
         if formdate < today and \
                 not current_user.admin():
             flash("The date is in the past!")
-            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                   live_site=live_site())
 
         # 2: Validate cafe (must be specified)
         if form.destination.data == NEW_CAFE \
                 and form.new_destination.data == "":
             flash("New cafe not specified!")
-            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                   live_site=live_site())
 
         # 3: Check we can find cafe in the dB
         if form.destination.data != NEW_CAFE:
@@ -527,7 +529,8 @@ def add_ride():
                 app.logger.debug(f"add_ride(): Failed to get cafe from '{form.destination.data}'.")
                 Event().log_event("Add ride Fail", f"Failed to get cafe from '{form.destination.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the cafe choice.")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                       live_site=live_site())
         else:
             # New cafe, not yet in database
             cafe = None
@@ -548,7 +551,8 @@ def add_ride():
                 app.logger.debug(f"add_ride(): Failed to get GPX from '{form.gpx_name.data}'.")
                 Event().log_event("Add ride Fail", f"Failed to get GPX from '{form.gpx_name.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the GPX choice.")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                       live_site=live_site())
         else:
             # They are uploading their own GPX file
             gpx = None
@@ -563,7 +567,8 @@ def add_ride():
             if not match:
                 # Doesn't look like we pass that cafe!
                 flash(f"That GPX route doesn't pass {cafe.name}!")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                       live_site=live_site())
 
         # 7: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
         if not current_user.admin():
@@ -573,7 +578,8 @@ def add_ride():
                 flash("Only Admins can nominate someone else to lead a ride.")
                 # In case they've forgotten their user name, reset it in the form
                 form.leader.data = current_user.name
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                       live_site=live_site())
 
         # ----------------------------------------------------------- #
         # Do we need to upload a GPX?
@@ -584,7 +590,8 @@ def add_ride():
                 app.logger.debug(f"add_ride(): Failed to find 'gpx_file' in request.files!")
                 Event().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
                 flash("Couldn't find the file.")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                       live_site=live_site())
             else:
                 # Get the filename
                 file = request.files['gpx_file']
@@ -596,14 +603,16 @@ def add_ride():
                     app.logger.debug(f"add_ride(): No selected file!")
                     Event().log_event(f"Add ride Fail", f"No selected file!")
                     flash('No selected file')
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                           live_site=live_site())
 
                 if not file or \
                         not allowed_file(file.filename):
                     app.logger.debug(f"add_ride(): Invalid file '{file.filename}'!")
                     Event().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
                     flash("That's not a GPX file!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                           live_site=live_site())
 
                 # Create a new GPX object
                 # We do this first as we need the id in order to create
@@ -634,7 +643,7 @@ def add_ride():
                     app.logger.debug(f"add_ride(): Failed to add gpx to the dB!")
                     Event().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
                     flash("Sorry, something went wrong!")
-                    return render_template("gpx_add.html", year=current_year, form=form)
+                    return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
                 # This is where we will store it
                 filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
@@ -644,7 +653,7 @@ def add_ride():
                 if not delete_file_if_exists(filename):
                     # Failed to delete existing file (func will generate error trace)
                     flash("Sorry, something went wrong!")
-                    return render_template("gpx_add.html", year=current_year, form=form)
+                    return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
                 # Upload the GPX file
                 try:
@@ -653,14 +662,14 @@ def add_ride():
                     app.logger.debug(f"add_ride(): Failed to upload/save '{filename}', error code was {e.args}.")
                     Event().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                     flash("Sorry, something went wrong!")
-                    return render_template("gpx_add.html", year=current_year, form=form)
+                    return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
                 # Update gpx object with filename
                 if not Gpx().update_filename(gpx.id, filename):
                     app.logger.debug(f"add_ride(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     Event().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     flash("Sorry, something went wrong!")
-                    return render_template("gpx_add.html", year=current_year, form=form)
+                    return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
                 # Strip all excess data from the file
                 strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
@@ -738,7 +747,8 @@ def add_ride():
             app.logger.debug(f"add_ride(): Failed to add ride from '{new_ride}'.")
             Event().log_event("Add ride Fail", f"Failed to add ride '{new_ride}'.")
             flash("Sorry, something went wrong.")
-            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                                   live_site=live_site())
 
     # ----------------------------------------------------------- #
     # Handle POST
@@ -751,13 +761,13 @@ def add_ride():
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
-        return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+        return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site())
 
     # ----------------------------------------------------------- #
     # Handle GET
     # ----------------------------------------------------------- #
 
-    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride)
+    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

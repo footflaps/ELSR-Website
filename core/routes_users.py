@@ -12,7 +12,7 @@ from datetime import datetime
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year
+from core import app, current_year, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -140,7 +140,7 @@ def login():
             app.logger.debug(f"login(): email not recognised '{email}'.")
             Event().log_event("Login Fail", f"Email not recognised '{email}'")
             flash("Email address is not recognised!")
-            return render_template("user_login.html", form=form, year=current_year)
+            return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
         # Test 2: Did they forget password?
         if form.forgot.data:
@@ -155,7 +155,7 @@ def login():
             Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()
             # Tell user to expect an email
             flash("If your email address is registered, an email recovery mail has been sent.")
-            return render_template("user_login.html", form=form, year=current_year)
+            return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
         # Test 3: Do they want a new verification code?
         if form.verify.data:
@@ -184,7 +184,7 @@ def login():
             Event().log_event("Login Fail", f"Email has been blocked '{email}'.")
             flash("That email address has been temporarily blocked!")
             flash(f"Contact '{admin_email_address}' to discuss.")
-            return render_template("user_login.html", form=form, year=current_year)
+            return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
         # Test 6: Check password
         if User().validate_password(user, password, user_ip):
@@ -216,7 +216,7 @@ def login():
             app.logger.debug(f"login(): Failed, Wrong password for '{email}'.")
             Event().log_event("Login Fail", f"Wrong password for '{email}'")
             flash("Password did not match!")
-            return render_template("user_login.html", form=form, year=current_year)
+            return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
     # ------------------------------------------------------------------------------------------------- #
     #   GET - Show login page                                                                           #
@@ -237,7 +237,7 @@ def login():
 
     # app.logger.debug(f"login(): Saved '{session['url']}' as return page after login.")
 
-    return render_template("user_login.html", form=form, year=current_year)
+    return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -306,7 +306,7 @@ def register():
         # We have a reserved name
         if new_user.name == DELETED_NAME:
             flash("Sorry, that name is reserved.")
-            return render_template("user_register.html", form=form, year=current_year,
+            return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Names must be unique
@@ -315,7 +315,7 @@ def register():
             Event().log_event("User Page Succes", f"Username clash '{new_user.name}' "
                                                   f"for new_user.id = '{new_user.id}'.")
             flash(f"Sorry, the name '{new_user.name.strip()}' is already in use!")
-            return render_template("user_register.html", form=form, year=current_year,
+            return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Add to dB
@@ -337,16 +337,16 @@ def register():
             app.logger.debug(f"register(): User().create_user() failed for '{new_user.email}'.")
             Event().log_event("Register Error", f"User().create_user() failed for '{new_user.email}'.")
             flash("Sorry, something went wrong!")
-            return render_template("user_register.html", form=form, year=current_year,
+            return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
     elif request.method == 'POST':
         flash("Something was missing in the registration form, see below!")
-        return render_template("user_register.html", form=form, year=current_year,
+        return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                                admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
     # Show register page / form
-    return render_template("user_register.html", form=form, year=current_year,
+    return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                            admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
 
@@ -498,7 +498,7 @@ def validate_email():
                 app.logger.debug(f"validate_email(): Form, code didn't work for user '{user.email}'.")
                 Event().log_event("Validate Fail", f"Form, code didn't work for user '{user.email}'.")
                 flash("Incorrect code (or code has expired), please try again!")
-                return render_template("user_validate.html", form=form, year=current_year)
+                return render_template("user_validate.html", form=form, year=current_year, live_site=live_site())
 
         else:
             # Invalid email
@@ -508,7 +508,7 @@ def validate_email():
             # Just fall through to validate page
 
     # Show validate email form
-    return render_template("user_validate.html", form=form, year=current_year)
+    return render_template("user_validate.html", form=form, year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -599,7 +599,7 @@ def twofa_login():
                 app.logger.debug(f"twofa_login(): Form, code didn't work for user '{user.email}'.")
                 Event().log_event("2FA login Fail", f"Form, code didn't work for user '{user.email}'.")
                 flash("Incorrect code (or code has expired), please try again!")
-                return render_template("user_sms_login.html", form=form, year=current_year)
+                return render_template("user_sms_login.html", form=form, year=current_year, live_site=live_site())
 
         # Invalid email
         app.logger.debug(f"twofa_login(): Form, unrecognised email '{form.email.data}'.")
@@ -607,7 +607,7 @@ def twofa_login():
         flash("Unrecognised email, please try again!")
 
     # Show register page / form
-    return render_template("user_sms_login.html", form=form, year=current_year)
+    return render_template("user_sms_login.html", form=form, year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -659,7 +659,7 @@ def reset_password():
             Event().log_event("Reset Fail", f"Form route, Passwords don't match! Email = '{email}'.")
             flash("Passwords don't match!")
             # Back to the same page for another try
-            return render_template("user_reset_password.html", form=form, year=current_year)
+            return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())
 
         if User().reset_password(email, form.password1.data):
             app.logger.debug(f"reset_password(): Form route, Password has been reset, email = '{email}'.")
@@ -673,7 +673,7 @@ def reset_password():
             Event().log_event("Reset Fail", f"User().reset_password() failed! email = '{email}'.")
             flash("Sorry, something went wrong!")
 
-    return render_template("user_reset_password.html", form=form, year=current_year)
+    return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -856,28 +856,28 @@ def user_page():
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds, anchor="messages")
+                               classifieds=classifieds, live_site=live_site(), anchor="messages")
 
     elif anchor == "account":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds, anchor="account")
+                               classifieds=classifieds, live_site=live_site(), anchor="account")
 
     elif event_period or anchor == "eventLog":
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds, anchor="eventLog")
+                               classifieds=classifieds, live_site=live_site(), anchor="eventLog")
 
     else:
         return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
                                cafe_comments=cafe_comments, messages=messages, events=events, days=days,
                                rides=rides, socials=socials, notifications=notifications, blogs=blogs,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds)
+                               classifieds=classifieds, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -1046,7 +1046,7 @@ def mobile_verify():
             # Fal back to the GET option
 
     # Back to user page
-    return render_template("user_phone_verification.html", year=current_year, form=form)
+    return render_template("user_phone_verification.html", year=current_year, form=form, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

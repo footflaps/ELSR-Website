@@ -10,7 +10,7 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year
+from core import app, current_year, live_site
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our classes
@@ -81,7 +81,8 @@ def classifieds():
                         print(f"Appending '{filename}'")
                         classified.images.append(filename)
 
-    return render_template("classifieds.html", year=current_year, classifieds=classifieds, status_sold=STATUS_SOLD)
+    return render_template("classifieds.html", year=current_year, classifieds=classifieds, status_sold=STATUS_SOLD,
+                           live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -218,9 +219,8 @@ def add_sell():
                 app.logger.debug(f"add_sell(): Failed to add classified: '{new_classified}'.")
                 Event().log_event("Add Sell Fail", f"Failed to add classified: '{new_classified}'.")
                 flash("Sorry, something went wrong.")
-                return render_template("classifieds_sell.html", year=current_year, form=form,
-                                       num_photos_used=num_photos_used,
-                                       classified=classified)
+                return render_template("classifieds_sell.html", year=current_year, form=form, live_site=live_site(),
+                                       num_photos_used=num_photos_used, classified=classified)
 
             # ----------------------------------------------------------- #
             # Upload photos
@@ -239,9 +239,8 @@ def add_sell():
                 app.logger.debug(f"add_sell(): Failed to add classified: '{new_classified}'.")
                 Event().log_event("Add Sell Fail", f"Failed to add classified: '{new_classified}'.")
                 flash("Sorry, something went wrong.")
-                return render_template("classifieds_sell.html", year=current_year, form=form,
-                                       num_photos_used=num_photos_used,
-                                       classified=classified)
+                return render_template("classifieds_sell.html", year=current_year, form=form, live_site=live_site(),
+                                       num_photos_used=num_photos_used, classified=classified)
 
             # ----------------------------------------------------------- #
             # Alert admin to new post
@@ -271,7 +270,7 @@ def add_sell():
             flash("Something was missing, see comments below:")
 
     return render_template("classifieds_sell.html", year=current_year, form=form, num_photos_used=num_photos_used,
-                           classified=classified)
+                           classified=classified, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

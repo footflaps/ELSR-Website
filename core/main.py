@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GPX_UPLOAD_FOLDER_ABS
+from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -181,7 +181,7 @@ def home():
     flash("Now meeting at Bean Theory Cafe!")
 
     # Render home page
-    return render_template("main_home.html", year=current_year, cafes=cafe_marker,
+    return render_template("main_home.html", year=current_year, cafes=cafe_marker, live_site=live_site(),
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS)
 
 
@@ -237,7 +237,7 @@ def chaingang():
 
     # Render home page
     return render_template("main_chaingang.html", year=current_year, leader_table=leader_table,
-                           cafe_markers=cafe_markers, elevation_data=elevation_data,
+                           cafe_markers=cafe_markers, elevation_data=elevation_data, live_site=live_site(),
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS)
 
@@ -262,7 +262,7 @@ def twr():
     count_map_loads(1)
 
     # Render page
-    return render_template("main_twr.html", year=current_year, cafes=cafe_marker,
+    return render_template("main_twr.html", year=current_year, cafes=cafe_marker, live_site=live_site(),
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS)
 
 
@@ -274,7 +274,7 @@ def twr():
 @app.route("/about", methods=['GET'])
 @update_last_seen
 def about():
-    return render_template("main_about.html", year=current_year)
+    return render_template("main_about.html", year=current_year, live_site=live_site())
 
 
 
@@ -291,7 +291,7 @@ def gdpr():
     # ----------------------------------------------------------- #
     admins = User().all_admins()
 
-    return render_template("main_gdpr.html", year=current_year, admins=admins)
+    return render_template("main_gdpr.html", year=current_year, admins=admins, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -330,7 +330,7 @@ def contact():
     #   GET - Render page
     # ----------------------------------------------------------- #
 
-    return render_template("main_contact.html", year=current_year, form=form)
+    return render_template("main_contact.html", year=current_year, form=form, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -340,7 +340,7 @@ def contact():
 @app.route("/plan", methods=['GET'])
 @update_last_seen
 def plan():
-    return render_template("main_plan_a_ride.html", year=current_year)
+    return render_template("main_plan_a_ride.html", year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -350,7 +350,7 @@ def plan():
 @app.route("/gpx_guide", methods=['GET'])
 @update_last_seen
 def gpx_guide():
-    return render_template("main_download_howto.html", year=current_year)
+    return render_template("main_download_howto.html", year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -360,7 +360,7 @@ def gpx_guide():
 @app.route("/uncut", methods=['GET'])
 @update_last_seen
 def uncut():
-    return render_template("uncut_steerertubes.html", year=current_year)
+    return render_template("uncut_steerertubes.html", year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -378,7 +378,7 @@ def uncut():
 @app.route("/error", methods=['GET'])
 def error():
     test = 1/0
-    return render_template("uncut_steerertubes.html", year=current_year)
+    return render_template("uncut_steerertubes.html", year=current_year, live_site=live_site())
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -399,7 +399,7 @@ def csrf_error(e):
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 400 status explicitly
-    return render_template('400.html', year=current_year), 400
+    return render_template('400.html', year=current_year, live_site=live_site()), 400
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -418,7 +418,7 @@ def bad_request(e):
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 400 status explicitly
-    return render_template('400.html', year=current_year), 400
+    return render_template('400.html', year=current_year, live_site=live_site()), 400
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -438,7 +438,7 @@ def unauthorized(e):
 
     # note that we set the 401 status explicitly
     # NB Don't have a 401 page, just re-use 403
-    return render_template('403.html', year=current_year), 401
+    return render_template('403.html', year=current_year, live_site=live_site()), 401
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -457,7 +457,7 @@ def forbidden(e):
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
-    return render_template('403.html', year=current_year), 403
+    return render_template('403.html', year=current_year, live_site=live_site()), 403
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -476,7 +476,7 @@ def page_not_found(e):
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 404 status explicitly
-    return render_template('404.html', year=current_year), 404
+    return render_template('404.html', year=current_year, live_site=live_site()), 404
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -495,7 +495,7 @@ def method_not_allowed(e):
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 405 status explicitly
-    return render_template('403.html', year=current_year), 405
+    return render_template('403.html', year=current_year, live_site=live_site()), 405
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -515,7 +515,7 @@ def file_too_large(e):
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 413 status explicitly
-    return render_template('400.html', year=current_year), 413
+    return render_template('400.html', year=current_year, live_site=live_site()), 413
 
 
 # ------------------------------------------------------------------------------------------------------------- #
@@ -534,7 +534,7 @@ def internal_server_error(e):
                              f"'{request.referrer}', '{users_ip}'.")
 
     # now you're handling non-HTTP exceptions only
-    return render_template("500.html", e=e), 500
+    return render_template("500.html", year=current_year, live_site=live_site(), e=e), 500
 
 
 # Have to register 500 with app to overrule the default built in 500 page

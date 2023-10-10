@@ -8,7 +8,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists, is_mobile
+from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists, is_mobile, live_site
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -71,7 +71,7 @@ def gpx_list():
             flash(f"We are missing the GPX file for route {missing}!")
 
     # Render in gpx_list template
-    return render_template("gpx_list.html", year=current_year, gpxes=gpxes, mobile=is_mobile(),
+    return render_template("gpx_list.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site(),
                            missing_files=missing_files)
 
 
@@ -207,7 +207,7 @@ def gpx_details(gpx_id):
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
                            cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
-                           MAP_BOUNDS=MAP_BOUNDS, direction=direction, rides=rides)
+                           MAP_BOUNDS=MAP_BOUNDS, direction=direction, rides=rides, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -397,7 +397,7 @@ def new_route():
             app.logger.debug(f"new_route(): Failed to find 'filename' in request.files!")
             Event().log_event(f"New GPX Fail", f"Failed to find 'filename' in request.files!")
             flash("Couldn't find the file.")
-            return render_template("gpx_add.html", year=current_year, form=form)
+            return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
         else:
             # Get the filename
@@ -410,14 +410,14 @@ def new_route():
                 app.logger.debug(f"new_route(): No selected file!")
                 Event().log_event(f"New GPX Fail", f"No selected file!")
                 flash('No selected file')
-                return render_template("gpx_add.html", year=current_year, form=form)
+                return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             if not file or \
                     not allowed_file(file.filename):
                 app.logger.debug(f"new_route(): Invalid file '{file.filename}'!")
                 Event().log_event(f"New GPX Fail", f"Invalid file '{file.filename}'!")
                 flash("That's not a GPX file!")
-                return render_template("gpx_add.html", year=current_year, form=form)
+                return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             # Create a new GPX object
             # We do this first as we need the id in order to create
@@ -445,7 +445,7 @@ def new_route():
                 app.logger.debug(f"new_route(): Failed to add gpx to the dB!")
                 Event().log_event(f"New GPX Fail", f"Failed to add gpx to the dB!")
                 flash("Sorry, something went wrong!")
-                return render_template("gpx_add.html", year=current_year, form=form)
+                return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             # This is where we will store it
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
@@ -455,7 +455,7 @@ def new_route():
             if not delete_file_if_exists(filename):
                 # Failed to delete existing file (func will generate error trace)
                 flash("Sorry, something went wrong!")
-                return render_template("gpx_add.html", year=current_year, form=form)
+                return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             # Upload the GPX file
             try:
@@ -464,14 +464,14 @@ def new_route():
                 app.logger.debug(f"new_route(): Failed to upload/save '{filename}', error code was {e.args}.")
                 Event().log_event(f"New GPX Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                 flash("Sorry, something went wrong!")
-                return render_template("gpx_add.html", year=current_year, form=form)
+                return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             # Update gpx object with filename
             if not Gpx().update_filename(gpx.id, filename):
                 app.logger.debug(f"new_route(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                 Event().log_event(f"New GPX Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                 flash("Sorry, something went wrong!")
-                return render_template("gpx_add.html", year=current_year, form=form)
+                return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             # Strip all excess data from the file
             flash("Any HR or Power data has been removed.")
@@ -489,13 +489,13 @@ def new_route():
         # ----------------------------------------------------------- #
         flash("Form not filled in properly, see below!")
 
-        return render_template("gpx_add.html", year=current_year, form=form)
+        return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
     # ----------------------------------------------------------- #
     #   GET - render form etc
     # ----------------------------------------------------------- #
 
-    return render_template("gpx_add.html", year=current_year, form=form)
+    return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -636,7 +636,8 @@ def edit_route():
     # Render the page
     return render_template("gpx_edit.html", year=current_year, gpx=gpx, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            MAP_BOUNDS=MAP_BOUNDS, start_markers=maps[0], start_map_coords=maps[1],
-                           end_markers=maps[2], end_map_coords=maps[3], return_path=return_path, form=form)
+                           end_markers=maps[2], end_map_coords=maps[3], return_path=return_path, form=form,
+                           live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -11,7 +11,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, is_mobile
+from core import app, current_year, is_mobile, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -286,7 +286,7 @@ def admin_page():
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
                                files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
-                               dataset=dataset, anchor="eventLog")
+                               dataset=dataset, live_site=live_site(), anchor="eventLog")
     elif anchor == "messages":
         # Jump straight to the 'messages'
         return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
@@ -294,7 +294,7 @@ def admin_page():
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
                                files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
-                               dataset=dataset, anchor="messages")
+                               dataset=dataset, live_site=live_site(), anchor="messages")
     else:
         # No jumping, just display the page from the top
         return render_template("admin_page.html", year=current_year, admins=admins, trusted_users=trusted_users,
@@ -302,7 +302,7 @@ def admin_page():
                                rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                                map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
                                files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
-                               dataset=dataset)
+                               dataset=dataset, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -12,7 +12,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year
+from core import app, current_year, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -149,7 +149,7 @@ def calendar():
         # Next month
         month += 1
 
-    return render_template("calendar.html", year=current_year, events=events)
+    return render_template("calendar.html", year=current_year, events=events, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -257,7 +257,8 @@ def add_social():
         app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
         if formdate < today:
             flash("The date is in the past!")
-            return render_template("calendar_add_social.html", year=current_year, form=form, social=social)
+            return render_template("calendar_add_social.html", year=current_year, form=form, social=social,
+                                   live_site=live_site())
 
         # ----------------------------------------------------------- #
         # We can now create / update the social object
@@ -317,7 +318,8 @@ def add_social():
             app.logger.debug(f"add_social(): Failed to add social for '{new_social}'.")
             Event().log_event("Add Social Fail", f"Failed to add social for '{new_social}'.")
             flash("Sorry, something went wrong.")
-            return render_template("calendar_add_social.html", year=current_year, form=form, social=social)
+            return render_template("calendar_add_social.html", year=current_year, form=form, social=social,
+                                   live_site=live_site())
 
     elif request.method == 'POST':
         # ----------------------------------------------------------- #
@@ -330,9 +332,11 @@ def add_social():
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
-        return render_template("calendar_add_social.html", year=current_year, form=form, social=social)
+        return render_template("calendar_add_social.html", year=current_year, form=form, social=social,
+                               live_site=live_site())
 
-    return render_template("calendar_add_social.html", year=current_year, form=form, social=social)
+    return render_template("calendar_add_social.html", year=current_year, form=form, social=social,
+                           live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -386,7 +390,7 @@ def social():
         else:
             social.show_ics = True
 
-    return render_template("main_social.html", year=current_year, socials=socials, date=date)
+    return render_template("main_social.html", year=current_year, socials=socials, date=date, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -643,5 +647,5 @@ def ride_history(request):
     # ----------------------------------------------------------- #
     return render_template("calendar_group.html", year=current_year, group_name=group, rides=rides,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), warning=warning,
-                           MAP_BOUNDS=MAP_BOUNDS, gpxes=gpxes, cafes=cafe_markers,
+                           MAP_BOUNDS=MAP_BOUNDS, gpxes=gpxes, cafes=cafe_markers, live_site=live_site(),
                            polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])
