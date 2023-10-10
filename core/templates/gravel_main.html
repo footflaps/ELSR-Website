@@ -38,8 +38,57 @@
 {% endwith %}
 
 
+
 <!---------------------------------------------------------------------------------------------------->
-<!--                                      Main Content                                              -->
+<!--                                         Quick Links                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+		
+			<h2>Gravel Links</h2>
+			
+			<ul>
+				<li>Routes from Cambridge</li>
+				<li>Long Distance Trails</li>
+				<li>All Gravel GPXes</li>
+			</ul>
+	
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      WhatsApp Group                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!-- Readwrite users can see WA link -->
+{% if current_user.is_authenticated: %}
+	{% if current_user.readwrite() %}
+
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+				
+					<h2>ELSR Gravel WhatsApp Group</h2>
+				
+					<p>
+						We have a WhatsApp Group for discussing Gravel Rides. You can join using
+						<a href="https://chat.whatsapp.com/BYNwRtOx8dnEmqmxOqWEvo"><strong>this link.</strong></a>
+					</p>
+			
+				</div>
+			</div>
+		</div>
+
+	{% endif %}
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                           Intro                                                -->
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
@@ -62,13 +111,120 @@
 			</p>
 			
 			<p>
-				We also have a few long distance trails in our region which are ideal for gravel packing:
+				Our local trails are definitely at the easier end of gravel riding with virtually no technical sections,
+				unlike say The Lake District or Mid Wales. However, they are pretty fast rolling and given how flat the
+				region is, you are able to cover good distances very easily e.g. the Fastest Known Time for the 372 km
+				Rebellion Way is a staggering 13h:30m! See
+				<a href="https://www.strava.com/activities/9674738731"><strong>Strava.</strong></a>
+				However, we would recommend a slightly more leisurely approach, e.g. splitting the route over three
+				days and enjoying the scenary.
+			</p>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                           Gravel Bikes                                         -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>What is a Gravel Bike?</h2>
+			
+			<p>
+				A very good question! With the current trend of road bikes accepting wider and wider tyres, the
+				difference between modern road bikes and gravel bikes is shrinking. Typically, a gravel bike will take
+				anything up to 55mm tyres with good clearance for mud and / or mudguards. The geometry will be
+				slightly more relaxed (longer wheelbase and slacker head tube angle). This will favour stability over
+				razor sharp handling and make the bike easier to ride over rough terrain. They also tend to have a
+				more upright position e.g. slightly shorter reach and higher stack than road specific frames.
+			</p>
+			<p>
+				However, the single biggest difference in handling comes from running wider tyres at lower pressures,
+				which make a big difference to how the bike feels on bridleways etc. For out local trails, you won't be
+				pushing the upper bounds of technical riding, so a more road orientated frame with some 35mm tyres will
+				probably be absolutely fine.
+			</p>
+			<p>
+				If you find gravel ride a bit battering on the wrists or hands, there are some excellent solutions out
+				there e.g. I use a
+				<a href="https://www.youtube.com/watch?v=jL4kzCsiJfM"><strong>RedShift stem </strong></a>
+				on my Gravel Bike, which makes a huge difference to how rough the trails feel and how far you can ride.
+			</p>
+			
+			<p>
+				NB Worth noting that the <a href="https://www.rsf.org.uk/"><strong>Rough Stuff Fellowship</strong></a>
+				have been riding (or often carrying) normal road bikes offroad for a very long time e.g. when it
+				was compulsory to smoke a pipe and wear shorts in winter even for ladies.
+			</p>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                        Gravel Packing                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>What is a Gravel Packing?</h2>
+			
+			<p>
+				Traditional panniers are so 1980s. Every outdoor company under the sun is now selling soft, strap on
+				luggage for gravel bikes. E.g. for one or two nights B&Bing I use:
 			</p>
 			
 			<ul>
-				<li>Peddars Way: Details <a href="https://www.norfolk.gov.uk/out-and-about-in-norfolk/norfolk-trails/cycle-routes/peddars-way"><strong>here.</strong></a></li>
-				<li>Rebellion Way: Details <a href="https://www.cyclinguk.org/rebellion-way"><strong>here.</strong></a></li>
-				<li>Wolf Way and it's various children: Details <a href="https://www.cyclinguk.org/route/wolf-way"><strong>here.</strong></a></li>
+				<li>10 litre saddle bag carrying spare shoes and clothes</li>
+				<li>3 litre frame bag carrying pump, tools, tubes and small lock</li>
+				<li>7 litre bar bag carrying gilet, waterproof, food, wallet and suncream etc (normally half empty)</li>
+			</ul>
+			
+			<img class="mt-2" src="{{ url_for('static', filename='/img/free-ranger.jpg') }}"
+			     style="width: 100%; border: 4px solid #000;">
+							
+			<p>
+				If you're using B&Bs, then you only really need a change of clothes for the evening and maybe a spare
+				pair of cycle shorts and a toothbrush. Spare shoes take up most of the space, but it's nice to give
+				your feet a rest and your cycling shoes could easily be wet. If you're camping then you're going to
+				need a lot more kit and be a lot more inventive in how you pack it e.g. see
+				<a href="https://www.youtube.com/watch?v=gItut2g9_3k"><strong>Juliet Elliott's set up.</strong></a>
+			</p>
+			
+		</div>
+	</div>
+</div>
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Long Distance Trails                                      -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>Long Distance Trails</h2>
+			<p>
+				We also have a few long distance trails in our region which are ideal for gravel packing. Whilst they
+				don't start from Cambridge, they are easy to reach by train eg Peddars Way and Rebellion Way can be
+				reached by a short train ride to Thetford.
+			</p>
+			
+			<ul>
+				<li>Peddars Way: Details
+					<a href="https://www.norfolk.gov.uk/out-and-about-in-norfolk/norfolk-trails/cycle-routes/peddars-way"><strong>here.</strong></a></li>
+				<li>Rebellion Way: Details
+					<a href="https://www.cyclinguk.org/rebellion-way"><strong>here.</strong></a></li>
+				<li>Wolf Way and it's various derivatives: Details
+					<a href="https://www.cyclinguk.org/route/wolf-way"><strong>here.</strong></a></li>
 			</ul>
 			
 			<hr>
@@ -76,6 +232,9 @@
 		</div>
 	</div>
 </div>
+
+
+
 
 
 <!---------------------------------------------------------------------------------------------------->
@@ -294,7 +453,6 @@
 	</div>
 	
 </div>
-
 
 <div class="container">
 	<div class="row">
