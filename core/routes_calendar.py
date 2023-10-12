@@ -7,13 +7,11 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 import os
 from threading import Thread
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, current_year, live_site
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -22,16 +20,15 @@ from core import app, current_year, live_site
 from core.db_users import update_last_seen, logout_barred_user
 from core.db_calendar import Calendar, GROUP_CHOICES
 from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
-                           SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC
+    SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC
 from core.dB_events import Event
 from core.db_users import User
 from core.subs_email_sms import send_social_notification_emails
 from core.db_blog import Blog
 from core.dB_gpx import Gpx
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
-                                  google_maps_api_key, count_map_loads
+    google_maps_api_key, count_map_loads
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -65,6 +62,33 @@ ICS_DIRECTORY = os.environ['ELSR_ICS_DIRECTORY']
 @logout_barred_user
 @update_last_seen
 def calendar():
+    # ----------------------------------------------------------- #
+    # Did we get passed a date? (Optional)
+    # ----------------------------------------------------------- #
+    target_date_str = request.args.get('date', None)
+
+    # ----------------------------------------------------------- #
+    # Work out month
+    # ----------------------------------------------------------- #
+    # Just use today's date for how we launch the calendar
+    start_year = datetime.today().year
+    start_month = datetime.today().month
+
+    if target_date_str:
+        try:
+            try_year = int(target_date_str[4:8])
+            try_month = int(target_date_str[2:4])
+        except:
+            # If we get garbage, just use today
+            flash(f"Invalid date string '{target_date_str}'")
+            try_year = -1
+            try_month = -1
+
+        if 0 <= try_month <= 11 \
+                and start_year - 1 <= try_year <= start_year + 1:
+            start_year = try_year
+            start_month = try_month
+
     # ----------------------------------------------------------- #
     # Need to build a list of events
     # ----------------------------------------------------------- #
@@ -149,7 +173,8 @@ def calendar():
         # Next month
         month += 1
 
-    return render_template("calendar.html", year=current_year, events=events, live_site=live_site())
+    return render_template("calendar.html", year=current_year, events=events, live_site=live_site(),
+                           start_month=start_month, start_year=start_year)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -455,7 +480,7 @@ def delete_social():
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}'.")
         Event().log_event("Delete Social Fail", f"Refusing permission for '{current_user.email}', "
-                                                 f"social_id = '{social_id}'.")
+                                                f"social_id = '{social_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -522,7 +547,7 @@ def download_ics():
     # Permissions
     # ----------------------------------------------------------- #
     if not current_user.readwrite() and \
-        social.privacy == SOCIAL_DB_PRIVATE:
+            social.privacy == SOCIAL_DB_PRIVATE:
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}' as Private.")
