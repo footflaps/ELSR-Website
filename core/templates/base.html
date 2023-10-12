@@ -149,7 +149,7 @@
 			<!--                                   Website Title Details                                        -->
 			<!---------------------------------------------------------------------------------------------------->
 			
-			<a class="navbar-brand float-left" href="{{ url_for('home') }}" style="font-size: 22px;">
+			<a class="navbar-brand float-left" href="{{ url_for('home') }}">
 				<i class="fa-solid fa-person-biking fa-xl"></i>
 				&nbsp; EL Social Rides
 			</a>
@@ -161,48 +161,56 @@
 			
 			<!-- This is the Menu button which appears when the list collapses -->
 			<button class="navbar-toggler navbar-toggler-right float-right" type="button" data-toggle="collapse"
-			        data-target="#navbarResponsive" aria-controls="navbarResponsive"
-			        aria-expanded="false" aria-label="Toggle navigation">
+			        data-target="#navbarResponsive">
                 Menu
                 <i class="fas fa-bars"></i>
             </button>
       
 			<!-- Horizontal menu bar which vanishes on narrow screens -->
 			<div class="collapse navbar-collapse" id="navbarResponsive">
+				
 				<ul class="navbar-nav ml-auto">
 					
-					<!-- Navigation links -->
-					<li class="nav-item">
-						<a class="nav-link" href="{{ url_for('home') }}">Home</a>
+					
+					<!-- ELSE dropdown -->
+					<li class="nav-item dropdown">
+				        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+				           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				            ELSR
+				        </a>
+				        <div class="dropdown-menu" aria-labelledby="elsrDropdown">
+							<a class="dropdown-item" href="{{ url_for('home') }}">Home</a>
+							<a class="dropdown-item" href="{{ url_for('blog') }}">Blog</a>
+					        <a class="dropdown-item" href="{{ url_for('social') }}">Socials</a>
+					        <a class="dropdown-item" href="/classifieds">Classifieds</a>
+					    </div>
 					</li>
 					
-					<li class="nav-item">
-						<a class="nav-link" href="{{ url_for('blog') }}">Blog</a>
+					<!-- Calendar dropdown -->
+					<li class="nav-item dropdown">
+				        <a class="nav-link dropdown-toggle" href="#" id="calendarDropdown" role="button"
+				           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				            Calendar
+				        </a>
+				        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<a class="dropdown-item" href="{{ url_for('calendar') }}">Calendar</a>
+							<a class="dropdown-item" href="{{ url_for('weekend') }}">Weekend</a>
+					        <a class="dropdown-item" href="{{ url_for('social') }}">Socials</a>
+					    </div>
 					</li>
 					
-					<li class="nav-item">
-						<a class="nav-link" href="{{ url_for('weekend') }}">Rides</a>
+					<!-- Databases -->
+					<li class="nav-item dropdown">
+				        <a class="nav-link dropdown-toggle" href="#" id="infoDropdown" role="button"
+				           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				            Resources
+				        </a>
+				        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+							<a class="dropdown-item" href="{{ url_for('cafe_list') }}">Cafes</a>
+							<a class="dropdown-item " href="{{ url_for('gpx_list') }}">GPX Files</a>
+					        <a class="dropdown-item" href="{{ url_for('gravel') }}">Gravel</a>
+					    </div>
 					</li>
-					
-					<li class="nav-item">
-						<a class="nav-link" href="{{ url_for('calendar') }}">Calendar</a>
-					</li>
-					
-					<li class="nav-item">
-						<a class="nav-link" href="{{ url_for('cafe_list') }}">Cafes</a>
-					</li>
-					
-					<li class="nav-item">
-						<a class="nav-link" href="{{ url_for('gpx_list') }}">GPX Files</a>
-					</li>
-					
-					<li class="nav-item">
-						<a class="nav-link" href="/classifieds">Classifieds</a>
-					</li>
-					
-<!--					<li class="nav-item">-->
-<!--						<a class="nav-link" href="/about">About</a>-->
-<!--					</li>-->
 					
 					<!-- Register / Login links -->
 					{% if not current_user.is_authenticated: %}

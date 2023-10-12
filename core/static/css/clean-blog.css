@@ -14,33 +14,27 @@ p {
   margin: 30px 0;
 }
 
-p a {
-/*  text-decoration: underline; */
-}
+/* NB H1 is defined below with Header Section */
 
-.nav-link {
-  text-decoration: none;
+h2 {
+  font-size: 26px;
+  font-weight: 800;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-
-h1,
-h2,
-h3,
+h3 {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
 h4 {
+  font-size: 18px;
   font-weight: 800;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-h2 {
-    font-size: 26px;
-}
-
-h3 {
-    font-size: 22px;
-}
-
-h4 {
-    font-size: 18px;
-}
+/* **************************************************************************
+                               Hyperlink Behaviour
+   ************************************************************************** */
 
 a {
   color: #212529;
@@ -52,26 +46,13 @@ a:focus, a:hover {
   text-decoration: none;
 }
 
+/* **************************************************************************
+                                           Other
+   ************************************************************************** */
+
 blockquote {
   font-style: italic;
   color: #868e96;
-}
-
-.section-heading {
-  font-size: 36px;
-  font-weight: 700;
-  margin-top: 60px;
-}
-
-.caption {
-  font-size: 14px;
-  font-style: italic;
-  display: block;
-  margin: 0;
-  padding: 10px;
-  text-align: center;
-  border-bottom-right-radius: 5px;
-  border-bottom-left-radius: 5px;
 }
 
 ::-moz-selection {
@@ -101,8 +82,9 @@ img::-moz-selection {
   background: transparent;
 }
 
+
 /* **************************************************************************
-                               Page Heading Navigation
+                             Navigation bar
    ************************************************************************** */
 
 #mainNav {
@@ -112,26 +94,50 @@ img::-moz-selection {
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* Targets "EL Social Rides" */
 #mainNav .navbar-brand {
   font-weight: 800;
+  font-size: 22px;
   color: #343a40;
 }
 
+/* Menu button on narrow screens */
 #mainNav .navbar-toggler {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 800;
   padding: 13px;
   text-transform: uppercase;
   color: #343a40;
 }
 
+/* Nav bar items */
 #mainNav .navbar-nav > li.nav-item > a {
-  font-size: 12px;
+  font-size: 16px;
   font-weight: 800;
   letter-spacing: 1px;
   text-transform: uppercase;
 }
 
+/* Set vertical position of dropdown menu box */
+.dropdown-menu {
+  top: 34px;
+}
+
+/* Dropdown nav items */
+.dropdown-item {
+  font-size: 16px;
+  font-weight: 800;
+  color: #808b96;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Highlight selected item in dropdown */
+.dropdown-item:focus, .dropdown-item:hover {
+    background-color: #ff9999; !important
+}
+
+/* Wide screen behaviour */
 @media only screen and (min-width: 992px) {
   #mainNav {
     border-bottom: 1px solid transparent;
@@ -142,26 +148,28 @@ img::-moz-selection {
     color: #fff;
   }
   #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
-    color: rgba(255, 255, 255, 0.8);
+    color: #e74c3c;
   }
   #mainNav .navbar-nav > li.nav-item > a {
     padding: 10px 20px;
     color: #fff;
   }
-  #mainNav .navbar-nav > li.nav-item > a:focus, #mainNav .navbar-nav > li.nav-item > a:hover {
-    color: rgba(255, 255, 255, 0.8);
+  #mainNav .navbar-nav > li.nav-item > a:focus,
+  #mainNav .navbar-nav > li.nav-item > a:hover {
+    color:  #e74c3c;
   }
 }
 
+/* Wide screen behaviour */
 @media only screen and (min-width: 992px) {
   #mainNav {
     transition: background-color 0.2s;
-    /* Force Hardware Acceleration in WebKit */
+    // Force Hardware Acceleration in WebKit
     transform: translate3d(0, 0, 0);
     -webkit-backface-visibility: hidden;
   }
   #mainNav.is-fixed {
-    /* when the user scrolls down, we hide the header right above the viewport */
+    // when the user scrolls down, we hide the header right above the viewport
     position: fixed;
     top: -67px;
     transition: transform 0.2s;
@@ -181,10 +189,15 @@ img::-moz-selection {
     color: #0085A1;
   }
   #mainNav.is-visible {
-    /* if the user changes the scrolling direction, we show the header */
+    // if the user changes the scrolling direction, we show the header
     transform: translate3d(0, 100%, 0);
   }
 }
+
+
+/* **************************************************************************
+                                   Page Header
+   ************************************************************************** */
 
 header.masthead {
   margin-bottom: 50px;
@@ -206,133 +219,52 @@ header.masthead .overlay {
 }
 
 header.masthead .page-heading,
-header.masthead .post-heading,
-header.masthead .site-heading {
+header.masthead .post-heading {
   padding: 200px 0 150px;
   color: white;
 }
 
 @media only screen and (min-width: 768px) {
   header.masthead .page-heading,
-  header.masthead .post-heading,
-  header.masthead .site-heading {
+  header.masthead .post-heading {
     padding: 200px 0;
   }
 }
 
-header.masthead .page-heading,
-header.masthead .site-heading {
+/* Centre page headings etc */
+header.masthead .page-heading {
   text-align: center;
 }
 
-header.masthead .page-heading h1,
-header.masthead .site-heading h1 {
-  font-size: 50px;
-  margin-top: 0;
-}
-
-header.masthead .page-heading .subheading,
-header.masthead .site-heading .subheading {
+/* Define subheading */
+header.masthead .page-heading .subheading {
   font-size: 24px;
-  font-weight: 300;
+  //font-weight: 300;
   line-height: 1.1;
   display: block;
   margin: 10px 0 0;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-@media only screen and (min-width: 768px) {
-  header.masthead .page-heading h1,
-  header.masthead .site-heading h1 {
-    font-size: 80px;
-  }
-}
-
-header.masthead .post-heading h1 {
-  font-size: 35px;
-}
-
-header.masthead .post-heading .meta,
-header.masthead .post-heading .subheading {
-  line-height: 1.1;
-  display: block;
-}
-
-header.masthead .post-heading .subheading {
-  font-size: 24px;
-  font-weight: 600;
-  margin: 10px 0 30px;
+/* H1 scales with page width */
+h1 {
+  font-size: 50px;
+  font-weight: 800;
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-header.masthead .post-heading .meta {
-  font-size: 20px;
-  font-weight: 300;
-  font-style: italic;
-  font-family: 'Lora', 'Times New Roman', serif;
-}
-
-header.masthead .post-heading .meta a {
-  color: #fff;
-}
-
+/* H1 and subheading scale with page width */
 @media only screen and (min-width: 768px) {
-  header.masthead .post-heading h1 {
-    font-size: 55px;
+  header.masthead .page-heading h1 {
+    font-size: 80px;
   }
-  header.masthead .post-heading .subheading {
-    font-size: 30px;
-  }
-}
-
-/* **************************************************************************
-                                 Blog posts?
-   ************************************************************************** */
-
-/*
-.post-preview > a {
-  color: #212529;
-}
-
-.post-preview > a:focus, .post-preview > a:hover {
-  text-decoration: none;
-  color: #0085A1;
-}
-
-.post-preview > a > .post-title {
-  font-size: 30px;
-  margin-top: 30px;
-  margin-bottom: 10px;
-}
-
-.post-preview > a > .post-subtitle {
-  font-weight: 300;
-  margin: 0 0 10px;
-}
-
-.post-preview > .post-meta {
-  font-size: 18px;
-  font-style: italic;
-  margin-top: 0;
-  color: #868e96;
-}
-
-.post-preview > .post-meta > a {
-  text-decoration: none;
-  color: #212529;
-}
-
-.post-preview > .post-meta > a:focus, .post-preview > .post-meta > a:hover {
-  text-decoration: underline;
-  color: #0085A1;
-}
-
-@media only screen and (min-width: 768px) {
-  .post-preview > a > .post-title {
-    font-size: 36px;
+  header.masthead .page-heading .subheading {
+    font-size: 30px; !important
+    font-weight: 800; !important
   }
 }
-*/
+
+
 /* **************************************************************************
                                    Forms
    ************************************************************************** */
@@ -508,7 +440,7 @@ input[type=file]::file-selector-button:hover {
 }
 
 /* **************************************************************************
-                                 Table Pagination
+                              JS Table Pagination
    ************************************************************************** */
 
 .paginate_button {
@@ -546,7 +478,7 @@ input[type=file]::file-selector-button:hover {
 }
 
 /* **************************************************************************
-                                  Style Tables
+                                 Style JS Tables
    ************************************************************************** */
 
 /* Table Header uses class='sorting' */
