@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url('{{ url_for('static', filename='img/club_kit/elsr-ss-jersey.jpg')}}')">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Club Kit</h1>
+					<span class="subheading">The best dressed cyclists in town...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                           Intro                                                -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>2023 ELSR Club Kit</h2>
+			
+			<p>
+				We have 2023 club kit available to order now. If you want to try sample kit to find your size, we
+				have a sample session in the Calendar
+				<a href="{{ url_for('social', date=17102023) }}"><strong>here.</strong></a>
+			</p>
+			
+			<p>
+				You place your oder direct with Tactic on their site
+				<a href="https://www.tactic-sport.com/en/team-store"><strong>here</strong></a>,
+				using club code "<strong>ff78d6</strong>".
+			</p>
+			
+			
+			<h2>Short Sleeve Jersey</h2>
+			<p>There are four short sleeve jersey variants:</p>
+			<ul>
+				<li>Men's summer weight <strong>£64</strong></li>
+				<li>Women's summer weight <strong>£64</strong></li>
+				<li>Men's spring / autumn weight <strong>£74</strong></li>
+				<li>Women's spring / autumn weight <strong>£74</strong></li>
+			</ul>
+			<img class="mt-2" src="{{ url_for('static', filename='/img/club_kit/elsr-ss-jersey.jpg') }}"
+			     style="width: 100%; border: 4px solid #000;">
+			Image is men's summer weight.
+			<hr>
+			
+			
+			<h2>Long Sleeve Jersey</h2>
+			<p>There are two long sleeve jersey variants:</p>
+			<ul>
+				<li>Men's cut <strong>£89</strong></li>
+				<li>Women's cut <strong>£89</strong></li>
+			</ul>
+			<img class="mt-2" src="{{ url_for('static', filename='/img/club_kit/elsr-ls-jersey.jpg') }}"
+			     style="width: 100%; border: 4px solid #000;">
+			Image is men's cut.
+			<hr>
+			
+			
+			<h2>Gilet</h2>
+			<p>There is a unisex gilet (<strong>£57</strong>):</p>
+			<img class="mt-2" src="{{ url_for('static', filename='/img/club_kit/elsr-gilet.jpg') }}"
+			     style="width: 100%; border: 4px solid #000;">
+			<hr>
+			
+			
+			<h2>Bib shorts</h2>
+			<p>There are two bib short variants:</p>
+			<ul>
+				<li>Men's cut <strong>£79</strong></li>
+				<li>Women's cut <strong>£79</strong></li>
+			</ul>
+			<img class="mt-2" src="{{ url_for('static', filename='/img/club_kit/elsr-bib-shorts.jpg') }}"
+			     style="width: 100%; border: 4px solid #000;">
+			<hr>
+			
+			
+			<h2>Bib tights</h2>
+			<p>There are two bib short variants:</p>
+			<ul>
+				<li>Men's cut <strong>£94</strong></li>
+				<li>Women's cut <strong>£94</strong></li>
+			</ul>
+			<img class="mt-2" src="{{ url_for('static', filename='/img/club_kit/elsr-big-longs.jpg') }}"
+			     style="width: 100%; border: 4px solid #000;">
+			<hr>
+			
+			
+		</div>
+	</div>
+</div>
+
+
+
+
+{% endblock %}
