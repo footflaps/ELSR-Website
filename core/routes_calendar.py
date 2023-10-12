@@ -68,7 +68,7 @@ def calendar():
     target_date_str = request.args.get('date', None)
 
     # ----------------------------------------------------------- #
-    # Work out month
+    # Work out year and month, to pre-load calendar
     # ----------------------------------------------------------- #
     # Just use today's date for how we launch the calendar
     start_year = datetime.today().year
@@ -80,10 +80,11 @@ def calendar():
             try_month = int(target_date_str[2:4])
         except:
             # If we get garbage, just use today
-            flash(f"Invalid date string '{target_date_str}'")
+            flash(f"Invalid date string '{target_date_str}', was expecting 'DDMMYYYY'.")
             try_year = -1
             try_month = -1
 
+        # Better check it is a real date and not just random numbers
         if 0 <= try_month <= 11 \
                 and start_year - 1 <= try_year <= start_year + 1:
             start_year = try_year
