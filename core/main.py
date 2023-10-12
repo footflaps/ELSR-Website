@@ -368,6 +368,7 @@ def uncut():
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/club_kit", methods=['GET'])
+@app.route("/team_kit", methods=['GET'])
 @update_last_seen
 def club_kit():
     return render_template("main_club_kit.html", year=current_year, live_site=live_site())
