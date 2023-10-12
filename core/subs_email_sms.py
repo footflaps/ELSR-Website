@@ -279,7 +279,7 @@ def send_one_social_notification_email(user: User(), social: Socials()):
     # ----------------------------------------------------------- #
     # Create hyperlinks
     # ----------------------------------------------------------- #
-    cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
+    cal_link = f"https://www.elsr.co.uk/calendar?date={date}"
     social_link = f"https://www.elsr.co.uk/social?date={date}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
     one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
