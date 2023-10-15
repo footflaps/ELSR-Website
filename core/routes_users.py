@@ -7,21 +7,19 @@ import os
 import re
 from datetime import datetime
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, current_year, live_site
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
-                          update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
-                          TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm, NOTIFICATIONS_DEFAULT_VALUE
+    update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
+    TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm, NOTIFICATIONS_DEFAULT_VALUE
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
@@ -34,7 +32,6 @@ from core.db_social import Socials
 from core.subs_email_sms import alert_admin_via_sms
 from core.db_blog import Blog
 from core.db_classifieds import Classified
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -1294,3 +1291,29 @@ def unsubscribe_all():
     # Revert to home page
     return redirect(url_for('home'))
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Show use list
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/who_are_we', methods=['GET'])
+@logout_barred_user
+@update_last_seen
+def who_are_we():
+    # ----------------------------------------------------------- #
+    # Need a list of users
+    # ----------------------------------------------------------- #
+    users = User().all_users_sorted()
+
+    # ----------------------------------------------------------- #
+    # Need a list of letters
+    # ----------------------------------------------------------- #
+    username_letters = []
+
+    for user in users:
+        username_letter = user.name[0].upper()
+        if not username_letter in username_letters:
+            username_letters.append(username_letter)
+
+    # Render in main index template
+    return render_template("user_list.html", year=current_year, users=users, username_letters=username_letters)

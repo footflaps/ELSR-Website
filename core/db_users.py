@@ -10,6 +10,7 @@ from datetime import date, datetime
 import random
 import os
 import hashlib
+from sqlalchemy import func
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -262,7 +263,7 @@ class User(UserMixin, db.Model):
 
     def all_users_sorted(self):
         with app.app_context():
-            users = db.session.query(User).order_by('name').filter(User.name != DELETED_NAME).all()
+            users = db.session.query(User).order_by(func.lower(User.name)).filter(User.name != DELETED_NAME).all()
             return users
 
     def all_admins(self):
