@@ -19,7 +19,7 @@ from core import app, current_year, live_site
 
 from core.db_users import User, CreateUserForm, VerifyUserForm, LoginUserForm, ResetPasswordForm, \
     update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm, \
-    TwoFactorLoginForm, DELETED_NAME, ChangeUserNameForm, NOTIFICATIONS_DEFAULT_VALUE
+    TwoFactorLoginForm, DELETED_NAME, ChangeUserDetailsForm, NOTIFICATIONS_DEFAULT_VALUE
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
@@ -724,7 +724,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Need a form for changing user name
     # ----------------------------------------------------------- #
-    form = ChangeUserNameForm()
+    form = ChangeUserDetailsForm()
 
     if request.method == 'GET':
         # pre-fill existing name

@@ -1,7 +1,7 @@
-from flask import abort, flash, session, request
+from flask import abort, flash, request
 from flask_login import UserMixin, current_user, logout_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField
+from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField, URLField
 from wtforms.validators import InputRequired, Email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -972,12 +972,16 @@ class ResetPasswordForm(FlaskForm):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Change username form
+# Change user details form
 # -------------------------------------------------------------------------------------------------------------- #
-class ChangeUserNameForm(FlaskForm):
-    name = StringField("Change user name:",
-                       validators=[InputRequired("Please enter your name.")])
-    submit = SubmitField("Change me!")
+class ChangeUserDetailsForm(FlaskForm):
+    name = StringField("Change user name:", validators=[InputRequired("Please enter your name.")])
+    bio = StringField("Witty one liner:", validators=[])
+    strava = URLField("Strava url:", validators=[])
+    instagram = URLField("Instagram url:", validators=[])
+    twitter = URLField("Twitter / X url:", validators=[])
+    facebook = URLField("Facebook url:", validators=[])
+    submit = SubmitField("Update me!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
