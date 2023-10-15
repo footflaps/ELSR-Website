@@ -1316,4 +1316,5 @@ def who_are_we():
             username_letters.append(username_letter)
 
     # Render in main index template
-    return render_template("user_list.html", year=current_year, users=users, username_letters=username_letters)
+    return render_template("user_list.html", year=current_year, users=users, username_letters=username_letters,
+                           live_site=live_site())

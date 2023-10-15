@@ -164,6 +164,12 @@ class User(UserMixin, db.Model):
     # Notifications
     notifications = db.Column(db.Integer, unique=False)
 
+    # Socials
+    socials = db.Column(db.Text, unique=False)
+
+    # Bio
+    bio = db.Column(db.Text, unique=False)
+
     # ---------------------------------------------------------------------------------------------------------- #
     # User permissions
     # ---------------------------------------------------------------------------------------------------------- #
