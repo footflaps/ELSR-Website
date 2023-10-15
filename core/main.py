@@ -36,7 +36,7 @@ from core.subs_email_sms import contact_form_email
 
 # I don't know why these are needed here, but without it, it complains even though Pycharm highlights them
 # saying they are not actually used!
-from core.routes_users import login
+from core.routes_users import user_page
 from core.routes_cafes import cafe_list
 from core.routes_gpx import gpx_list
 from core.routes_admin import admin_page
@@ -47,6 +47,8 @@ from core.routes_calendar import calendar
 from core.routes_blog import blog
 from core.routes_classifieds import classifieds
 from core.routes_gravel import gravel
+from core.routes_user_register import register
+from core.routes_user_login_logout import login
 
 
 # -------------------------------------------------------------------------------------------------------------- #
