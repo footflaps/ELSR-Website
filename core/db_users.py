@@ -1,7 +1,7 @@
 from flask import abort, flash, request
 from flask_login import UserMixin, current_user, logout_user
 from flask_wtf import FlaskForm
-from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField, URLField
+from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField, URLField, SelectField
 from wtforms.validators import InputRequired, Email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -17,7 +17,7 @@ from sqlalchemy import func
 # Import out database connection from __init__
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import db, app, login_manager
+from core import db, app, login_manager, GROUP_CHOICES
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -977,6 +977,8 @@ class ResetPasswordForm(FlaskForm):
 class ChangeUserDetailsForm(FlaskForm):
     name = StringField("Change user name:", validators=[InputRequired("Please enter your name.")])
     bio = StringField("Witty one liner:", validators=[])
+    GROUP_CHOICES.insert(0, "n/a")
+    group = SelectField("Main Group:", choices=GROUP_CHOICES)
     strava = URLField("Strava url:", validators=[])
     instagram = URLField("Instagram url:", validators=[])
     twitter = URLField("Twitter / X url:", validators=[])

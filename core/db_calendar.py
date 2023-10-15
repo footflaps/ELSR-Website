@@ -10,7 +10,7 @@ import time
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, db, GPX_UPLOAD_FOLDER_ABS
+from core import app, db, GPX_UPLOAD_FOLDER_ABS, GROUP_CHOICES
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our own classes
@@ -23,10 +23,6 @@ from core.db_users import User
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
-
-# These are our standard groups
-TWR_CHOICE = "TWR"
-GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed", "Gravel", TWR_CHOICE]
 
 # Option for user defined choices
 NEW_CAFE = "New cafe!"
