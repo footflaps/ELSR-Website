@@ -133,6 +133,7 @@ CLASSIFIED_BODY = "Dear [USER], \n\n" \
                   "advert. To stop messages being forwarded to you, either mark your post as Sold or delete it from " \
                   "the website.\n"
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -809,4 +810,24 @@ def get_twilio_balance():
     response = requests.get(url=url, auth=auth)
     response.raise_for_status()
     return [float(response.json()['balance']), response.json()['currency']]
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Summarise who gets emails
+# -------------------------------------------------------------------------------------------------------------- #
+def email_ride_alert_summary():
+    # Get all users
+    users = User().all_users_sorted()
+    # Scan by ride types
+    results = {}
+    for choice, notification in zip(GROUP_CHOICES, GROUP_NOTIFICATIONS):
+        print(f"choice = '{choice}', notification = '{notification}'")
+        alerted_users = []
+        for user in users:
+            if user.notification_choice(notification):
+                alerted_users.append(user.email)
+        results[choice] = alerted_users
+    # Return our Dictionary
+    return results
+
 

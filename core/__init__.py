@@ -26,6 +26,14 @@ from core.gravatar_hack import Gravatar
 TWR_CHOICE = "TWR"
 GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed", "Gravel", TWR_CHOICE]
 
+# This set must match the order of GROUP_CHOICES above
+GROUP_NOTIFICATIONS = ["When someone posts a Decaff ride",
+                       "When someone posts an Espresso ride",
+                       "When someone posts a Doppio ride",
+                       "When someone posts a Mixed ride",
+                       "When someone posts a Gravel ride",
+                       "When someone posts a TWR ride"]
+
 # Global Flash Message
 GLOBAL_FLASH = "Sunday rides now meet at 9am at Bean Theory!"
 

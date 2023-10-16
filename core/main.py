@@ -49,6 +49,7 @@ from core.routes_classifieds import classifieds
 from core.routes_gravel import gravel
 from core.routes_user_register import register
 from core.routes_user_login_logout import login
+from core.routes_admin_maps import enable_maps
 
 
 # -------------------------------------------------------------------------------------------------------------- #

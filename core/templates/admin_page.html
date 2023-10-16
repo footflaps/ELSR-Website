@@ -798,6 +798,77 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                                      Table of email alerts                                     -->
+<!---------------------------------------------------------------------------------------------------->
+
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+
+			<h2 class="post-title float-left">Email alerts:</h2>
+		
+			<!-- Button to expose hidden table -->
+			<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseAlertList"
+			   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_alerts">
+                   SHOW
+            </a>
+			
+		</div>
+	</div>
+
+	<!-- Collapsed / Hidden table of alerts in Calendar -->
+	<div class="collapse" id="collapseAlertList">
+		<div class="row mt-3">
+			<div class="col-lg-8 col-md-10 mx-auto">
+			
+				<table id="alertTable" class="table table-striped table-bordered table-sm table-condensed"
+				       data-order='[[ 0, "dec" ]]' data-page-length="25"
+				       style="width: 100%">
+			
+					<!-- Header -->
+					<thead>
+	                    <tr>
+	                        <th scope="col">Ride</th>
+		                    <th scope="col">Emails</th>
+		                </tr>
+	                </thead>
+			
+					<tbody>
+						{% for key, value in email_alerts.items() %}
+							
+							<tr>
+								<td scope="row">{{ key }}</td>
+								<td scope="row">
+									{% for email in value %}
+										<img src="{{ email | gravatar }}"
+							                 width="40"
+									         style="border-radius: 50%;"/> {{ email }} <br>
+									{% endfor %}
+								</td>
+							</tr>
+					
+						{% endfor %}
+					
+					</tbody>
+				
+				</table>
+				
+			</div>
+		</div>
+	</div>
+
+	<!-- Separator before next section -->
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<hr>
+		</div>
+	</div>
+	
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                Table of all rides in calendar                                  -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -1858,6 +1929,14 @@
         });
        $("#collapseUntrustedUserList").on("hide.bs.collapse", function(){
             document.getElementById('show_untrusted_users').innerHTML = 'SHOW';
+        });
+        
+        /* Alerts - Hide <-> Show buttons name change */
+		$("#collapseAlertList").on("show.bs.collapse", function(){
+            document.getElementById('show_alerts').innerHTML = 'HIDE';
+        });
+       $("#collapseAlertList").on("hide.bs.collapse", function(){
+            document.getElementById('show_alerts').innerHTML = 'SHOW';
         });
         
         /* Rides - Hide <-> Show buttons name change */

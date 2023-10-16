@@ -20,7 +20,7 @@ from validators import url as check_url
 # Import out database connection from __init__
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import db, app, login_manager, GROUP_CHOICES
+from core import db, app, login_manager, GROUP_CHOICES, GROUP_NOTIFICATIONS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -78,12 +78,6 @@ MESSAGE_NOTIFICATION = "When I receive a message"
 SOCIAL_NOTIFICATION = "When someone posts a social"
 BLOG_NOTIFICATION = "When someone posts a blog entry"
 
-# This set must match the order of GROUP_CHOICES in dB_calendar.py
-# GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed"]
-GROUP_NOTIFICATIONS = ["When someone posts a Decaff ride",
-                       "When someone posts an Espresso ride",
-                       "When someone posts a Doppio ride",
-                       "When someone posts a Mixed ride"]
 
 NOTIFICATIONS = [
         {"name": MESSAGE_NOTIFICATION,
@@ -991,8 +985,9 @@ def url_validation(form, field):
 class ChangeUserDetailsForm(FlaskForm):
     name = StringField("Change user name:", validators=[InputRequired("Please enter your name.")])
     bio = CKEditorField("Witty one liner:", validators=[])
-    GROUP_CHOICES.insert(0, "n/a")
-    group = SelectField("Main Group:", choices=GROUP_CHOICES)
+    groups = GROUP_CHOICES.copy()
+    groups.insert(0, "n/a")
+    group = SelectField("Main Group:", choices=groups)
     strava = URLField("Strava url:", validators=[url_validation])
     instagram = URLField("Instagram url:", validators=[url_validation])
     twitter = URLField("Twitter / X url:", validators=[url_validation])
