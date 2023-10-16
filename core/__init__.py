@@ -26,6 +26,9 @@ from core.gravatar_hack import Gravatar
 TWR_CHOICE = "TWR"
 GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed", "Gravel", TWR_CHOICE]
 
+# Global Flash Message
+GLOBAL_FLASH = "Sunday rides now meet at 9am at Bean Theory!"
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import env vars if on web server

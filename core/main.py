@@ -15,7 +15,7 @@ from bs4 import BeautifulSoup
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site
+from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site, GLOBAL_FLASH
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -180,7 +180,8 @@ def home():
     count_map_loads(1)
 
     # Temporary alert for change of meeting point
-    flash("Now meeting at Bean Theory Cafe!")
+    if GLOBAL_FLASH:
+        flash(GLOBAL_FLASH)
 
     # Render home page
     return render_template("main_home.html", year=current_year, cafes=cafe_marker, live_site=live_site(),

@@ -11,7 +11,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, delete_file_if_exists, live_site
+from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLASH
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -339,7 +339,9 @@ def weekend():
     if private_gpx:
         flash("One or more routes hasn't been made public yet!")
 
-    flash("Now meeting at Bean Theory Cafe!")
+    # Temporary alert for change of meeting point
+    if GLOBAL_FLASH:
+        flash(GLOBAL_FLASH)
 
     return render_template("calendar_weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
