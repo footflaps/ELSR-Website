@@ -105,19 +105,19 @@
 				<div class="mt-2 float-right">
 				
 					{% if user.social_url("strava") %}
-						 &nbsp; <i class="fa-brands fa-strava fa-lg"></i>
+						 &nbsp; <a href="{{ user.social_url('strava') }}"><i class="fa-brands fa-strava fa-lg"></i></a>
 					{% endif %}
 					
 					{% if user.social_url("instagram") %}
-						 &nbsp; <i class="fa-brands fa-instagram fa-lg"></i>
+						 &nbsp; <a href="{{ user.social_url('instagram') }}"><i class="fa-brands fa-instagram fa-lg"></i></a>
 					{% endif %}
 					
 					{% if user.social_url("twitter") %}
-						 &nbsp; <i class="fa-brands fa-twitter fa-lg"></i>
+						 &nbsp; <a href="{{ user.social_url('twitter') }}"><i class="fa-brands fa-twitter fa-lg"></i></a>
 					{% endif %}
 					
 					{% if user.social_url("facebook") %}
-						 &nbsp; <i class="fa-brands fa-facebook fa-lg"></i>
+						 &nbsp; <a href="{{ user.social_url('facebook') }}"><i class="fa-brands fa-facebook fa-lg"></i></a>
 					{% endif %}
 
 				</div>
