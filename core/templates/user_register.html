@@ -41,7 +41,7 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--                                       Main Content                                             -->
+<!--                                     Terms and Conditions                                       -->
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
@@ -137,12 +137,25 @@
 			</p>
 			<hr>
 			
-			<h3 class="mb-5" id="decision">Decision time...</h3>
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Registration Form                                         -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h3 class="mb-5">Decision time...</h3>
 			
 			<div class="clearfix">
 				<!-- Button to expose hidden options -->
 				<a class="btn btn-primary my-2" data-toggle="collapse" href="#collapseRegister" role="button"
-				   aria-expanded="false" aria-controls="collapseExample">
+				   aria-expanded="false" aria-controls="collapseExample" id="showForm">
 	                   I consent to the T&Cs
 	            </a>
 				
@@ -160,40 +173,41 @@
 		                <h3>Register on www.elsr.co.uk</h3>
 		                <p>NB Registration is a two step process, you need to verify your email address with a code
 		                   which will be emailed to you by <b>{{ admin_email_address }}</b>.
-		                <p>NB Verification codes will expire after 24 hours.</p>
+		                <p>NB Verification codes will expire after <strong>24 hours</strong>.</p>
 						
 		                {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-
+		   
 					</div>
 				</div>
 			</div>
 			
+			<hr>
+			
 			<!-- Tag for jumping right to the open form -->
 			<a name="registration_form" ></a>
-			<hr>
 			
 		</div>
 	</div>
 </div>
 
 
-
 <!---------------------------------------------------------------------------------------------------->
-<!--                                 Open page at Events anchor                                     -->
+<!--                                 Jump down to show reg form                                     -->
 <!---------------------------------------------------------------------------------------------------->
 
 <script>
-
-	{% if anchor %}
-		
-		/* Open collapsed section */
-		$("#collapseRegister").collapse('show');
-        
+    
+    $("#collapseRegister").on("show.bs.collapse", function(){
         /* Jump to anchor */
-        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
-	    
-	{% endif %}
-	
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#registration_form"
+        /* Change button name */
+        document.getElementById('showForm').innerHTML = '<i class="fa-solid fa-arrows-down-to-line fa-xl"></i> Form below <i class="fa-solid fa-arrows-down-to-line fa-xl"></i>';
+    });
+    
+    $("#collapseRegister").on("hide.bs.collapse", function(){
+        document.getElementById('showForm').innerHTML = 'I consent to the T&Cs';
+    });
+    
 </script>
 
 
