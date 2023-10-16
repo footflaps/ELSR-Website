@@ -29,7 +29,14 @@ NEW_CAFE = "New cafe!"
 UPLOAD_ROUTE = "Upload my own route!"
 
 # Default option
-DEFAULT_START = "8:00am from Bean Theory Cafe"
+DEFAULT_START_TIMES = {"Monday": "8:00am from Bean Theory Cafe",
+                       "Tuesday": "8:00am from Bean Theory Cafe",
+                       "Wednesday": "8:00am from Bean Theory Cafe",
+                       "Thursday": "8:00am from Bean Theory Cafe",
+                       "Friday": "8:00am from Bean Theory Cafe",
+                       "Saturday": "8:00am from Bean Theory Cafe",
+                       "Sunday": "9:00am from Bean Theory Cafe",
+                       }
 
 
 # -------------------------------------------------------------------------------------------------------------- #

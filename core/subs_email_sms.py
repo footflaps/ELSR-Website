@@ -5,6 +5,7 @@ from requests.auth import HTTPBasicAuth
 from twilio.rest import Client
 import requests
 from unidecode import unidecode
+from datetime import datetime
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -16,10 +17,9 @@ from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION
 from core.db_messages import Message, ADMIN_EMAIL
-from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START
+from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES
 from core.db_social import Socials
 from core.db_blog import Blog, PUBLIC_NEWS
-from core.db_classifieds import Classified
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -374,7 +374,9 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     if ride.start_time:
         start = unidecode(ride.start_time)
     else:
-        start = unidecode(DEFAULT_START)
+        date_obj = datetime(int(date[4:8]), int(date[2:4]), int(date[0:2]), 0, 00)
+        day = date_obj.strftime('%A')
+        start = unidecode(DEFAULT_START_TIMES[day])
     destination = unidecode(ride.destination)
 
     # ----------------------------------------------------------- #

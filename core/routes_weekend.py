@@ -24,7 +24,7 @@ from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START
+from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START_TIMES
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 
@@ -195,7 +195,7 @@ def weekend():
         return abort(404)
     else:
         # Get what we actually wanted from work_out_days()
-        days = tmp[0]
+        days = tmp[0]               # eg 'Saturday'
         dates_long = tmp[1]
         dates_short = tmp[2]
 
@@ -238,7 +238,7 @@ def weekend():
                 ride.elevation = gpx.ascent_m
                 ride.public = gpx.public()
                 if ride.start_time:
-                    if ride.start_time.strip() != DEFAULT_START \
+                    if ride.start_time.strip() != DEFAULT_START_TIMES[day] \
                             and ride.start_time.strip() != "":
                         start_times[day].append(f"{ride.destination}: {ride.start_time}")
 
@@ -345,7 +345,8 @@ def weekend():
 
     return render_template("calendar_weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
-                           days=days, dates_long=dates_long, dates_short=dates_short, DEFAULT_START=DEFAULT_START,
+                           days=days, dates_long=dates_long, dates_short=dates_short,
+                           DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                            rides=rides, start_times=start_times, weather_data=weather_data,
                            polylines=polylines, cafe_coords=cafe_coords, live_site=live_site(),
                            elevation_data=elevation_data, elevation_cafes=elevation_cafes, anchor=target_date_str)
@@ -476,7 +477,7 @@ def add_ride():
             form = create_ride_form(False)
 
         if request.method == 'GET':
-            form.start.data = DEFAULT_START
+            form.start.data = DEFAULT_START_TIMES['Saturday']
 
         # Pre-populate the data in the form, if we were passed one
         if start_date_str:
