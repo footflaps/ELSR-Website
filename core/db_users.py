@@ -1,6 +1,7 @@
 from flask import abort, flash, request
 from flask_login import UserMixin, current_user, logout_user
 from flask_wtf import FlaskForm
+from flask_ckeditor import CKEditorField
 from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField, URLField, SelectField
 from wtforms.validators import InputRequired, Email
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +12,7 @@ import random
 import os
 import hashlib
 from sqlalchemy import func
+import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -258,6 +260,14 @@ class User(UserMixin, db.Model):
                 return self.notifications & mask
         return False
 
+    def social_url(self, social):
+        if not self.socials:
+            return ""
+        try:
+            return json.loads(self.socials)[social]
+        except KeyError:
+            return "n/a"
+
     # ---------------------------------------------------------------------------------------------------------- #
     # User functions
     # ---------------------------------------------------------------------------------------------------------- #
@@ -356,23 +366,6 @@ class User(UserMixin, db.Model):
         for user in users:
             if name.strip().lower() == user.name.strip().lower():
                 return True
-        return False
-
-    def update_user_name(self, user_id, new_name):
-        with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
-            if user:
-                try:
-                    user.name = new_name
-                    # Write to dB
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"dB.update_user_name(): Failed with error code '{e.args}' "
-                                     f"for user_id = '{user_id}'.")
-                    return False
-            else:
-                app.logger.error(f"dB.update_user_name(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def find_user_from_email(self, email):
@@ -750,6 +743,18 @@ class User(UserMixin, db.Model):
             app.logger.error(f"dB.set_notifications(): Called with invalid user_id = '{user_id}'.")
             return False
 
+    def update_user(self, user):
+        # Try and add to dB
+        with app.app_context():
+            try:
+                db.session.add(user)
+                db.session.commit()
+                # Return success
+                return True
+            except Exception as e:
+                app.logger.error(f"dB.update_user(): Failed to update user '{user.id}', error code was '{e.args}'.")
+                return False
+
     def combo_str(self):
         return f"{self.name} ({self.id})"
 
@@ -781,7 +786,6 @@ class User(UserMixin, db.Model):
 # Create the actual dB
 # -------------------------------------------------------------------------------------------------------------- #
 
-# This one doesn't seem to work, need to use the one in the same module as the Primary dB
 with app.app_context():
     db.create_all()
 
@@ -976,7 +980,7 @@ class ResetPasswordForm(FlaskForm):
 # -------------------------------------------------------------------------------------------------------------- #
 class ChangeUserDetailsForm(FlaskForm):
     name = StringField("Change user name:", validators=[InputRequired("Please enter your name.")])
-    bio = StringField("Witty one liner:", validators=[])
+    bio = CKEditorField("Witty one liner:", validators=[])
     GROUP_CHOICES.insert(0, "n/a")
     group = SelectField("Main Group:", choices=GROUP_CHOICES)
     strava = URLField("Strava url:", validators=[])

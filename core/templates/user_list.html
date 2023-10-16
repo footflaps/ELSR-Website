@@ -52,7 +52,6 @@
 				<a href="#{{ letter }}"><strong>{{ letter.upper() }}</strong></a>,
 			{% endfor %}
 			
-			
 			<hr>
 			
 		</div>
@@ -77,28 +76,69 @@
 		{% endif %}
 		
 		<!-- User details -->
-		<div class="row mb-3">
+		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 
-				<a href="https://gravatar.com/">
-					<img src="{{ user.email | gravatar }}"
-				         width="60" height="60"
-				         style="border-radius: 50%;"/>
-				</a> &nbsp
-				{{user.name}}
-			
-				{% if user.admin() %}
-					&nbsp; <i class="fa-solid fa-asterisk fa-beat"></i>
-					<strong>ADMIN</strong>
-					<i class="fa-solid fa-asterisk fa-beat"></i>
-				{% endif %}
+				<!-- Name, Group and Bio -->
+				<div class="float-left">
+					
+					<a href="https://gravatar.com/">
+						<img src="{{ user.email | gravatar }}"
+					         width="60" height="60"
+					         style="border-radius: 50%;"/>
+					</a> &nbsp
+					{{user.name}}
 				
-				<hr>
-			
+					{% if user.admin() %}
+						&nbsp; <i class="fa-solid fa-asterisk fa-beat"></i>
+						<strong>ADMIN</strong>
+						<i class="fa-solid fa-asterisk fa-beat"></i>
+					{% endif %}
+	
+					{% if user.social_url("group") %}
+						 &nbsp; (<strong>{{ user.social_url("group") }}</strong>)
+					{% endif %}
+					
+				</div>
+				
+				<!-- Socials -->
+				<div class="mt-2 float-right">
+				
+					{% if user.social_url("strava") %}
+						 &nbsp; <i class="fa-brands fa-strava fa-lg"></i>
+					{% endif %}
+					
+					{% if user.social_url("instagram") %}
+						 &nbsp; <i class="fa-brands fa-instagram fa-lg"></i>
+					{% endif %}
+					
+					{% if user.social_url("twitter") %}
+						 &nbsp; <i class="fa-brands fa-twitter fa-lg"></i>
+					{% endif %}
+					
+					{% if user.social_url("facebook") %}
+						 &nbsp; <i class="fa-brands fa-facebook fa-lg"></i>
+					{% endif %}
+
+				</div>
+				
 			</div>
-			
 		</div>
 		
+		{% if user.bio %}
+			<div class="row mt-2">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					<i class="fa-solid fa-quote-left"></i><i>{{ user.bio }}</i><i class="fa-solid fa-quote-right"></i>
+				</div>
+			</div>
+		{% endif %}
+	
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<hr>
+			</div>
+		</div>
+	
 	{% endfor %}
 	
 </div>

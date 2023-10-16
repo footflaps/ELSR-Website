@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 import os
 import re
 from datetime import datetime
-
+import json
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -13,13 +13,12 @@ from datetime import datetime
 
 from core import app, current_year, live_site
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, update_last_seen, logout_barred_user, DELETED_NAME, ChangeUserDetailsForm, \
-                          NOTIFICATIONS_DEFAULT_VALUE
+    NOTIFICATIONS_DEFAULT_VALUE
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
@@ -30,7 +29,6 @@ from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.db_blog import Blog
 from core.db_classifieds import Classified
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -56,6 +54,7 @@ def same_origin(current_uri, compare_uri):
             and current.hostname == compare.hostname
             and current.port == compare.port
     )
+
 
 def validate_phone_number(phone_number):
     # ----------------------------------------------------------- #
@@ -143,40 +142,87 @@ def user_page():
     form = ChangeUserDetailsForm()
 
     if request.method == 'GET':
-        # pre-fill existing name
+        # ----------------------------------------------------------- #
+        # Fill in the form from the db
+        # ----------------------------------------------------------- #
         form.name.data = user.name
+        form.bio.data = user.bio
+        form.group.data = user.social_url("group")
+        form.strava.data = user.social_url("strava")
+        form.instagram.data = user.social_url("instagram")
+        form.twitter.data = user.social_url("twitter")
+        form.facebook.data = user.social_url("facebook")
+
     elif form.validate_on_submit():
-        # User has requested new name
+        # ----------------------------------------------------------- #
+        # Process submitted form
+        # ----------------------------------------------------------- #
+        # Read the form
+        made_change = False
         new_name = form.name.data.strip()
-        if new_name == user.name:
-            # No change
-            flash("That's the same name as before!")
-            return redirect(url_for('user_page', user_id=user.id))
-        elif User().check_name_in_use(new_name):
-            # Not unique
-            flash(f"Sorry, the name '{new_name}' is already in use!")
-            app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")
-            Event().log_event("User Page Succes", f"Username clash '{new_name}' for user_id = '{user_id}'.")
-            return redirect(url_for('user_page', user_id=user.id))
-        else:
-            # Change their name
-            if User().update_user_name(user.id, new_name):
-                app.logger.debug(f"user_page(): Change username for user_id = '{user_id}' to '{new_name}'.")
-                Event().log_event("User Page Succes", f"Changed username for user_id = '{user_id}' to '{new_name}'.")
-                flash("User name has been changed!")
-                return redirect(url_for('user_page', user_id=user.id))
+        new_bio = form.bio.data
+        new_strava = form.strava.data
+        new_instagram = form.instagram.data
+        new_twitter = form.twitter.data
+        new_facebook = form.facebook.data
+        new_group = form.group.data
+
+        # Did they change their username?
+        if new_name != user.name:
+            # Needs to be unique
+            if User().check_name_in_use(new_name):
+                # Not unique
+                flash(f"Sorry, the name '{new_name}' is already in use!")
+                app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")
+                Event().log_event("User Page Success", f"Username clash '{new_name}' for user_id = '{user_id}'.")
+            else:
+                # Change their name
+                user.name = new_name
+                made_change = True
+
+        # Did they change their bio?
+        if new_bio != user.bio:
+            # Update it
+            user.bio = new_bio
+            made_change = True
+
+        # Did they change socials / group?
+        if new_strava != user.social_url("strava") or \
+                new_instagram != user.social_url("instagram") or \
+                new_twitter != user.social_url("twitter") or \
+                new_facebook != user.social_url("facebook") or \
+                new_group != user.social_url("group"):
+            user.socials = json.dumps({'strava': new_strava,
+                                       'instagram': new_instagram,
+                                       'twitter': new_twitter,
+                                       'facebook': new_facebook,
+                                       'group': new_group})
+            made_change = True
+
+        # Update user object
+        if made_change:
+            if User().update_user(user):
+                app.logger.debug(f"user_page(): Updated user, user_id = '{user_id}'.")
+                Event().log_event("User Page Success", f"Updated user, user_id = '{user_id}'.")
+                flash("User has been updated!")
+                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
             else:
                 # Should never get here, but..
-                app.logger.debug(f"user_page(): Failed to change username for user_id = '{user_id}'.")
-                Event().log_event("User Page Fail",
-                                  f"Failed to change username for user_id = '{user_id}'.")
+                app.logger.debug(f"user_page(): Failed to update user, user_id = '{user_id}'.")
+                Event().log_event("User Page Fail", f"Failed to update user, user_id = '{user_id}'.")
                 flash("Sorry, something went wrong!")
-                return redirect(url_for('user_page', user_id=user.id))
+                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
+        else:
+            # They didn't change anything
+            flash("Nothing was changed!")
+            return redirect(url_for('user_page', user_id=user_id, anchor="account"))
 
     elif request.method == 'POST':
+        # ----------------------------------------------------------- #
         # Failed form validation
-        flash("You didn't fill your name in properly!")
-        return redirect(url_for('user_page', user_id=user.id))
+        # ----------------------------------------------------------- #
+        flash("Check form for errors!")
+        return redirect(url_for('user_page', user_id=user.id, anchor="account"))
 
     # ----------------------------------------------------------- #
     # Events
@@ -264,33 +310,14 @@ def user_page():
     # Keep count of Google Map Loads
     count_map_loads(1)
 
-    if anchor == "messages":
-        return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
-                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
-                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds, live_site=live_site(), anchor="messages")
+    if event_period:
+        anchor = "eventLog"
 
-    elif anchor == "account":
-        return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
-                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
-                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds, live_site=live_site(), anchor="account")
-
-    elif event_period or anchor == "eventLog":
-        return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
-                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
-                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds, live_site=live_site(), anchor="eventLog")
-
-    else:
-        return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
-                               cafe_comments=cafe_comments, messages=messages, events=events, days=days,
-                               rides=rides, socials=socials, notifications=notifications, blogs=blogs,
-                               GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
-                               classifieds=classifieds, live_site=live_site())
+    return render_template("user_page.html", year=current_year, cafes=cafes, user=user, gpxes=gpxes,
+                           cafe_comments=cafe_comments, messages=messages, events=events, days=days,
+                           rides=rides, socials=socials, notifications=notifications, blogs=blogs,
+                           GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS, form=form,
+                           classifieds=classifieds, live_site=live_site(), anchor=anchor)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -474,7 +501,7 @@ def set_notifications():
         flash("Sorry, something went wrong.")
 
     # Back to user page
-    return redirect(url_for('user_page', anchor="account", user_id=user_id))
+    return redirect(url_for('user_page', anchor="notifications", user_id=user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
