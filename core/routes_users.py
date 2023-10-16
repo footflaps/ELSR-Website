@@ -196,7 +196,7 @@ def user_page():
         abort(403)
 
     # ----------------------------------------------------------- #
-    # Events
+    # Gather data: 1. Events
     # ----------------------------------------------------------- #
     if not event_period:
         events = Event().all_events_email_days(user.email, DEFAULT_EVENT_DAYS)
@@ -209,22 +209,22 @@ def user_page():
         days = int(event_period)
 
     # ----------------------------------------------------------- #
-    # Cafes
+    # Gather data: 2. Cafes
     # ----------------------------------------------------------- #
     cafes = Cafe().find_all_cafes_by_email(user.email)
 
     # ----------------------------------------------------------- #
-    # GPX files
+    # Gather data: 3. GPX files
     # ----------------------------------------------------------- #
     gpxes = Gpx().all_gpxes_by_email(user.email)
 
     # ----------------------------------------------------------- #
-    # Comments
+    # Gather data: 4. Comments
     # ----------------------------------------------------------- #
     cafe_comments = CafeComment().all_comments_by_email(user.email)
 
     # ----------------------------------------------------------- #
-    # Messages
+    # Gather data: 5. Messages
     # ----------------------------------------------------------- #
     messages = Message().all_messages_to_email(user.email)
 
@@ -245,27 +245,27 @@ def user_page():
             flash(f"You have {count} unread messages")
 
     # ----------------------------------------------------------- #
-    # Rides
+    # Gather data: 6. Rides
     # ----------------------------------------------------------- #
     rides = Calendar().all_calendar_email(user.email)
 
     # ----------------------------------------------------------- #
-    # All scheduled social events
+    # Gather data: 7. Social events
     # ----------------------------------------------------------- #
     socials = Socials().all_by_email(user.email)
 
     # ----------------------------------------------------------- #
-    # All classifieds
+    # Gather data: 8. Classifieds
     # ----------------------------------------------------------- #
     classifieds = Classified().all_by_email(user.email)
 
     # ----------------------------------------------------------- #
-    # Notification preferences
+    # Gather data: 9. Notification preferences
     # ----------------------------------------------------------- #
     notifications = user.notification_choices_set()
 
     # ----------------------------------------------------------- #
-    # Blog posts
+    # Gather data: 10. Blog posts
     # ----------------------------------------------------------- #
     blogs = Blog().all_by_email(user.email)
     for blog in blogs:
@@ -274,16 +274,16 @@ def user_page():
         if blog.date_unix:
             blog.date = datetime.utcfromtimestamp(blog.date_unix).strftime('%d %b %Y')
 
-
-
     # ----------------------------------------------------------- #
-    # Need a form for changing user name
+    # ----------------------------------------------------------- #
+    # Manage form on page
+    # ----------------------------------------------------------- #
     # ----------------------------------------------------------- #
     form = ChangeUserDetailsForm()
 
     if request.method == 'GET':
         # ----------------------------------------------------------- #
-        # Fill in the form from the db
+        # Fill in blank form before displaying
         # ----------------------------------------------------------- #
         form.name.data = user.name
         form.bio.data = user.bio
@@ -297,6 +297,7 @@ def user_page():
         # ----------------------------------------------------------- #
         # Process submitted form
         # ----------------------------------------------------------- #
+
         # Read the form
         made_change = False
         new_name = form.name.data.strip()
@@ -349,7 +350,6 @@ def user_page():
         # ----------------------------------------------------------- #
         flash("Check form for errors!")
 
-
     # -------------------------------------------------------------------------------------------- #
     # Show user page
     # -------------------------------------------------------------------------------------------- #
@@ -357,6 +357,7 @@ def user_page():
     # Keep count of Google Map Loads
     count_map_loads(1)
 
+    # Add an anchor tag if the Admin is changing the Event view settings
     if event_period:
         anchor = "eventLog"
 
@@ -370,7 +371,6 @@ def user_page():
 # -------------------------------------------------------------------------------------------------------------- #
 # Delete user - user can delete themselves so *NOT* restricted to Admin only
 # -------------------------------------------------------------------------------------------------------------- #
-
 @app.route('/delete_user', methods=['POST'])
 @logout_barred_user
 @login_required
