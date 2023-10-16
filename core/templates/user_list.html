@@ -52,6 +52,14 @@
 				<a href="#{{ letter }}"><strong>{{ letter.upper() }}</strong></a>,
 			{% endfor %}
 			
+			{% if not current_user.is_authenticated %}
+			
+				<p style="color: red">
+					<strong>Log in to see active social links.</strong>
+				</p>
+			
+			{% endif %}
+			
 			<hr>
 			
 		</div>
@@ -124,10 +132,10 @@
 					
 					{% else %}
 						<!-- Just icons -->
-					    <i class="fa-brands fa-strava fa-lg"></i>
-						<i class="fa-brands fa-instagram fa-lg"></i>
-						<i class="fa-brands fa-twitter fa-lg"></i>
-						<i class="fa-brands fa-facebook fa-lg"></i>
+					    <i class="fa-brands fa-strava fa-lg" style="color: #ccd1d1"></i>
+						<i class="fa-brands fa-instagram fa-lg" style="color: #ccd1d1"></i>
+						<i class="fa-brands fa-twitter fa-lg" style="color: #ccd1d1"></i>
+						<i class="fa-brands fa-facebook fa-lg" style="color: #ccd1d1"></i>
 					{% endif %}
 					
 				</div>
