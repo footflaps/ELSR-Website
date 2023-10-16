@@ -82,11 +82,10 @@
 				<!-- Name, Group and Bio -->
 				<div class="float-left">
 					
-					<a href="https://gravatar.com/">
-						<img src="{{ user.email | gravatar }}"
-					         width="60" height="60"
-					         style="border-radius: 50%;"/>
-					</a> &nbsp
+					<img src="{{ user.email | gravatar }}"
+				         width="60" height="60"
+				         style="border-radius: 50%;"/>
+					&nbsp
 					{{user.name}}
 				
 					{% if user.admin() %}
