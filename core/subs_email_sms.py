@@ -820,8 +820,9 @@ def email_ride_alert_summary():
     users = User().all_users_sorted()
     # Scan by ride types
     results = {}
-    for choice, notification in zip(GROUP_CHOICES, GROUP_NOTIFICATIONS):
-        print(f"choice = '{choice}', notification = '{notification}'")
+    one_words = GROUP_CHOICES + ["Socials", "Blogs", "Messages"]
+    user_notifications = GROUP_NOTIFICATIONS + [SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, MESSAGE_NOTIFICATION]
+    for choice, notification in zip(one_words, user_notifications):
         alerted_users = []
         for user in users:
             if user.notification_choice(notification):
