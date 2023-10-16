@@ -19,7 +19,7 @@ from core import app, current_year, is_mobile, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID
-from core.db_messages import Message, ADMIN_EMAIL, READONLY_MESSAGE, READWRITE_MESSAGE, WELCOME_MESSAGE
+from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_calendar import Calendar
 from core.db_social import Socials, SOCIAL_DB_PRIVATE
@@ -278,31 +278,17 @@ def admin_page():
     #       the user is looking at events, we get passed a variable 'anchor' which is set to 'eventLog'.
     # "eventLog" is the tab on the page, which a JS snippet will jump to when the page loads in the browser.
 
-    if event_period \
-            or anchor == "eventLog":
-        # Jump straight to the 'eventlog'
-        return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
-                               messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
-                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
-                               dataset=dataset, live_site=live_site(), anchor="eventLog")
-    elif anchor == "messages":
-        # Jump straight to the 'messages'
-        return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
-                               messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
-                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
-                               dataset=dataset, live_site=live_site(), anchor="messages")
-    else:
-        # No jumping, just display the page from the top
-        return render_template("admin_page.html", year=current_year, admins=admins, trusted_users=trusted_users,
-                               messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
-                               rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
-                               map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
-                               files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
-                               dataset=dataset, live_site=live_site())
+    # If Admin is changing event view, jump straight to events section
+    if event_period:
+        anchor = "eventLog"
+
+    # Render page
+    return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
+                           messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
+                           rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
+                           map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
+                           files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
+                           dataset=dataset, live_site=live_site(), anchor=anchor)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
