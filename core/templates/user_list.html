@@ -103,22 +103,33 @@
 				<!-- Socials -->
 				<div class="mt-2 float-right">
 				
-					{% if user.social_url("strava") %}
-						 &nbsp; <a href="{{ user.social_url('strava') }}"><i class="fa-brands fa-strava fa-lg"></i></a>
+					{% if current_user.is_authenticated %}
+						
+						<!-- Real links -->
+						{% if user.social_url("strava") %}
+							 &nbsp; <a href="{{ user.social_url('strava') }}"><i class="fa-brands fa-strava fa-lg"></i></a>
+						{% endif %}
+						
+						{% if user.social_url("instagram") %}
+							 &nbsp; <a href="{{ user.social_url('instagram') }}"><i class="fa-brands fa-instagram fa-lg"></i></a>
+						{% endif %}
+						
+						{% if user.social_url("twitter") %}
+							 &nbsp; <a href="{{ user.social_url('twitter') }}"><i class="fa-brands fa-twitter fa-lg"></i></a>
+						{% endif %}
+						
+						{% if user.social_url("facebook") %}
+							 &nbsp; <a href="{{ user.social_url('facebook') }}"><i class="fa-brands fa-facebook fa-lg"></i></a>
+						{% endif %}
+					
+					{% else %}
+						<!-- Just icons -->
+					    <i class="fa-brands fa-strava fa-lg"></i>
+						<i class="fa-brands fa-instagram fa-lg"></i>
+						<i class="fa-brands fa-twitter fa-lg"></i>
+						<i class="fa-brands fa-facebook fa-lg"></i>
 					{% endif %}
 					
-					{% if user.social_url("instagram") %}
-						 &nbsp; <a href="{{ user.social_url('instagram') }}"><i class="fa-brands fa-instagram fa-lg"></i></a>
-					{% endif %}
-					
-					{% if user.social_url("twitter") %}
-						 &nbsp; <a href="{{ user.social_url('twitter') }}"><i class="fa-brands fa-twitter fa-lg"></i></a>
-					{% endif %}
-					
-					{% if user.social_url("facebook") %}
-						 &nbsp; <a href="{{ user.social_url('facebook') }}"><i class="fa-brands fa-facebook fa-lg"></i></a>
-					{% endif %}
-
 				</div>
 				
 			</div>
