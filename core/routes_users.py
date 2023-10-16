@@ -6,6 +6,8 @@ import os
 import re
 from datetime import datetime
 import json
+import validators
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -29,6 +31,7 @@ from core.db_calendar import Calendar
 from core.db_social import Socials
 from core.db_blog import Blog
 from core.db_classifieds import Classified
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -78,6 +81,62 @@ def validate_phone_number(phone_number):
     # Add back leading '+'
     phone_number = "+" + phone_number
     return phone_number
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Process social links
+# -------------------------------------------------------------------------------------------------------------- #
+def validate_socials(user, form):
+    # ----------------------------------------------------------- #
+    # Get new social links from the form
+    # ----------------------------------------------------------- #
+    new_strava = form.strava.data.strip()
+    new_instagram = form.instagram.data.strip()
+    new_twitter = form.twitter.data.strip()
+    new_facebook = form.facebook.data.strip()
+    new_group = form.group.data.strip()
+
+    # ----------------------------------------------------------- #
+    # Did anything change
+    # ----------------------------------------------------------- #
+    if new_strava == user.social_url("strava") and \
+            new_instagram == user.social_url("instagram") and \
+            new_twitter == user.social_url("twitter") and \
+            new_facebook == user.social_url("facebook") and \
+            new_group == user.social_url("group"):
+        # Nothing changed
+        return False
+
+    # ----------------------------------------------------------- #
+    # Validate URLs for social links
+    # ----------------------------------------------------------- #
+    if new_strava != "":
+        if not validators.url(new_strava):
+            flash("That's not a valid Strava link!")
+            new_strava = user.social_url("strava")
+    if new_instagram != "":
+        if not validators.url(new_instagram):
+            flash("That's not a valid Instagram link!")
+            new_instagram = user.social_url("instagram")
+    if new_twitter != "":
+        if not validators.url(new_twitter):
+            flash("That's not a valid Twitter link!")
+            new_twitter = user.social_url("twitter")
+    if new_facebook != "":
+        if not validators.url(new_facebook):
+            flash("That's not a valid Facebook link!")
+            new_facebook = user.social_url("facebook")
+
+    # ----------------------------------------------------------- #
+    # Update user
+    # ----------------------------------------------------------- #
+    user.socials = json.dumps({'strava': new_strava,
+                               'instagram': new_instagram,
+                               'twitter': new_twitter,
+                               'facebook': new_facebook,
+                               'group': new_group})
+    # Return True to update user
+    return True
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -135,94 +194,6 @@ def user_page():
         Event().log_event("User Page Fail", f"Rejected request from current_user.id = '{current_user.id}', "
                                             f"for user_id = '{user_id}'.")
         abort(403)
-
-    # ----------------------------------------------------------- #
-    # Need a form for changing user name
-    # ----------------------------------------------------------- #
-    form = ChangeUserDetailsForm()
-
-    if request.method == 'GET':
-        # ----------------------------------------------------------- #
-        # Fill in the form from the db
-        # ----------------------------------------------------------- #
-        form.name.data = user.name
-        form.bio.data = user.bio
-        form.group.data = user.social_url("group")
-        form.strava.data = user.social_url("strava")
-        form.instagram.data = user.social_url("instagram")
-        form.twitter.data = user.social_url("twitter")
-        form.facebook.data = user.social_url("facebook")
-
-    elif form.validate_on_submit():
-        # ----------------------------------------------------------- #
-        # Process submitted form
-        # ----------------------------------------------------------- #
-        # Read the form
-        made_change = False
-        new_name = form.name.data.strip()
-        new_bio = form.bio.data
-        new_strava = form.strava.data
-        new_instagram = form.instagram.data
-        new_twitter = form.twitter.data
-        new_facebook = form.facebook.data
-        new_group = form.group.data
-
-        # Did they change their username?
-        if new_name != user.name:
-            # Needs to be unique
-            if User().check_name_in_use(new_name):
-                # Not unique
-                flash(f"Sorry, the name '{new_name}' is already in use!")
-                app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")
-                Event().log_event("User Page Success", f"Username clash '{new_name}' for user_id = '{user_id}'.")
-            else:
-                # Change their name
-                user.name = new_name
-                made_change = True
-
-        # Did they change their bio?
-        if new_bio != user.bio:
-            # Update it
-            user.bio = new_bio
-            made_change = True
-
-        # Did they change socials / group?
-        if new_strava != user.social_url("strava") or \
-                new_instagram != user.social_url("instagram") or \
-                new_twitter != user.social_url("twitter") or \
-                new_facebook != user.social_url("facebook") or \
-                new_group != user.social_url("group"):
-            user.socials = json.dumps({'strava': new_strava,
-                                       'instagram': new_instagram,
-                                       'twitter': new_twitter,
-                                       'facebook': new_facebook,
-                                       'group': new_group})
-            made_change = True
-
-        # Update user object
-        if made_change:
-            if User().update_user(user):
-                app.logger.debug(f"user_page(): Updated user, user_id = '{user_id}'.")
-                Event().log_event("User Page Success", f"Updated user, user_id = '{user_id}'.")
-                flash("User has been updated!")
-                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
-            else:
-                # Should never get here, but..
-                app.logger.debug(f"user_page(): Failed to update user, user_id = '{user_id}'.")
-                Event().log_event("User Page Fail", f"Failed to update user, user_id = '{user_id}'.")
-                flash("Sorry, something went wrong!")
-                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
-        else:
-            # They didn't change anything
-            flash("Nothing was changed!")
-            return redirect(url_for('user_page', user_id=user_id, anchor="account"))
-
-    elif request.method == 'POST':
-        # ----------------------------------------------------------- #
-        # Failed form validation
-        # ----------------------------------------------------------- #
-        flash("Check form for errors!")
-        return redirect(url_for('user_page', user_id=user.id, anchor="account"))
 
     # ----------------------------------------------------------- #
     # Events
@@ -302,6 +273,82 @@ def user_page():
         # 1. Human-readable date
         if blog.date_unix:
             blog.date = datetime.utcfromtimestamp(blog.date_unix).strftime('%d %b %Y')
+
+
+
+    # ----------------------------------------------------------- #
+    # Need a form for changing user name
+    # ----------------------------------------------------------- #
+    form = ChangeUserDetailsForm()
+
+    if request.method == 'GET':
+        # ----------------------------------------------------------- #
+        # Fill in the form from the db
+        # ----------------------------------------------------------- #
+        form.name.data = user.name
+        form.bio.data = user.bio
+        form.group.data = user.social_url("group")
+        form.strava.data = user.social_url("strava")
+        form.instagram.data = user.social_url("instagram")
+        form.twitter.data = user.social_url("twitter")
+        form.facebook.data = user.social_url("facebook")
+
+    elif form.validate_on_submit():
+        # ----------------------------------------------------------- #
+        # Process submitted form
+        # ----------------------------------------------------------- #
+        # Read the form
+        made_change = False
+        new_name = form.name.data.strip()
+        new_bio = form.bio.data
+
+        # Did they change their username?
+        if new_name != user.name:
+            # Needs to be unique
+            if User().check_name_in_use(new_name):
+                # Not unique
+                flash(f"Sorry, the name '{new_name}' is already in use!")
+                app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")
+                Event().log_event("User Page Success", f"Username clash '{new_name}' for user_id = '{user_id}'.")
+            else:
+                # Change their name
+                user.name = new_name
+                made_change = True
+
+        # Did they change their bio?
+        if new_bio != user.bio:
+            # Update it
+            user.bio = new_bio
+            made_change = True
+
+        # Handle socials
+        if validate_socials(user, form):
+            made_change = True
+
+        # Update user object
+        if made_change:
+            if User().update_user(user):
+                app.logger.debug(f"user_page(): Updated user, user_id = '{user_id}'.")
+                Event().log_event("User Page Success", f"Updated user, user_id = '{user_id}'.")
+                flash("User has been updated!")
+                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
+            else:
+                # Should never get here, but..
+                app.logger.debug(f"user_page(): Failed to update user, user_id = '{user_id}'.")
+                Event().log_event("User Page Fail", f"Failed to update user, user_id = '{user_id}'.")
+                flash("Sorry, something went wrong!")
+                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
+        else:
+            # They didn't change anything
+            flash("Nothing was changed!")
+            return redirect(url_for('user_page', user_id=user_id, anchor="account"))
+
+    elif request.method == 'POST':
+        # ----------------------------------------------------------- #
+        # Failed form validation
+        # ----------------------------------------------------------- #
+        flash("Check form for errors!")
+
 
     # -------------------------------------------------------------------------------------------- #
     # Show user page

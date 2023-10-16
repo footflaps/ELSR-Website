@@ -2,7 +2,7 @@ from flask import abort, flash, request
 from flask_login import UserMixin, current_user, logout_user
 from flask_wtf import FlaskForm
 from flask_ckeditor import CKEditorField
-from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField, URLField, SelectField
+from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField, URLField, SelectField, validators
 from wtforms.validators import InputRequired, Email
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
@@ -13,6 +13,7 @@ import os
 import hashlib
 from sqlalchemy import func
 import json
+from validators import url as check_url
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -976,17 +977,26 @@ class ResetPasswordForm(FlaskForm):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Change user details form
+# Custom validator for URLs (which accepts a blank field)
+# -------------------------------------------------------------------------------------------------------------- #
+def url_validation(form, field):
+    if field.data.strip() != "" and \
+         not check_url(field.data):
+        raise validators.ValidationError('This is not a valid url eg https://www.strava.com/')
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# User details form
 # -------------------------------------------------------------------------------------------------------------- #
 class ChangeUserDetailsForm(FlaskForm):
     name = StringField("Change user name:", validators=[InputRequired("Please enter your name.")])
     bio = CKEditorField("Witty one liner:", validators=[])
     GROUP_CHOICES.insert(0, "n/a")
     group = SelectField("Main Group:", choices=GROUP_CHOICES)
-    strava = URLField("Strava url:", validators=[])
-    instagram = URLField("Instagram url:", validators=[])
-    twitter = URLField("Twitter / X url:", validators=[])
-    facebook = URLField("Facebook url:", validators=[])
+    strava = URLField("Strava url:", validators=[url_validation])
+    instagram = URLField("Instagram url:", validators=[url_validation])
+    twitter = URLField("Twitter / X url:", validators=[url_validation])
+    facebook = URLField("Facebook url:", validators=[url_validation])
     submit = SubmitField("Update me!")
 
 
