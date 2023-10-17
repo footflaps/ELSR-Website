@@ -76,6 +76,7 @@
 	{% set firstletter = "" %}
 	
 	{% for user in users %}
+		{% if user.id != 50 %}
 	
 		<!-- Create Anchors for next letter in alphabet -->
 		{% if firstletter != user.name[0] %}
@@ -160,6 +161,7 @@
 			</div>
 		</div>
 	
+		{% endif %}
 	{% endfor %}
 	
 </div>
