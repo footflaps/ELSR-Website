@@ -621,6 +621,7 @@ def unsubscribe_all():
 @logout_barred_user
 @update_last_seen
 def who_are_we():
+    abort(404)
     # ----------------------------------------------------------- #
     # Need a list of users
     # ----------------------------------------------------------- #
