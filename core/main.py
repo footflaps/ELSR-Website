@@ -395,6 +395,11 @@ def club_kit():
                 form.gilet.data = sizes['gilet']
                 form.bib_shorts.data = sizes['bib_shorts']
                 form.bib_longs.data = sizes['bib_longs']
+                # Added this later, so won't always exist
+                try:
+                    form.notes.data = sizes['notes']
+                except KeyError:
+                    form.notes.data = ""
 
         # Are we posting the completed form?
         if form.validate_on_submit():
@@ -408,6 +413,7 @@ def club_kit():
                      "gilet": form.gilet.data,
                      "bib_shorts": form.bib_shorts.data,
                      "bib_longs": form.bib_longs.data,
+                     "notes": form.notes.data,
                      }
             user.clothing_size = json.dumps(sizes)
             user_id = user.id

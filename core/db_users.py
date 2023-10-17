@@ -1011,6 +1011,7 @@ class ClothingSizesForm(FlaskForm):
     gilet = SelectField("Gilet:", choices=SIZES)
     bib_shorts = SelectField("Bib shorts:", choices=SIZES)
     bib_longs = SelectField("Bib longs:", choices=SIZES)
+    notes = StringField("Notes:", validators=[])
     submit = SubmitField("Save me!")
 
 
