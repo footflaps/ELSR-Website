@@ -66,7 +66,7 @@ class Socials(db.Model):
     # Privacy (Public / Private)
     privacy = db.Column(db.String(20))
 
-    # Return all events
+    # Return all socials
     def all(self):
         with app.app_context():
             socials = db.session.query(Socials).all()
@@ -143,7 +143,6 @@ class Socials(db.Model):
 # Create the actual dB
 # -------------------------------------------------------------------------------------------------------------- #
 
-# This seems to be the only one which works?
 with app.app_context():
     db.create_all()
 

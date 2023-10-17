@@ -2,7 +2,6 @@ from flask import render_template, request, flash, abort, send_from_directory, u
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFError
-from urllib3 import request as request3
 from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
@@ -381,7 +380,6 @@ def club_kit():
             abort(404)
 
         if request.method == 'GET':
-            pass
             # ----------------------------------------------------------- #
             #   GET - Fill form in from dB
             # ----------------------------------------------------------- #
