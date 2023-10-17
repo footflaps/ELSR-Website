@@ -103,7 +103,9 @@
 					{% endif %}
 	
 					{% if user.social_url("group") %}
-						 &nbsp; (<strong>{{ user.social_url("group") }}</strong>)
+						{% if user.social_url("group").lower() != "n/a" %}
+						    &nbsp; (<strong>{{ user.social_url("group") }}</strong>)
+						{% endif %}
 					{% endif %}
 					
 				</div>
