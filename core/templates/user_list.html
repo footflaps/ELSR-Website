@@ -103,6 +103,7 @@
 					{% endif %}
 	
 					{% if user.social_url("group") %}
+						<!-- Suppress n/a which I forgot to do before it gets added to db -->
 						{% if user.social_url("group").lower() != "n/a" %}
 						    &nbsp; (<strong>{{ user.social_url("group") }}</strong>)
 						{% endif %}
