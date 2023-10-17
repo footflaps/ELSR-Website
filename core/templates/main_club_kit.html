@@ -109,13 +109,16 @@
 		<div class="collapse" id="collapseSizes">
 			<div class="row mt-3">
 				<div class="col-lg-8 col-md-10 mx-auto">
-				
+					
 					<!-- Load ckeditor -->
 					{{ ckeditor.load() }}
-					
+			
 					<!-- This is where the form will go -->
 					{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-				
+					
+					<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
+					{{ ckeditor.config(name='notes') }}
+					
 				</div>
 			</div>
 		</div>

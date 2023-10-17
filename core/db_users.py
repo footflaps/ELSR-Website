@@ -927,7 +927,7 @@ class VerifyUserForm(FlaskForm):
     email = EmailField("Email address",
                        validators=[InputRequired("Please enter your email address."), Email()])
     verification_code = IntegerField("Verification code",
-                                      validators=[InputRequired("Please enter the six digit code emailed to you.")])
+                                     validators=[InputRequired("Please enter the six digit code emailed to you.")])
     submit = SubmitField("Verify email address")
 
 
@@ -938,7 +938,7 @@ class TwoFactorLoginForm(FlaskForm):
     email = EmailField("Email address",
                        validators=[InputRequired("Please enter your email address."), Email()])
     verification_code = IntegerField("Verification code",
-                                      validators=[InputRequired("Please enter the six digit code SMSed to you.")])
+                                     validators=[InputRequired("Please enter the six digit code SMSed to you.")])
     submit = SubmitField("2FA Login")
 
 
@@ -947,7 +947,7 @@ class TwoFactorLoginForm(FlaskForm):
 # -------------------------------------------------------------------------------------------------------------- #
 class VerifySMSForm(FlaskForm):
     verification_code = IntegerField("Verification code",
-                                      validators=[InputRequired("Please enter the six digit code SMSed to you.")])
+                                     validators=[InputRequired("Please enter the six digit code SMSed to you.")])
     submit = SubmitField("Verify Mobile")
 
 
@@ -1011,7 +1011,7 @@ class ClothingSizesForm(FlaskForm):
     gilet = SelectField("Gilet:", choices=SIZES)
     bib_shorts = SelectField("Bib shorts:", choices=SIZES)
     bib_longs = SelectField("Bib longs:", choices=SIZES)
-    notes = StringField("Notes:", validators=[])
+    notes = CKEditorField("Notes:", validators=[])
     submit = SubmitField("Save me!")
 
 
