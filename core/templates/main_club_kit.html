@@ -3,6 +3,11 @@
 
 {% block content %}
 
+<!-- Add import for bootstrap wtf quickform support -->
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                       Page Header                                              -->
@@ -70,7 +75,84 @@
 			<p>
 				Order deadline <strong>23rd of October 2023</strong> for the first wave of orders.
 			</p>
+
+			<hr>
 			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                           Size form                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if current_user.is_authenticated %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+			
+				<h2 class="float-left">Save your size</h2>
+
+				<!-- Button to expose hidden table -->
+				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseSizes"
+				   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_sizes">
+	                   SHOW
+	            </a>
+					
+				
+			</div>
+		</div>
+		
+		<!-- Collapsed / Hidden table of alerts in Calendar -->
+		<div class="collapse" id="collapseSizes">
+			<div class="row mt-3">
+				<div class="col-lg-8 col-md-10 mx-auto">
+				
+					<!-- Load ckeditor -->
+					{{ ckeditor.load() }}
+					
+					<!-- This is where the form will go -->
+					{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+				
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+		
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+	<script>
+		
+		/* Hide <-> Show buttons name change */
+		$("#collapseSizes").on("show.bs.collapse", function(){
+            document.getElementById('show_sizes').innerHTML = 'HIDE';
+        });
+       $("#collapseSizes").on("hide.bs.collapse", function(){
+            document.getElementById('show_sizes').innerHTML = 'SHOW';
+        });
+		
+	</script>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Clothing details                                          -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			<h2>Short Sleeve Jersey</h2>
 			<p>There are four short sleeve jersey variants:</p>

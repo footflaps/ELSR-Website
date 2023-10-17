@@ -23,7 +23,7 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site, GLOBAL_FLA
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
-from core.db_users import User, update_last_seen
+from core.db_users import User, update_last_seen, ClothingSizesForm
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
 from core.dB_events import Event
@@ -375,7 +375,32 @@ def uncut():
 @app.route("/team_kit", methods=['GET'])
 @update_last_seen
 def club_kit():
-    return render_template("main_club_kit.html", year=current_year, live_site=live_site())
+
+    # Need a form
+    form = ClothingSizesForm()
+
+    # Are we posting the completed form?
+    if form.validate_on_submit():
+
+        # ----------------------------------------------------------- #
+        #   POST - form validated & submitted
+        # ----------------------------------------------------------- #
+
+        flash("Thankyou, your message has been sent!")
+
+    elif request.method == 'POST':
+
+        # ----------------------------------------------------------- #
+        #   POST - form validation failed
+        # ----------------------------------------------------------- #
+
+        flash("Form not filled in properly, see below!")
+
+    # ----------------------------------------------------------- #
+    #   GET - Render page
+    # ----------------------------------------------------------- #
+
+    return render_template("main_club_kit.html", year=current_year, live_site=live_site(), form=form)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

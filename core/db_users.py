@@ -97,6 +97,9 @@ NOTIFICATIONS = [
 ]
 
 
+SIZES = ["XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"]
+
+
 # -------------------------------------------------------------------------------------------------------------- #
 # User loader function
 # -------------------------------------------------------------------------------------------------------------- #
@@ -166,6 +169,9 @@ class User(UserMixin, db.Model):
 
     # Bio
     bio = db.Column(db.Text, unique=False)
+
+    # Clothing sizes
+    clothing_size = db.Column(db.Text, unique=False)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # User permissions
@@ -993,6 +999,19 @@ class ChangeUserDetailsForm(FlaskForm):
     twitter = URLField("Twitter / X url:", validators=[url_validation])
     facebook = URLField("Facebook url:", validators=[url_validation])
     submit = SubmitField("Update me!")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Clothing size form
+# -------------------------------------------------------------------------------------------------------------- #
+class ClothingSizesForm(FlaskForm):
+    jersey_ss_relaxed = SelectField("Sunny Day (relaxed fit) SS Jersey:", choices=SIZES)
+    jersey_ss_race = SelectField("Hard Day (race fit) SS Jersey:", choices=SIZES)
+    jersey_ls = SelectField("Long Sleeve Jersey:", choices=SIZES)
+    gilet = SelectField("Gilet:", choices=SIZES)
+    bib_shorts = SelectField("Bib shorts:", choices=SIZES)
+    bib_longs = SelectField("Bib longs:", choices=SIZES)
+    submit = SubmitField("Save me!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
