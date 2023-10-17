@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead" style="background-image: url({{ url_for('static', filename='img/construction-bg.jpg')}})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Under Construction</h1>
+					<span class="subheading">This page is undergoing life-saving surgery...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<hr>
+
+{% endblock %}

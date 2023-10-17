@@ -621,7 +621,8 @@ def unsubscribe_all():
 @logout_barred_user
 @update_last_seen
 def who_are_we():
-    abort(404)
+    return render_template("under_construction.html", year=current_year, live_site=live_site())
+
     # ----------------------------------------------------------- #
     # Need a list of users
     # ----------------------------------------------------------- #
