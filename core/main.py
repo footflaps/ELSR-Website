@@ -2,21 +2,21 @@ from flask import render_template, request, flash, abort, send_from_directory, u
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFError
+from urllib3 import request as request3
 from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from threading import Thread
 import os
-import requests
+import requests as requests2
 from bs4 import BeautifulSoup
-
+import json
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site, GLOBAL_FLASH
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our classes
@@ -28,7 +28,6 @@ from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
 from core.dB_events import Event
 from core.subs_email_sms import contact_form_email
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import the other route pages
@@ -51,18 +50,17 @@ from core.routes_user_register import register
 from core.routes_user_login_logout import login
 from core.routes_admin_maps import enable_maps
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
 CHAINGANG_GPX_FILENAME = "gpx_el_cg_2023.gpx"
 
-CHAINGANG_MEET_NEW =  [{
-        "position": {"lat": 52.22528, "lng": 0.043116},
-        "title": f'<a href="https://threehorseshoesmadingley.co.uk/">Three Horseshoes</a>',
-        "color": OPEN_CAFE_COLOUR,
-    }]
+CHAINGANG_MEET_NEW = [{
+    "position": {"lat": 52.22528, "lng": 0.043116},
+    "title": f'<a href="https://threehorseshoesmadingley.co.uk/">Three Horseshoes</a>',
+    "color": OPEN_CAFE_COLOUR,
+}]
 
 # Getting chaingang leaders
 TARGET_URL = "https://www.strava.com/segments/31554922?filter=overall"
@@ -95,7 +93,7 @@ class ContactForm(FlaskForm):
 
 def get_chaingang_top10():
     # Overall leader board
-    response = requests.get(TARGET_URL, headers=headers)
+    response = requests2.get(TARGET_URL, headers=headers)
     webpage = response.text
     soup = BeautifulSoup(webpage, "lxml")
     table = soup.find(id='segment-leaderboard')
@@ -173,7 +171,7 @@ def home():
     # Create a GM marker
     cafe_marker = [{
         "position": {"lat": cafe.lat, "lng": cafe.lon},
-        "title": f'<a href="{ url_for("cafe_details", cafe_id=BEAN_THEORY_INDEX) }">{cafe.name}</a>',
+        "title": f'<a href="{url_for("cafe_details", cafe_id=BEAN_THEORY_INDEX)}">{cafe.name}</a>',
         "color": OPEN_CAFE_COLOUR,
     }]
 
@@ -257,7 +255,7 @@ def twr():
     # Show The Bench
     # -------------------------------------------------------------------------------------------- #
     cafe_marker = [{
-        "position": {"lat":  52.197020, "lng":  0.111206},
+        "position": {"lat": 52.197020, "lng": 0.111206},
         "title": "The Bench",
         "color": OPEN_CAFE_COLOUR,
     }]
@@ -270,7 +268,6 @@ def twr():
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), MAP_BOUNDS=MAP_BOUNDS)
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # About
 # -------------------------------------------------------------------------------------------------------------- #
@@ -281,7 +278,6 @@ def about():
     return render_template("main_about.html", year=current_year, live_site=live_site())
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # GDPR
 # -------------------------------------------------------------------------------------------------------------- #
@@ -289,7 +285,6 @@ def about():
 @app.route("/gdpr", methods=['GET'])
 @update_last_seen
 def gdpr():
-
     # ----------------------------------------------------------- #
     # List of all admins
     # ----------------------------------------------------------- #
@@ -371,30 +366,69 @@ def uncut():
 # Club kit page
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route("/club_kit", methods=['GET'])
-@app.route("/team_kit", methods=['GET'])
+@app.route("/club_kit", methods=['GET', 'POST'])
+@app.route("/team_kit", methods=['GET', 'POST'])
 @update_last_seen
 def club_kit():
-
     # Need a form
     form = ClothingSizesForm()
 
-    # Are we posting the completed form?
-    if form.validate_on_submit():
+    if current_user.is_authenticated:
+        user = User().find_user_from_id(current_user.id)
+        if not user:
+            app.logger.debug(f"club_kit(): Failed to find user, if = '{current_user.id}'!")
+            Event().log_event("club_kit Fail", f"Failed to find user, if = '{current_user.id}'!")
+            abort(404)
 
-        # ----------------------------------------------------------- #
-        #   POST - form validated & submitted
-        # ----------------------------------------------------------- #
+        if request.method == 'GET':
+            pass
+            # ----------------------------------------------------------- #
+            #   GET - Fill form in from dB
+            # ----------------------------------------------------------- #
 
-        flash("Thankyou, your message has been sent!")
+            # Populate form
+            if user.clothing_size:
+                sizes = json.loads(user.clothing_size)
+                form.jersey_ss_relaxed.data = sizes['jersey_ss_relaxed']
+                form.jersey_ss_race.data = sizes['jersey_ss_race']
+                form.jersey_ls.data = sizes['jersey_ls']
+                form.gilet.data = sizes['gilet']
+                form.bib_shorts.data = sizes['bib_shorts']
+                form.bib_longs.data = sizes['bib_longs']
 
-    elif request.method == 'POST':
+        # Are we posting the completed form?
+        if form.validate_on_submit():
 
-        # ----------------------------------------------------------- #
-        #   POST - form validation failed
-        # ----------------------------------------------------------- #
+            # ----------------------------------------------------------- #
+            #   POST - form validated & submitted
+            # ----------------------------------------------------------- #
+            sizes = {"jersey_ss_relaxed": form.jersey_ss_relaxed.data,
+                     "jersey_ss_race": form.jersey_ss_race.data,
+                     "jersey_ls": form.jersey_ls.data,
+                     "gilet": form.gilet.data,
+                     "bib_shorts": form.bib_shorts.data,
+                     "bib_longs": form.bib_longs.data,
+                     }
+            user.clothing_size = json.dumps(sizes)
+            user_id = user.id
 
-        flash("Form not filled in properly, see below!")
+            # Save to user
+            if User().update_user(user):
+                app.logger.debug(f"club_kit(): Updated user, user_id = '{user_id}'.")
+                Event().log_event("club_kit Success", f"Updated user, user_id = '{user_id}'.")
+                flash("Your sizes have been updated!")
+            else:
+                # Should never get here, but..
+                app.logger.debug(f"club_kit(): Failed to update user, user_id = '{user_id}'.")
+                Event().log_event("club_kit Fail", f"Failed to update user, user_id = '{user_id}'.")
+                flash("Sorry, something went wrong!")
+
+        elif request.method == 'POST':
+
+            # ----------------------------------------------------------- #
+            #   POST - form validation failed
+            # ----------------------------------------------------------- #
+            flash("Form not filled in properly, see below!")
 
     # ----------------------------------------------------------- #
     #   GET - Render page
@@ -417,7 +451,7 @@ def club_kit():
 
 @app.route("/error", methods=['GET'])
 def error():
-    test = 1/0
+    test = 1 / 0
     return render_template("uncut_steerertubes.html", year=current_year, live_site=live_site())
 
 
@@ -580,7 +614,6 @@ def internal_server_error(e):
 # Have to register 500 with app to overrule the default built in 500 page
 app.register_error_handler(500, internal_server_error)
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -594,4 +627,3 @@ if __name__ == "__main__":
         app.run(debug=False)
     else:
         app.run(debug=False)
-
