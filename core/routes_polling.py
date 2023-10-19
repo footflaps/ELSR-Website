@@ -60,6 +60,18 @@ def html_options(options: str):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Test for value in list for jinja
+# -------------------------------------------------------------------------------------------------------------- #
+def is_in_list(value, list):
+    if value in list:
+        return True
+    return False
+
+# Add to jinja
+app.jinja_env.globals.update(is_in_list=is_in_list)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # html routes
@@ -68,20 +80,39 @@ def html_options(options: str):
 # -------------------------------------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------------------------------------- #
-# View a single pol
+# List all polls
 # -------------------------------------------------------------------------------------------------------------- #
-@app.route('/poll/<poll_id>', methods=['GET', 'POST'])
+@app.route('/polls', methods=['GET'])
+@logout_barred_user
+@update_last_seen
+def poll_list():
+    # ----------------------------------------------------------- #
+    # Grab all the polls
+    # ----------------------------------------------------------- #
+    polls = Polls().all()
+
+    return render_template("poll_list.html", year=current_year, live_site=live_site(), polls=polls)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# View a single poll
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route('/poll/<poll_id>', methods=['GET'])
 @logout_barred_user
 @update_last_seen
 def poll_details(poll_id):
     # ----------------------------------------------------------- #
+    # Did we get passed an anchor?
+    # ----------------------------------------------------------- #
+    anchor = request.args.get('anchor', None)
+
+    # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
     poll = Polls().one_poll_by_id(poll_id)
-
     if not poll:
-        app.logger.debug(f"poll_details(): Failed to locate Poll with gpx_id = '{poll_id}'.")
-        Event().log_event("One Poll Fail", f"Failed to locate Poll with gpx_id = '{poll_id}'.")
+        app.logger.debug(f"poll_details(): Failed to locate Poll with poll_id = '{poll_id}'.")
+        Event().log_event("One Poll Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -95,9 +126,21 @@ def poll_details(poll_id):
 
     # Need responses as a dictionary
     poll.responses = json.loads(poll.responses)
-    print(poll.responses)
 
-    return render_template("poll_details.html", year=current_year, live_site=live_site(), poll=poll)
+    # Need number of current / remaining votes
+    num_votes = 0
+    print(f"poll.responses = '{poll.responses}'")
+    if current_user.is_authenticated:
+        for option in json.loads(poll.options):
+            print(f"option = '{option}'")
+            try:
+                if current_user.email in poll.responses[option]:
+                    num_votes += 1
+            except KeyError:
+                pass
+
+    return render_template("poll_details.html", year=current_year, live_site=live_site(), poll=poll,
+                           num_votes=num_votes, anchor=anchor)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -227,3 +270,182 @@ def add_poll():
             poll.options_html.append(option)
 
     return render_template("poll_new.html", year=current_year, live_site=live_site(), form=form, poll=poll)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Remove vote
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route('/unvote', methods=['GET'])
+@logout_barred_user
+@update_last_seen
+@login_required
+def remove_vote():
+    # ----------------------------------------------------------- #
+    # Get params
+    # ----------------------------------------------------------- #
+    poll_id = request.args.get('poll_id', None)
+    option = request.args.get('option', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not poll_id:
+        app.logger.debug(f"remove_vote(): Missing poll_id!")
+        Event().log_event("remove_vote() Fail", f"Missing poll_id!")
+        return abort(404)
+    if not option or not option.isdigit():
+        app.logger.debug(f"remove_vote(): Missing option!")
+        Event().log_event("remove_vote() Fail", f"Missing option!")
+        return abort(404)
+    option = int(option)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    poll = Polls().one_poll_by_id(poll_id)
+    if not poll:
+        app.logger.debug(f"remove_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
+        Event().log_event("remove_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
+        return abort(404)
+
+    # Get poll options as a list
+    option_list = json.loads(poll.options)
+    # Get votes as a dictionary
+    votes = json.loads(poll.responses)
+
+    # Check option is a valid index into option_list (offset by 1 as option starts at 1)
+    if option <= 0 or option > len(option_list):
+        app.logger.debug(f"remove_vote(): Invalid option = '{option}'.")
+        Event().log_event("remove_vote() Fail", f"Invalid option = '{option}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Check they have a vote to remove
+    # ----------------------------------------------------------- #
+    selected_option = option_list[option - 1]
+
+    # Get votes for this selected_option
+    try:
+        option_votes = votes[selected_option]
+    except KeyError:
+        option_votes = []
+
+    # Their email should be in the list
+    if not current_user.email in option_votes:
+        # Should never happen, but...
+        app.logger.debug(f"remove_vote(): Can't remove non existent vote!")
+        Event().log_event("remove_vote() Fail", f"Can't remove non existent vote!")
+        flash("Invalid vote option!")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Remove their email
+    # ----------------------------------------------------------- #
+    # Remove email
+    votes[selected_option].remove(current_user.email)
+    # Push back to poll object as JSON string
+    poll.responses = json.dumps(votes)
+    # Update in db
+    poll = Polls().add_poll(poll)
+    # Did that work?
+    if not poll:
+        # Should never happen, but...
+        app.logger.debug(f"remove_vote(): Can't update poll, id = '{poll_id}'!")
+        Event().log_event("remove_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
+        flash("Sorry, something went wrong!")
+
+    # ----------------------------------------------------------- #
+    # Back to poll page
+    # ----------------------------------------------------------- #
+
+    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Add vote
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route('/vote', methods=['GET'])
+@logout_barred_user
+@update_last_seen
+@login_required
+def add_vote():
+    # ----------------------------------------------------------- #
+    # Get params
+    # ----------------------------------------------------------- #
+    poll_id = request.args.get('poll_id', None)
+    option = request.args.get('option', None)
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not poll_id:
+        app.logger.debug(f"add_vote(): Missing poll_id!")
+        Event().log_event("add_vote() Fail", f"Missing poll_id!")
+        return abort(404)
+    if not option or not option.isdigit():
+        app.logger.debug(f"add_vote(): Missing option!")
+        Event().log_event("add_vote() Fail", f"Missing option!")
+        return abort(404)
+    option = int(option)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    poll = Polls().one_poll_by_id(poll_id)
+    if not poll:
+        app.logger.debug(f"add_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
+        Event().log_event("add_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
+        return abort(404)
+
+    # Get poll options as a list
+    option_list = json.loads(poll.options)
+    # Get votes as a dictionary
+    votes = json.loads(poll.responses)
+
+    # Check option is a valid index into option_list (offset by 1 as option starts at 1)
+    if option <= 0 or option > len(option_list):
+        app.logger.debug(f"add_vote(): Invalid option = '{option}'.")
+        Event().log_event("add_vote() Fail", f"Invalid option = '{option}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Check they haven't already voted for this option
+    # ----------------------------------------------------------- #
+    selected_option = option_list[option - 1]
+
+    # Get votes for this selected_option
+    try:
+        option_votes = votes[selected_option]
+    except KeyError:
+        votes[selected_option] = []
+        option_votes = []
+
+    # Their email should be in the list
+    if current_user.email in option_votes:
+        # Should never happen, but...
+        app.logger.debug(f"remove_vote(): User already voted for this option!")
+        Event().log_event("remove_vote() Fail", f"User already voted for this optione!")
+        flash("You've already voted for that option!")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Add their email
+    # ----------------------------------------------------------- #
+    # Add email
+    votes[selected_option].append(current_user.email)
+    # Push back to poll object as JSON string
+    poll.responses = json.dumps(votes)
+    # Update in db
+    poll = Polls().add_poll(poll)
+    # Did that work?
+    if not poll:
+        # Should never happen, but...
+        app.logger.debug(f"add_vote(): Can't update poll, id = '{poll_id}'!")
+        Event().log_event("add_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
+        flash("Sorry, something went wrong!")
+
+    # ----------------------------------------------------------- #
+    # Back to poll page
+    # ----------------------------------------------------------- #
+
+    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
