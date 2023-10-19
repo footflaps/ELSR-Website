@@ -403,7 +403,10 @@ def add_vote():
     # Get poll options as a list
     option_list = json.loads(poll.options)
     # Get votes as a dictionary
-    votes = json.loads(poll.responses)
+    if poll.responses:
+        votes = json.loads(poll.responses)
+    else:
+        votes = {}
 
     # Check option is a valid index into option_list (offset by 1 as option starts at 1)
     if option <= 0 or option > len(option_list):
