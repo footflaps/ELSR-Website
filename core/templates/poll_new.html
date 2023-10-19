@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Bootstrap WTForm Support                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!-- Generic photo -->
+<header  class="masthead"
+         style="background-image: url({{ url_for('static', filename='img/cafe-bg.jpg') }})">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					{% if poll.id %}
+						<h1>Edit your poll</h1>
+					{% else %}
+						<h1>Create a new poll</h1>
+					{% endif %}
+					<span class="subheading">Stand on the shoulders of giants via a poll...</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Show poll if there                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if poll %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+
+				<h2 style="color: red">Example poll</h2>
+				
+				<hr>
+				
+				<div class="card mt-3">
+						<div class="card-body">
+						
+							<!-- Card title -->
+							<h3 class="card-title">Poll: {{ poll.name }} </h3>
+							<h4 class="card-title">
+								Poll ends: {{ poll.termination_date[0:2] }}/{{ poll.termination_date[2:4] }}/{{ poll.termination_date[4:8] }}, Poll is currently
+								<strong style="color:red">{{ poll.status }}</strong>
+							</h4>
+							<h4 class="card-title">Created by:
+							    <!-- User Gravatar -->
+								<img src="{{ poll.email | gravatar }}"
+								         width="40"
+										 style="border-radius: 50%;"/>
+								{{ get_user_name(poll.email) }}, on
+ 		                        {{ poll.created_date[0:2] }}/{{ poll.created_date[2:4] }}/{{ poll.created_date[4:8] }}
+							</h4>
+							<hr>
+							
+							<!-- Card body -->
+							<h4 class="card-text">Details:</h4>
+							{{ poll.details | safe }}
+							<hr>
+							
+							<!-- Card body -->
+							<h4 class="card-text">Choose up to
+								<strong style="color:red">{{ poll.max_selections }}</strong> options:</h4>
+						
+							<!-- Iterate over options -->
+							{% for option in poll.options_html %}
+								<div class="my-5">
+									<strong class="float-left">
+										<i class="fa-regular fa-circle-dot fa-xl"></i> &nbsp; {{ option }}
+									</strong>
+									<button class="btn btn-sm btn-dark disabled float-right">SELECT</button>
+									<br>
+								</div>
+							{% endfor %}
+							
+						</div>
+					</div>
+				
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+	
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Poll Edit form                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>Define the Poll</h2>
+			
+			<!-- Load ckeditor -->
+			{{ ckeditor.load() }}
+			
+			<!-- This is where the form will go -->
+			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary", "cancel": "secondary", "update": "primary"}) }}
+			
+			<!--  Configure the ckeditor to tell it which field in WTForm will need to be a CKEditor. -->
+			{{ ckeditor.config(name='details') }}
+			{{ ckeditor.config(name='options') }}
+			
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+{% endblock %}
+
+
+{% block scripts %}
+
+{% endblock %}

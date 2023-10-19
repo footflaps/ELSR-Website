@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, IntegerField
+from wtforms import StringField, SubmitField, SelectField, IntegerField, DateField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from datetime import datetime
@@ -10,6 +10,13 @@ from datetime import datetime
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Constants
+# -------------------------------------------------------------------------------------------------------------- #
+
+POLL_NO_RESPONSE = ""
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -30,7 +37,10 @@ class Polls(db.Model):
     email = db.Column(db.String(50))
 
     # Use string for date eg '13012023'
-    date = db.Column(db.String(8))
+    created_date = db.Column(db.String(8))
+
+    # Use string for date eg '13012023'
+    termination_date = db.Column(db.String(8))
 
     # Name of poll
     name = db.Column(db.Text)
@@ -41,11 +51,17 @@ class Polls(db.Model):
     # Options
     options = db.Column(db.Text)
 
+    # Responses
+    responses = db.Column(db.Text)
+
     # How many selections can be made
     max_selections = db.Column(db.Integer)
 
     # Privacy (Public / Private)
     privacy = db.Column(db.String(20))
+
+    # Open / closed
+    status = db.Column(db.String(8))
 
     def all(self):
         with app.app_context():
@@ -67,6 +83,7 @@ class Polls(db.Model):
                 return db.session.query(Polls).filter_by(id=new_poll.id).first()
             except Exception as e:
                 app.logger.error(f"dB.add_poll(): Failed with error code '{e.args}'.")
+                print(f"EdB.add_poll(): Failed with error code '{e.args}'.")
                 return None
 
     def delete_poll(self, poll_id):
@@ -111,17 +128,27 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 # Create Poll Form
 # -------------------------------------------------------------------------------------------------------------- #
-class CreatePollForm(FlaskForm):
-    name = StringField("What is the name of the poll?", validators=[InputRequired("Please enter a name.")])
-    details = CKEditorField("Provide some details:",
-                            validators=[InputRequired("Please enter some vague idea about the poll.")])
-    options = StringField("Enter the options as a Comma Separated List eg Monday, Tuesday, Wednesday:",
-                          validators=[InputRequired("Please enter some options.")])
-    max_selections = IntegerField("How many options can the user choose? (0 = all)",
-                                  validators=[InputRequired("Please enter a number.")])
-    privacy = SelectField("Is this poll Public or Private:",
-                          choices=["Private", "Public"], validators=[])
-    submit = SubmitField("Save")
+def create_poll_form(edit: bool):
+    class Form(FlaskForm):
+        name = StringField("What is the name of the poll?", validators=[InputRequired("Please enter a name.")])
+        details = CKEditorField("Provide some details:",
+                                validators=[InputRequired("Please enter some vague idea about the poll.")])
+        options = CKEditorField("Enter the options as Bullet Point List:",
+                              validators=[InputRequired("Please enter some options.")])
+        termination_date = DateField("When does the poll finish?", format='%Y-%m-%d', validators=[])
+        max_selections = IntegerField("How many options can the user choose? (0 = all)",
+                                      validators=[InputRequired("Please enter a number.")])
+        privacy = SelectField("Is this poll Public or Private:",
+                              choices=["Private", "Public"], validators=[])
+        status = SelectField("Is this poll still open or has it finished (closed)?",
+                              choices=["Open", "Closed"], validators=[])
+
+        cancel = SubmitField("Cancel")
+        update = SubmitField("Update")
+        submit = SubmitField("Submit")
+
+    # Return the Class
+    return Form()
 
 
 # -------------------------------------------------------------------------------------------------------------- #

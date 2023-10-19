@@ -26,7 +26,7 @@ from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
-from core.routes_calendar import ICS_DIRECTORY
+from core.routes_socials import ICS_DIRECTORY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
