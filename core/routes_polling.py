@@ -201,6 +201,15 @@ def add_poll():
         abort(404)
 
     # ----------------------------------------------------------- #
+    # Check read write
+    # ----------------------------------------------------------- #
+    if not user.readwrite():
+        app.logger.debug(f"add_poll(): User doesn't have readwrite!")
+        Event().log_event("add_poll Fail", f"User doesn't have readwrite!")
+        flash("You don't have permission to create polls!")
+        abort(403)
+
+    # ----------------------------------------------------------- #
     # Manage form
     # ----------------------------------------------------------- #
     if request.method == 'GET':
@@ -251,8 +260,8 @@ def add_poll():
 
         else:
             # Should never happen, but...
-            app.logger.debug(f"add_poll(): Failed to add social for '{poll}'.")
-            Event().log_event("Add Poll Fail", f"Failed to add social for '{poll}'.")
+            app.logger.debug(f"add_poll(): Failed to add poll for '{poll}'.")
+            Event().log_event("Add Poll Fail", f"Failed to add poll for '{poll}'.")
             flash("Sorry, something went wrong.")
 
     elif request.method == 'POST':
@@ -455,3 +464,96 @@ def add_vote():
     # ----------------------------------------------------------- #
 
     return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Delete poll
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route('/delete_poll', methods=['POST'])
+@logout_barred_user
+@update_last_seen
+@login_required
+def delete_poll():
+    # ----------------------------------------------------------- #
+    # Did we get passed a poll_id?
+    # ----------------------------------------------------------- #
+    poll_id = request.args.get('poll_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Must have parameters
+    # ----------------------------------------------------------- #
+    if not poll_id:
+        app.logger.debug(f"delete_poll(): Missing poll_id!")
+        Event().log_event("Delete poll Fail", f"Missing poll_id!")
+        return abort(400)
+    if not password:
+        app.logger.debug(f"delete_poll(): Missing Password!")
+        Event().log_event("Delete poll Fail", f"Missing Password!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Validate poll_id
+    # ----------------------------------------------------------- #
+    poll = Polls().one_poll_by_id(poll_id)
+    if not poll:
+        app.logger.debug(f"delete_poll(): Failed to locate poll, poll_id = '{poll_id}'.")
+        Event().log_event("Delete poll Fail", f"Failed to locate poll, poll_id = '{poll_id}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access
+    # ----------------------------------------------------------- #
+    # Must be admin or the current author
+    if current_user.email != poll.email \
+            and not current_user.admin() or \
+            not current_user.readwrite():
+        # Failed authentication
+        app.logger.debug(f"delete_poll(): Refusing permission for '{current_user.email}' and "
+                         f"poll_id = '{poll_id}'.")
+        Event().log_event("Delete poll Fail", f"Refusing permission for '{current_user.email}', "
+                                                f"poll_id = '{poll_id}'.")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    #  Validate password
+    # ----------------------------------------------------------- #
+    # Need current user
+    user = User().find_user_from_id(current_user.id)
+
+    # Validate against current_user's password
+    if not user.validate_password(user, password, user_ip):
+        app.logger.debug(f"delete_polll(): Delete failed, incorrect password for user_id = '{user.id}'!")
+        Event().log_event("Poll Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
+        flash(f"Incorrect password for user {user.name}!")
+        # Go back to polls page
+        return redirect(url_for('poll_list'))
+
+    # ----------------------------------------------------------- #
+    # Delete Poll
+    # ----------------------------------------------------------- #
+    if Polls().delete_poll(poll_id):
+        app.logger.debug(f"delete_poll(): Deleted poll, poll_id = '{poll_id}'.")
+        Event().log_event("Delete poll Success", f"Deleted poll, poll_id = '{poll_id}'.")
+        flash("Poll has been deleted.")
+    else:
+        app.logger.debug(f"delete_poll(): Failed to delete poll, poll_id = '{poll_id}''.")
+        Event().log_event("Delete poll Fail", f"Failed to delete poll, poll_id = '{poll_id}'.")
+        flash("Sorry, something went wrong.")
+
+    return redirect(url_for('poll_list'))
