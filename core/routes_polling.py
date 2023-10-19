@@ -125,7 +125,10 @@ def poll_details(poll_id):
         poll.options_html.append(option)
 
     # Need responses as a dictionary
-    poll.responses = json.loads(poll.responses)
+    if poll.responses:
+        poll.responses = json.loads(poll.responses)
+    else:
+        poll.responses = {}
 
     # Need number of current / remaining votes
     num_votes = 0
