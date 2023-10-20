@@ -44,6 +44,8 @@ a {
 a:focus, a:hover {
   color: #0085A1;
   text-decoration: none;
+  /* This displays the title string when hovering over an image */
+  display: block;
 }
 
 /* **************************************************************************

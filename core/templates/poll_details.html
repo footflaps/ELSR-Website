@@ -148,14 +148,16 @@
 									{% if is_in_list(current_user.email, poll.responses[option]) %}
 										
 										<!-- Show user as first icon -->
-										<img src="{{ current_user.email | gravatar }}"
+										<img title="{{ get_user_name(current_user.email) }}"
+										     src="{{ current_user.email | gravatar }}"
 									         width="40"
 											 style="border-radius: 50%;"/>
 								
 										<!-- Everyone else -->
 										{% for voter in poll.responses[option] %}
 											{% if voter != current_user.email %}
-												<img src="{{ voter | gravatar }}"
+												<img title="{{ get_user_name(voter) }}"
+												     src="{{ voter | gravatar }}"
 											         width="40"
 													 style="border-radius: 50%;"/>
 											{% endif %}
@@ -165,9 +167,10 @@
 								
 										<!-- Logged in, but not voted -->
 										{% for voter in poll.responses[option] %}
-											<img src="{{ voter | gravatar }}"
-									         width="40"
-											 style="border-radius: 50%;"/>
+											<img title="{{ get_user_name(voter) }}"
+											     src="{{ voter | gravatar }}"
+									             width="40"
+											     style="border-radius: 50%;"/>
 										{% endfor %}
 								
 									{% endif %}
@@ -176,9 +179,10 @@
 								
 									<!-- Not logged in -->
 									{% for voter in poll.responses[option] %}
+										<!-- NB unauthenticated users don't see names on hover over -->
 										<img src="{{ voter | gravatar }}"
-								         width="40"
-										 style="border-radius: 50%;"/>
+								             width="40"
+										     style="border-radius: 50%;"/>
 									{% endfor %}
 								
 								{% endif %}
