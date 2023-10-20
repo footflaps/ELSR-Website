@@ -225,7 +225,8 @@ def ride_history(request):
                     "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
                     "color": cafe_colour,
                 })
-
+            if len(gpxes) > MAX_NUM_GPX_PER_GRAPH:
+                break
         else:
             ride.length_km = "n/a"
             ride.ascent_m = "n/a"
@@ -233,6 +234,7 @@ def ride_history(request):
     # ----------------------------------------------------------- #
     # Map for the possible routes
     # ----------------------------------------------------------- #
+    # NB create_polyline_set enforces MAX_NUM_GPX_PER_GRAPH
     polylines = create_polyline_set(gpxes)
 
     # Warn if we skipped any
