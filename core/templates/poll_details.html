@@ -119,8 +119,13 @@
 											<a href="{{ url_for('add_vote', poll_id=poll.id, option=loop.index) }}">
 												<button class="btn btn-sm btn-primary float-right">VOTE</button>
 											</a>
+										{% elif poll.max_selections == 1 %}
+											<!-- Single option poll, so can easily move vote -->
+											<a href="{{ url_for('swap_vote', poll_id=poll.id, option=loop.index) }}">
+												<button class="btn btn-sm btn-primary float-right">VOTE</button>
+											</a>
 										{% else %}
-											<!-- Run out of votes -->
+											<!-- Too complex to work out where we take the vote from -->
 											<button class="btn btn-sm btn-dark disabled float-right">VOTE</button>
 										{% endif %}
 									
