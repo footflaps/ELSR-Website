@@ -102,7 +102,7 @@ def gravel_all():
     polylines = create_polyline_set(gpxes)
 
     # Warn if we skipped any
-    if len(gpxes) > MAX_NUM_GPX_PER_GRAPH:
+    if len(gpxes) >= MAX_NUM_GPX_PER_GRAPH:
         warning = f"NB: Only showing first {MAX_NUM_GPX_PER_GRAPH} routes on map."
     else:
         warning = None
@@ -169,7 +169,7 @@ def gravel_ldt():
     polylines = create_polyline_set(gpxes)
 
     # Warn if we skipped any
-    if len(gpxes) > MAX_NUM_GPX_PER_GRAPH:
+    if len(gpxes) >= MAX_NUM_GPX_PER_GRAPH:
         warning = f"NB: Only showing first {MAX_NUM_GPX_PER_GRAPH} routes on map."
     else:
         warning = None
@@ -252,7 +252,7 @@ def gravel_local():
     polylines = create_polyline_set(local_gpxes)
 
     # Warn if we skipped any
-    if len(local_gpxes) > MAX_NUM_GPX_PER_GRAPH:
+    if len(local_gpxes) >= MAX_NUM_GPX_PER_GRAPH:
         warning = f"NB: Only showing first {MAX_NUM_GPX_PER_GRAPH} routes on map."
     else:
         warning = None

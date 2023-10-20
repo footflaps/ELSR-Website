@@ -153,7 +153,7 @@ def cafe_details(cafe_id):
     polylines = create_polyline_set(gpxes)
 
     # Warn if we skipped any
-    if len(gpxes) > MAX_NUM_GPX_PER_GRAPH:
+    if len(gpxes) >= MAX_NUM_GPX_PER_GRAPH:
         warning = f"NB: Only showing first {MAX_NUM_GPX_PER_GRAPH} routes on map."
     else:
         warning = None

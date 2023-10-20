@@ -191,7 +191,7 @@ def create_polyline_set(gpxes):
             mid_lon += tmp['midlon']
             num_routes += 1
 
-        if num_routes > MAX_NUM_GPX_PER_GRAPH:
+        if num_routes >= MAX_NUM_GPX_PER_GRAPH:
             break
 
     # Avoid /0
