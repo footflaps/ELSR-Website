@@ -55,143 +55,143 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 
 			<div class="card mt-3">
-					<div class="card-body">
+				<div class="card-body">
+				
+					<!-- Card title -->
+					<h3 class="card-title">Poll: {{ poll.name }} </h3>
+					<h4 class="card-title">
+						Poll ends: {{ poll.termination_date[0:2] }}/{{ poll.termination_date[2:4] }}/{{ poll.termination_date[4:8] }}, Poll is currently
+						<strong style="color:red">{{ poll.status }}</strong>
+					</h4>
+					<h4 class="card-title">Created by:
+					    <!-- User Gravatar -->
+						<img src="{{ poll.email | gravatar }}"
+						         width="40"
+								 style="border-radius: 50%;"/>
+						{{ get_user_name(poll.email) }}, on
+                        {{ poll.created_date[0:2] }}/{{ poll.created_date[2:4] }}/{{ poll.created_date[4:8] }}
+					</h4>
+					<hr>
 					
-						<!-- Card title -->
-						<h3 class="card-title">Poll: {{ poll.name }} </h3>
-						<h4 class="card-title">
-							Poll ends: {{ poll.termination_date[0:2] }}/{{ poll.termination_date[2:4] }}/{{ poll.termination_date[4:8] }}, Poll is currently
-							<strong style="color:red">{{ poll.status }}</strong>
+					<!-- Card body part 1 -->
+					<h4 class="card-text">Details:</h4>
+					{{ poll.details | safe }}
+					<hr>
+					
+					<!-- Card body part 2 -->
+					{% if current_user.is_authenticated: %}
+						<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
+							<strong style="color:red">{{ poll.max_selections }}</strong> available votes.
 						</h4>
-						<h4 class="card-title">Created by:
-						    <!-- User Gravatar -->
-							<img src="{{ poll.email | gravatar }}"
-							         width="40"
-									 style="border-radius: 50%;"/>
-							{{ get_user_name(poll.email) }}, on
-                            {{ poll.created_date[0:2] }}/{{ poll.created_date[2:4] }}/{{ poll.created_date[4:8] }}
+					{% else %}
+						<h4 class="card-text">Choose up to
+							<strong style="color:red">{{ poll.max_selections }}</strong> options:
 						</h4>
-						<hr>
+					{% endif %}
+					
+					<!-- Warn non logged-in users they need to log in -->
+					{% if not current_user.is_authenticated: %}
+						<strong style="color:red">Log in to be able to vote</strong>
+					{% endif %}
+					
+					<!-- Iterate over options -->
+					<a name="votes"></a>
+					{% for option in poll.options_html %}
 						
-						<!-- Card body -->
-						<h4 class="card-text">Details:</h4>
-						{{ poll.details | safe }}
-						<hr>
-						
-						<!-- Card body -->
-						{% if current_user.is_authenticated: %}
-							<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
-								<strong style="color:red">{{ poll.max_selections }}</strong> available votes.
-							</h4>
-						{% else %}
-							<h4 class="card-text">Choose up to
-								<strong style="color:red">{{ poll.max_selections }}</strong> options:
-							</h4>
-						{% endif %}
-						
-						<!-- Warn non logged-in users they need to log in -->
-						{% if not current_user.is_authenticated: %}
-							<strong style="color:red">Log in to be able to vote</strong>
-						{% endif %}
-						
-						<!-- Iterate over options -->
-						<a name="votes"></a>
-						{% for option in poll.options_html %}
+						<!-- Show voting option with button -->
+						<div class="mt-5">
 							
-							<!-- Show voting option with button -->
-							<div class="mt-5">
-								
-								<strong class="float-left">
-									<i class="fa-regular fa-circle-dot fa-xl"></i> &nbsp; {{ option }}
-								</strong>
-								
-								{% if poll.status == POLL_OPEN %}
-								
-									{% if current_user.is_authenticated: %}
-									
-										{% if is_in_list(current_user.email, poll.responses[option]) %}
-											<!-- Has already chosen this one -->
-											<a href="{{ url_for('remove_vote', poll_id=poll.id, option=loop.index) }}">
-												<button class="btn btn-sm btn-primary float-right">UNVOTE</button>
-											</a>
-										{% elif num_votes < poll.max_selections %}
-											<!-- Has votes left -->
-											<a href="{{ url_for('add_vote', poll_id=poll.id, option=loop.index) }}">
-												<button class="btn btn-sm btn-primary float-right">VOTE</button>
-											</a>
-										{% elif poll.max_selections == 1 %}
-											<!-- Single option poll, so can easily move vote -->
-											<a href="{{ url_for('swap_vote', poll_id=poll.id, option=loop.index) }}">
-												<button class="btn btn-sm btn-primary float-right">VOTE</button>
-											</a>
-										{% else %}
-											<!-- Too complex to work out where we take the vote from -->
-											<button class="btn btn-sm btn-dark disabled float-right">VOTE</button>
-										{% endif %}
-									
-									{% else %}
-									
-										<button class="btn btn-sm btn-dark disabled float-right">LOG IN</button>
-									
-									{% endif %}
-								
-								{% endif %}
-								
-								<br>
-								
-							</div>
-						
-							<!-- Show existing voters as row of Gravatars -->
-							<div class="my-3">
-								
+							<strong class="float-left">
+								<i class="fa-regular fa-circle-dot fa-xl"></i> &nbsp; {{ option }}
+							</strong>
+							
+							{% if poll.status == POLL_OPEN %}
+							
 								{% if current_user.is_authenticated: %}
+								
 									{% if is_in_list(current_user.email, poll.responses[option]) %}
-										
-										<!-- Show user as first icon -->
-										<img title="{{ get_user_name(current_user.email) }}"
-										     src="{{ current_user.email | gravatar }}"
-									         width="40"
-											 style="border-radius: 50%;"/>
-								
-										<!-- Everyone else -->
-										{% for voter in poll.responses[option] %}
-											{% if voter != current_user.email %}
-												<img title="{{ get_user_name(voter) }}"
-												     src="{{ voter | gravatar }}"
-											         width="40"
-													 style="border-radius: 50%;"/>
-											{% endif %}
-										{% endfor %}
-								
+										<!-- Has already chosen this one -->
+										<a href="{{ url_for('remove_vote', poll_id=poll.id, option=loop.index) }}">
+											<button class="btn btn-sm btn-primary float-right">UNVOTE</button>
+										</a>
+									{% elif num_votes < poll.max_selections %}
+										<!-- Has votes left -->
+										<a href="{{ url_for('add_vote', poll_id=poll.id, option=loop.index) }}">
+											<button class="btn btn-sm btn-primary float-right">VOTE</button>
+										</a>
+									{% elif poll.max_selections == 1 %}
+										<!-- Single option poll, so can easily swap vote -->
+										<a href="{{ url_for('swap_vote', poll_id=poll.id, option=loop.index) }}">
+											<button class="btn btn-sm btn-primary float-right">VOTE</button>
+										</a>
 									{% else %}
-								
-										<!-- Logged in, but not voted -->
-										{% for voter in poll.responses[option] %}
-											<img title="{{ get_user_name(voter) }}"
-											     src="{{ voter | gravatar }}"
-									             width="40"
-											     style="border-radius: 50%;"/>
-										{% endfor %}
-								
+										<!-- Too complex to work out where we take the vote from -->
+										<button class="btn btn-sm btn-dark disabled float-right">VOTE</button>
 									{% endif %}
 								
 								{% else %}
 								
-									<!-- Not logged in -->
+									<button class="btn btn-sm btn-dark disabled float-right">LOG IN</button>
+								
+								{% endif %}
+							
+							{% endif %}
+							
+							<br>
+							
+						</div>
+					
+						<!-- Show existing voters as row of Gravatars -->
+						<div class="my-3">
+							
+							{% if current_user.is_authenticated: %}
+								{% if is_in_list(current_user.email, poll.responses[option]) %}
+									
+									<!-- Show user as first icon -->
+									<img title="{{ get_user_name(current_user.email) }}"
+									     src="{{ current_user.email | gravatar }}"
+								         width="40"
+										 style="border-radius: 50%;"/>
+							
+									<!-- Everyone else -->
 									{% for voter in poll.responses[option] %}
-										<!-- NB unauthenticated users don't see names on hover over -->
-										<img src="{{ voter | gravatar }}"
+										{% if voter != current_user.email %}
+											<img title="{{ get_user_name(voter) }}"
+											     src="{{ voter | gravatar }}"
+										         width="40"
+												 style="border-radius: 50%;"/>
+										{% endif %}
+									{% endfor %}
+							
+								{% else %}
+							
+									<!-- Logged in, but not voted -->
+									{% for voter in poll.responses[option] %}
+										<img title="{{ get_user_name(voter) }}"
+										     src="{{ voter | gravatar }}"
 								             width="40"
 										     style="border-radius: 50%;"/>
 									{% endfor %}
-								
+							
 								{% endif %}
-							</div>
-						
-						{% endfor %}
-						
-					</div>
+							
+							{% else %}
+							
+								<!-- Not logged in -->
+								{% for voter in poll.responses[option] %}
+									<!-- NB unauthenticated users don't see names on hover over -->
+									<img src="{{ voter | gravatar }}"
+							             width="40"
+									     style="border-radius: 50%;"/>
+								{% endfor %}
+							
+							{% endif %}
+						</div>
+					
+					{% endfor %}
+					
 				</div>
+			</div>
 			
 			<hr>
 			
@@ -210,10 +210,16 @@
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
-
-				 <a data-toggle="modal" data-target="#DeletePollModal">
-					<button type="button" class="btn btn-danger float-right">DELETE POLL</button>
-				 </a>
+				
+				{% if current_user.admin() %}
+					<h2 class="float-left">Admin panel</h2>
+				{% else %}
+					<h2 class="float-left">Owner control</h2>
+				{% endif %}
+				
+				<a data-toggle="modal" data-target="#DeletePollModal">
+					<button type="button" class="btn btn-sm btn-danger float-right">DELETE POLL</button>
+				</a>
 			
 			</div>
 		</div>
