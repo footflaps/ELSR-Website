@@ -216,7 +216,7 @@ def ride_history(request):
             cafe_id = ride.cafe_id
             cafe = Cafe().one_cafe(cafe_id)
             if cafe:
-                if len(gpxes) < MAX_NUM_GPX_PER_GRAPH:
+                if len(gpxes) <= MAX_NUM_GPX_PER_GRAPH:
                     if cafe.active:
                         cafe_colour = OPEN_CAFE_COLOUR
                     else:
