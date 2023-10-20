@@ -216,17 +216,16 @@ def ride_history(request):
             cafe_id = ride.cafe_id
             cafe = Cafe().one_cafe(cafe_id)
             if cafe:
-                if cafe.active:
-                    cafe_colour = OPEN_CAFE_COLOUR
-                else:
-                    cafe_colour = CLOSED_CAFE_COLOUR
-                cafe_markers.append({
-                    "position": {"lat": cafe.lat, "lng": cafe.lon},
-                    "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                    "color": cafe_colour,
-                })
-            if len(gpxes) >= MAX_NUM_GPX_PER_GRAPH:
-                break
+                if len(gpxes) < MAX_NUM_GPX_PER_GRAPH:
+                    if cafe.active:
+                        cafe_colour = OPEN_CAFE_COLOUR
+                    else:
+                        cafe_colour = CLOSED_CAFE_COLOUR
+                    cafe_markers.append({
+                        "position": {"lat": cafe.lat, "lng": cafe.lon},
+                        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+                        "color": cafe_colour,
+                    })
         else:
             ride.length_km = "n/a"
             ride.ascent_m = "n/a"
