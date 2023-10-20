@@ -1,11 +1,8 @@
 from flask import render_template, url_for, request, flash, redirect, abort
 from flask_login import login_required, current_user
 from werkzeug import exceptions
-from bbc_feeds import weather
-from datetime import datetime, timedelta
+from datetime import datetime
 import json
-import os
-from threading import Thread
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -21,7 +18,7 @@ from core import app, current_year, live_site
 
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_events import Event
-from core.db_polls import Polls, create_poll_form, POLL_NO_RESPONSE
+from core.db_polls import Polls, create_poll_form, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -91,6 +88,23 @@ def poll_list():
     # ----------------------------------------------------------- #
     polls = Polls().all()
 
+    # ----------------------------------------------------------- #
+    #   Check polls haven't timed out
+    # ----------------------------------------------------------- #
+    for poll in polls:
+        # Check each one
+        if poll.status == POLL_OPEN:
+            # Check date
+            today_date = datetime.today().date()
+            poll_date = datetime(int(poll.termination_date[4:8]),
+                                 int(poll.termination_date[2:4]),
+                                 int(poll.termination_date[0:2])).date()
+            if poll_date < today_date:
+                poll.status = POLL_CLOSED
+                # Update poll
+                Polls().add_poll(poll)
+
+    # Render page
     return render_template("poll_list.html", year=current_year, live_site=live_site(), polls=polls)
 
 
@@ -114,6 +128,21 @@ def poll_details(poll_id):
         app.logger.debug(f"poll_details(): Failed to locate Poll with poll_id = '{poll_id}'.")
         Event().log_event("One Poll Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
+
+    # ----------------------------------------------------------- #
+    #   Check poll hasn't timed out
+    # ----------------------------------------------------------- #
+    if poll.status == POLL_OPEN:
+        # Check date
+        today_date = datetime.today().date()
+        poll_date = datetime(int(poll.termination_date[4:8]),
+                             int(poll.termination_date[2:4]),
+                             int(poll.termination_date[0:2])).date()
+        if poll_date < today_date:
+            flash("The poll has now closed")
+            poll.status = POLL_CLOSED
+            # Update poll
+            Polls().add_poll(poll)
 
     # ----------------------------------------------------------- #
     #   Render page
@@ -143,7 +172,7 @@ def poll_details(poll_id):
                 pass
 
     return render_template("poll_details.html", year=current_year, live_site=live_site(), poll=poll,
-                           num_votes=num_votes, anchor=anchor)
+                           num_votes=num_votes, anchor=anchor, POLL_OPEN=POLL_OPEN)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -155,9 +184,17 @@ def poll_details(poll_id):
 @login_required
 def add_poll():
     # ----------------------------------------------------------- #
-    # Did we get passed a poll id?
+    # Get poll_id from form (if one was posted)
     # ----------------------------------------------------------- #
-    poll_id = request.args.get('poll_id', None)
+    if request.method == 'POST':
+        poll_id = request.form['poll_id']
+    else:
+        poll_id = None
+
+    # ----------------------------------------------------------- #
+    # Need a form
+    # ----------------------------------------------------------- #
+    form = create_poll_form(True)
 
     # ----------------------------------------------------------- #
     # Get poll from db
@@ -170,7 +207,7 @@ def add_poll():
             # Poll no longer / never existed
             app.logger.debug(f"add_poll(): Failed to find Poll, id = '{poll_id}'!")
             Event().log_event("add_poll Fail", f"Failed to find Poll, id = '{poll_id}'!")
-            flash("That poll id doesn't seem to exist!")
+            flash(f"That poll id '{poll_id}' doesn't seem to exist!")
             abort(404)
 
         # Not allowed to edit a poll in progress
@@ -180,14 +217,9 @@ def add_poll():
             flash("You can't edit a poll once people have voted!")
             abort(403)
 
-        # Want a form with Cancel/Update/Submit
-        form = create_poll_form(True)
-
     else:
         # New poll
         poll = None
-        # Want a form with Cancel/Create
-        form = create_poll_form(False)
 
     # ----------------------------------------------------------- #
     # Get user
@@ -219,6 +251,8 @@ def add_poll():
         if not poll_id:
             # Default value
             form.options.data = "<ul><li>Option 1</li><li>Option 2</li><li>Option 3</li></ul>"
+            form.max_selections.data = 1
+            form.poll_id.data = None
         else:
             # Populate form from db
             form.name.data = poll.name
@@ -226,12 +260,19 @@ def add_poll():
             form.details.data = poll.details
             form.privacy.data = poll.privacy
             form.max_selections.data = poll.max_selections
+            form.poll_id.data = poll.id
 
     # Are we posting the completed form?
     if form.validate_on_submit():
         # ----------------------------------------------------------- #
         #   POST - form validated & submitted
         # ----------------------------------------------------------- #
+
+        # Detect cancel
+        if form.cancel.data:
+            # Back to list of polls
+            return redirect(url_for('poll_list'))
+
         # Save form details in the db
         if not poll:
             # Creating a new poll, so define these now
@@ -256,7 +297,6 @@ def add_poll():
             # Success
             app.logger.debug(f"add_poll(): Successfully added new poll.")
             Event().log_event("Add Poll Pass", f"Successfully added new poll.")
-            flash("Please verify that the poll looks ok!")
 
         else:
             # Should never happen, but...
@@ -264,12 +304,28 @@ def add_poll():
             Event().log_event("Add Poll Fail", f"Failed to add poll for '{poll}'.")
             flash("Sorry, something went wrong.")
 
+        # They're finished
+        if form.submit.data:
+            # Back to list of polls
+            flash("Poll has been published!")
+            return redirect(url_for('poll_list'))
+        else:
+            # They're still editing
+            flash("Please verify that the poll looks ok!")
+
     elif request.method == 'POST':
 
         # ----------------------------------------------------------- #
         #   POST - form validation failed
         # ----------------------------------------------------------- #
-        flash("Form not filled in properly, see below!")
+
+        # Detect user cancel
+        if form.cancel.data:
+            # Back to list of polls
+            return redirect(url_for('poll_list'))
+        else:
+            # Give them a hint
+            flash("Form not filled in properly, see below!")
 
     # ----------------------------------------------------------- #
     #   Render page
@@ -280,6 +336,10 @@ def add_poll():
         poll.options_html = []
         for option in extract_options_from_form(form.options.data):
             poll.options_html.append(option)
+
+    # Make sure form has poll.id set (if we are editing an existing poll)
+    if poll:
+        form.poll_id.data = poll.id
 
     return render_template("poll_new.html", year=current_year, live_site=live_site(), form=form, poll=poll)
 
@@ -320,6 +380,24 @@ def remove_vote():
         Event().log_event("remove_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
 
+    # ----------------------------------------------------------- #
+    # Check permissions
+    # ----------------------------------------------------------- #
+    if not current_user.readwrite():
+        app.logger.debug(f"remove_vote(): User not readwrite!")
+        Event().log_event("remove_vote() Fail", f"User not readwrite!")
+        flash("You don't have permission to vote!")
+        return abort(403)
+
+    if poll.status != POLL_OPEN:
+        app.logger.debug(f"remove_vote(): Poll is closed, poll_id = '{poll_id}'.")
+        Event().log_event("remove_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
+        flash("The poll is now closed!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Check poll options
+    # ----------------------------------------------------------- #
     # Get poll options as a list
     option_list = json.loads(poll.options)
     # Get votes as a dictionary
@@ -409,6 +487,24 @@ def add_vote():
         Event().log_event("add_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
 
+    # ----------------------------------------------------------- #
+    # Check permissions
+    # ----------------------------------------------------------- #
+    if not current_user.readwrite():
+        app.logger.debug(f"add_vote(): User not readwrite!")
+        Event().log_event("add_vote() Fail", f"User not readwrite!")
+        flash("You don't have permission to vote!")
+        return abort(403)
+
+    if poll.status != POLL_OPEN:
+        app.logger.debug(f"add_vote(): Poll is closed, poll_id = '{poll_id}'.")
+        Event().log_event("add_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
+        flash("The poll is now closed!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Check options
+    # ----------------------------------------------------------- #
     # Get poll options as a list
     option_list = json.loads(poll.options)
     # Get votes as a dictionary

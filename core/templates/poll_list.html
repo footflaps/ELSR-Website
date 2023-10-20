@@ -78,8 +78,12 @@
 								<td scope="row">{{ poll.id }}</td>
 								<td><a href="{{ url_for('poll_details', poll_id=poll.id) }}">{{ poll.name }}</a></td>
 								<td>{{ get_user_name(poll.email) }}</td>
-								<td>{{ poll.termination_date }}</td>
-								<td>{{ poll.status }}</td>
+								<td>{{ poll.termination_date[0:2] }}/{{ poll.termination_date[2:4] }}/{{ poll.termination_date[4:8] }}</td>
+								{% if poll.status == POLL_OPEN %}
+									<td>{{ poll.status.upper() }}</td>
+								{% else %}
+									<td style="color: red"><strong>{{ poll.status.upper() }}</strong></td>
+								{% endif %}
 							</tr>
 						{% endfor %}
 					</tbody>
@@ -99,19 +103,19 @@
 <!---------------------------------------------------------------------------------------------------->
 
 {% if current_user.is_authenticated: %}
-
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
+	{% if current_user.readwrite(): %}
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					
+					<a href="{{ url_for('add_poll') }}">
+						<button class="btn btn-primary float-right">Add Poll</button>
+					</a>
 				
-				<a href="{{ url_for('add_poll') }}">
-					<button class="btn btn-primary float-right">Add Poll</button>
-				</a>
-			
+				</div>
 			</div>
 		</div>
-	</div>
-	
+	{% endif %}
 {% endif %}
 
 

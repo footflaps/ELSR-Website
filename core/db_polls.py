@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, IntegerField, DateField
+from wtforms import StringField, SubmitField, SelectField, IntegerField, DateField, validators, HiddenField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from datetime import datetime
@@ -17,7 +17,8 @@ from core import app, db
 # -------------------------------------------------------------------------------------------------------------- #
 
 POLL_NO_RESPONSE = ""
-
+POLL_OPEN = "Open"
+POLL_CLOSED = "Closed"
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -126,6 +127,24 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Custom validator for number entries (must be +ve integer)
+# -------------------------------------------------------------------------------------------------------------- #
+def selection_validation(form, field):
+    if int(field.data) <= 0:
+        raise validators.ValidationError('Must be a positive integer!')
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Custom validator for termination date (must be in the future)
+# -------------------------------------------------------------------------------------------------------------- #
+def date_validation(form, field):
+    today_date = datetime.today().date()
+    poll_date = field.data
+    if poll_date < today_date:
+        raise validators.ValidationError('Poll must end in the future!')
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Create Poll Form
 # -------------------------------------------------------------------------------------------------------------- #
 def create_poll_form(edit: bool):
@@ -135,13 +154,14 @@ def create_poll_form(edit: bool):
                                 validators=[InputRequired("Please enter some vague idea about the poll.")])
         options = CKEditorField("Enter the options as Bullet Point List:",
                               validators=[InputRequired("Please enter some options.")])
-        termination_date = DateField("When does the poll finish?", format='%Y-%m-%d', validators=[])
+        termination_date = DateField("When does the poll finish?", format='%Y-%m-%d', validators=[date_validation])
         max_selections = IntegerField("How many options can the user choose? (0 = all)",
-                                      validators=[InputRequired("Please enter a number.")])
+                                      validators=[InputRequired("Please enter a number."), selection_validation])
         privacy = SelectField("Is this poll Public or Private:",
                               choices=["Private", "Public"], validators=[])
         status = SelectField("Is this poll still open or has it finished (closed)?",
-                              choices=["Open", "Closed"], validators=[])
+                              choices=[POLL_OPEN, POLL_CLOSED], validators=[])
+        poll_id = HiddenField("poll_id")
 
         cancel = SubmitField("Cancel")
         update = SubmitField("Update")

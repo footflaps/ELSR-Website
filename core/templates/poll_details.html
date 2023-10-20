@@ -105,7 +105,7 @@
 									<i class="fa-regular fa-circle-dot fa-xl"></i> &nbsp; {{ option }}
 								</strong>
 								
-								{% if poll.status == "Open" %}
+								{% if poll.status == POLL_OPEN %}
 								
 									{% if current_user.is_authenticated: %}
 									
@@ -230,7 +230,7 @@
 			<div class="modal-dialog" role="document">
 				<div class="modal-content">
 					<div class="modal-header">
-						<h5 class="modal-title" id="DeletePollModalLabel">Delete Poll</h5>
+						<h5 class="modal-title" id="DeletePollModalLabel"><strong>Delete Poll</strong></h5>
 						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 							<span aria-hidden="true">&times;</span>
 						</button>
