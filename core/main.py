@@ -107,13 +107,6 @@ def get_chaingang_top10():
     return rows
 
 
-def user_ip():
-    # Get user's IP
-    if request.headers.getlist("X-Forwarded-For"):
-        users_ip = request.headers.getlist("X-Forwarded-For")[0]
-    else:
-        users_ip = request.remote_addr
-    return users_ip
 
 
 # -------------------------------------------------------------------------------------------------------------- #
