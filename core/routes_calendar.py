@@ -88,12 +88,12 @@ def calendar():
     # Loop over time
     # ----------------------------------------------------------- #
     year = datetime.today().year
-    # Start one month behind to backfill calendar a bit
-    month = datetime.today().month - 1
+    # Start three months behind to backfill calendar a bit
+    month = datetime.today().month - 3
     today_str = datetime.today().strftime("%Y-%m-%d")
 
-    # Just cover 6 month span
-    for _ in range(0, 6):
+    # Just cover 9 month span
+    for _ in range(0, 9):
         if month == 13:
             year += 1
             month = 1
