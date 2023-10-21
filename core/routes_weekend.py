@@ -11,7 +11,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLASH
+from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLASH, GRAVEL_CHOICE
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -19,7 +19,7 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
-from core.dB_gpx import Gpx
+from core.dB_gpx import Gpx, GPX_ROAD, GPX_GRAVEL
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
@@ -204,8 +204,8 @@ def weekend():
     else:
         # Get what we actually wanted from work_out_days()
         days = tmp[0]               # eg 'Saturday'
-        dates_long = tmp[1]
-        dates_short = tmp[2]
+        dates_long = tmp[1]         # eg 'Saturday 25 August 2023'
+        dates_short = tmp[2]        # eg '01022023'
 
     # ----------------------------------------------------------- #
     # Add GPX details
@@ -221,71 +221,72 @@ def weekend():
     # We will flash a warning if we find a private GPX in any of the weekend's routes
     private_gpx = False
 
-    # Populate everything for Saturday
+    # Populate everything for each day eg loop over ['Saturday', 'Sunday']
     for day in days:
-
-        # We need to check all the GPXes still exist etc
+        # Get a set of rides for this day from the calendar indexed by short dates eg '01022024'
         tmp_rides = Calendar().all_calendar_date(dates_short[day])
-        # app.logger.debug(f"weekend(): Passed '{dates_short[day]}' to calendar and got back '{tmp_rides}'")
 
-        # Create empty sets for all the data we will need to populate for each day
+        # Create empty sets for all the data jinja will need to populate each day
         rides[day] = []
         gpxes[day] = []
         cafes[day] = []
         start_times[day] = []
         cafe_coords[day] = []
 
+        # Loop over each ride
         for ride in tmp_rides:
-            # Look up the ride
+            # Look up the GPX object referenced in the ride object
             gpx = Gpx().one_gpx(ride.gpx_id)
 
-            # Should exist, but..
+            # NB It could have been deleted, so check it still exists
             if gpx:
-                # Extract ride stats
+                # Extract ride stats which are cached in the GPX object (no need to read the actual file)
                 ride.distance = gpx.length_km
                 ride.elevation = gpx.ascent_m
                 ride.public = gpx.public()
-                if ride.start_time:
-                    if ride.start_time.strip() != DEFAULT_START_TIMES[day] \
-                            and ride.start_time.strip() != "":
-                        start_times[day].append(f"{ride.destination}: {ride.start_time}")
 
-                # Make a note, if we find a non-public GPX
+                # Make a note of any non-standard start times
+                # NB start_time should always be set, but you never know...
+                if ride.start_time:
+                    # NB treat a blank entry as normal start time for that day
+                    if ride.start_time.strip() != "":
+                        if ride.start_time.strip() != DEFAULT_START_TIMES[day]:
+                            start_times[day].append(f"{ride.destination}: {ride.start_time}")
+
+                # Make a note, if we find a non-public GPX as this will stop people downloading the file
                 if not gpx.public():
                     private_gpx = True
 
-                # ----------------------------------------------------------- #
-                # Include this ride in the webpage
-                # ----------------------------------------------------------- #
-
-                # Update destination (as cafe may have changed name)
-                if ride.cafe_id:
-                    cafe = Cafe().one_cafe(ride.cafe_id)
-                    if cafe:
-                        ride.destination = cafe.name
-
-                # Add gpx object to the list of GPX files for that day
+                # Add gpx object to the list of GPX files for this day
                 gpxes[day].append(gpx)
 
-                # Add ride to the list of rides that day
+                # Add ride to the list of rides this day
                 rides[day].append(ride)
 
-                # Look up the cafe
+                # Look up cafe (which might not yet be in the db)
                 cafe = Cafe().one_cafe(ride.cafe_id)
-
-                # NB Might not exist if a new cafe, not in our existing db
                 if cafe:
+                    # Update destination (as cafe may have changed name)
+                    ride.destination = cafe.name
+
+                    # Create a marker for Google Maps for this cafe
+                    if cafe.active:
+                        color = OPEN_CAFE_COLOUR
+                    else:
+                        flash(f"Cafe '{cafe.name}' has been flagged as Closed!")
+                        color = CLOSED_CAFE_COLOUR
                     cafe_coords[day].append({
                         "position": {"lat": cafe.lat, "lng": cafe.lon},
                         "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                        "color": OPEN_CAFE_COLOUR,
+                        "color": color,
                     })
                     cafes[day].append(cafe)
                 else:
                     # Just add a blank cafe object
                     cafes[day].append(Cafe())
 
-                # Double check we can find the file
+                # Double check we can find the GPX file
+                # NB have seen once where it was stuck as a tmp file - wonder if I updated the website mid edit?
                 filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
                 if os.path.exists(filename):
                     ride.missing_gpx = False
@@ -331,10 +332,8 @@ def weekend():
     # ----------------------------------------------------------- #
     bbc_weather = weather().forecast(CAMBRIDGE_BBC_WEATHER_CODE)
     today = datetime.today().strftime("%A")
-
     weather_data = {}
     for day in days:
-
         for item in bbc_weather:
             title = item['title'].split(':')
             if title[0] == day \
@@ -640,6 +639,11 @@ def add_ride():
                 gpx.ascent_m = 0
                 gpx.length_km = 0
                 gpx.filename = "tmp"
+                # Fill in the GPX surface type
+                if form.group.data == GRAVEL_CHOICE:
+                    gpx.type = GPX_GRAVEL
+                else:
+                    gpx.type = GPX_ROAD
 
                 # Add to the dB
                 new_id = gpx.add_gpx(gpx)

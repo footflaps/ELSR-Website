@@ -11,7 +11,7 @@ import json
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, db
+from core import app, db, GRAVEL_CHOICE
 from core.db_users import User
 
 
@@ -20,9 +20,10 @@ from core.db_users import User
 # -------------------------------------------------------------------------------------------------------------- #
 
 GPX_ALLOWED_EXTENSIONS = {'gpx'}
-TYPE_GRAVEL = "Gravel"
-TYPES = ["Road",
-         TYPE_GRAVEL,
+GPX_GRAVEL = GRAVEL_CHOICE
+GPX_ROAD = "Road"
+TYPES = [GPX_ROAD,
+         GPX_GRAVEL,
          "MTB"]
 
 # -------------------------------------------------------------------------------------------------------------- #
