@@ -81,9 +81,17 @@
 					<!-- Card body part 2 -->
 					{% if current_user.is_authenticated %}
 						{% if current_user.readwrite() %}
-							<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
-								<strong style="color:red">{{ poll.max_selections }}</strong> available votes.
-							</h4>
+							{% if poll.max_selections == 0 %}
+								<!-- Can vote for all options -->
+								<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
+									<strong style="color:red">{{ poll.options_html | length }}</strong> available votes.
+								</h4>
+							{% else %}
+								<!-- Number of allowed votes is less than # options -->
+								<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
+									<strong style="color:red">{{ poll.max_selections }}</strong> available votes.
+								</h4>
+							{% endif %}
 						{% else %}
 							<h4 class="card-text">Choose up to
 								<strong style="color:red">{{ poll.max_selections }}</strong> option(s):
@@ -122,7 +130,7 @@
 											<button class="btn btn-sm btn-primary float-right">UNVOTE</button>
 										</a>
 									
-									{% elif num_votes < poll.max_selections %}
+									{% elif num_votes < poll.max_selections or poll.max_selections==0 %}
 							
 										<!-- Has votes left -->
 										<a href="{{ url_for('add_vote', poll_id=poll.id, option=loop.index) }}">

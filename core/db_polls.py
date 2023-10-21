@@ -130,7 +130,7 @@ with app.app_context():
 # Custom validator for number entries (must be +ve integer)
 # -------------------------------------------------------------------------------------------------------------- #
 def selection_validation(form, field):
-    if int(field.data) <= 0:
+    if int(field.data) < 0:
         raise validators.ValidationError('Must be a positive integer!')
 
 
@@ -153,14 +153,14 @@ def create_poll_form(edit: bool):
         details = CKEditorField("Provide some details:",
                                 validators=[InputRequired("Please enter some vague idea about the poll.")])
         options = CKEditorField("Enter the options as Bullet Point List:",
-                              validators=[InputRequired("Please enter some options.")])
+                                validators=[InputRequired("Please enter some options.")])
         termination_date = DateField("When does the poll finish?", format='%Y-%m-%d', validators=[date_validation])
         max_selections = IntegerField("How many options can the user choose? (0 = all)",
                                       validators=[InputRequired("Please enter a number."), selection_validation])
         privacy = SelectField("Is this poll Public or Private:",
                               choices=["Private", "Public"], validators=[])
         status = SelectField("Is this poll still open or has it finished (closed)?",
-                              choices=[POLL_OPEN, POLL_CLOSED], validators=[])
+                             choices=[POLL_OPEN, POLL_CLOSED], validators=[])
         poll_id = HiddenField("poll_id")
 
         cancel = SubmitField("Cancel")
