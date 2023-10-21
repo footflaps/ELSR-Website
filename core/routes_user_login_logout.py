@@ -65,7 +65,6 @@ def login():
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
     email = request.args.get('email', None)
-    # app.logger.debug(f"login(): Passed email = '{email}'.")
 
     # ----------------------------------------------------------- #
     # Need a login form
@@ -190,7 +189,7 @@ def login():
             or "reset" in str(request.referrer):
         # If they've come from validate email, no point bouncing them back once they've logged in,
         # so forward them to home instead. Likewise, if they came from another site, don't jump back after login.
-        session['url'] = url_for('home')
+        session['url'] = url_for('blog')
     else:
         session['url'] = request.referrer
 
