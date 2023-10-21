@@ -194,7 +194,6 @@ def login():
     else:
         session['url'] = request.referrer
 
-    # app.logger.debug(f"login(): Saved '{session['url']}' as return page after login.")
     return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
 
