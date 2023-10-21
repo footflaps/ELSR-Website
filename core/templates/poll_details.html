@@ -79,19 +79,20 @@
 					<hr>
 					
 					<!-- Card body part 2 -->
-					{% if current_user.is_authenticated: %}
-						<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
-							<strong style="color:red">{{ poll.max_selections }}</strong> available votes.
-						</h4>
+					{% if current_user.is_authenticated %}
+						{% if current_user.readwrite() %}
+							<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
+								<strong style="color:red">{{ poll.max_selections }}</strong> available votes.
+							</h4>
+						{% else %}
+							<h4 class="card-text">Choose up to
+								<strong style="color:red">{{ poll.max_selections }}</strong> option(s):
+							</h4>
+						{% endif %}
 					{% else %}
 						<h4 class="card-text">Choose up to
-							<strong style="color:red">{{ poll.max_selections }}</strong> options:
+							<strong style="color:red">{{ poll.max_selections }}</strong> option(s):
 						</h4>
-					{% endif %}
-					
-					<!-- Warn non logged-in users they need to log in -->
-					{% if not current_user.is_authenticated: %}
-						<strong style="color:red">Log in to be able to vote</strong>
 					{% endif %}
 					
 					<!-- Iterate over options -->
@@ -108,32 +109,51 @@
 							{% if poll.status == POLL_OPEN %}
 							
 								{% if current_user.is_authenticated: %}
-								
-									{% if is_in_list(current_user.email, poll.responses[option]) %}
+									
+									{% if not current_user.readwrite() %}
+							
+										<!-- No permission to vote -->
+										<button class="btn btn-sm btn-dark disabled float-right">VOTE</button>
+									
+									{% elif is_in_list(current_user.email, poll.responses[option]) %}
+							
 										<!-- Has already chosen this one -->
 										<a href="{{ url_for('remove_vote', poll_id=poll.id, option=loop.index) }}">
 											<button class="btn btn-sm btn-primary float-right">UNVOTE</button>
 										</a>
+									
 									{% elif num_votes < poll.max_selections %}
+							
 										<!-- Has votes left -->
 										<a href="{{ url_for('add_vote', poll_id=poll.id, option=loop.index) }}">
 											<button class="btn btn-sm btn-primary float-right">VOTE</button>
 										</a>
+									
 									{% elif poll.max_selections == 1 %}
+							
 										<!-- Single option poll, so can easily swap vote -->
 										<a href="{{ url_for('swap_vote', poll_id=poll.id, option=loop.index) }}">
 											<button class="btn btn-sm btn-primary float-right">VOTE</button>
 										</a>
+									
 									{% else %}
+							
 										<!-- Too complex to work out where we take the vote from -->
 										<button class="btn btn-sm btn-dark disabled float-right">VOTE</button>
+							
 									{% endif %}
 								
 								{% else %}
-								
+							
+									<!-- Not logged in -->
 									<button class="btn btn-sm btn-dark disabled float-right">LOG IN</button>
-								
+							
 								{% endif %}
+							
+							{% else %}
+							
+								<!-- Poll now closed -->
+								<button class="btn btn-sm btn-dark disabled float-right">CLOSED</button>
 							
 							{% endif %}
 							
@@ -145,41 +165,58 @@
 						<div class="my-3">
 							
 							{% if current_user.is_authenticated: %}
-								{% if is_in_list(current_user.email, poll.responses[option]) %}
-									
-									<!-- Show user as first icon -->
-									<img title="{{ get_user_name(current_user.email) }}"
-									     src="{{ current_user.email | gravatar }}"
-								         width="40"
-										 style="border-radius: 50%;"/>
 							
-									<!-- Everyone else -->
+								{% if not current_user.readwrite() %}
+							
+									<!-- User is untrusted -->
 									{% for voter in poll.responses[option] %}
-										{% if voter != current_user.email %}
-											<img title="{{ get_user_name(voter) }}"
-											     src="{{ voter | gravatar }}"
-										         width="40"
-												 style="border-radius: 50%;"/>
-										{% endif %}
-									{% endfor %}
-							
-								{% else %}
-							
-									<!-- Logged in, but not voted -->
-									{% for voter in poll.responses[option] %}
-										<img title="{{ get_user_name(voter) }}"
-										     src="{{ voter | gravatar }}"
+										<!-- NO name shown on hover over -->
+										<img src="{{ voter | gravatar }}"
 								             width="40"
 										     style="border-radius: 50%;"/>
 									{% endfor %}
-							
+								
+								{% else %}
+								
+									<!-- User is Trusted -->
+									{% if is_in_list(current_user.email, poll.responses[option]) %}
+										
+										<!-- Show user as first icon WITH name on hover over -->
+										<img title="{{ get_user_name(current_user.email) }}"
+										     src="{{ current_user.email | gravatar }}"
+									         width="40"
+											 style="border-radius: 50%;"/>
+								
+										{% for voter in poll.responses[option] %}
+											{% if voter != current_user.email %}
+												<!-- Everyone else WITH name on hover over -->
+												<img title="{{ get_user_name(voter) }}"
+												     src="{{ voter | gravatar }}"
+											         width="40"
+													 style="border-radius: 50%;"/>
+											{% endif %}
+										{% endfor %}
+								
+									{% else %}
+								
+										<!-- Logged in, but not voted -->
+										{% for voter in poll.responses[option] %}
+											<!-- Everyone WITH name on hover over -->
+											<img title="{{ get_user_name(voter) }}"
+											     src="{{ voter | gravatar }}"
+									             width="40"
+											     style="border-radius: 50%;"/>
+										{% endfor %}
+								
+									{% endif %}
+								
 								{% endif %}
 							
 							{% else %}
 							
 								<!-- Not logged in -->
 								{% for voter in poll.responses[option] %}
-									<!-- NB unauthenticated users don't see names on hover over -->
+									<!-- Everyone WITH name on hover over -->
 									<img src="{{ voter | gravatar }}"
 							             width="40"
 									     style="border-radius: 50%;"/>

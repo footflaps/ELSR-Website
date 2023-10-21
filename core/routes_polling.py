@@ -105,6 +105,16 @@ def poll_list():
                 Polls().add_poll(poll)
 
     # ----------------------------------------------------------- #
+    #   Messages
+    # ----------------------------------------------------------- #
+
+    if not current_user.is_authenticated:
+        flash("You will need to log in to participate in any polls.")
+    elif not current_user.readwrite():
+        flash("Currently you don't have permission to participate in any polls.")
+        flash("Please contact an Admin via your user page.")
+
+    # ----------------------------------------------------------- #
     #   Render page
     # ----------------------------------------------------------- #
     return render_template("poll_list.html", year=current_year, live_site=live_site(), polls=polls)
@@ -161,17 +171,27 @@ def poll_details(poll_id):
     else:
         poll.responses = {}
 
-    # Need number of current / remaining votes
+    # ----------------------------------------------------------- #
+    #   Number remaining votes
+    # ----------------------------------------------------------- #
     num_votes = 0
-    print(f"poll.responses = '{poll.responses}'")
-    if current_user.is_authenticated:
-        for option in json.loads(poll.options):
-            print(f"option = '{option}'")
-            try:
-                if current_user.email in poll.responses[option]:
-                    num_votes += 1
-            except KeyError:
-                pass
+    if poll.status == POLL_CLOSED:
+        flash("This poll has now finished.")
+    elif not current_user.is_authenticated:
+        flash("You will need to log in to participate in any polls.")
+    elif not current_user.readwrite():
+        flash("Currently, you don't have permission to participate in polls.")
+        flash("Please contact an Admin via your user page.")
+    else:
+        print(f"poll.responses = '{poll.responses}'")
+        if current_user.is_authenticated:
+            for option in json.loads(poll.options):
+                print(f"option = '{option}'")
+                try:
+                    if current_user.email in poll.responses[option]:
+                        num_votes += 1
+                except KeyError:
+                    pass
 
     return render_template("poll_details.html", year=current_year, live_site=live_site(), poll=poll,
                            num_votes=num_votes, anchor=anchor, POLL_OPEN=POLL_OPEN)
