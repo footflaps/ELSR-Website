@@ -189,3 +189,8 @@ with app.app_context():
     print(f"Found {len(polls)} polls in the dB")
     app.logger.debug(f"Start of day: Found {len(polls)} polls in the dB")
 
+with app.app_context():
+    poll = db.session.query(Polls).filter_by(id=3).first()
+    if poll:
+        poll.details = poll.details + "<p>Wine and drinks will be extra</p>"
+        db.session.commit()
