@@ -25,7 +25,11 @@ from core.gravatar_hack import Gravatar
 # These are our standard groups
 TWR_CHOICE = "TWR"
 GRAVEL_CHOICE = "Gravel"
-GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed", GRAVEL_CHOICE, TWR_CHOICE]
+DECAFF_GROUP = "Decaff"
+ESPRESSO_GROUP = "Espresso"
+DOPPIO_GROUP = "Doppio"
+MIXED_GROUP = "Mixed"
+GROUP_CHOICES = [DECAFF_GROUP, ESPRESSO_GROUP, DOPPIO_GROUP, MIXED_GROUP, GRAVEL_CHOICE, TWR_CHOICE]
 
 # This set must match the order of GROUP_CHOICES above
 GROUP_NOTIFICATIONS = ["When someone posts a Decaff ride",

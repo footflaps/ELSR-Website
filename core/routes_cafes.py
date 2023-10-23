@@ -6,12 +6,11 @@ import mpu
 import os
 from threading import Thread
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site
+from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO_GROUP, DECAFF_GROUP, MIXED_GROUP
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
@@ -21,14 +20,14 @@ from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_CO
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
-                                  google_maps_api_key, count_map_loads
+    google_maps_api_key, count_map_loads
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 from core.subs_cafe_photos import update_cafe_photo
-
+from core.db_calendar import Calendar
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used to verify sensible cafe coordinates
@@ -94,6 +93,42 @@ def cafe_list():
     return render_template("cafe_list.html", year=current_year, cafes=cafes, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            cafe_markers=cafe_markers, map_coords=map_coords, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            live_site=live_site())
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# List of top 10 most visited cafes
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/cafe_top10', methods=['GET'])
+@update_last_seen
+def cafe_top10():
+    # ----------------------------------------------------------- #
+    # Get all the rides
+    # ----------------------------------------------------------- #
+    rides = Calendar().all_calendar()
+
+    # This is our cafe list
+    cafes = {}
+
+    # Filter by Doppio, Espresso, Decaff and Mixed
+    for ride in rides:
+        if ride.group == DOPPIO_GROUP \
+                or ride.group == ESPRESSO_GROUP \
+                or ride.group == DECAFF_GROUP \
+                or ride.group == MIXED_GROUP:
+            # Grab the cafe ID (if set)
+            cafe_id = ride.cafe_id
+            if ride.cafe_id:
+                if not cafe_id in cafes:
+                    cafes[cafe_id] = 1
+                else:
+                    cafes[cafe_id] += 1
+
+
+
+
+    # Render template
+    return render_template("cafe_top10.html", year=current_year, mobile=is_mobile(), live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -436,8 +471,8 @@ def edit_cafe():
     # Restrict access
     # ----------------------------------------------------------- #
     if not current_user.admin() and \
-       current_user.email != cafe.added_email or \
-       not current_user.readwrite():
+            current_user.email != cafe.added_email or \
+            not current_user.readwrite():
         # Failed authentication
         app.logger.debug(f"edit_cafe(): Rejected request for '{current_user.email}' as no permissions for "
                          f"cafe_id = '{cafe_id}'.")
@@ -540,7 +575,7 @@ def edit_cafe():
             Thread(target=check_new_cafe_with_all_gpxes, args=(updated_cafe,)).start()
         else:
             # It's not moved enough to care
-            app.logger.debug(f"edit_cafe(): Cafe has only moved {round(dist_km,1)} km, so no need to update GPXes.")
+            app.logger.debug(f"edit_cafe(): Cafe has only moved {round(dist_km, 1)} km, so no need to update GPXes.")
 
         # Back to cafe details page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))
@@ -615,7 +650,7 @@ def close_cafe():
         app.logger.debug(f"close_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
         Event().log_event("Close Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions"
-                          f" for cafe.id = '{cafe.id}'.")
+                                             f" for cafe.id = '{cafe.id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -772,7 +807,8 @@ def flag_cafe():
     else:
         # Should never get here, but....
         app.logger.debug(f"flag_cafe(): Message().add_message failed, cafe_id = '{cafe_id}'.")
-        Event().log_event("Flag Cafe Fail", f"Message().add_message failed, cafe_id = '{cafe_id}', reason = '{reason}'.")
+        Event().log_event("Flag Cafe Fail",
+                          f"Message().add_message failed, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Sorry, something went wrong.")
 
     # ----------------------------------------------------------- #

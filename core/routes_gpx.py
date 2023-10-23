@@ -97,13 +97,13 @@ def gpx_list():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# List of all known GPX files
+# List of top 10 most downloaded GPXes
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/gpx_top10', methods=['GET'])
 @update_last_seen
 def gpx_top10():
-    # Grab all our gpxed
+    # Grab all our gpxes
     gpxes = Gpx().all_gpxes_sorted_downloads()
 
     # Convert JSON field into int
@@ -111,7 +111,7 @@ def gpx_top10():
         gpx.num_downloads = download_count(gpx)
 
     # Render template
-    return render_template("gpx_top10.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site())\
+    return render_template("gpx_top10.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
