@@ -37,6 +37,7 @@ from core.subs_email_sms import contact_form_email
 from core.routes_users import user_page
 from core.routes_cafes import cafe_list
 from core.routes_gpx import gpx_list
+from core.routes_gpx_edit import edit_route
 from core.routes_admin import admin_page
 from core.routes_messages import mark_read
 from core.routes_events import delete_event
