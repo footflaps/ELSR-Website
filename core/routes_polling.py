@@ -17,7 +17,7 @@ from core import app, current_year, live_site
 
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_events import Event
-from core.db_polls import Polls, create_poll_form, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED
+from core.db_polls import Polls, create_poll_form, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -140,6 +140,22 @@ def poll_details(poll_id):
         app.logger.debug(f"poll_details(): Failed to locate Poll with poll_id = '{poll_id}'.")
         Event().log_event("One Poll Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Check privacy
+    # ----------------------------------------------------------- #
+    if poll.privacy == POLL_PRIVATE:
+        if not current_user.is_authenticated:
+            app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
+            Event().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
+            flash("You must be logged in to see private polls.")
+            return abort(403)
+        elif not current_user.readwrite():
+            app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
+            Event().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
+            flash("You don't have permission to see private polls.")
+            flash("Please contact an Admin via your user page.")
+            return abort(403)
 
     # ----------------------------------------------------------- #
     #   Check poll hasn't timed out

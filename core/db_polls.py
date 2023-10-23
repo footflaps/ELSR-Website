@@ -16,6 +16,8 @@ from core import app, db
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
+POLL_PRIVATE = "Private"
+POLL_PUBLIC = "Public"
 POLL_NO_RESPONSE = ""
 POLL_OPEN = "Open"
 POLL_CLOSED = "Closed"
@@ -159,7 +161,7 @@ def create_poll_form(edit: bool):
         max_selections = IntegerField("How many options can the user choose? (0 = all)",
                                       validators=[InputRequired("Please enter a number."), selection_validation])
         privacy = SelectField("Is this poll Public or Private:",
-                              choices=["Private", "Public"], validators=[])
+                              choices=[POLL_PUBLIC, POLL_PRIVATE], validators=[])
         status = SelectField("Is this poll still open or has it finished (closed)?",
                              choices=[POLL_OPEN, POLL_CLOSED], validators=[])
         poll_id = HiddenField("poll_id")
