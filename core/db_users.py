@@ -405,8 +405,8 @@ class User(UserMixin, db.Model):
                     try:
                         # Update last login details
                         user = db.session.query(User).filter_by(id=user.id).first()
-                        user.last_login = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-                        user.last_login_ip = user_ip
+                        user.last_login = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+                        user.last_login_ip = str(user_ip)
                         db.session.commit()
                         return True
                     except Exception as e:

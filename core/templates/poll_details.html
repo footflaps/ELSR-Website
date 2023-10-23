@@ -262,12 +262,37 @@
 					<h2 class="float-left">Owner control</h2>
 				{% endif %}
 				
-				<a data-toggle="modal" data-target="#DeletePollModal">
-					<button type="button" class="btn btn-sm btn-danger float-right">DELETE POLL</button>
-				</a>
-			
+				<!-- Button to expose hidden options -->
+				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseAdminList"
+				   role="button" aria-expanded="false" aria-controls="collapseExample" id="show_list">
+		            SHOW
+		        </a>
+				
+				
 			</div>
 		</div>
+		
+		<!-- Collapsed / Hidden section -->
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="collapse" id="collapseAdminList">
+					<div class="card card-body my-3">
+		                <div class="clearfix">
+					
+							<a data-toggle="modal" data-target="#DeletePollModal">
+								<button type="button" class="btn btn-sm btn-danger float-right">DELETE POLL</button>
+							</a>
+			       
+			                <a data-toggle="modal" data-target="#EditPollModal">
+								<button type="button" class="btn btn-sm btn-primary float-left">EDIT POLL</button>
+							</a>
+			       
+			     		</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		
 	</div>
 
 	<div class="container">
@@ -282,7 +307,7 @@
 
 
 		<!---------------------------------------------------------------------------------------------------->
-		<!--                         Modal form for confirming unbarring user                               -->
+		<!--                         Modal form for confirming Delete poll                                  -->
 		<!---------------------------------------------------------------------------------------------------->
 		
 		<div class="modal fade" id="DeletePollModal" tabindex="-1" role="dialog"
@@ -323,6 +348,53 @@
 			</div>
 		</div>  <!-- End of modal form -->
 
+
+		<!---------------------------------------------------------------------------------------------------->
+		<!--                         Modal form for confirming Edit poll                                    -->
+		<!---------------------------------------------------------------------------------------------------->
+		
+		<div class="modal fade" id="EditPollModal" tabindex="-1" role="dialog"
+		     aria-labelledby="exampleModalLabel" aria-hidden="true">
+			<div class="modal-dialog" role="document">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="EditPollModalLabel"><strong>Edit Live Poll</strong></h5>
+						<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body">
+						<!--
+							NB To get the two parameters use:
+								1. gpx_id = request.args.get('gpx_id', None)
+		                        2. confirm = request.form['confirm']
+						-->
+						<form action="{{ url_for('edit_poll', poll_id=poll.id) }}" method="post">
+							<p>
+								Please take care editing a live poll as people may have already voted!
+							</p>
+							
+							<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+							<input type="hidden" name="get" value="True"/>
+							
+							<div class="form-group">
+								<label class="col-form-label">
+									Enter <strong>your password</strong> below.
+								</label>
+								<input type="password" class="form-control" name="password">
+							</div>
+							
+							<div class="modal-footer">
+								<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+								<button type="submit" class="btn btn-danger">EDIT</button>
+							</div>
+							
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>  <!-- End of modal form -->
+
 	{% endif %}
 {% endif %}
 
@@ -334,6 +406,15 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <script>
+	
+	/* Admin - Hide <-> Show buttons name change */
+	$("#collapseAdminList").on("show.bs.collapse", function(){
+	    document.getElementById('show_list').innerHTML = 'HIDE';
+	});
+	$("#collapseAdminList").on("hide.bs.collapse", function(){
+	    document.getElementById('show_list').innerHTML = 'SHOW';
+	});
+ 
 	
 	{% if anchor == 'votes' %}
 		

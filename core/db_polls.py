@@ -140,8 +140,9 @@ def selection_validation(form, field):
 def date_validation(form, field):
     today_date = datetime.today().date()
     poll_date = field.data
-    if poll_date < today_date:
-        raise validators.ValidationError('Poll must end in the future!')
+    if poll_date:
+        if poll_date < today_date:
+            raise validators.ValidationError('Poll must end in the future!')
 
 
 # -------------------------------------------------------------------------------------------------------------- #

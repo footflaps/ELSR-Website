@@ -4,7 +4,6 @@ from werkzeug import exceptions
 from datetime import datetime
 import json
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -63,6 +62,7 @@ def is_in_list(value, list):
     if value in list:
         return True
     return False
+
 
 # Add to jinja
 app.jinja_env.globals.update(is_in_list=is_in_list)
@@ -367,225 +367,199 @@ def add_poll():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Remove vote
+# Edit a live poll
 # -------------------------------------------------------------------------------------------------------------- #
-@app.route('/unvote', methods=['GET'])
+@app.route('/edit_poll', methods=['POST'])
 @logout_barred_user
 @update_last_seen
 @login_required
-def remove_vote():
+def edit_poll():
     # ----------------------------------------------------------- #
-    # Get params
+    # Get poll_id from form (if one was posted)
     # ----------------------------------------------------------- #
     poll_id = request.args.get('poll_id', None)
-    option = request.args.get('option', None)
 
-    # ----------------------------------------------------------- #
-    # Handle missing parameters
-    # ----------------------------------------------------------- #
-    if not poll_id:
-        app.logger.debug(f"remove_vote(): Missing poll_id!")
-        Event().log_event("remove_vote() Fail", f"Missing poll_id!")
-        return abort(404)
-    if not option or not option.isdigit():
-        app.logger.debug(f"remove_vote(): Missing option!")
-        Event().log_event("remove_vote() Fail", f"Missing option!")
-        return abort(404)
-    option = int(option)
-
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
-    if not poll:
-        app.logger.debug(f"remove_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
-        Event().log_event("remove_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
-        return abort(404)
-
-    # ----------------------------------------------------------- #
-    # Check permissions
-    # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"remove_vote(): User not readwrite!")
-        Event().log_event("remove_vote() Fail", f"User not readwrite!")
-        flash("You don't have permission to vote!")
-        return abort(403)
-
-    # Poll must be open
-    if poll.status != POLL_OPEN:
-        app.logger.debug(f"remove_vote(): Poll is closed, poll_id = '{poll_id}'.")
-        Event().log_event("remove_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
-        flash("The poll is now closed!")
-        return abort(403)
-
-    # ----------------------------------------------------------- #
-    # Check poll options
-    # ----------------------------------------------------------- #
-    # Get poll options as a list
-    option_list = json.loads(poll.options)
-    # Get votes as a dictionary
-    votes = json.loads(poll.responses)
-
-    # Check option is a valid index into option_list (offset by 1 as option starts at 1)
-    if option <= 0 or option > len(option_list):
-        app.logger.debug(f"remove_vote(): Invalid option = '{option}'.")
-        Event().log_event("remove_vote() Fail", f"Invalid option = '{option}'.")
-        return abort(404)
-
-    # ----------------------------------------------------------- #
-    # Check they have a vote to remove
-    # ----------------------------------------------------------- #
-    selected_option = option_list[option - 1]
-
-    # Get votes for this selected_option
+    # We get passed 'get' on first call
     try:
-        option_votes = votes[selected_option]
-    except KeyError:
-        option_votes = []
+        get = request.form['get']
+    except:
+        get = None
 
-    # Their email should be in the list
-    if not current_user.email in option_votes:
-        # Should never happen, but...
-        app.logger.debug(f"remove_vote(): Can't remove non existent vote!")
-        Event().log_event("remove_vote() Fail", f"Can't remove non existent vote!")
-        flash("Invalid vote option!")
-        return abort(404)
+    # We get passed 'password' on first call
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
 
-    # ----------------------------------------------------------- #
-    # Remove their email
-    # ----------------------------------------------------------- #
-    # Remove email
-    votes[selected_option].remove(current_user.email)
-    # Push back to poll object as JSON string
-    poll.responses = json.dumps(votes)
-    # Update in db
-    poll = Polls().add_poll(poll)
-    # Did that work?
-    if not poll:
-        # Should never happen, but...
-        app.logger.debug(f"remove_vote(): Can't update poll, id = '{poll_id}'!")
-        Event().log_event("remove_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
-        flash("Sorry, something went wrong!")
+    print(f"password = '{password}'")
 
     # ----------------------------------------------------------- #
-    # Back to poll page
-    # ----------------------------------------------------------- #
-
-    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Add vote
-# -------------------------------------------------------------------------------------------------------------- #
-@app.route('/vote', methods=['GET'])
-@logout_barred_user
-@update_last_seen
-@login_required
-def add_vote():
-    # ----------------------------------------------------------- #
-    # Get params
-    # ----------------------------------------------------------- #
-    poll_id = request.args.get('poll_id', None)
-    option = request.args.get('option', None)
-
-    # ----------------------------------------------------------- #
-    # Handle missing parameters
+    # Check we have mandatory params
     # ----------------------------------------------------------- #
     if not poll_id:
-        app.logger.debug(f"add_vote(): Missing poll_id!")
-        Event().log_event("add_vote() Fail", f"Missing poll_id!")
-        return abort(404)
-    if not option or not option.isdigit():
-        app.logger.debug(f"add_vote(): Missing option!")
-        Event().log_event("add_vote() Fail", f"Missing option!")
-        return abort(404)
-    option = int(option)
+        app.logger.debug(f"edit_poll(): No poll_id!")
+        Event().log_event("edit_poll Fail", f"No poll_id!")
+        abort(404)
 
     # ----------------------------------------------------------- #
-    # Check params are valid
+    # Get poll from db
     # ----------------------------------------------------------- #
     poll = Polls().one_poll_by_id(poll_id)
     if not poll:
-        app.logger.debug(f"add_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
-        Event().log_event("add_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
-        return abort(404)
+        # Poll no longer / never existed
+        app.logger.debug(f"edit_poll(): Failed to find Poll, id = '{poll_id}'!")
+        Event().log_event("edit_poll Fail", f"Failed to find Poll, id = '{poll_id}'!")
+        flash(f"That poll id '{poll_id}' doesn't seem to exist!")
+        abort(404)
 
     # ----------------------------------------------------------- #
-    # Check permissions
+    # Restrict access
     # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"add_vote(): User not readwrite!")
-        Event().log_event("add_vote() Fail", f"User not readwrite!")
-        flash("You don't have permission to vote!")
+    # Must be admin or the current author
+    if current_user.email != poll.email \
+            and not current_user.admin() or \
+            not current_user.readwrite():
+        # Failed authentication
+        app.logger.debug(f"edit_poll(): Refusing permission for '{current_user.email}' and "
+                         f"poll_id = '{poll_id}'.")
+        Event().log_event("edit_poll Fail", f"Refusing permission for '{current_user.email}', "
+                                            f"poll_id = '{poll_id}'.")
         return abort(403)
 
-    # Poll must be open
-    if poll.status != POLL_OPEN:
-        app.logger.debug(f"add_vote(): Poll is closed, poll_id = '{poll_id}'.")
-        Event().log_event("add_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
-        flash("The poll is now closed!")
-        return abort(403)
-
     # ----------------------------------------------------------- #
-    # Check options
+    # Get user's IP
     # ----------------------------------------------------------- #
-    # Get poll options as a list
-    option_list = json.loads(poll.options)
-    # Get votes as a dictionary
-    if poll.responses:
-        votes = json.loads(poll.responses)
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
     else:
-        votes = {}
-
-    # Check option is a valid index into option_list (offset by 1 as option starts at 1)
-    if option <= 0 or option > len(option_list):
-        app.logger.debug(f"add_vote(): Invalid option = '{option}'.")
-        Event().log_event("add_vote() Fail", f"Invalid option = '{option}'.")
-        return abort(404)
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
-    # Check they haven't already voted for this option
+    #  Validate password
     # ----------------------------------------------------------- #
-    selected_option = option_list[option - 1]
+    if password:
+        # Need current user
+        user = User().find_user_from_id(current_user.id)
 
-    # Get votes for this selected_option
-    try:
-        option_votes = votes[selected_option]
-    except KeyError:
-        votes[selected_option] = []
-        option_votes = []
-
-    # Their email should be in the list
-    if current_user.email in option_votes:
-        # Should never happen, but...
-        app.logger.debug(f"remove_vote(): User already voted for this option!")
-        Event().log_event("remove_vote() Fail", f"User already voted for this optione!")
-        flash("You've already voted for that option!")
-        return abort(404)
+        # Validate against current_user's password
+        if not user.validate_password(user, password, user_ip):
+            app.logger.debug(f"edit_poll(): Delete failed, incorrect password for user_id = '{user.id}'!")
+            Event().log_event("edit_poll Fail", f"Incorrect password for user_id = '{user.id}'!")
+            flash(f"Incorrect password for user {user.name}!")
+            # Go back to polls page
+            return redirect(url_for('poll_details', poll_id=poll_id))
 
     # ----------------------------------------------------------- #
-    # Add their email
+    # Need a form
     # ----------------------------------------------------------- #
-    # Add email
-    votes[selected_option].append(current_user.email)
-    # Push back to poll object as JSON string
-    poll.responses = json.dumps(votes)
-    # Update in db
-    poll = Polls().add_poll(poll)
-    # Did that work?
-    if not poll:
-        # Should never happen, but...
-        app.logger.debug(f"add_vote(): Can't update poll, id = '{poll_id}'!")
-        Event().log_event("add_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
-        flash("Sorry, something went wrong!")
+    form = create_poll_form(True)
 
     # ----------------------------------------------------------- #
-    # Back to poll page
+    # Get user
+    # ----------------------------------------------------------- #
+    user = User().find_user_from_id(current_user.id)
+    if not user:
+        # Should never get here, but...
+        app.logger.debug(f"edit_poll(): Failed to find user, id = '{current_user.id}'!")
+        Event().log_event("edit_poll Fail", f"Failed to find user, id = '{current_user.id}'!")
+        flash("The current user doesn't seem to exist!")
+        abort(404)
+
+    # ----------------------------------------------------------- #
+    # Check read write
+    # ----------------------------------------------------------- #
+    if not user.readwrite():
+        app.logger.debug(f"edit_poll(): User doesn't have readwrite!")
+        Event().log_event("edit_poll Fail", f"User doesn't have readwrite!")
+        flash("You don't have permission to edit polls!")
+        abort(403)
+
+    # ----------------------------------------------------------- #
+    # Manage form
+    # ----------------------------------------------------------- #
+    if get:
+        # ----------------------------------------------------------- #
+        #   GET - Fill form in from dB
+        # ----------------------------------------------------------- #
+        form.name.data = poll.name
+        form.details.data = poll.details
+        form.options.data = html_options(poll.options)
+        termination_date = datetime(int(poll.termination_date[4:8]), int(poll.termination_date[2:4]),
+                                    int(poll.termination_date[0:2]), 0, 00)
+        form.termination_date.data = termination_date
+        form.privacy.data = poll.privacy
+        form.max_selections.data = poll.max_selections
+        form.status.data = poll.status
+
+    # Are we posting the completed form?
+    elif form.validate_on_submit():
+        # ----------------------------------------------------------- #
+        #   POST - form validated & submitted
+        # ----------------------------------------------------------- #
+
+        # Detect cancel
+        if form.cancel.data:
+            # Back to list of polls
+            return redirect(url_for('poll_details', poll_id=poll_id))
+
+        print(f"Form submitted pol_id = '{poll_id}'")
+
+        # Get these from the form
+        poll.name = form.name.data
+        poll.details = form.details.data
+        poll.max_selections = form.max_selections.data
+        poll.termination_date = form.termination_date.data.strftime("%d%m%Y")
+        poll.status = form.status.data
+        poll.options = json.dumps(extract_options_from_form(form.options.data))
+
+        # Add to db
+        poll = Polls().add_poll(poll)
+        if poll:
+            # Success
+            app.logger.debug(f"edit_poll(): Successfully added new poll.")
+            Event().log_event("edit_poll Pass", f"Successfully added new poll.")
+
+        else:
+            # Should never happen, but...
+            app.logger.debug(f"edit_poll(): Failed to add poll for '{poll}'.")
+            Event().log_event("edit_poll Fail", f"Failed to add poll for '{poll}'.")
+            flash("Sorry, something went wrong.")
+
+        # They're finished
+        if form.submit.data:
+            # Back to list of polls
+            flash("Poll has been published!")
+            return redirect(url_for('poll_list'))
+        else:
+            # They're still editing
+            flash("Please verify that the poll looks ok!")
+
+    elif request.method == 'POST':
+        # ----------------------------------------------------------- #
+        #   POST - form validation failed
+        # ----------------------------------------------------------- #
+
+        # Detect user cancel
+        if form.cancel.data:
+            # Back to list of polls
+            return redirect(url_for('poll_details', poll_id=poll_id))
+        else:
+            # Give them a hint
+            flash("Form not filled in properly, see below!")
+
+    # ----------------------------------------------------------- #
+    #   Render page
     # ----------------------------------------------------------- #
 
-    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
+    # Need options for form as a list
+    poll.options_html = []
+    for option in extract_options_from_form(form.options.data):
+        poll.options_html.append(option)
+
+    # Make sure form has poll.id set (if we are editing an existing poll)
+    form.poll_id.data = poll.id
+
+    return render_template("poll_new.html", year=current_year, live_site=live_site(), form=form, poll=poll)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -649,7 +623,7 @@ def delete_poll():
         app.logger.debug(f"delete_poll(): Refusing permission for '{current_user.email}' and "
                          f"poll_id = '{poll_id}'.")
         Event().log_event("Delete poll Fail", f"Refusing permission for '{current_user.email}', "
-                                                f"poll_id = '{poll_id}'.")
+                                              f"poll_id = '{poll_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -660,7 +634,7 @@ def delete_poll():
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
-        app.logger.debug(f"delete_polll(): Delete failed, incorrect password for user_id = '{user.id}'!")
+        app.logger.debug(f"delete_poll(): Delete failed, incorrect password for user_id = '{user.id}'!")
         Event().log_event("Poll Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to polls page
@@ -680,127 +654,3 @@ def delete_poll():
 
     # Back to list of all polls
     return redirect(url_for('poll_list'))
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Swap vote (if simple pick one poll, we can just remove existing vote and move it)
-# -------------------------------------------------------------------------------------------------------------- #
-@app.route('/swapvote', methods=['GET'])
-@logout_barred_user
-@update_last_seen
-@login_required
-def swap_vote():
-    # ----------------------------------------------------------- #
-    # Get params
-    # ----------------------------------------------------------- #
-    poll_id = request.args.get('poll_id', None)
-    option = request.args.get('option', None)
-
-    # ----------------------------------------------------------- #
-    # Handle missing parameters
-    # ----------------------------------------------------------- #
-    if not poll_id:
-        app.logger.debug(f"swap_vote(): Missing poll_id!")
-        Event().log_event("swap_vote() Fail", f"Missing poll_id!")
-        return abort(404)
-    if not option or not option.isdigit():
-        app.logger.debug(f"swap_vote(): Missing option!")
-        Event().log_event("swap_vote() Fail", f"Missing option!")
-        return abort(404)
-    option = int(option)
-
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
-    if not poll:
-        app.logger.debug(f"swap_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
-        Event().log_event("swap_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
-        return abort(404)
-
-    # ----------------------------------------------------------- #
-    # Check permissions
-    # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"swap_vote(): User not readwrite!")
-        Event().log_event("swap_vote() Fail", f"User not readwrite!")
-        flash("You don't have permission to vote!")
-        return abort(403)
-
-    # Poll must be open
-    if poll.status != POLL_OPEN:
-        app.logger.debug(f"swap_vote(): Poll is closed, poll_id = '{poll_id}'.")
-        Event().log_event("swap_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
-        flash("The poll is now closed!")
-        return abort(403)
-
-    # ----------------------------------------------------------- #
-    # Extract options from JSON in db
-    # ----------------------------------------------------------- #
-    # option_list will look like ['Option 1', 'Option 2', 'Option 3']
-    option_list = json.loads(poll.options)
-
-    # ----------------------------------------------------------- #
-    # Check their vote choice exists
-    # ----------------------------------------------------------- #
-    # Check option is a valid index into option_list (offset by 1 as option starts at 1)
-    if option <= 0 or option > len(option_list):
-        app.logger.debug(f"swap_vote(): Invalid option = '{option}'.")
-        Event().log_event("swap_vote() Fail", f"Invalid option = '{option}'.")
-        return abort(404)
-
-    # ----------------------------------------------------------- #
-    # Extract votes from JSON in db
-    # ----------------------------------------------------------- #
-    # votes looks like this: {
-    #                          'Option 1': [Email1, Email2],
-    #                          'Option 2': [Email3, Email4],
-    #                          'Option 3': [Email 5]
-    #                        }
-    if poll.responses:
-        votes = json.loads(poll.responses)
-    else:
-        # No one has voted yet, so empty dictionary
-        votes = {}
-
-    # ----------------------------------------------------------- #
-    # Remove all existing votes
-    # ----------------------------------------------------------- #
-    for key, value in votes.items():
-        if current_user.email in value:
-            value.remove(current_user.email)
-
-    # ----------------------------------------------------------- #
-    # Add their email to their chosen option
-    # ----------------------------------------------------------- #
-    selected_option = option_list[option - 1]
-
-    # Get votes for this selected_option
-    try:
-        option_votes = votes[selected_option]
-    except KeyError:
-        votes[selected_option] = []
-        option_votes = []
-
-    # Add email
-    votes[selected_option].append(current_user.email)
-
-    # ----------------------------------------------------------- #
-    # Push results back to db
-    # ----------------------------------------------------------- #
-    # Convert to JSON string
-    poll.responses = json.dumps(votes)
-    # Update in db
-    poll = Polls().add_poll(poll)
-    # Did that work?
-    if not poll:
-        # Should never happen, but...
-        app.logger.debug(f"swap_vote(): Can't update poll, id = '{poll_id}'!")
-        Event().log_event("swap_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
-        flash("Sorry, something went wrong!")
-
-    # ----------------------------------------------------------- #
-    # Back to poll page
-    # ----------------------------------------------------------- #
-    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
