@@ -3,6 +3,8 @@ from flask_login import login_required, current_user
 from werkzeug import exceptions
 import os
 from threading import Thread
+import json
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -82,35 +84,18 @@ def gpx_list():
 @app.route('/gpx_top10', methods=['GET'])
 @update_last_seen
 def gpx_top10():
-    # Grab all our routes
+    # Grab all our gpxed
     gpxes = Gpx().all_gpxes_sorted_downloads()
 
-    # Double check we have all the files present
-    missing_files = []
-
+    # Add counts
     for gpx in gpxes:
-        # Absolute path name
-        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
-
-        # Check the file is actually there, before we try and parse it etc
-        if not os.path.exists(filename):
-            missing_files.append(gpx.id)
-
-    # Need different path for Admin
-    if not current_user.is_authenticated:
-        admin = False
-    elif current_user.admin():
-        admin = True
-    else:
-        admin = False
-
-    if admin:
-        for missing in missing_files:
-            flash(f"We are missing the GPX file for route {missing}!")
+        if gpx.downloads:
+            gpx.num_downloads = len(json.loads(gpx.downloads))
+        else:
+            gpx.num_downloads = 0
 
     # Render in gpx_list template
-    return render_template("gpx_top10.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site(),
-                           missing_files=missing_files)
+    return render_template("gpx_top10.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site())\
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -632,7 +617,7 @@ def route_download(gpx_id):
     # ----------------------------------------------------------- #
     # Update count
     # ----------------------------------------------------------- #
-    Gpx().update_downloads(gpx.id)
+    Gpx().update_downloads(gpx.id, current_user.email)
 
     # ----------------------------------------------------------- #
     # Send link to download the file
@@ -734,7 +719,7 @@ def gpx_download2():
     # ----------------------------------------------------------- #
     # Update count
     # ----------------------------------------------------------- #
-    Gpx().update_downloads(gpx.id)
+    Gpx().update_downloads(gpx.id, email)
 
     # ----------------------------------------------------------- #
     # Send link to download the file

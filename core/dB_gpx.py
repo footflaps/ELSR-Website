@@ -5,6 +5,7 @@ from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, Length, InputRequired
 from datetime import date
 import json
+from sqlalchemy import func
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -69,10 +70,19 @@ class Gpx(db.Model):
     details = db.Column(db.Text)
 
     # Number times downloaded
-    downloads = db.Column(db.Integer, nullable=True)
+    downloads = db.Column(db.Text)
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Properties
+    # -------------------------------------------------------------------------------------------------------------- #
 
     def public(self):
         return self.valid == 1
+
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Functions
+    # -------------------------------------------------------------------------------------------------------------- #
 
     def all_gpxes(self):
         with app.app_context():
@@ -81,7 +91,7 @@ class Gpx(db.Model):
 
     def all_gpxes_sorted_downloads(self):
         with app.app_context():
-            gpxes = db.session.query(Gpx).filter_by(valid=1).order_by(Gpx.downloads.desc()).limit(10).all()
+            gpxes = db.session.query(Gpx).filter_by(valid=1).order_by(func.json_array_length(Gpx.downloads).desc()).all()
             return gpxes
 
     # Alphabetical list for combobox selection
@@ -154,17 +164,21 @@ class Gpx(db.Model):
                     return False
         return False
 
-    def update_downloads(self, gpx_id):
+    def update_downloads(self, gpx_id, email):
         with app.app_context():
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
             if gpx:
                 try:
                     # Update filename
                     if gpx.downloads:
-                        gpx.downloads += 1
+                        emails = json.loads(gpx.downloads)
+                        if not email in emails :
+                            emails.append(email)
                     else:
-                        gpx.downloads = 1
+                        # Start new set
+                        emails = [email]
                     # Write to dB
+                    gpx.downloads = json.dumps(emails)
                     db.session.commit()
                     return True
                 except Exception as e:
