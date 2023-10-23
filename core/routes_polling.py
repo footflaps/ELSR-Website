@@ -325,6 +325,7 @@ def add_poll():
         poll.max_selections = form.max_selections.data
         poll.termination_date = form.termination_date.data.strftime("%d%m%Y")
         poll.status = form.status.data
+        poll.privacy = form.privacy.data
 
         # Options need to be filtered
         poll.options = json.dumps(extract_options_from_form(form.options.data))
@@ -527,6 +528,7 @@ def edit_poll():
         poll.termination_date = form.termination_date.data.strftime("%d%m%Y")
         poll.status = form.status.data
         poll.options = json.dumps(extract_options_from_form(form.options.data))
+        poll.privacy = form.privacy.data
 
         # Add to db
         poll = Polls().add_poll(poll)
