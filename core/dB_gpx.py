@@ -91,7 +91,8 @@ class Gpx(db.Model):
 
     def all_gpxes_sorted_downloads(self):
         with app.app_context():
-            gpxes = db.session.query(Gpx).filter_by(valid=1).order_by(func.json_array_length(Gpx.downloads).desc()).all()
+            gpxes = db.session.query(Gpx).filter_by(valid=1).order_by(func.json_array_length(Gpx.downloads).desc()).\
+                    limit(10).all()
             return gpxes
 
     # Alphabetical list for combobox selection
