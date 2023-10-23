@@ -71,17 +71,15 @@
 				<!-- Header -->
 				<thead>
                     <tr>
-	                    {% if not mobile %}
-                            <th scope="col">ID</th>
-	                    {% endif %}
-                        <th scope="col">Name</th>
+	                    <th scope="col"># Downloads</th>
+	                    <th scope="col">Name</th>
                         <th scope="col">Length (km)</th>
                         <th scope="col">Ascent (m)</th>
 	                    <th scope="col">Type</th>
 	                    {% if not mobile %}
 	                        <th scope="col">Uploaded by</th>
 	                    {% endif %}
-	                    <th scope="col"># Downloads</th>
+	                    
                     </tr>
                 </thead>
 		
@@ -90,9 +88,7 @@
 				
 						<!-- Each GPX entry -->
 						<tr>
-							{% if not mobile %}
-								<td scope="row">{{ gpx.id }}</td>
-							{% endif %}
+							<td scope="row">{{ gpx.downloads }}</td>
 							<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{ gpx.name }}</a></td>
 							<td scope="row">{{ gpx.length_km }}</td>
 	                        <td scope="row">{{ gpx.ascent_m }}</td>
@@ -100,7 +96,6 @@
 							{% if not mobile %}
 								<td scope="row">{{ get_user_name(gpx.email) }}</td>
 							{% endif %}
-							<td scope="row">{{ gpx.downloads }}</td>
 					    </tr>
 				
 					{% endfor %}
