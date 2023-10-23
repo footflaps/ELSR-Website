@@ -76,7 +76,27 @@
 						{% for poll in polls: %}
 							<tr>
 								<td scope="row">{{ poll.id }}</td>
-								<td><a href="{{ url_for('poll_details', poll_id=poll.id) }}">{{ poll.name }}</a></td>
+								<!-- Poll name and hyperlink -->
+								<td>
+									{% if poll.privacy == "Private" %}
+										{% if not current_user.is_authenticated: %}
+											<!-- Not logged in -->
+											{{ poll.name }}
+											<i class="fa-solid fa-user-lock"></i>
+										{% elif not current_user.readwrite() %}
+											<!-- unTrusted user -->
+											{{ poll.name }}
+											<i class="fa-solid fa-user-lock"></i>
+										{% else %}
+											<!-- Trusted user -->
+											<a href="{{ url_for('poll_details', poll_id=poll.id) }}">{{ poll.name }}</a>
+											<i class="fa-solid fa-user-lock"></i>
+										{% endif %}
+									{% else %}
+										<a href="{{ url_for('poll_details', poll_id=poll.id) }}">{{ poll.name }}</a>
+									{% endif %}
+								</td>
+								
 								<td> <img src="{{ poll.email | gravatar }}"
 							             width="40"
 									     style="border-radius: 50%;"/>  {{ get_user_name(poll.email) }}</td>
