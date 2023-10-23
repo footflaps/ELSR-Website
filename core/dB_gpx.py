@@ -120,10 +120,7 @@ class Gpx(db.Model):
 
     def delete_gpx(self, gpx_id):
         with app.app_context():
-
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
             if gpx:
                 # Delete the GPX file
                 try:
@@ -138,10 +135,7 @@ class Gpx(db.Model):
 
     def update_filename(self, gpx_id, filename):
         with app.app_context():
-
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
             if gpx:
                 try:
                     # Update filename
@@ -155,13 +149,28 @@ class Gpx(db.Model):
                     return False
         return False
 
+    def update_downloads(self, gpx_id):
+        with app.app_context():
+            gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
+            if gpx:
+                try:
+                    # Update filename
+                    if gpx.downloads:
+                        gpx.downloads += 1
+                    else:
+                        gpx.downloads = 1
+                    # Write to dB
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_gpx: Failed to update downloads for gpx_id = '{gpx.id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+        return False
+
     def clear_cafe_list(self, gpx_id):
         with app.app_context():
-
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
-            # Did we get something?
             if gpx:
                 try:
                     # Note, the cafes_passed is a JSON string, not a list!
@@ -176,11 +185,7 @@ class Gpx(db.Model):
 
     def update_cafe_list(self, gpx_id, cafe_id, dist_km, range_km):
         with app.app_context():
-
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
-            # Did we get something?
             if gpx:
                 try:
                     # Get the list of cafes passed
@@ -219,11 +224,7 @@ class Gpx(db.Model):
 
     def remove_cafe_list(self, gpx_id, cafe_id):
         with app.app_context():
-
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-
-            # Did we get something?
             if gpx:
                 try:
                     # Get the list of cafes passed
@@ -253,9 +254,7 @@ class Gpx(db.Model):
     # Add length and ascent to the database
     def update_stats(self, gpx_id, length_km, ascent_m):
         with app.app_context():
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
-            # Did we get something?
             if gpx:
                 try:
                     # Update route stats
@@ -297,7 +296,6 @@ class Gpx(db.Model):
 
     def publish(self, gpx_id):
         with app.app_context():
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
             if gpx:
                 try:
@@ -312,7 +310,6 @@ class Gpx(db.Model):
 
     def hide(self, gpx_id):
         with app.app_context():
-            # Locate the GPX file
             gpx = db.session.query(Gpx).filter_by(id=gpx_id).first()
             if gpx:
                 try:
