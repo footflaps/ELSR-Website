@@ -90,10 +90,7 @@ def gpx_top10():
     # Add counts
     for gpx in gpxes:
         if gpx.downloads:
-            if gpx.downloads.isnumeric():
-                return int(gpx.downloads)
-            else:
-                gpx.num_downloads = len(json.loads(gpx.downloads))
+            gpx.num_downloads = len(json.loads(gpx.downloads))
         else:
             gpx.num_downloads = 0
 
