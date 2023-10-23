@@ -19,7 +19,7 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
-from core.dB_gpx import Gpx, GPX_ROAD, GPX_GRAVEL
+from core.dB_gpx import Gpx, TYPE_ROAD, TYPE_GRAVEL
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
@@ -641,9 +641,9 @@ def add_ride():
                 gpx.filename = "tmp"
                 # Fill in the GPX surface type
                 if form.group.data == GRAVEL_CHOICE:
-                    gpx.type = GPX_GRAVEL
+                    gpx.type = TYPE_GRAVEL
                 else:
-                    gpx.type = GPX_ROAD
+                    gpx.type = TYPE_ROAD
 
                 # Add to the dB
                 new_id = gpx.add_gpx(gpx)

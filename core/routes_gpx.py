@@ -14,14 +14,14 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_gpx import Gpx, UploadGPXForm, create_rename_gpx_form
+from core.dB_gpx import Gpx, UploadGPXForm
 from core.db_users import User, update_last_seen, logout_barred_user, get_user_name
 from core.dB_cafes import Cafe
 from core.dB_events import Event
-from core.subs_gpx import allowed_file, check_new_gpx_with_all_cafes, gpx_direction
-from core.subs_google_maps import polyline_json, markers_for_cafes_native, start_and_end_maps_native_gm, \
-    MAP_BOUNDS, google_maps_api_key, count_map_loads
-from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx, check_route_name, strip_excess_info_from_gpx
+from core.subs_gpx import allowed_file, gpx_direction
+from core.subs_google_maps import polyline_json, markers_for_cafes_native, MAP_BOUNDS, google_maps_api_key, \
+                                  count_map_loads
+from core.subs_gpx_edit import check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
@@ -72,6 +72,44 @@ def gpx_list():
 
     # Render in gpx_list template
     return render_template("gpx_list.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site(),
+                           missing_files=missing_files)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# List of all known GPX files
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route('/gpx_top10', methods=['GET'])
+@update_last_seen
+def gpx_top10():
+    # Grab all our routes
+    gpxes = Gpx().all_gpxes_sorted_downloads()
+
+    # Double check we have all the files present
+    missing_files = []
+
+    for gpx in gpxes:
+        # Absolute path name
+        filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+
+        # Check the file is actually there, before we try and parse it etc
+        if not os.path.exists(filename):
+            missing_files.append(gpx.id)
+
+    # Need different path for Admin
+    if not current_user.is_authenticated:
+        admin = False
+    elif current_user.admin():
+        admin = True
+    else:
+        admin = False
+
+    if admin:
+        for missing in missing_files:
+            flash(f"We are missing the GPX file for route {missing}!")
+
+    # Render in gpx_list template
+    return render_template("gpx_top10.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site(),
                            missing_files=missing_files)
 
 

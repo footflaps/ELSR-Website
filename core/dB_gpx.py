@@ -20,10 +20,10 @@ from core.db_users import User
 # -------------------------------------------------------------------------------------------------------------- #
 
 GPX_ALLOWED_EXTENSIONS = {'gpx'}
-GPX_GRAVEL = GRAVEL_CHOICE
-GPX_ROAD = "Road"
-TYPES = [GPX_ROAD,
-         GPX_GRAVEL,
+TYPE_GRAVEL = GRAVEL_CHOICE
+TYPE_ROAD = "Road"
+TYPES = [TYPE_ROAD,
+         TYPE_GRAVEL,
          "MTB"]
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -77,6 +77,11 @@ class Gpx(db.Model):
     def all_gpxes(self):
         with app.app_context():
             gpxes = db.session.query(Gpx).all()
+            return gpxes
+
+    def all_gpxes_sorted_downloads(self):
+        with app.app_context():
+            gpxes = db.session.query(Gpx).filter_by(valid=1).order_by(Gpx.downloads.desc()).limit(10).all()
             return gpxes
 
     # Alphabetical list for combobox selection
