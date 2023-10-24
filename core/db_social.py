@@ -66,6 +66,12 @@ class Socials(db.Model):
     # Privacy (Public / Private)
     privacy = db.Column(db.String(20))
 
+    # Allow people to sign up (True / False)
+    sign_up = db.Column(db.String(8))
+
+    # JSON string of emails of attendees
+    attendees = db.Column(db.Text)
+
     # Return all socials
     def all(self):
         with app.app_context():
