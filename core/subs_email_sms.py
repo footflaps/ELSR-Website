@@ -83,6 +83,7 @@ RIDE_BODY = "Dear [USER], \n\n" \
             "The ride destination is: [DESTINATION]\n" \
             "Here are some useful links:\n\n" \
             "See the calendar here: [CAL_LINK]\n" \
+            "See details of the route here: [GPX_LINK]\n" \
             "Download the GPX file here: [DL_LINK]\n\n" \
             "Thanks, \n\n" \
             "The Admin Team\n\n" \
@@ -384,9 +385,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     # Create hyperlinks
     # ----------------------------------------------------------- #
     cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
-    # Old link which needed user to be logged in
-    # dl_link = f"https://www.elsr.co.uk/gpx_download/{ride.gpx_id}"
-    # New link which works when not logged in
+    gpx_link = f"https://www.elsr.co.uk/route/{ride.gpx_id}"
     dl_link = f"https://www.elsr.co.uk//gpx_download2?email={user.email}&gpx_id={ride.gpx_id}&" \
               f"code={user.gpx_download_code(ride.gpx_id)}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
@@ -406,6 +405,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
         body = body.replace("[DESTINATION]", destination)
         body = body.replace("[CAL_LINK]", cal_link)
         body = body.replace("[DL_LINK]", dl_link)
+        body = body.replace("[GPX_LINK]", gpx_link)
         body = body.replace("[ACCOUNT_LINK]", user_page)
         body = body.replace("[UNSUBSCRIBE]", one_click_unsubscribe)
 
