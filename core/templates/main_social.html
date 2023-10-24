@@ -85,6 +85,7 @@
 			
 				{% for social in socials %}
 					
+					<a name="social_{{social.id}}" ></a>
 					<div class="card mt-3">
 						<div class="card-body">
 						
@@ -104,44 +105,129 @@
 			
 							{{ social.details | safe }}
 							
+							<!-- Do we allow booking -->
+							{% if social.sign_up %}
+								<hr>
+								<h4>Attendees:</h4>
+							
+								{% if current_user.is_authenticated: %}
+							
+									{% if not current_user.readwrite() %}
+								
+										<!-- User is untrusted -->
+										{% for voter in social.attendees %}
+											<!-- NO name shown on hover over -->
+											<img src="{{ voter | gravatar }}"
+									             width="40"
+											     style="border-radius: 50%;"/>
+										{% endfor %}
+									
+									{% else %}
+									
+										<!-- User is Trusted -->
+										{% if is_in_list(current_user.email, social.attendees) %}
+											
+											<!-- Show user as first icon WITH name on hover over -->
+											<img title="{{ get_user_name(current_user.email) }}"
+											     src="{{ current_user.email | gravatar }}"
+										         width="40"
+												 style="border-radius: 50%;"/>
+									
+											{% for voter in social.attendees %}
+												{% if voter != current_user.email %}
+													<!-- Everyone else WITH name on hover over -->
+													<img title="{{ get_user_name(voter) }}"
+													     src="{{ voter | gravatar }}"
+												         width="40"
+														 style="border-radius: 50%;"/>
+												{% endif %}
+											{% endfor %}
+									
+										{% else %}
+									
+											<!-- Logged in, but not voted -->
+											{% for voter in social.attendees %}
+												<!-- Everyone WITH name on hover over -->
+												<img title="{{ get_user_name(voter) }}"
+												     src="{{ voter | gravatar }}"
+										             width="40"
+												     style="border-radius: 50%;"/>
+											{% endfor %}
+									
+										{% endif %}
+									
+									{% endif %}
+								
+								{% else %}
+								
+									<!-- Not logged in -->
+									{% for voter in social.attendees %}
+										<!-- Everyone WITH name on hover over -->
+										<img src="{{ voter | gravatar }}"
+								             width="40"
+										     style="border-radius: 50%;"/>
+									{% endfor %}
+								
+								{% endif %}
+							
+							{% endif %}
+							
 						</div>
 					</div>
 			
 					<!-- Admin and owner can edit / delete the event -->
 					{% if current_user.is_authenticated %}
-					<div>
-						
-						{% if social.show_ics %}
-						
-							<!-- Download ics -->
-							<a href="{{ url_for('download_ics', social_id=social.id) }}">
-		                        <button class="btn btn-sm btn-primary mr-2"><i class="fa-regular fa-calendar-plus"></i></button>
-							</a>
-			
-						{% else %}
+						<div>
 							
-							<!-- ics is locked out -->
-							<button class="btn btn-sm btn-primary disabled mr-2">
-								<i class="fa-regular fa-calendar-plus"></i>
-								<i class="fa-solid fa-lock"></i>
-							</button>
+							<!-- ICS option -->
+							{% if social.show_ics %}
 							
-						{% endif %}
-						
-						{% if current_user.admin() or current_user.email == social.email %}
+								<!-- Download ics -->
+								<a href="{{ url_for('download_ics', social_id=social.id) }}">
+			                        <button class="btn btn-sm btn-primary mr-2"><i class="fa-regular fa-calendar-plus"></i></button>
+								</a>
+				
+							{% else %}
 								
-								<!-- Edit social -->
-								<a href="{{ url_for('add_social', social_id=social.id) }}">
-			                        <button class="btn btn-sm btn-secondary mr-2">Edit</button>
-					            </a>
+								<!-- ics is locked out -->
+								<button class="btn btn-sm btn-primary disabled mr-2">
+									<i class="fa-regular fa-calendar-plus"></i>
+									<i class="fa-solid fa-lock"></i>
+								</button>
+								
+							{% endif %}
+							
+							<!-- Admin / Owner options -->
+							{% if current_user.admin() or current_user.email == social.email %}
 								
 								<!-- Delete social -->
 								<a data-toggle="modal" data-target="#deleteSocial{{ social.id }}">
-			                        <button class="btn btn-sm btn-danger">DEL</button>
+			                        <button class="btn btn-sm btn-danger float-right my-2 ml-2">DEL</button>
 					            </a>
-								
+							
+								<!-- Edit social -->
+								<a href="{{ url_for('add_social', social_id=social.id) }}">
+			                        <button class="btn btn-sm btn-secondary float-right my-2">Edit</button>
+					            </a>
 							
 							{% endif %}
+							
+							<!-- Sign up / Sign off -->
+							{% if social.sign_up %}
+								
+								<!-- Have we already said yes? -->
+								{% if is_in_list(current_user.email, social.attendees) %}
+									<a href="{{ url_for('social_cant', social_id=social.id) }}">
+			                            <button class="btn btn-sm btn-warning my-2">CAN'T MAKE IT NOW</button>
+					                </a>
+								{% else %}
+									<a href="{{ url_for('social_can', social_id=social.id) }}">
+			                            <button class="btn btn-sm btn-primary my-2">I'M COMING</button>
+					                </a>
+								{% endif %}
+							
+							{% endif %}
+							
 						</div>
 					{% endif %}
 			
@@ -199,6 +285,8 @@
 		<div class="row mt-3">
 			<div class="col-lg-8 col-md-10 mx-auto">
 			
+				<hr>
+				
 				<!-- Add social button -->
 				<a href="{{ url_for('add_social', date=None) }}">
 					<button type="button" class="btn btn-primary float-right">Add social</button>
@@ -220,6 +308,23 @@
 		</div>
 	</div>
 </div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                              Script to allow page jump to anchor                               -->
+<!---------------------------------------------------------------------------------------------------->
+
+<script>
+	
+	{% if anchor %}
+	    
+        /* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+	
+	{% endif %}
+	
+</script>
+
 
 
 

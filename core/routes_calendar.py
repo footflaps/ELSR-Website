@@ -74,7 +74,7 @@ def calendar():
             try_month = -1
 
         # Better check it is a real date and not just random numbers
-        if 0 <= try_month <= 11 \
+        if 1 <= try_month <= 12 \
                 and start_year - 1 <= try_year <= start_year + 1:
             start_year = try_year
             start_month = try_month

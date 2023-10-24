@@ -29,6 +29,9 @@ SOCIAL_FORM_PUBLIC = "Public (Anyone on the internet)"
 # Don't change these as they are in the db
 SOCIAL_DB_PRIVATE = "PRIVATE"
 SOCIAL_DB_PUBLIC = "PUBLIC"
+SIGN_UP_YES = "Absolutely"
+SIGN_UP_NO = "I just don't care"
+SIGN_UP_CHOICES = [SIGN_UP_NO, SIGN_UP_YES]
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -191,6 +194,7 @@ def create_social_form(admin: bool):
                                          choices=[SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC], validators=[])
         details = CKEditorField("When, where, dress code etc:",
                                 validators=[InputRequired("Please provide some details.")])
+        sign_up = SelectField("Do you *need* people to sign up?", choices=SIGN_UP_CHOICES, validators=[])
 
         cancel = SubmitField("Maybe not")
         submit = SubmitField("Go for it!")

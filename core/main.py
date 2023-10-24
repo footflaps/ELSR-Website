@@ -52,6 +52,7 @@ from core.routes_admin_maps import enable_maps
 from core.routes_polling import add_poll
 from core.routes_polling_voting import swap_vote
 from core.routes_socials import add_social
+from core.routes_social_signup import social_cant
 from core.routes_errors import csrf_error
 
 

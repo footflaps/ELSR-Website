@@ -5,6 +5,7 @@ from datetime import datetime
 from ics import Calendar as icsCalendar, Event as icsEvent
 import os
 from threading import Thread
+import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -20,7 +21,7 @@ from core import app, current_year, live_site
 
 from core.db_users import update_last_seen, logout_barred_user
 from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
-    SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC
+                           SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.dB_events import Event
 from core.db_users import User
 from core.subs_email_sms import send_social_notification_emails
@@ -108,6 +109,10 @@ def add_social():
                 form.destination_hidden.data = SOCIAL_FORM_PRIVATE
             else:
                 form.destination_hidden.data = SOCIAL_FORM_PUBLIC
+            if social.sign_up == "True":
+                form.sign_up.data = SIGN_UP_YES
+            else:
+                form.sign_up.data = SIGN_UP_NO
 
             # Admin owner option
             if current_user.admin():
@@ -188,6 +193,11 @@ def add_social():
             new_social.privacy = SOCIAL_DB_PUBLIC
         else:
             new_social.privacy = SOCIAL_DB_PRIVATE
+        # Handle sign ups
+        if form.sign_up.data == SIGN_UP_YES:
+            social.sign_up = "True"
+        else:
+            social.sign_up = "False"
 
         # ----------------------------------------------------------- #
         # Add to the db
@@ -202,7 +212,8 @@ def add_social():
             else:
                 flash("Social added to Calendar!")
                 Thread(target=send_social_notification_emails, args=(new_social,)).start()
-            return redirect(url_for('calendar'))
+            # Show the calendar on a page with the social date visible
+            return redirect(url_for('calendar', date=social.date))
 
         else:
             # Should never happen, but...
@@ -231,7 +242,7 @@ def add_social():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Socials
+# Show all socials for a given date
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/social", methods=['GET'])
@@ -242,6 +253,7 @@ def social():
     # Did we get passed a date? (optional)
     # ----------------------------------------------------------- #
     date = request.args.get('date', None)
+    anchor = request.args.get('anchor', None)
 
     # ----------------------------------------------------------- #
     # Get our socials
@@ -258,6 +270,14 @@ def social():
     # Tweak the data before we show it
     # ----------------------------------------------------------- #
     for social in socials:
+        # Convert attendees from string to list
+        if social.attendees:
+            social.attendees = json.loads(social.attendees)
+        else:
+            social.attendees = []
+        # Swap 'True' / 'False' in db for boolean for jinja
+        social.sign_up = social.sign_up == "True"
+
         # Add more friendly start time
         if social.start_time:
             social.start_time_txt = f"{social.start_time[0:2]}:{social.start_time[2:4]}"
@@ -281,7 +301,8 @@ def social():
         else:
             social.show_ics = True
 
-    return render_template("main_social.html", year=current_year, socials=socials, date=date, live_site=live_site())
+    return render_template("main_social.html", year=current_year, socials=socials, date=date, live_site=live_site(),
+                           anchor=anchor)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
