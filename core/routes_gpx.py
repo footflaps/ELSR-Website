@@ -702,7 +702,18 @@ def gpx_download2():
         flash("Sorry, we couldn't find that email address in the database!")
         return abort(404)
 
+    # ----------------------------------------------------------- #
+    # Check user isn't banned
+    # ----------------------------------------------------------- #
+    if user.blocked():
+        app.logger.debug(f"gpx_download2(): User account blocked, email = '{email}'.")
+        Event().log_event("gpx_download2 Fail", f" User account blocked, email = '{email}'.")
+        flash("Sorry, but your account has been locked!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
     # Validate download code
+    # ----------------------------------------------------------- #
     if code != user.gpx_download_code(gpx.id):
         app.logger.debug(f"gpx_download2(): Passed invalid download code = '{code}'.")
         Event().log_event("gpx_download2 Fail", f"Passed invalid download code = '{code}'.")
