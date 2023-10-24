@@ -647,8 +647,10 @@ def route_download(gpx_id):
     # This is the filename the user will see
     download_name = f"ELSR_{gpx.name.replace(' ', '_')}.gpx"
 
-    app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
-    Event().log_event("GPX Downloaded", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
+    app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}) to '{current_user.email}', "
+                     f"filename = '{filename}'.")
+    Event().log_event("GPX Downloaded", f"Serving GPX gpx_id = '{gpx_id}' to '{current_user.email}', "
+                                        f"filename = ({gpx.name}).")
     return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
                                path=os.path.basename(gpx.filename),
                                download_name=download_name)
@@ -760,8 +762,10 @@ def gpx_download2():
     # This is the filename the user will see
     download_name = f"ELSR_{gpx.name.replace(' ', '_')}.gpx"
 
-    app.logger.debug(f"gpx_download2d(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}), filename = '{filename}'.")
-    Event().log_event("gpx_download2", f"Serving GPX gpx_id = '{gpx_id}' ({gpx.name}).")
+    app.logger.debug(f"gpx_download2d(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}) to '{user.email}', "
+                     f"filename = '{filename}'.")
+    Event().log_event("gpx_download2", f"Serving GPX gpx_id = '{gpx_id}' to '{user.email}', "
+                                       f"filename = ({gpx.name}).")
     return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
                                path=os.path.basename(gpx.filename),
                                download_name=download_name)
