@@ -195,9 +195,9 @@ def add_social():
             new_social.privacy = SOCIAL_DB_PRIVATE
         # Handle sign ups
         if form.sign_up.data == SIGN_UP_YES:
-            social.sign_up = "True"
+            new_social.sign_up = "True"
         else:
-            social.sign_up = "False"
+            new_social.sign_up = "False"
 
         # ----------------------------------------------------------- #
         # Add to the db
@@ -212,8 +212,8 @@ def add_social():
             else:
                 flash("Social added to Calendar!")
                 Thread(target=send_social_notification_emails, args=(new_social,)).start()
-            # Show the calendar on a page with the social date visible
-            return redirect(url_for('calendar', date=social.date))
+            # Back to socials page showing the new social
+            return redirect(url_for('social', date=new_social.date))
 
         else:
             # Should never happen, but...
