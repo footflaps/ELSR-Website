@@ -114,6 +114,25 @@ def forbidden(e):
 
 
 # ------------------------------------------------------------------------------------------------------------- #
+# 403: Forbidden - not readwrite
+# ------------------------------------------------------------------------------------------------------------- #
+@app.route('/403rw', methods=['GET'])
+def not_rw():
+    # What page were they looking for?
+    requested_route = request.path
+    users_ip = user_ip()
+
+    # Log error in event log
+    app.logger.debug(f"403: Not readwrite for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
+    Event().log_event("403", f"Not readwrite for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
+
+    # note that we set the 403 status explicitly
+    return render_template('403rw.html', year=current_year, live_site=live_site()), 403
+
+
+# ------------------------------------------------------------------------------------------------------------- #
 # 404: Not Found
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(404)

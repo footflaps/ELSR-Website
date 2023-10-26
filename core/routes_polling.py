@@ -4,6 +4,7 @@ from werkzeug import exceptions
 from datetime import datetime
 import json
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -155,7 +156,7 @@ def poll_details(poll_id):
             Event().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You don't have permission to see private polls.")
             flash("Please contact an Admin via your user page.")
-            return abort(403)
+            return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     #   Check poll hasn't timed out
