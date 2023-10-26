@@ -19,6 +19,14 @@ from core.gravatar_hack import Gravatar
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Useful to know if this is the live site or not
+# -------------------------------------------------------------------------------------------------------------- #
+
+def live_site():
+    return os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -44,10 +52,10 @@ GLOBAL_FLASH = "Sunday rides now meet at 9am at Bean Theory!"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import env vars if on web server
+# Import env vars if on live web server (test site uses Pycharm Env Vars)
 # -------------------------------------------------------------------------------------------------------------- #
 
-if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+if live_site():
     sys.path.insert(1, '/home/ben_freeman_eu/elsr_website/ELSR-Website/')
     import env_vars
 
@@ -65,7 +73,7 @@ GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 # Initialise Sentry (only for live site)
 # -------------------------------------------------------------------------------------------------------------- #
 
-if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
+if live_site():
     sentry_sdk.init(
         dsn=os.environ['ELSR_SENTRY_DSN'],
         integrations=[
@@ -207,11 +215,6 @@ def delete_file_if_exists(filename):
             return False
     # If file not there, return True as can continue etc
     return True
-
-
-# Useful to know if this is the live site or not
-def live_site():
-    return os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py")
 
 
 def user_ip():
