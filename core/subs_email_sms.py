@@ -12,10 +12,16 @@ from datetime import datetime
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app
+from core import app, live_site
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import our classes
+# -------------------------------------------------------------------------------------------------------------- #
+
 from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
-                          SOCIAL_NOTIFICATION, BLOG_NOTIFICATION
+                          SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
 from core.db_messages import Message, ADMIN_EMAIL
 from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES
 from core.db_social import Socials
@@ -199,6 +205,15 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
     one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
 
     # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
+
+    # ----------------------------------------------------------- #
     # Send an email
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
@@ -285,6 +300,15 @@ def send_one_social_notification_email(user: User(), social: Socials()):
     social_link = f"https://www.elsr.co.uk/social?date={date}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
     one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
+
+    # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
 
     # ----------------------------------------------------------- #
     # Send an email
@@ -392,6 +416,15 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
 
     # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
+
+    # ----------------------------------------------------------- #
     # Send an email
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
@@ -484,6 +517,15 @@ def send_message_notification_email(message: Message(), user: User()):
     one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
 
     # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
+
+    # ----------------------------------------------------------- #
     # Send an email
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
@@ -560,6 +602,15 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
     body = body.replace("[ACCOUNT_LINK]", user_page)
 
     # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
+
+    # ----------------------------------------------------------- #
     # Send the email
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
@@ -590,6 +641,12 @@ def send_verification_email(target_email, user_name, code):
     # ----------------------------------------------------------- #
     target_email = unidecode(target_email)
     user_name = unidecode(user_name)
+
+    # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        return
 
     # ----------------------------------------------------------- #
     # Send an email
@@ -626,6 +683,12 @@ def send_reset_email(target_email, user_name, code):
     # ----------------------------------------------------------- #
     target_email = unidecode(target_email)
     user_name = unidecode(user_name)
+
+    # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        return
 
     # ----------------------------------------------------------- #
     # Send an email
@@ -732,6 +795,18 @@ def send_system_alert_email(body):
 # Send SMS for Two Factor Authentication
 # -------------------------------------------------------------------------------------------------------------- #
 def send_2fa_sms(user):
+    # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
+
+    # ----------------------------------------------------------- #
+    # Send SMS via Twilio
+    # ----------------------------------------------------------- #
     client = Client(twilio_account_sid, twilio_auth_token)
     message = client.messages.create(
         body=f"2FA URL: https://www.elsr.co.uk/{url_for('twofa_login')}?code={user.verification_code}"
@@ -747,6 +822,18 @@ def send_2fa_sms(user):
 # Send SMS to verify phone number is correct
 # -------------------------------------------------------------------------------------------------------------- #
 def send_sms_verif_code(user):
+    # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
+
+    # ----------------------------------------------------------- #
+    # Send SMS via Twilio
+    # ----------------------------------------------------------- #
     client = Client(twilio_account_sid, twilio_auth_token)
     message = client.messages.create(
         body=f"Mobile verification URL: https://www.elsr.co.uk{url_for('mobile_verify')}?code={user.verification_code}"
@@ -762,6 +849,15 @@ def send_sms_verif_code(user):
 # Generic send SMS
 # -------------------------------------------------------------------------------------------------------------- #
 def send_sms(user, body):
+    # ----------------------------------------------------------- #
+    # Don't message from test site
+    # ----------------------------------------------------------- #
+    if not live_site():
+        # Only message developer
+        if user.id != SUPER_ADMIN_USER_ID:
+            # Suppress SMS
+            return
+
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
