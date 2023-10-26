@@ -193,6 +193,7 @@ gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=Fa
 # Year for (C)
 current_year = date.today().year
 
+
 def is_mobile():
     user_agent_details = request.user_agent.string
     phones = ["iphone", "android", "mobile"]
