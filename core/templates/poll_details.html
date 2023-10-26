@@ -111,7 +111,7 @@
 						<div class="mt-5">
 							
 							<strong class="float-left">
-								<i class="fa-regular fa-circle-dot fa-xl"></i> &nbsp; {{ option }}
+								<i class="fa-regular fa-circle-dot fa-xl"></i> &nbsp; {{ option | safe }}
 							</strong>
 							
 							{% if poll.status == POLL_OPEN %}
