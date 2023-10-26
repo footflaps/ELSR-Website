@@ -79,23 +79,23 @@
                     </tr>
                 </thead>
 		
-<!--				<tbody>-->
-<!--					{% for gpx in gpxes: %}-->
-<!--				-->
-<!--						&lt;!&ndash; Each GPX entry &ndash;&gt;-->
-<!--						<tr>-->
-<!--							<td scope="row">{{ gpx.num_downloads }}</td>-->
-<!--							<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{ gpx.name }}</a></td>-->
-<!--							<td scope="row">{{ gpx.length_km }}</td>-->
-<!--	                        <td scope="row">{{ gpx.ascent_m }}</td>-->
-<!--							<td scope="row">{{ gpx.type }}</td>-->
-<!--							{% if not mobile %}-->
-<!--								<td scope="row">{{ get_user_name(gpx.email) }}</td>-->
-<!--							{% endif %}-->
-<!--					    </tr>-->
-<!--				-->
-<!--					{% endfor %}-->
-<!--				</tbody>-->
+				<tbody>
+					{% for cafe in cafes: %}
+				
+						<!-- Each cafe -->
+						<tr>
+							<td scope="row">{{ cafe['visits'] }}</td>
+							<td scope="row">
+								<a href="{{ url_for('cafe_details', cafe_id=cafe['id']) }}">
+									{{ cafe['name'] }}
+								</a>
+							</td>
+							<td scope="row">{{ cafe['routes'] }}</td>
+	                        <td scope="row">{{ cafe['rating'] }}</td>
+					    </tr>
+				
+					{% endfor %}
+				</tbody>
 			
 			</table>
 			

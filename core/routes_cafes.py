@@ -123,12 +123,26 @@ def cafe_top10():
                     cafes[cafe_id] = 1
                 else:
                     cafes[cafe_id] += 1
+    # Sort dictionary
+    sorted_cafes = dict(reversed(sorted(cafes.items(), key=lambda item: item[1])))
 
-
-
+    # Build list for jinja
+    cafes = []
+    for index, data in sorted_cafes.items():
+        cafe = Cafe().one_cafe(index)
+        if cafe:
+            cafes.append({"name": cafe.name,
+                          "id": cafe.id,
+                          "visits": data,
+                          "routes": len(Gpx().find_all_gpx_for_cafe(cafe.id, current_user)),
+                          "rating": cafe.rating,
+                          })
+        if len(cafes) >= 10:
+            break
 
     # Render template
-    return render_template("cafe_top10.html", year=current_year, mobile=is_mobile(), live_site=live_site())
+    return render_template("cafe_top10.html", year=current_year, mobile=is_mobile(), live_site=live_site(),
+                           cafes=cafes)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
