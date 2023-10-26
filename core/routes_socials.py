@@ -78,7 +78,7 @@ def add_social():
         app.logger.debug(f"add_social(): Rejected request for '{current_user.email}' as no permissions.")
         Event().log_event("Add Social Fail", f"Rejected request for '{current_user.email}' as no permissions.")
         flash("Sorry, you do not have write permissions.")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Need a form
@@ -441,7 +441,7 @@ def download_ics():
         Event().log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
                                                  f"social_id = '{social_id}' as Private.")
         flash("Private events are for regular riders only!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Create ics file

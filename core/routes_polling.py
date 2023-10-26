@@ -278,7 +278,7 @@ def add_poll():
         app.logger.debug(f"add_poll(): User doesn't have readwrite!")
         Event().log_event("add_poll Fail", f"User doesn't have readwrite!")
         flash("You don't have permission to create polls!")
-        abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Manage form
@@ -442,7 +442,7 @@ def edit_poll():
                          f"poll_id = '{poll_id}'.")
         Event().log_event("edit_poll Fail", f"Refusing permission for '{current_user.email}', "
                                             f"poll_id = '{poll_id}'.")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Get user's IP
@@ -490,7 +490,7 @@ def edit_poll():
         app.logger.debug(f"edit_poll(): User doesn't have readwrite!")
         Event().log_event("edit_poll Fail", f"User doesn't have readwrite!")
         flash("You don't have permission to edit polls!")
-        abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Manage form

@@ -106,7 +106,7 @@ def add_sell():
         app.logger.debug(f"add_sell(): Refusing permission for '{current_user.email}'.")
         Event().log_event("Add Sell Fail", f"Refusing permission for '{current_user.email}'.")
         flash("You do not have permission to add posts to the Classifieds!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Validate classified_id

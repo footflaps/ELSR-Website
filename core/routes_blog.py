@@ -98,7 +98,7 @@ def blog():
                 app.logger.debug(f"blog(): Refusing permission for '{current_user.email}'.")
                 Event().log_event("Blog Fail", f"Refusing permission for '{current_user.email}'.")
                 flash("You do not have permission to see private blog posts!")
-                return abort(403)
+                return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # List of all news articles
@@ -182,7 +182,7 @@ def add_blog():
         app.logger.debug(f"add_blog(): Refusing permission for '{current_user.email}'.")
         Event().log_event("Add Blog Fail", f"Refusing permission for '{current_user.email}'.")
         flash("You do not have permission to add blog posts!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Validate blog_id

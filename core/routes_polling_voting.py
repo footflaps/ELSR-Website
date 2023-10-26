@@ -71,7 +71,7 @@ def remove_vote():
         app.logger.debug(f"remove_vote(): User not readwrite!")
         Event().log_event("remove_vote() Fail", f"User not readwrite!")
         flash("You don't have permission to vote!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # Poll must be open
     if poll.status != POLL_OPEN:
@@ -180,7 +180,7 @@ def add_vote():
         app.logger.debug(f"add_vote(): User not readwrite!")
         Event().log_event("add_vote() Fail", f"User not readwrite!")
         flash("You don't have permission to vote!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # Poll must be open
     if poll.status != POLL_OPEN:
@@ -293,7 +293,7 @@ def swap_vote():
         app.logger.debug(f"swap_vote(): User not readwrite!")
         Event().log_event("swap_vote() Fail", f"User not readwrite!")
         flash("You don't have permission to vote!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # Poll must be open
     if poll.status != POLL_OPEN:

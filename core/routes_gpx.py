@@ -269,7 +269,7 @@ def new_route():
     if not current_user.readwrite():
         Event().log_event("New GPX Fail", f"Refusing permission for user {current_user.email} to upload GPX route!")
         app.logger.debug(f"new_route(): Refusing permission for user {current_user.email} to upload GPX route!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Need a form for uploading
@@ -555,7 +555,7 @@ def flag_gpx():
                          f"gpx_id = '{gpx_id}'.")
         Event().log_event("Flag GPX Fail", f"Rejected request from '{current_user.email}' as no permissions, "
                                            f"gpx_id = '{gpx_id}'")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Send a message to Admin

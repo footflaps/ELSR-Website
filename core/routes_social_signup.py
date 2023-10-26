@@ -65,7 +65,7 @@ def social_can():
         app.logger.debug(f"social_can(): User not readwrite!")
         Event().log_event("social_can() Fail", f"User not readwrite!")
         flash("You don't have permission to sign up etc!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # Social must be subscribable
     if social.sign_up != "True":
@@ -151,7 +151,7 @@ def social_cant():
         app.logger.debug(f"social_cant(): User not readwrite!")
         Event().log_event("social_cant() Fail", f"User not readwrite!")
         flash("You don't have permission to sign up etc!")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # Social must be subscribable
     if social.sign_up != "True":

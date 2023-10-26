@@ -7,6 +7,7 @@ import json
 import os
 from threading import Thread
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -383,7 +384,7 @@ def add_ride():
         app.logger.debug(f"add_ride(): Refusing permission for '{current_user.email}'.")
         Event().log_event("Add Ride Fail", f"Refusing permission for '{current_user.email}'.")
         flash("You do not have permission to add events to the calendar.")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Validate ride_id

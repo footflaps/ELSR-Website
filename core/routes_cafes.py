@@ -326,7 +326,7 @@ def new_cafe():
             app.logger.debug(f"new_cafe(): Rejected request for '{current_user.email}' as no permissions.")
             Event().log_event("New Cafe Fail", f"Rejected request for '{current_user.email}' as no permissions.")
             flash("Sorry, you do not have write permissions.")
-            return abort(403)
+            return redirect(url_for("not_rw"))
 
         # Validate range
         range_km = mpu.haversine_distance((float(form.lat.data), float(form.lon.data)), (ELSR_LAT, ELSR_LON))
@@ -785,7 +785,7 @@ def flag_cafe():
                          f"cafe.id = '{cafe.id}'.")
         Event().log_event("Flag Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions, "
                                             f"cafe_id = '{cafe_id}'")
-        return abort(403)
+        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Send a message to Admin
