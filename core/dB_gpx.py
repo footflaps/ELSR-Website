@@ -172,7 +172,7 @@ class Gpx(db.Model):
                     # Update filename
                     if gpx.downloads:
                         emails = json.loads(gpx.downloads)
-                        if not email in emails :
+                        if not email in emails:
                             emails.append(email)
                     else:
                         # Start new set
