@@ -140,8 +140,14 @@ def selection_validation(form, field):
 # Custom validator for termination date (must be in the future)
 # -------------------------------------------------------------------------------------------------------------- #
 def date_validation(form, field):
+    # This will be '<class 'datetime.date'>'
     today_date = datetime.today().date()
+    # This can be either  '<class 'datetime.date'>' or '<class 'datetime.datetime'>'
     poll_date = field.data
+    # Convert to date object as we can't compare date vs datetime
+    if type(poll_date) == datetime:
+        poll_date = poll_date.date()
+    # Might not be set...
     if poll_date:
         if poll_date < today_date:
             raise validators.ValidationError('Poll must end in the future!')
