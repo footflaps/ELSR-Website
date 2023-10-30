@@ -7,7 +7,6 @@ import json
 import os
 from threading import Thread
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -25,7 +24,8 @@ from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START_TIMES, MEETING_OTHER
+from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START_TIMES, MEETING_OTHER, \
+    MEETING_BEAN, MEETING_COFFEE_VANS
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 
@@ -256,9 +256,9 @@ def weekend():
         return abort(404)
     else:
         # Get what we actually wanted from work_out_days()
-        days = tmp[0]               # eg 'Saturday'
-        dates_long = tmp[1]         # eg 'Saturday 25 August 2023'
-        dates_short = tmp[2]        # eg '01022023'
+        days = tmp[0]  # eg 'Saturday'
+        dates_long = tmp[1]  # eg 'Saturday 25 August 2023'
+        dates_short = tmp[2]  # eg '01022023'
 
     # ----------------------------------------------------------- #
     # Add GPX details
@@ -349,7 +349,8 @@ def weekend():
                     ride.missing_gpx = True
                     app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
                     Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
-                    flash(f"Looks like GPX file for ride '{ride.destination}' (ride.id = {ride.id}, leader = '{ride.leader}') has been deleted!")
+                    flash(
+                        f"Looks like GPX file for ride '{ride.destination}' (ride.id = {ride.id}, leader = '{ride.leader}') has been deleted!")
 
             else:
                 # Missing GPX row in the table
@@ -502,7 +503,15 @@ def add_ride():
         # Start time and location
         start_details = split_start_string(ride.start_time)
         form.start_time.data = start_details['time']
-        form.start_location.data = start_details['place']
+        place = start_details['place']
+        if place == MEETING_BEAN \
+                or place == MEETING_COFFEE_VANS:
+            # One of our two default locations
+            form.start_location.data = place
+        else:
+            # "Other.." category
+            form.start_location.data = MEETING_OTHER
+            form.other_location.data = place
 
         # Cafe:
         if cafe:

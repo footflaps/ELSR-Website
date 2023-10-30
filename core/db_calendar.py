@@ -39,8 +39,10 @@ DEFAULT_START_TIMES = {"Monday": "08:00 from Bean Theory Cafe",
                        }
 
 MEETING_OTHER = "Other..."
-MEETING_CHOICES = ["Bean Theory Cafe",
-                   "Coffe Vans by the Station",
+MEETING_BEAN = "Bean Theory Cafe"
+MEETING_COFFEE_VANS = "Coffee Vans by the Station"
+MEETING_CHOICES = [MEETING_BEAN,
+                   MEETING_COFFEE_VANS,
                    MEETING_OTHER]
 
 # -------------------------------------------------------------------------------------------------------------- #
