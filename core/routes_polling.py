@@ -1,5 +1,5 @@
 from flask import render_template, url_for, request, flash, redirect, abort
-from flask_login import login_required, current_user
+from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime
 import json
@@ -16,7 +16,7 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user
+from core.db_users import User, update_last_seen, logout_barred_user, login_required
 from core.dB_events import Event
 from core.db_polls import Polls, create_poll_form, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 

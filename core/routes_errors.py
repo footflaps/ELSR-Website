@@ -133,6 +133,26 @@ def not_rw():
 
 
 # ------------------------------------------------------------------------------------------------------------- #
+# 403: Forbidden - not logged in
+# ------------------------------------------------------------------------------------------------------------- #
+@app.route('/403login', methods=['GET'])
+def not_logged_in():
+    # What page were they looking for?
+    requested_route = request.path
+    users_ip = user_ip()
+
+    # Log error in event log
+    app.logger.debug(f"403: Not logged in for '{requested_route}', previous page was "
+                     f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
+    Event().log_event("403", f"Not logged in for '{requested_route}', previous page was "
+                             f"'{request.referrer}', '{users_ip}'.")
+
+    # note that we set the 403 status explicitly
+    return render_template('403login.html', year=current_year, live_site=live_site()), 403
+
+
+
+# ------------------------------------------------------------------------------------------------------------- #
 # 404: Not Found
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(404)

@@ -1,5 +1,5 @@
 from flask import redirect, url_for, flash, request, abort
-from flask_login import current_user, login_required
+from flask_login import current_user
 from werkzeug import exceptions
 
 
@@ -14,7 +14,7 @@ from core import app
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, admin_only, update_last_seen
+from core.db_users import User, admin_only, update_last_seen, login_required
 from core.dB_events import Event
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, boost_map_limit
 

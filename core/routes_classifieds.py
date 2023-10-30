@@ -1,10 +1,10 @@
-from flask import render_template, request, flash, abort, redirect, url_for, send_from_directory
-from flask_login import login_required, current_user
+from flask import render_template, request, flash, abort, redirect, url_for
+from flask_login import  current_user
 from werkzeug import exceptions
 import os
-from datetime import date, datetime, timedelta
+from datetime import date
 from threading import Thread
-from ics import Calendar as icsCalendar, Event as icsEvent
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -12,11 +12,12 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 
 from core import app, current_year, live_site
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, get_user_name
+from core.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required
 from core.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER, create_classified_form, MAX_NUM_PHOTOS, SELL, \
                                 STATUS_SOLD
 from core.dB_events import Event

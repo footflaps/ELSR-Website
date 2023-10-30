@@ -1,5 +1,5 @@
 from flask import url_for, request, flash, redirect, abort
-from flask_login import login_required, current_user
+from flask_login import current_user
 import json
 
 
@@ -14,7 +14,7 @@ from core import app
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import update_last_seen, logout_barred_user
+from core.db_users import update_last_seen, logout_barred_user, login_required
 from core.dB_events import Event
 from core.db_social import Socials
 

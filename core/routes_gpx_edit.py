@@ -1,7 +1,8 @@
 from flask import render_template, redirect, url_for, flash, request, abort
-from flask_login import login_required, current_user
+from flask_login import current_user
 import os
 from threading import Thread
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -9,12 +10,13 @@ from threading import Thread
 
 from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, live_site
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
+from core.db_users import User, update_last_seen, logout_barred_user, login_required
 from core.dB_gpx import Gpx, create_rename_gpx_form
-from core.db_users import User, update_last_seen, logout_barred_user
 from core.dB_events import Event
 from core.subs_gpx import check_new_gpx_with_all_cafes
 from core.subs_google_maps import start_and_end_maps_native_gm, MAP_BOUNDS, google_maps_api_key, count_map_loads

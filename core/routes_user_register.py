@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session
-from flask_login import login_user, current_user, login_required
+from flask_login import login_user, current_user
 from werkzeug import exceptions
 from threading import Thread
 import os
@@ -17,7 +17,7 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, CreateUserForm, VerifyUserForm, TwoFactorLoginForm, DELETED_NAME, \
+from core.db_users import User, CreateUserForm, VerifyUserForm, TwoFactorLoginForm, DELETED_NAME, login_required, \
                           update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX, VerifySMSForm
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event

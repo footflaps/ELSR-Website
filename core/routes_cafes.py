@@ -1,10 +1,11 @@
 from flask import render_template, redirect, url_for, flash, request, abort
-from flask_login import login_required, current_user
+from flask_login import current_user
 from datetime import date
 from werkzeug import exceptions
 import mpu
 import os
 from threading import Thread
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -12,10 +13,12 @@ from threading import Thread
 
 from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO_GROUP, DECAFF_GROUP, MIXED_GROUP
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
+from core.db_users import User, update_last_seen, logout_barred_user, login_required
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes
@@ -24,10 +27,10 @@ from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, EL
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
-from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 from core.subs_cafe_photos import update_cafe_photo
 from core.db_calendar import Calendar
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used to verify sensible cafe coordinates

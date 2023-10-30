@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory
-from flask_login import login_required, current_user
+from flask_login import current_user
 from werkzeug import exceptions
 import os
 from threading import Thread
@@ -16,8 +16,8 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
+from core.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required
 from core.dB_gpx import Gpx, UploadGPXForm
-from core.db_users import User, update_last_seen, logout_barred_user, get_user_name
 from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.subs_gpx import allowed_file, gpx_direction

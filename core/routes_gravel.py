@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort, send_from_directory, url_for, redirect
+from flask import render_template, flash
 from flask_login import current_user
 import gpxpy
 import gpxpy.gpx
@@ -17,8 +17,8 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, is_mobile, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen
-from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads, \
+from core.db_users import update_last_seen
+from core.subs_google_maps import google_maps_api_key, MAP_BOUNDS, count_map_loads, \
                                   create_polyline_set, MAX_NUM_GPX_PER_GRAPH
 from core.dB_gpx import Gpx
 from core.subs_gpx import ELSR_LAT, ELSR_LON

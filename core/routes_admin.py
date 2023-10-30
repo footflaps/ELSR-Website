@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort
-from flask_login import current_user, login_required
+from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime
 import os
@@ -18,7 +18,7 @@ from core import app, current_year, is_mobile, live_site
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID
+from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID, login_required
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.db_calendar import Calendar

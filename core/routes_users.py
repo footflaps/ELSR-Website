@@ -1,5 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
-from flask_login import current_user, logout_user, login_required
+from flask_login import current_user, logout_user
 from werkzeug import exceptions
 from urllib.parse import urlparse
 import os
@@ -20,7 +20,7 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, update_last_seen, logout_barred_user, DELETED_NAME, ChangeUserDetailsForm, \
-    NOTIFICATIONS_DEFAULT_VALUE
+                          NOTIFICATIONS_DEFAULT_VALUE, login_required
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment

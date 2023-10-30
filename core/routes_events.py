@@ -1,5 +1,5 @@
 from flask import request, abort, flash, redirect, url_for
-from flask_login import login_required, current_user
+from flask_login import current_user
 from werkzeug import exceptions
 
 
@@ -7,16 +7,15 @@ from werkzeug import exceptions
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, live_site
+from core import app
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our Event class
 # -------------------------------------------------------------------------------------------------------------- #
 
+from core.db_users import User, update_last_seen, admin_only, login_required
 from core.dB_events import Event
-from core.db_users import admin_only
-from core.db_users import User, update_last_seen
 
 
 # -------------------------------------------------------------------------------------------------------------- #

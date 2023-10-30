@@ -1,4 +1,4 @@
-from flask import abort, flash, request
+from flask import abort, flash, request, redirect, url_for
 from flask_login import UserMixin, current_user, logout_user
 from flask_wtf import FlaskForm
 from flask_ckeditor import CKEditorField
@@ -808,7 +808,7 @@ def random_code(num_digits):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Create a decorator for admin only
+# Decorator for admin only
 # -------------------------------------------------------------------------------------------------------------- #
 
 def admin_only(f):
@@ -834,6 +834,27 @@ def admin_only(f):
 
     return decorated_function
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Decorator for login required
+# -------------------------------------------------------------------------------------------------------------- #
+
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.is_authenticated:
+            # Otherwise continue with the route function
+            return f(*args, **kwargs)
+        else:
+            # Generate a custom 403 error
+            return redirect(url_for('not_logged_in'))
+
+    return decorated_function
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Decorator to update last seen
+# -------------------------------------------------------------------------------------------------------------- #
 
 def update_last_seen(f):
     @wraps(f)
@@ -862,6 +883,10 @@ def update_last_seen(f):
     return decorated_function
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Decorator to logout barred user
+# -------------------------------------------------------------------------------------------------------------- #
+
 def logout_barred_user(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -881,6 +906,32 @@ def logout_barred_user(f):
 
     return decorated_function
 
+
+
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Decorator for readwrite
+# -------------------------------------------------------------------------------------------------------------- #
+
+def must_be_readwrite(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated:
+            # Not logged in, so no idea who they are
+            return abort(403)
+        else:
+            user = User().find_user_from_id(current_user.id)
+            if user:
+                if not user.blocked():
+                    # Log out the user
+                    app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
+                    Event().log_event("Blocked User logout", "Logged out user as blocked")
+                    flash("You have been logged out.")
+                    logout_user()
+            return f(*args, **kwargs)
+
+    return decorated_function
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Export some functions to jinja that we want to use inside html templates

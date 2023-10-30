@@ -1,5 +1,5 @@
 from flask import render_template, url_for, request, flash, redirect, abort, send_from_directory
-from flask_login import login_required, current_user
+from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime
 from ics import Calendar as icsCalendar, Event as icsEvent
@@ -19,7 +19,7 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import update_last_seen, logout_barred_user
+from core.db_users import update_last_seen, logout_barred_user, login_required
 from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
                            SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.dB_events import Event

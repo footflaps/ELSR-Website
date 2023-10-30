@@ -1,5 +1,5 @@
 from flask import render_template, request, flash, abort, redirect, url_for, send_from_directory
-from flask_login import login_required, current_user
+from flask_login import current_user
 from werkzeug import exceptions
 import os
 from datetime import date, datetime, timedelta
@@ -18,7 +18,7 @@ from core import app, current_year, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID
+from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required
 from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_PHOTO_FOLDER, NO_CAFE, \
                          NO_GPX, DRUNK_OPTION, CCC_OPTION, EVENT_OPTION
 from core.dB_events import Event
