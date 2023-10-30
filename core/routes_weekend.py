@@ -25,7 +25,7 @@ from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.db_users import User, update_last_seen, logout_barred_user
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START_TIMES
+from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START_TIMES, MEETING_OTHER
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 
@@ -44,6 +44,9 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Work out which days we will display
+# -------------------------------------------------------------------------------------------------------------- #
 # The weekend page displays all the rides for the upcoming weekend. However, we may have been called with a date
 # for a weekend further in the future or in the past. The weekend may also be a BH (with a Friday, Monday or both
 # tagged on). If it is a BH Weekend, then we will also include the BH days in the WE page, but only if we have rides
@@ -176,6 +179,19 @@ def work_out_days(target_date_str):
     # Return the three data sets
     # ----------------------------------------------------------- #
     return [days, dates_long, dates_short]
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Extract start time and location from the form
+# -------------------------------------------------------------------------------------------------------------- #
+def create_start_string(form):
+    start_time = str(form.start_time.data).split(':')[:2]
+    print(f"start_time = '{start_time}'")
+    if form.start_location.data != MEETING_OTHER:
+        return f"{start_time[0]}:{start_time[1]} from {form.start_location.data}"
+    else:
+        return f"{start_time[0]}:{start_time[1]} from {form.other_location.data.strip()}"
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -498,8 +514,8 @@ def add_ride():
         else:
             form = create_ride_form(False)
 
-        if request.method == 'GET':
-            form.start.data = DEFAULT_START_TIMES['Saturday']
+        # if request.method == 'GET':
+        #     form.start.data = DEFAULT_START_TIMES['Saturday']
 
         # Pre-populate the data in the form, if we were passed one
         if start_date_str:
@@ -511,7 +527,7 @@ def add_ride():
                 request.method == 'GET':
             form.leader.data = current_user.name
 
-    # Are we posting the completed comment form?
+    # Are we posting the completed form?
     if request.method == 'POST' \
             and form.validate_on_submit():
         # ----------------------------------------------------------- #
@@ -520,16 +536,10 @@ def add_ride():
 
         # Detect cancel button
         if form.cancel.data:
+            # Abort now...
             return redirect(url_for('weekend', date=start_date_str))
 
-        # 1: Validate cafe (must be specified)
-        if form.destination.data == NEW_CAFE \
-                and form.new_destination.data == "":
-            flash("New cafe not specified!")
-            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                   live_site=live_site())
-
-        # 2: Check we can find cafe in the dB
+        # 1: Check we can find cafe in the dB
         if form.destination.data != NEW_CAFE:
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
@@ -546,12 +556,12 @@ def add_ride():
             # New cafe, not yet in database
             cafe = None
 
-        # 3: Validate GPX (must be specified)
+        # 2: Validate GPX (must be specified)
         if form.gpx_name.data == UPLOAD_ROUTE \
                 and not form.gpx_file.data:
             flash("You didn't select a GPX file to upload!")
 
-        # 4: Check we can find gpx in the dB
+        # 3: Check we can find gpx in the dB
         if form.gpx_name.data != UPLOAD_ROUTE:
             # Work out which GPX route they chose
             # eg "20: 'Mill End again', 107.6km / 838.0m"
@@ -568,7 +578,7 @@ def add_ride():
             # They are uploading their own GPX file
             gpx = None
 
-        # 5: Check route passes cafe (if both from comboboxes)
+        # 4: Check route passes cafe (if both from comboboxes)
         if gpx and cafe:
             match = False
             # gpx.cafes_passed is a json.dumps string, so need to convert back
@@ -581,7 +591,7 @@ def add_ride():
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                        live_site=live_site())
 
-        # 6: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
+        # 5: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
         if not current_user.admin():
             # Allow them to append eg "Simon" -> "Simon Bond" as some usernames are quite short
             if form.leader.data[0:len(current_user.name)] != current_user.name:
@@ -708,11 +718,14 @@ def add_ride():
 
         new_ride.date = start_date_str
         new_ride.leader = form.leader.data
-        new_ride.start_time = form.start.data
+        # Create our ride start string eg "8:00am from Bean Theory Cafe"
+        new_ride.start_time = create_start_string(form)
         if cafe:
+            # Existing cafe from db
             new_ride.destination = cafe.name
             new_ride.cafe_id = cafe.id
         else:
+            # New destination
             new_ride.destination = form.new_destination.data
             new_ride.cafe_id = None
         new_ride.group = form.group.data

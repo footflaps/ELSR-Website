@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, DateField, validators
+from wtforms import StringField, SubmitField, SelectField, DateField, validators, TimeField
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired
 import os
@@ -29,15 +29,19 @@ NEW_CAFE = "New cafe!"
 UPLOAD_ROUTE = "Upload my own route!"
 
 # Default option
-DEFAULT_START_TIMES = {"Monday": "8:00am from Bean Theory Cafe",
-                       "Tuesday": "8:00am from Bean Theory Cafe",
-                       "Wednesday": "8:00am from Bean Theory Cafe",
-                       "Thursday": "8:00am from Bean Theory Cafe",
-                       "Friday": "8:00am from Bean Theory Cafe",
-                       "Saturday": "8:00am from Bean Theory Cafe",
-                       "Sunday": "9:00am from Bean Theory Cafe",
+DEFAULT_START_TIMES = {"Monday": "08:00 from Bean Theory Cafe",
+                       "Tuesday": "08:00 from Bean Theory Cafe",
+                       "Wednesday": "08:00 from Bean Theory Cafe",
+                       "Thursday": "08:00 from Bean Theory Cafe",
+                       "Friday": "08:00 from Bean Theory Cafe",
+                       "Saturday": "08:00 from Bean Theory Cafe",
+                       "Sunday": "09:00 from Bean Theory Cafe",
                        }
 
+MEETING_OTHER = "Other..."
+MEETING_CHOICES = ["Bean Theory Cafe",
+                   "Coffe Vans by the Station",
+                   MEETING_OTHER]
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
@@ -202,6 +206,34 @@ def date_validation(form, field):
             raise validators.ValidationError('That date is in the past!')
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Custom validator for filling in New Start location (if they select Other, they must fill in the location)
+# -------------------------------------------------------------------------------------------------------------- #
+def start_validation(form, field):
+    start_option = form.start_location.data
+    if start_option == MEETING_OTHER:
+        if field.data.strip() == "":
+            raise validators.ValidationError(f"You must enter an alternate meeting point "
+                                             f"if you select '{MEETING_OTHER}'")
+    elif field.data.strip() != "":
+        raise validators.ValidationError(f"You must leave this blank unless you have selected '{MEETING_OTHER}'")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Custom validator for filling in Destination (if they select New Cafe, they must fill in the location)
+# -------------------------------------------------------------------------------------------------------------- #
+def destination_validation(form, field):
+    cafe_option = form.destination.data
+    if cafe_option == NEW_CAFE:
+        if field.data.strip() == "":
+            raise validators.ValidationError(f"You must enter the name of the new cafe if you select '{NEW_CAFE}'")
+    elif field.data.strip() != "":
+        raise validators.ValidationError(f"You must leave this blank unless you have selected '{NEW_CAFE}'")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# The form itself
+# -------------------------------------------------------------------------------------------------------------- #
 # We create the form in a function as the form's select fields have to updated as we add users and rides etc,
 # to databases. If we just create a class, then it runs once at start of day and never updates.
 
@@ -251,11 +283,20 @@ def create_ride_form(admin: bool, gpx_id=None):
         if admin:
             owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[DataRequired()])
 
+        # Leader and group
         leader = StringField("Ride Leader:", validators=[DataRequired()])
-        start = StringField("Start time and location:", validators=[DataRequired()])
-        destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
-        new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[])
         group = SelectField("What pace is the ride:", choices=GROUP_CHOICES, validators=[DataRequired()])
+
+        # Split start into three parts
+        start_time = TimeField("Meeting time:", format="%H:%M")
+        start_location = SelectField("Meeting point:", choices=MEETING_CHOICES)
+        other_location = StringField(f"New start location (use with '{MEETING_OTHER}'):", validators=[start_validation])
+
+        # Destination
+        destination = SelectField("Cafe:", choices=cafe_choices, validators=[DataRequired()])
+        new_destination = StringField("If you're going to a new cafe, pray tell:", validators=[destination_validation])
+
+        # Route details
         gpx_name = SelectField("Choose an existing route:", choices=gpx_choices, validators=[DataRequired()])
         gpx_file = FileField("or, upload your own GPX file:", validators=[])
 
