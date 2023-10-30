@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, DateField, TimeField
+from wtforms import StringField, SubmitField, SelectField, DateField, TimeField, validators
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from datetime import datetime
@@ -164,6 +164,17 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Custom validator for termination date (must be in the future)
+# -------------------------------------------------------------------------------------------------------------- #
+def date_validation(form, field):
+    today_date = datetime.today().date()
+    poll_date = field.data
+    if poll_date:
+        if poll_date < today_date:
+            raise validators.ValidationError("The date is in the past!")
+
+
 def create_social_form(admin: bool):
 
     class Form(FlaskForm):
@@ -171,7 +182,6 @@ def create_social_form(admin: bool):
         # ----------------------------------------------------------- #
         # Generate the list of users
         # ----------------------------------------------------------- #
-
         users = User().all_users_sorted()
         all_users = []
         for user in users:
@@ -180,7 +190,8 @@ def create_social_form(admin: bool):
         # ----------------------------------------------------------- #
         # The form itself
         # ----------------------------------------------------------- #
-        date = DateField("Which day is the social for:", format='%Y-%m-%d', validators=[])
+        date = DateField("Which day is the social for:", format='%Y-%m-%d',
+                         validators=[date_validation])
         start_time = TimeField("Start time:", format="%H:%M")
 
         # Admin can assign to any user
@@ -188,13 +199,22 @@ def create_social_form(admin: bool):
             owner = SelectField("Owner (Admin only field):", choices=all_users,
                                 validators=[InputRequired("Please enter an owner.")])
 
-        organiser = StringField("Organiser:", validators=[InputRequired("Please enter an organiser.")])
-        destination = StringField("Location (can be hidden):", validators=[InputRequired("Please enter a destination.")])
+        organiser = StringField("Organiser:",
+                                validators=[InputRequired("Please enter an organiser.")])
+
+        destination = StringField("Location (can be hidden):",
+                                  validators=[InputRequired("Please enter a destination.")])
+
         destination_hidden = SelectField("Social type:",
-                                         choices=[SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC], validators=[])
+                                         choices=[SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC],
+                                         validators=[])
+
         details = CKEditorField("When, where, dress code etc:",
                                 validators=[InputRequired("Please provide some details.")])
-        sign_up = SelectField("Do you *need* people to sign up?", choices=SIGN_UP_CHOICES, validators=[])
+
+        sign_up = SelectField("Do you *need* people to sign up?",
+                              choices=SIGN_UP_CHOICES,
+                              validators=[])
 
         cancel = SubmitField("Maybe not")
         submit = SubmitField("Go for it!")

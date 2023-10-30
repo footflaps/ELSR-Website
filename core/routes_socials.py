@@ -143,19 +143,6 @@ def add_social():
         if form.cancel.data:
             return redirect(url_for('calendar'))
 
-        # 1: Validate date (must be in the future)
-        if type(form.date.data) == datetime:
-            formdate = form.date.data.date()
-        else:
-            formdate = form.date.data
-        today = datetime.today().date()
-        # print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
-        app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
-        if formdate < today:
-            flash("The date is in the past!")
-            return render_template("calendar_add_social.html", year=current_year, form=form, social=social,
-                                   live_site=live_site())
-
         # ----------------------------------------------------------- #
         # We can now create / update the social object
         # ----------------------------------------------------------- #
