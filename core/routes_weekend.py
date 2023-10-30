@@ -837,7 +837,6 @@ def delete_ride():
     # Check the ride_id is valid
     # ----------------------------------------------------------- #
     ride = Calendar().one_ride_id(ride_id)
-
     if not ride:
         app.logger.debug(f"delete_ride(): Failed to locate ride with cafe_id = '{ride_id}'.")
         Event().log_event("Delete Ride Fail", f"Failed to locate ride with cafe_id = '{ride_id}'.")
