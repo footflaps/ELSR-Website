@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, DateField, FileField
+from wtforms import StringField, SubmitField, SelectField, DateField, FileField, validators
 from wtforms.validators import InputRequired, DataRequired
 from flask_ckeditor import CKEditorField
 import os
@@ -222,6 +222,17 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Custom validator for termination date (must be in the future)
+# -------------------------------------------------------------------------------------------------------------- #
+def date_validation(form, field):
+    today_date = datetime.today().date()
+    poll_date = field.data
+    if poll_date:
+        if poll_date < today_date:
+            raise validators.ValidationError("The date is in the past!")
+
+
 def create_blogs_form(admin: bool):
 
     class Form(FlaskForm):
@@ -260,7 +271,11 @@ def create_blogs_form(admin: bool):
         # ----------------------------------------------------------- #
 
         # When
-        date = DateField("Give the blog post a date:", format='%Y-%m-%d', validators=[])
+        # NB Only Admins can post events in the past
+        if admin:
+            date = DateField("Give the blog post a date:", format='%Y-%m-%d', validators=[])
+        else:
+            date = DateField("Give the blog post a date:", format='%Y-%m-%d', validators=[date_validation])
 
         # Admin can assign to any user
         if admin:
