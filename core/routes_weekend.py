@@ -2,7 +2,7 @@ from flask import render_template, url_for, request, flash, redirect, abort
 from flask_login import login_required, current_user
 from werkzeug import exceptions
 from bbc_feeds import weather
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 import json
 import os
 from threading import Thread
@@ -192,6 +192,22 @@ def create_start_string(form):
     else:
         return f"{start_time[0]}:{start_time[1]} from {form.other_location.data.strip()}"
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Split start string back into two parts
+# -------------------------------------------------------------------------------------------------------------- #
+def split_start_string(start_time):
+    # We expect the form "08:00 from Bean Theory Cafe" etc
+    # Get time as a string eg "08:24"
+    time_str = start_time.split(' ')[0]
+    # Convert to a time object
+    time_obj = time(int(time_str.split(':')[0]), int(time_str.split(':')[1]))
+    # Get location as a string
+    location = " ".join(start_time.split(' ')[2:])
+    # Return the two parts
+    return {"time": time_obj,
+            "place": location
+            }
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -470,9 +486,10 @@ def add_ride():
         # Ride leader
         form.leader.data = ride.leader
 
-        # Start time
-        if not form.start.data:
-            form.start.data = ride.start_time
+        # Start time and location
+        start_details = split_start_string(ride.start_time)
+        form.start_time.data = start_details['time']
+        form.start_location.data = start_details['place']
 
         # Cafe:
         if cafe:
