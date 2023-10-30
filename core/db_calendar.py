@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, DateField
+from wtforms import StringField, SubmitField, SelectField, DateField, validators
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired
 import os
@@ -191,6 +191,17 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Custom validator for termination date (must be in the future)
+# -------------------------------------------------------------------------------------------------------------- #
+def date_validation(form, field):
+    today_date = datetime.today().date()
+    poll_date = field.data
+    if poll_date:
+        if poll_date < today_date:
+            raise validators.ValidationError('That date is in the past!')
+
+
 # We create the form in a function as the form's select fields have to updated as we add users and rides etc,
 # to databases. If we just create a class, then it runs once at start of day and never updates.
 
@@ -229,7 +240,12 @@ def create_ride_form(admin: bool, gpx_id=None):
         # ----------------------------------------------------------- #
         # The form itself
         # ----------------------------------------------------------- #
-        date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
+        # Admins can create events in the past, users can't
+        # Mainly to allow me to backfill ride history
+        if admin:
+            date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[])
+        else:
+            date = DateField("Which day is the ride for:", format='%Y-%m-%d', validators=[date_validation])
 
         # Admins have the ability to assign the ride to another user
         if admin:

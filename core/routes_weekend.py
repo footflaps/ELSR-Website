@@ -44,6 +44,13 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
+# The weekend page displays all the rides for the upcoming weekend. However, we may have been called with a date
+# for a weekend further in the future or in the past. The weekend may also be a BH (with a Friday, Monday or both
+# tagged on). If it is a BH Weekend, then we will also include the BH days in the WE page, but only if we have rides
+# scheduled on the BH days. So this function works out the set of dates which we will display in the WE page. NB It
+# doesn't actually check for official Bank Holidays, it just looks for rides scheduled on the Friday or Monday. If
+# the function is called with a mid-week day, eg a random Wednesday, it will just return the date for that day.
+
 def work_out_days(target_date_str):
     # Step 1: Create a set of date strings eg ["23082023", "24082023" ]
     if target_date_str:
@@ -52,8 +59,10 @@ def work_out_days(target_date_str):
         # ----------------------------------------------------------- #
         # NB We may have been parsed garbage as the date
         try:
-            target_date = datetime(int(target_date_str[4:8]), int(target_date_str[2:4]), int(target_date_str[0:2]), 0,
-                                   00)
+            target_date = datetime(int(target_date_str[4:8]),
+                                   int(target_date_str[2:4]),
+                                   int(target_date_str[0:2]),
+                                   0, 00)
         except:
             # Flag back fail
             return None
@@ -166,7 +175,6 @@ def work_out_days(target_date_str):
     # ----------------------------------------------------------- #
     # Return the three data sets
     # ----------------------------------------------------------- #
-
     return [days, dates_long, dates_short]
 
 
@@ -292,7 +300,7 @@ def weekend():
                 if os.path.exists(filename):
                     ride.missing_gpx = False
                 else:
-                    # Missing GPX file (will only be shown to Admins)
+                    # Flag missing GPX file (will only be shown to Admins)
                     ride.missing_gpx = True
                     app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
                     Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
@@ -337,6 +345,7 @@ def weekend():
     for day in days:
         for item in bbc_weather:
             title = item['title'].split(':')
+            # Weather is titled 'Saturday', 'Sunday', etc or 'Today' - so we have to figure out what 'Today' is...
             if title[0] == day \
                     or today == day and title == "Today":
                 weather_data[day] = item['summary'].split(',')[0:7]
@@ -351,6 +360,7 @@ def weekend():
     if GLOBAL_FLASH:
         flash(GLOBAL_FLASH)
 
+    # Render the page
     return render_template("calendar_weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            days=days, dates_long=dates_long, dates_short=dates_short,
@@ -450,9 +460,11 @@ def add_ride():
 
         # Cafe:
         if cafe:
+            # One of our known set
             form.destination.data = cafe.combo_string()
             form.new_destination.data = ""
         else:
+            # Not in the database yet
             form.destination.data = NEW_CAFE
             form.new_destination.data = ride.destination
 
@@ -465,9 +477,11 @@ def add_ride():
         # Change submission button name
         form.submit.label.text = "Update Ride"
 
-        # Add warnings for GPX issues
+        # Check if GPX route is still marked private
         if not gpx.public():
             flash(f"Warning the GPX file '{gpx.name}' is still PRIVATE")
+
+        # Check if GPX file exists
         filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
         if not os.path.exists(filename):
             flash(f"Warning the GPX '{gpx.name}' file is MISSING! You can't use this route!")
@@ -508,28 +522,14 @@ def add_ride():
         if form.cancel.data:
             return redirect(url_for('weekend', date=start_date_str))
 
-        # 1: Validate date (must be in the future)
-        if type(form.date.data) == datetime:
-            formdate = form.date.data.date()
-        else:
-            formdate = form.date.data
-        today = datetime.today().date()
-        print(f"formdate is '{type(formdate)}', today is '{type(today)}'")
-        app.logger.debug(f"formdate is '{type(formdate)}', today is '{type(today)}'")
-        if formdate < today and \
-                not current_user.admin():
-            flash("The date is in the past!")
-            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                   live_site=live_site())
-
-        # 2: Validate cafe (must be specified)
+        # 1: Validate cafe (must be specified)
         if form.destination.data == NEW_CAFE \
                 and form.new_destination.data == "":
             flash("New cafe not specified!")
             return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                    live_site=live_site())
 
-        # 3: Check we can find cafe in the dB
+        # 2: Check we can find cafe in the dB
         if form.destination.data != NEW_CAFE:
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
@@ -546,12 +546,12 @@ def add_ride():
             # New cafe, not yet in database
             cafe = None
 
-        # 4: Validate GPX (must be specified)
+        # 3: Validate GPX (must be specified)
         if form.gpx_name.data == UPLOAD_ROUTE \
                 and not form.gpx_file.data:
             flash("You didn't select a GPX file to upload!")
 
-        # 5: Check we can find gpx in the dB
+        # 4: Check we can find gpx in the dB
         if form.gpx_name.data != UPLOAD_ROUTE:
             # Work out which GPX route they chose
             # eg "20: 'Mill End again', 107.6km / 838.0m"
@@ -568,7 +568,7 @@ def add_ride():
             # They are uploading their own GPX file
             gpx = None
 
-        # 6: Check route passes cafe (if both from comboboxes)
+        # 5: Check route passes cafe (if both from comboboxes)
         if gpx and cafe:
             match = False
             # gpx.cafes_passed is a json.dumps string, so need to convert back
@@ -581,13 +581,13 @@ def add_ride():
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                        live_site=live_site())
 
-        # 7: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
+        # 6: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
         if not current_user.admin():
-            # Allow them to append eg "Simon" -> "Simon Bond" as some user names are quite short
+            # Allow them to append eg "Simon" -> "Simon Bond" as some usernames are quite short
             if form.leader.data[0:len(current_user.name)] != current_user.name:
                 # Looks like they've nominated someone else
                 flash("Only Admins can nominate someone else to lead a ride.")
-                # In case they've forgotten their user name, reset it in the form
+                # In case they've forgotten their username, reset it in the form
                 form.leader.data = current_user.name
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                        live_site=live_site())
