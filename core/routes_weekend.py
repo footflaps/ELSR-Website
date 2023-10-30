@@ -211,6 +211,18 @@ def split_start_string(start_time):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Format the start time for jinja
+# -------------------------------------------------------------------------------------------------------------- #
+def format_start_time(group, destination, start_time_str):
+    # We expect the form "Doppio", "Danish Camp", "08:00 from Bean Theory Cafe" etc
+    # Split "08:00" from "from Bean Theory Cafe"
+    start_time = start_time_str.split(' ')[0]
+    start_place = " ".join(start_time_str.split(' ')[2:])
+    return f"<strong>{group}</strong> to <strong>{destination}</strong>: <strong style='color: red'>{start_time}</strong> from " \
+           f"<strong>{start_place}</strong>"
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # html routes
@@ -292,7 +304,8 @@ def weekend():
                     # NB treat a blank entry as normal start time for that day
                     if ride.start_time.strip() != "":
                         if ride.start_time.strip() != DEFAULT_START_TIMES[day]:
-                            start_times[day].append(f"{ride.destination}: {ride.start_time}")
+                            # start_times[day].append(f"{ride.destination}: {ride.start_time}")
+                            start_times[day].append(format_start_time(ride.group, ride.destination, ride.start_time))
 
                 # Make a note, if we find a non-public GPX as this will stop people downloading the file
                 if not gpx.public():

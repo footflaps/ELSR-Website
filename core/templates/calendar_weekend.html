@@ -368,7 +368,11 @@
 						<p>All <strong>{{ day }}</strong> rides start at <strong>{{ DEFAULT_START_TIMES[day] }}</strong>, except: </p>
 						<ul>
 							{% for start_time in start_times[day] %}
-								<li>{{ start_time }}</li>
+								<li>
+									<i style="color: red" class="fa-solid fa-triangle-exclamation fa-beat fa-xl"></i>
+									{{ start_time | safe }}
+									<i style="color: red" class="fa-solid fa-triangle-exclamation fa-beat fa-xl"></i>
+								</li>
 							{% endfor %}
 						</ul>
 					{% else %}
