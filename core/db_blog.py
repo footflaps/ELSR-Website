@@ -226,10 +226,16 @@ with app.app_context():
 # Custom validator for termination date (must be in the future)
 # -------------------------------------------------------------------------------------------------------------- #
 def date_validation(form, field):
+    # This will be '<class 'datetime.date'>'
     today_date = datetime.today().date()
-    poll_date = field.data
-    if poll_date:
-        if poll_date < today_date:
+    # This can be either  '<class 'datetime.date'>' or '<class 'datetime.datetime'>'
+    blog_date = field.data
+    # Convert to date object as we can't compare date vs datetime
+    if type(blog_date) == datetime:
+        blog_date = blog_date.date()
+    # Might not be set...
+    if blog_date:
+        if blog_date < today_date:
             raise validators.ValidationError("The date is in the past!")
 
 
