@@ -11,7 +11,8 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO_GROUP, DECAFF_GROUP, MIXED_GROUP
+from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO_GROUP, DECAFF_GROUP, MIXED_GROUP, \
+                 delete_file_if_exists
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -175,7 +176,7 @@ def cafe_details(cafe_id):
     form = CreateCafeCommentForm()
 
     # Get any exiting comments for this cafe
-    comments = CafeComment().all_comments_by_id(cafe_id)
+    comments = CafeComment().all_comments_by_cafe_id(cafe_id)
 
     # Get all GPX routes which pass this cafe and that can be seen by current_user
     gpxes = Gpx().find_all_gpx_for_cafe(cafe_id, current_user)
@@ -893,3 +894,117 @@ def delete_comment():
 
     # Back to cafe details page
     return redirect(url_for('cafe_details', cafe_id=cafe_id))
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Delete cafe
+# -------------------------------------------------------------------------------------------------------------- #
+
+@app.route("/delete_cafe", methods=['POST'])
+@logout_barred_user
+@login_required
+@update_last_seen
+@rw_required
+def delete_cafe():
+    # ----------------------------------------------------------- #
+    # Get details from the page
+    # ----------------------------------------------------------- #
+    cafe_id = request.args.get('cafe_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
+
+    # ----------------------------------------------------------- #
+    # Handle missing parameters
+    # ----------------------------------------------------------- #
+    if not cafe_id:
+        app.logger.debug(f"delete_cafe(): Missing cafe_id!")
+        Event().log_event("Delete Cafe Fail", f"Missing cafe_id!")
+        return abort(400)
+    if not password:
+        app.logger.debug(f"delete_cafe(): Missing password!")
+        Event().log_event("Delete Cafe Fail", f"Missing password!")
+        return abort(400)
+
+    # ----------------------------------------------------------- #
+    # Check params are valid
+    # ----------------------------------------------------------- #
+    cafe = Cafe().one_cafe(cafe_id)
+    if not cafe:
+        app.logger.debug(f"delete_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
+        Event().log_event("Delete Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
+        return abort(404)
+
+    # ----------------------------------------------------------- #
+    # Restrict access to Admin or Author
+    # ----------------------------------------------------------- #
+    if not current_user.admin() \
+            and current_user.email != cafe.added_email:
+        # Failed authentication
+        app.logger.debug(f"delete_cafe(): Rejected request from '{current_user.email}' as no permissions"
+                         f" for cafe_id = '{cafe_id}'.")
+        Event().log_event("Delete Cafe Fail", f"Rejected request from user '{current_user.email}' as no "
+                                              f"permissions for cafe_id = '{cafe_id}'.")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    #  Validate password
+    # ----------------------------------------------------------- #
+    # Need current user
+    user = User().find_user_from_id(current_user.id)
+
+    # Validate against current_user's password
+    if not user.validate_password(user, password, user_ip):
+        app.logger.debug(f"delete_cafe(): Delete failed, incorrect password for user_id = '{user.id}'!")
+        Event().log_event("Delete Cafe Fail", f"Incorrect password for user_id = '{user.id}'!")
+        flash(f"Incorrect password for user {user.name}!")
+        # Go back to socials page
+        return redirect(url_for('cafe_details', cafe_id=cafe_id))
+
+    # ----------------------------------------------------------- #
+    #  Delete any comments
+    # ----------------------------------------------------------- #
+    comments = CafeComment().all_comments_by_cafe_id(cafe.id)
+    for comment in comments:
+        if not CafeComment().delete_comment(comment.id):
+            # This is not terminal, just leaves orphaned comments in the db
+            app.logger.debug(f"delete_cafe(): Failed to delete cafe comment id = '{comment.id}'!")
+            Event().log_event("Delete Cafe Fail", f"Failed to delete cafe comment id = '{comment.id}'!")
+
+    # ----------------------------------------------------------- #
+    #  Delete any images
+    # ----------------------------------------------------------- #
+    if cafe.image_name:
+        filename = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
+        delete_file_if_exists(filename)
+
+    # ----------------------------------------------------------- #
+    #  Delete the cafe itself
+    # ----------------------------------------------------------- #
+    if Cafe().delete_cafe(cafe.id):
+        # Success
+        app.logger.debug(f"delete_cafe(): Successfully deleted the cafe, id = '{cafe.id}'.")
+        Event().log_event("Delete Cafe Success", f"Successfully deleted the cafe, id = '{cafe.id}'.")
+        flash("Cafe deleted.")
+    else:
+        # Should never get here, but....
+        app.logger.debug(f"delete_cafe(): Failed to delete the cafe, id = '{cafe.id}'.")
+        Event().log_event("Delete Cafe Fail", f"Failed to delete the cafe, id = '{cafe.id}'.")
+        flash("Sorry, something went wrong!")
+
+    # Back to cafe list page
+    return redirect(url_for('cafe_list'))
+

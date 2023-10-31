@@ -67,7 +67,7 @@ class CafeComment(db.Model):
             return comment
 
     # Return a list of all comments for a given cafe id
-    def all_comments_by_id(self, article_id):
+    def all_comments_by_cafe_id(self, article_id):
         with app.app_context():
             comments = db.session.query(CafeComment).filter_by(article_id=article_id).all()
             return comments

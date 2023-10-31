@@ -409,7 +409,7 @@ def delete_blog():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin and Author
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != blog.email \

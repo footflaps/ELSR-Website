@@ -74,7 +74,6 @@ class Cafe(db.Model):
 
     # Add a new cafe to the dB
     def add_cafe(self, new_cafe):
-
         # Update some details
         new_cafe.added_date = date.today().strftime("%B %d, %Y")
         new_cafe.active = True
@@ -157,6 +156,22 @@ class Cafe(db.Model):
                     return True
                 except Exception as e:
                     app.logger.error(f"dB.unclose_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
+                    return False
+        return False
+
+    def delete_cafe(self, cafe_id):
+        with app.app_context():
+            # Locate the cafe file
+            cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
+            if cafe:
+                # Delete the Cafe
+                try:
+                    db.session.delete(cafe)
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_cafe: Failed to delete Cafe for cafe_id = '{cafe_id}', "
+                                     f"error code '{e.args}'.")
                     return False
         return False
 
