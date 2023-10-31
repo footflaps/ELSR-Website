@@ -14,7 +14,7 @@ from core import app
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import update_last_seen, logout_barred_user, login_required
+from core.db_users import update_last_seen, logout_barred_user, login_required, rw_required
 from core.dB_events import Event
 from core.db_polls import Polls, POLL_OPEN
 
@@ -34,6 +34,7 @@ from core.db_polls import Polls, POLL_OPEN
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def remove_vote():
     # ----------------------------------------------------------- #
     # Get params
@@ -66,13 +67,6 @@ def remove_vote():
     # ----------------------------------------------------------- #
     # Check permissions
     # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"remove_vote(): User not readwrite!")
-        Event().log_event("remove_vote() Fail", f"User not readwrite!")
-        flash("You don't have permission to vote!")
-        return redirect(url_for("not_rw"))
-
     # Poll must be open
     if poll.status != POLL_OPEN:
         app.logger.debug(f"remove_vote(): Poll is closed, poll_id = '{poll_id}'.")
@@ -143,6 +137,7 @@ def remove_vote():
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def add_vote():
     # ----------------------------------------------------------- #
     # Get params
@@ -175,13 +170,6 @@ def add_vote():
     # ----------------------------------------------------------- #
     # Check permissions
     # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"add_vote(): User not readwrite!")
-        Event().log_event("add_vote() Fail", f"User not readwrite!")
-        flash("You don't have permission to vote!")
-        return redirect(url_for("not_rw"))
-
     # Poll must be open
     if poll.status != POLL_OPEN:
         app.logger.debug(f"add_vote(): Poll is closed, poll_id = '{poll_id}'.")
@@ -256,6 +244,7 @@ def add_vote():
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def swap_vote():
     # ----------------------------------------------------------- #
     # Get params
@@ -288,13 +277,6 @@ def swap_vote():
     # ----------------------------------------------------------- #
     # Check permissions
     # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"swap_vote(): User not readwrite!")
-        Event().log_event("swap_vote() Fail", f"User not readwrite!")
-        flash("You don't have permission to vote!")
-        return redirect(url_for("not_rw"))
-
     # Poll must be open
     if poll.status != POLL_OPEN:
         app.logger.debug(f"swap_vote(): Poll is closed, poll_id = '{poll_id}'.")

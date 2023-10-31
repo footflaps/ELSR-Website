@@ -18,7 +18,7 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required
+from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes
@@ -227,7 +227,7 @@ def cafe_details(cafe_id):
             return redirect(url_for('cafe_details', cafe_id=cafe.id))
 
         # ----------------------------------------------------------- #
-        # Permission check
+        # Permission check for POST
         # ----------------------------------------------------------- #
         if not user.readwrite():
             # Should never get here, but....
@@ -314,6 +314,7 @@ def cafe_details(cafe_id):
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def new_cafe():
     # Need a form for the new cafe
     form = CreateCafeForm()
@@ -336,14 +337,6 @@ def new_cafe():
         # ----------------------------------------------------------- #
         #   POST - form submitted                                     #
         # ----------------------------------------------------------- #
-
-        # Permission check
-        if not current_user.readwrite():
-            # Should never get here, but....
-            app.logger.debug(f"new_cafe(): Rejected request for '{current_user.email}' as no permissions.")
-            Event().log_event("New Cafe Fail", f"Rejected request for '{current_user.email}' as no permissions.")
-            flash("Sorry, you do not have write permissions.")
-            return redirect(url_for("not_rw"))
 
         # Validate range
         range_km = mpu.haversine_distance((float(form.lat.data), float(form.lon.data)), (ELSR_LAT, ELSR_LON))
@@ -459,6 +452,7 @@ def new_cafe():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def edit_cafe():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -485,11 +479,10 @@ def edit_cafe():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     if not current_user.admin() and \
-            current_user.email != cafe.added_email or \
-            not current_user.readwrite():
+            current_user.email != cafe.added_email:
         # Failed authentication
         app.logger.debug(f"edit_cafe(): Rejected request for '{current_user.email}' as no permissions for "
                          f"cafe_id = '{cafe_id}'.")
@@ -626,6 +619,7 @@ def edit_cafe():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def close_cafe():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -658,11 +652,10 @@ def close_cafe():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     if not current_user.admin() and \
-            current_user.email != cafe.added_email or \
-            not current_user.readwrite():
+            current_user.email != cafe.added_email:
         # Failed authentication
         app.logger.debug(f"close_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
@@ -696,6 +689,7 @@ def close_cafe():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def unclose_cafe():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -721,11 +715,10 @@ def unclose_cafe():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     if not current_user.admin() \
-            and current_user.email != cafe.added_email or \
-            not current_user.readwrite():
+            and current_user.email != cafe.added_email:
         # Failed authentication
         app.logger.debug(f"unclose_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
@@ -758,6 +751,7 @@ def unclose_cafe():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def flag_cafe():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -792,17 +786,6 @@ def flag_cafe():
         app.logger.debug(f"flag_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
         Event().log_event("Flag Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
         return abort(404)
-
-    # ----------------------------------------------------------- #
-    # Check permissions
-    # ----------------------------------------------------------- #
-    if not current_user.readwrite():
-        # Failed authentication
-        app.logger.debug(f"uflag_cafe(): Rejected request from '{current_user.email}' as no permissions, "
-                         f"cafe.id = '{cafe.id}'.")
-        Event().log_event("Flag Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions, "
-                                            f"cafe_id = '{cafe_id}'")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Send a message to Admin
@@ -847,6 +830,7 @@ def flag_cafe():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def delete_comment():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -869,26 +853,23 @@ def delete_comment():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    comment = CafeComment().get_comment(comment_id)
     cafe = Cafe().one_cafe(cafe_id)
-
     if not cafe:
         app.logger.debug(f"delete_comment(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
         Event().log_event("Delete Comment Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
         return abort(404)
 
-    # Check comment id is valid
+    comment = CafeComment().get_comment(comment_id)
     if not comment:
         app.logger.debug(f"delete_comment(): Failed to locate comment with comment_id = '{comment_id}'.")
         Event().log_event("Delete Comment Fail", f"Failed to locate comment with comment_id = '{comment_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     if not current_user.admin() \
-            and current_user.email != comment.email or \
-            not current_user.readwrite():
+            and current_user.email != comment.email:
         # Failed authentication
         app.logger.debug(f"delete_comment(): Rejected request from '{current_user.email}' as no permissions"
                          f" for comment_id = '{comment_id}'.")

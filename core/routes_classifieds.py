@@ -17,7 +17,7 @@ from core import app, current_year, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required
+from core.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required, rw_required
 from core.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER, create_classified_form, MAX_NUM_PHOTOS, SELL, \
                                 STATUS_SOLD
 from core.dB_events import Event
@@ -93,21 +93,12 @@ def classifieds():
 @update_last_seen
 @logout_barred_user
 @login_required
+@rw_required
 def add_sell():
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #
     classified_id = request.args.get('classified_id', None)
-
-    # ----------------------------------------------------------- #
-    # Permissions
-    # ----------------------------------------------------------- #
-    if not current_user.readwrite():
-        # Failed authentication
-        app.logger.debug(f"add_sell(): Refusing permission for '{current_user.email}'.")
-        Event().log_event("Add Sell Fail", f"Refusing permission for '{current_user.email}'.")
-        flash("You do not have permission to add posts to the Classifieds!")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Validate classified_id
@@ -281,6 +272,7 @@ def add_sell():
 @update_last_seen
 @logout_barred_user
 @login_required
+@rw_required
 def delete_classified():
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id?
@@ -325,12 +317,11 @@ def delete_classified():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != classified.email \
-            and not current_user.admin() or \
-            not current_user.readwrite():
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"delete_classified(): Refusing permission for '{current_user.email}' and "
                          f"classified_id = '{classified_id}.")

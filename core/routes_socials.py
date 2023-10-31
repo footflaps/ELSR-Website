@@ -19,7 +19,7 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import update_last_seen, logout_barred_user, login_required
+from core.db_users import update_last_seen, logout_barred_user, login_required, rw_required
 from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
                            SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.dB_events import Event
@@ -52,6 +52,7 @@ ICS_DIRECTORY = os.environ['ELSR_ICS_DIRECTORY']
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def add_social():
     # ----------------------------------------------------------- #
     # Did we get passed a social_id? (Optional)
@@ -69,16 +70,6 @@ def add_social():
             return abort(404)
     else:
         social = None
-
-    # ----------------------------------------------------------- #
-    # Permission check
-    # ----------------------------------------------------------- #
-    if not current_user.readwrite():
-        # Should never get here, but....
-        app.logger.debug(f"add_social(): Rejected request for '{current_user.email}' as no permissions.")
-        Event().log_event("Add Social Fail", f"Rejected request for '{current_user.email}' as no permissions.")
-        flash("Sorry, you do not have write permissions.")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Need a form
@@ -300,6 +291,7 @@ def social():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def delete_social():
     # ----------------------------------------------------------- #
     # Did we get passed a social_id?
@@ -344,12 +336,11 @@ def delete_social():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin and Author
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != social.email \
-            and not current_user.admin() or \
-            not current_user.readwrite():
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}'.")

@@ -17,7 +17,7 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required
+from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.dB_gpx import Gpx, TYPE_ROAD, TYPE_GRAVEL
@@ -425,22 +425,13 @@ def weekend():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def add_ride():
     # ----------------------------------------------------------- #
     # Did we get passed a date or a ride_id? (Optional)
     # ----------------------------------------------------------- #
     start_date_str = request.args.get('date', None)
     ride_id = request.args.get('ride_id', None)
-
-    # ----------------------------------------------------------- #
-    # Permissions
-    # ----------------------------------------------------------- #
-    if not current_user.readwrite():
-        # Failed authentication
-        app.logger.debug(f"add_ride(): Refusing permission for '{current_user.email}'.")
-        Event().log_event("Add Ride Fail", f"Refusing permission for '{current_user.email}'.")
-        flash("You do not have permission to add events to the calendar.")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Validate ride_id
@@ -846,6 +837,7 @@ def add_ride():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def delete_ride():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -904,11 +896,10 @@ def delete_ride():
         return redirect(url_for('weekend', date=date))
 
     # ----------------------------------------------------------- #
-    # Restrict access to Admin or owner of ride event
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     if not current_user.admin() \
-            and current_user.email != ride.email or \
-            not current_user.readwrite():
+            and current_user.email != ride.emai:
         # Failed authentication
         app.logger.debug(f"delete_ride(): Rejected request from '{current_user.email}' as no permissions"
                          f" for ride_id = '{ride_id}'.")

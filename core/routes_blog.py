@@ -18,7 +18,7 @@ from core import app, current_year, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required
+from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required, rw_required
 from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_PHOTO_FOLDER, NO_CAFE, \
                          NO_GPX, DRUNK_OPTION, CCC_OPTION, EVENT_OPTION
 from core.dB_events import Event
@@ -92,7 +92,7 @@ def blog():
                 app.logger.debug(f"blog(): Refusing permission for unregistered user.")
                 Event().log_event("Blog Fail", f"Refusing permission for unregistered user.")
                 flash("You must be logged in to see private blog posts!")
-                return abort(403)
+                return redirect(url_for("not_logged_in"))
             elif not current_user.readwrite():
                 # Failed authentication
                 app.logger.debug(f"blog(): Refusing permission for '{current_user.email}'.")
@@ -168,21 +168,12 @@ def blog():
 @update_last_seen
 @logout_barred_user
 @login_required
+@rw_required
 def add_blog():
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
     blog_id = request.args.get('blog_id', None)
-
-    # ----------------------------------------------------------- #
-    # Permissions
-    # ----------------------------------------------------------- #
-    if not current_user.readwrite():
-        # Failed authentication
-        app.logger.debug(f"add_blog(): Refusing permission for '{current_user.email}'.")
-        Event().log_event("Add Blog Fail", f"Refusing permission for '{current_user.email}'.")
-        flash("You do not have permission to add blog posts!")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Validate blog_id

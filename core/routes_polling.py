@@ -16,7 +16,7 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required
+from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
 from core.dB_events import Event
 from core.db_polls import Polls, create_poll_form, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 
@@ -150,7 +150,7 @@ def poll_details(poll_id):
             app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
             Event().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You must be logged in to see private polls.")
-            return abort(403)
+            return redirect(url_for("not_logged_in"))
         elif not current_user.readwrite():
             app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
             Event().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
@@ -221,6 +221,7 @@ def poll_details(poll_id):
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def add_poll():
     # ----------------------------------------------------------- #
     # Get poll_id from form (if one was posted)
@@ -270,15 +271,6 @@ def add_poll():
         Event().log_event("add_poll Fail", f"Failed to find user, id = '{current_user.id}'!")
         flash("The current user doesn't seem to exist!")
         abort(404)
-
-    # ----------------------------------------------------------- #
-    # Check read write
-    # ----------------------------------------------------------- #
-    if not user.readwrite():
-        app.logger.debug(f"add_poll(): User doesn't have readwrite!")
-        Event().log_event("add_poll Fail", f"User doesn't have readwrite!")
-        flash("You don't have permission to create polls!")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Manage form
@@ -391,6 +383,7 @@ def add_poll():
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def edit_poll():
     # ----------------------------------------------------------- #
     # Get poll_id from form (if one was posted)
@@ -435,14 +428,13 @@ def edit_poll():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != poll.email \
-            and not current_user.admin() or \
-            not current_user.readwrite():
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"edit_poll(): Refusing permission for '{current_user.email}' and "
                          f"poll_id = '{poll_id}'.")
         Event().log_event("edit_poll Fail", f"Refusing permission for '{current_user.email}', "
                                             f"poll_id = '{poll_id}'.")
-        return redirect(url_for("not_rw"))
+        abort(403)
 
     # ----------------------------------------------------------- #
     # Get user's IP
@@ -482,15 +474,6 @@ def edit_poll():
         Event().log_event("edit_poll Fail", f"Failed to find user, id = '{current_user.id}'!")
         flash("The current user doesn't seem to exist!")
         abort(404)
-
-    # ----------------------------------------------------------- #
-    # Check read write
-    # ----------------------------------------------------------- #
-    if not user.readwrite():
-        app.logger.debug(f"edit_poll(): User doesn't have readwrite!")
-        Event().log_event("edit_poll Fail", f"User doesn't have readwrite!")
-        flash("You don't have permission to edit polls!")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Manage form
@@ -588,6 +571,7 @@ def edit_poll():
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def delete_poll():
     # ----------------------------------------------------------- #
     # Did we get passed a poll_id?
@@ -636,8 +620,7 @@ def delete_poll():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != poll.email \
-            and not current_user.admin() or \
-            not current_user.readwrite():
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"delete_poll(): Refusing permission for '{current_user.email}' and "
                          f"poll_id = '{poll_id}'.")

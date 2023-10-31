@@ -20,7 +20,7 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, update_last_seen, logout_barred_user, DELETED_NAME, ChangeUserDetailsForm, \
-                          NOTIFICATIONS_DEFAULT_VALUE, login_required
+                          NOTIFICATIONS_DEFAULT_VALUE, login_required, rw_required
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
 from core.dB_cafe_comments import CafeComment
@@ -619,6 +619,7 @@ def unsubscribe_all():
 
 @app.route('/who_are_we', methods=['GET'])
 @logout_barred_user
+@login_required
 @update_last_seen
 def who_are_we():
     return render_template("under_construction.html", year=current_year, live_site=live_site())

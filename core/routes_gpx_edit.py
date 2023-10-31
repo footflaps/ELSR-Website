@@ -15,7 +15,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required
+from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
 from core.dB_gpx import Gpx, create_rename_gpx_form
 from core.dB_events import Event
 from core.subs_gpx import check_new_gpx_with_all_cafes
@@ -40,6 +40,7 @@ from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def edit_route():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -79,14 +80,13 @@ def edit_route():
         return redirect(url_for('gpx_list'))
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin and Author
     # ----------------------------------------------------------- #
     # Rules:
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
-    if (current_user.email != gpx.email
-        and not current_user.admin()) \
-            or not current_user.readwrite():
+    if current_user.email != gpx.email \
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"edit_route(): Refusing permission for '{current_user.email}' and route '{gpx.id}'.")
         Event().log_event("Edit GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
@@ -182,6 +182,7 @@ def edit_route():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def gpx_cut_start():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -217,14 +218,13 @@ def gpx_cut_start():
     # ToDo: Need to check index is valid
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     # Rules:
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
-    if (current_user.email != gpx.email
-        and not current_user.admin()) \
-            or not current_user.readwrite():
+    if current_user.email != gpx.email \
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"gpx_cut_start(): Refusing permission for '{current_user.email}' and route '{gpx_id}'.")
         Event().log_event("GPX Cut Start Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
@@ -261,6 +261,7 @@ def gpx_cut_start():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def gpx_cut_end():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -296,14 +297,13 @@ def gpx_cut_end():
     # ToDo: Need to check index is valid
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin and Author
     # ----------------------------------------------------------- #
     # Rules:
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
-    if (current_user.email != gpx.email
-        and not current_user.admin()) \
-            or not current_user.readwrite():
+    if current_user.email != gpx.email \
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"gpx_cut_end(): Refusing permission for '{current_user.email}' and route '{gpx_id}'!")
         Event().log_event("GPX Cut End Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
@@ -339,6 +339,7 @@ def gpx_cut_end():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def publish_route():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -366,14 +367,13 @@ def publish_route():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin and Author
     # ----------------------------------------------------------- #
     # Rules:
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
-    if (current_user.email != gpx.email
-        and not current_user.admin()) \
-            or not current_user.readwrite():
+    if current_user.email != gpx.email \
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"publish_route(): Refusing permission for '{current_user.email}' to and route '{gpx.id}'!")
         Event().log_event("Publish GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
@@ -424,6 +424,7 @@ def publish_route():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def hide_route():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -451,14 +452,13 @@ def hide_route():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin and Author
     # ----------------------------------------------------------- #
     # Rules:
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
-    if (current_user.email != gpx.email
-        and not current_user.admin()) \
-            or not current_user.readwrite():
+    if current_user.email != gpx.email \
+            and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"hide_route(): Refusing permission for {current_user.email} to "
                          f"and route gpx_id = '{gpx_id}'.")

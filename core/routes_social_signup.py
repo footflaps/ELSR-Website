@@ -14,7 +14,7 @@ from core import app
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import update_last_seen, logout_barred_user, login_required
+from core.db_users import update_last_seen, logout_barred_user, login_required, rw_required
 from core.dB_events import Event
 from core.db_social import Socials
 
@@ -34,6 +34,7 @@ from core.db_social import Socials
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def social_can():
     # ----------------------------------------------------------- #
     # Get params
@@ -60,13 +61,6 @@ def social_can():
     # ----------------------------------------------------------- #
     # Check permissions
     # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"social_can(): User not readwrite!")
-        Event().log_event("social_can() Fail", f"User not readwrite!")
-        flash("You don't have permission to sign up etc!")
-        return redirect(url_for("not_rw"))
-
     # Social must be subscribable
     if social.sign_up != "True":
         app.logger.debug(f"social_can(): Social doesn't have sign up, social_id = '{social_id}'.")
@@ -120,6 +114,7 @@ def social_can():
 @logout_barred_user
 @update_last_seen
 @login_required
+@rw_required
 def social_cant():
     # ----------------------------------------------------------- #
     # Get params
@@ -146,13 +141,6 @@ def social_cant():
     # ----------------------------------------------------------- #
     # Check permissions
     # ----------------------------------------------------------- #
-    # User must have write permission
-    if not current_user.readwrite():
-        app.logger.debug(f"social_cant(): User not readwrite!")
-        Event().log_event("social_cant() Fail", f"User not readwrite!")
-        flash("You don't have permission to sign up etc!")
-        return redirect(url_for("not_rw"))
-
     # Social must be subscribable
     if social.sign_up != "True":
         app.logger.debug(f"social_cant(): Social doesn't have sign up, social_id = '{social_id}'.")

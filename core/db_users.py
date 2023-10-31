@@ -808,32 +808,12 @@ def random_code(num_digits):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Decorator for admin only
 # -------------------------------------------------------------------------------------------------------------- #
-
-def admin_only(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Use the admin parameter
-        if current_user.admin():
-            # Otherwise continue with the route function
-            return f(*args, **kwargs)
-        else:
-            # Naughty boy!
-
-            # Who do we think they are?
-            if current_user.is_authenticated:
-                who = current_user.email
-            else:
-                who = "lot logged in"
-
-            # Give them a stern talking to
-            app.logger.debug(f"admin_only(): User '{who}' attempted access to an admin page!")
-            Event().log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
-            return abort(403)
-
-    return decorated_function
-
+# -------------------------------------------------------------------------------------------------------------- #
+#                                                Decorators
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Decorator for login required
@@ -848,6 +828,61 @@ def login_required(f):
         else:
             # Generate a custom 403 error
             return redirect(url_for('not_logged_in'))
+
+    return decorated_function
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Decorator for readwrite required
+# -------------------------------------------------------------------------------------------------------------- #
+
+def rw_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Non logged in users won't have '.readwrite()' property
+        if current_user.is_authenticated:
+            # Use the readwrite parameter
+            if current_user.readwrite():
+                # Good to go
+                return f(*args, **kwargs)
+
+        # Who are we barring access to?
+        if current_user.is_authenticated:
+            who = current_user.email
+        else:
+            who = "lot logged in"
+
+        # Return 403
+        app.logger.debug(f"rw_required(): User '{who}' attempted access to a rw only page!")
+        Event().log_event("RW Access Fail", f"User '{who}' attempted access to a rw only page!")
+        return redirect(url_for('not_rw'))
+    return decorated_function
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Decorator for admin only
+# -------------------------------------------------------------------------------------------------------------- #
+
+def admin_only(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Non logged in users won't have '.admin()' property
+        if current_user.is_authenticated:
+            # Use the admin parameter
+            if current_user.admin():
+                # Good to go
+                return f(*args, **kwargs)
+
+        # Who are we barring access to?
+        if current_user.is_authenticated:
+            who = current_user.email
+        else:
+            who = "lot logged in"
+
+        # Return 403
+        app.logger.debug(f"admin_only(): User '{who}' attempted access to an admin page!")
+        Event().log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
+        return abort(403)
 
     return decorated_function
 

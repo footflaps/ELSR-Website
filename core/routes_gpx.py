@@ -16,7 +16,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required
+from core.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required, rw_required
 from core.dB_gpx import Gpx, UploadGPXForm
 from core.dB_cafes import Cafe
 from core.dB_events import Event
@@ -142,7 +142,7 @@ def gpx_details(gpx_id):
             not current_user.is_authenticated:
         app.logger.debug(f"gpx_details(): Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         Event().log_event("One GPX Fail", f"Refusing permission for non logged in user and hidden route '{gpx_id}'.")
-        return abort(403)
+        return redirect(url_for('not_logged_in'))
 
     elif not gpx.public() and \
             current_user.email != gpx.email and \
@@ -262,15 +262,8 @@ def gpx_details(gpx_id):
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def new_route():
-    # ----------------------------------------------------------- #
-    # Restrict access
-    # ----------------------------------------------------------- #
-    if not current_user.readwrite():
-        Event().log_event("New GPX Fail", f"Refusing permission for user {current_user.email} to upload GPX route!")
-        app.logger.debug(f"new_route(): Refusing permission for user {current_user.email} to upload GPX route!")
-        return redirect(url_for("not_rw"))
-
     # ----------------------------------------------------------- #
     # Need a form for uploading
     # ----------------------------------------------------------- #
@@ -398,6 +391,7 @@ def new_route():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def route_delete():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -447,14 +441,10 @@ def route_delete():
         return abort(404)
 
     # ----------------------------------------------------------- #
-    # Restrict access
+    # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
-    # Rules:
-    # 1. Must be admin or the current author
-    # 2. Must not be barred (NB Admins cannot be barred)
-    if (current_user.email != gpx.email
-        and not current_user.admin()) \
-            or not current_user.readwrite():
+    if current_user.email != gpx.email \
+            and not current_user.admin():
         app.logger.debug(f"route_delete(): Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         Event().log_event("GPX Delete Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         return abort(403)
@@ -511,6 +501,7 @@ def route_delete():
 @logout_barred_user
 @login_required
 @update_last_seen
+@rw_required
 def flag_gpx():
     # ----------------------------------------------------------- #
     # Get details from the page
@@ -545,17 +536,6 @@ def flag_gpx():
         app.logger.debug(f"flag_gpx(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         Event().log_event("Flag GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         return abort(404)
-
-    # ----------------------------------------------------------- #
-    # Check permissions
-    # ----------------------------------------------------------- #
-    if not current_user.readwrite():
-        # Failed authentication
-        app.logger.debug(f"flag_gpx(): Rejected request from '{current_user.email}' as no permissions, "
-                         f"gpx_id = '{gpx_id}'.")
-        Event().log_event("Flag GPX Fail", f"Rejected request from '{current_user.email}' as no permissions, "
-                                           f"gpx_id = '{gpx_id}'")
-        return redirect(url_for("not_rw"))
 
     # ----------------------------------------------------------- #
     # Send a message to Admin
