@@ -22,14 +22,14 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
 from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
-from core.subs_gpx import check_new_cafe_with_all_gpxes
+from core.subs_gpx import check_new_cafe_with_all_gpxes, remove_cafe_from_all_gpxes
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
     google_maps_api_key, count_map_loads
 from core.dB_gpx import Gpx
 from core.db_messages import Message, ADMIN_EMAIL
 from core.dB_events import Event
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
-from core.subs_cafe_photos import update_cafe_photo
+from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
 from core.db_calendar import Calendar
 
 
@@ -988,8 +988,16 @@ def delete_cafe():
     #  Delete any images
     # ----------------------------------------------------------- #
     if cafe.image_name:
-        filename = f"/static/img/cafe_photos/{os.path.basename(cafe.image_name)}"
+        filename = os.path.join(CAFE_FOLDER, os.path.basename(cafe.image_name))
         delete_file_if_exists(filename)
+
+    # ----------------------------------------------------------- #
+    #  Remove cafe id from all GPX files
+    # ----------------------------------------------------------- #
+    app.logger.debug(f"delete_cafe(): calling remove_cafe_from_all_gpxes for cafe, id = '{cafe.id}'.")
+    Event().log_event("Delete Cafe Success", f"calling remove_cafe_from_all_gpxes for cafe, id = '{cafe.id}'.")
+    # Update the routes in the background
+    Thread(target=remove_cafe_from_all_gpxes, args=(cafe.id,)).start()
 
     # ----------------------------------------------------------- #
     #  Delete the cafe itself

@@ -107,6 +107,21 @@ def check_new_cafe_with_all_gpxes(cafe):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Remove a cafe from all GPX files
+# -------------------------------------------------------------------------------------------------------------- #
+def remove_cafe_from_all_gpxes(cafe_id):
+    app.logger.debug(f"remove_cafe_from_all_gpxes(): Called with cafe_id = '{cafe_id}'.")
+
+    # Get all the routes
+    gpxes = Gpx().all_gpxes()
+
+    # Loop over each GPX file
+    for gpx in gpxes:
+        # Remove this entry
+        Gpx().remove_cafe_list(gpx.id, cafe_id)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Update a GPX from existing cafe dB
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -322,7 +337,9 @@ def test_cw_ccw():
             print(f"ret_deg = '{ret_deg}': ret_lon = '{round(ret_lon, 3)}',ret_lat = '{round(ret_lat, 3)}'")
             cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, True)
 
-test_cw_ccw()
+# test_cw_ccw()
+
+
 
 
 
