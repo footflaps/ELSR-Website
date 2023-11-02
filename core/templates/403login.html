@@ -37,18 +37,55 @@
 {% endwith %}
 
 
-
 <div class="container">
 	<div class="row">
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-			<hr>
-			
+			Certain content is only available to registered users.
 		</div>
 	</div>
 </div>
 
 
+<div class="container">
+	<div class="row mt-5">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<div class="float-left mt-2">
+				If you <strong>have</strong> an account, please log in:
+			</div>
+			
+			<a class="btn btn-primary float-right" href="{{ url_for('login') }}">
+			    &nbsp;&nbsp;Login &nbsp;&nbsp;
+            </a>
+		
+		</div>
+	</div>
+</div>
 
+<div class="container">
+	<div class="row my-2">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<div class="float-left mt-2">
+				If you <strong>don't yet have</strong> an account, please register:
+			</div>
+			
+			<a class="btn btn-primary float-right" href="{{ url_for('register') }}">
+			       Register
+            </a>
+		
+		</div>
+	</div>
+</div>
+
+<div class="container">
+	<div class="row my-2">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<hr>
+		
+		</div>
+	</div>
+</div>
 
 {% endblock %}
