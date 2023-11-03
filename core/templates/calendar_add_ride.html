@@ -65,6 +65,93 @@
 			<!-- This is where the form will go -->
 			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary", "cancel": "secondary"}) }}
 			
+			<!-- Auto complete start time and location based on day -->
+			<script>
+			
+				// The four form elements we need
+				let date = document.getElementById('date');
+				let start_time = document.getElementById('start_time');
+				let meeting_point = document.getElementById('start_location');
+				let new_start = document.getElementById('other_location');
+
+				// Get day of week from date
+				function getDayName(dateStr)
+					{
+					    var date = new Date(dateStr);
+					    return date.toLocaleDateString('en-GB', { weekday: 'long' });
+					}
+				
+				// Trap user changing the date
+				date.onchange = function() {
+					
+					// date.value has form '2023-11-04', so convert to day of week eg 'Saturday' etc
+					let day_of_week = getDayName(date.value);
+					
+					// Look up the default start time
+					let default_start_time = {{ DEFAULT_START_TIMES | tojson }}[day_of_week]
+					
+					// Populate the form
+					start_time.value = default_start_time['time'];
+					meeting_point.value = default_start_time['location'];
+					new_start.value = default_start_time['new'];
+					
+				};
+				
+				// Capture submit button and validate start details
+				function validateStart(e) {
+					
+					// Only both if date has been set
+					if (date.value != "") {
+					
+						// date.value has form '2023-11-04', so convert to day of week eg 'Saturday' etc
+						let day_of_week = getDayName(date.value);
+						
+						// Look up the default start time
+						let default_start_time = {{ DEFAULT_START_TIMES | tojson }}[day_of_week];
+						
+						// Have they deviated?
+						if ( start_time.value == default_start_time['time'] &&
+						     meeting_point.value == default_start_time['location'] &&
+						     new_start.value == default_start_time['new'] )
+						{
+					   
+					        // All ok - so just go ahead and submit
+					        return true;
+						       
+					   } else {
+					   
+					        // Non standard start time
+					        if (prompt(`Start time / place looks wrong for ${day_of_week}? \r` +
+					                   `Was expecting ${default_start_time['time']} and ` +
+					                   `${default_start_time['location']}. \r` +
+					                   `You chose ${start_time.value} and ${meeting_point.value}. \r` +
+					                   `Type 'yes' to confirm your choice.`) == 'yes')
+					        {
+					        
+					            // Go ahead with submit
+					            return true;
+					        
+					        } else {
+					        
+					            // Cancel submit
+					            if (e.preventDefault) e.preventDefault();
+				                return false;
+					        
+					        };
+						};
+					};
+				};
+
+				// Add function to the submit button
+				var form = document.querySelector("form");
+				if (form.attachEvent) {
+					form.attachEvent("submit", validateStart);
+				} else {
+				    form.addEventListener("submit", validateStart);
+				};
+				
+			</script>
+			
 		</div>
 	</div>
 </div>

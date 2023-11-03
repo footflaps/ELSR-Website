@@ -31,19 +31,85 @@ UPLOAD_ROUTE = "Upload my own route!"
 # Default option
 DEFAULT_START_TIMES = {"Monday": "08:00 from Bean Theory Cafe",
                        "Tuesday": "08:00 from Bean Theory Cafe",
-                       "Wednesday": "08:00 from Bean Theory Cafe",
+                       "Wednesday": "08:00 from The Bench, Newnham Corner",
                        "Thursday": "08:00 from Bean Theory Cafe",
                        "Friday": "08:00 from Bean Theory Cafe",
                        "Saturday": "08:00 from Bean Theory Cafe",
                        "Sunday": "09:00 from Bean Theory Cafe",
                        }
 
+
 MEETING_OTHER = "Other..."
 MEETING_BEAN = "Bean Theory Cafe"
 MEETING_COFFEE_VANS = "Coffee Vans by the Station"
+MEETING_TWR = "The Bench, Newnham Corner"
 MEETING_CHOICES = [MEETING_BEAN,
                    MEETING_COFFEE_VANS,
                    MEETING_OTHER]
+
+# Used by JS on the create ride page to auto fill in the start details based on the day of week
+DEFAULT_START_TIMES2 = {"Monday": {'time': '08:00', 'location': MEETING_BEAN, 'new': ''},
+                        "Tuesday": {'time': '08:00', 'location': MEETING_BEAN, 'new': ''},
+                        "Wednesday": {'time': '08:00', 'location': MEETING_OTHER, 'new': MEETING_TWR},
+                        "Thursday": {'time': '08:00', 'location': MEETING_BEAN, 'new': ''},
+                        "Friday": {'time': '08:00', 'location': MEETING_BEAN, 'new': ''},
+                        "Saturday": {'time': '08:00', 'location': MEETING_BEAN, 'new': ''},
+                        "Sunday": {'time': '09:00', 'location': MEETING_BEAN, 'new': ''},
+                        }
+
+
+def start_time_string(start_time_dict):
+    if start_time_dict['location'] != MEETING_OTHER:
+        return f"{start_time_dict['time']} from {start_time_dict['location']}"
+    else:
+        return f"{start_time_dict['time']} from {start_time_dict['new']}"
+
+
+
+def default_start_time_html(day):
+    # Look up what we would normally expect for day 'day'
+    default_time = DEFAULT_START_TIMES2[day]['time']
+    if DEFAULT_START_TIMES2[day]['location'] != MEETING_OTHER:
+        default_location = DEFAULT_START_TIMES2[day]['location']
+    else:
+        default_location = DEFAULT_START_TIMES2[day]['new']
+
+    return f"<strong>{default_time}</strong> from <strong>{default_location}</strong>"
+
+# Add this to jinja's environment, so we can use it within html templates
+app.jinja_env.globals.update(default_start_time_html=default_start_time_html)
+
+
+def custom_start_time_html(day, start_time_str):
+    # Look up what we would normally expect for day 'day'
+    default_time = DEFAULT_START_TIMES2[day]['time']
+    if DEFAULT_START_TIMES2[day]['location'] != MEETING_OTHER:
+        default_location = DEFAULT_START_TIMES2[day]['location']
+    else:
+        default_location = DEFAULT_START_TIMES2[day]['new']
+
+    # Now parse actual string
+    # We expect the form "Doppio", "Danish Camp", "08:00 from Bean Theory Cafe" etc
+    # Split "08:00" from "from Bean Theory Cafe"
+    time = start_time_str.split(' ')[0]
+    location = " ".join(start_time_str.split(' ')[2:])
+
+    # Build our html string
+    if default_time == time:
+        html = f"<strong>{time}</strong>"
+    else:
+        html = f"<strong style='color: red'>{time}</strong>"
+
+    if default_location == location:
+        html += f" from <strong>{location}</strong>"
+    else:
+        html += f" from <strong style='color:red'>{location}</strong>"
+
+    return html
+
+
+# Add this to jinja's environment, so we can use it within html templates
+app.jinja_env.globals.update(custom_start_time_html=custom_start_time_html)
 
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #

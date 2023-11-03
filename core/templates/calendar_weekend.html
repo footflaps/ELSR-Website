@@ -363,47 +363,82 @@
 						
 					</ul>
 		
-					<!-- Start times -->
-					{% if start_times[day] %}
-						<p>All <strong>{{ day }}</strong> rides start at <strong>{{ DEFAULT_START_TIMES[day] }}</strong>, except: </p>
+					<!--------------------------------------------------------------------------------------------->
+					<!--                                      Start times                                        -->
+					<!--------------------------------------------------------------------------------------------->
+					{% if start_details[day] %}
+					
+						<!-- One or more rides start has a custom start time or location -->
+						<p>
+							All <strong>{{ day }}</strong> rides start at
+							{{ default_start_time_html(day) | safe }}, except:
+						</p>
+				
+						<!-- List exceptions -->
 						<ul>
-							{% for start_time in start_times[day] %}
+							{% for start_detail in start_details[day] %}
 								<li>
 									<i style="color: red" class="fa-solid fa-triangle-exclamation fa-beat fa-xl"></i>
-									{{ start_time | safe }}
+									<strong>{{ start_detail['group'] }}</strong> to
+									<strong>{{ start_detail['destination'] }}</strong>:
+									{{ custom_start_time_html(day, start_detail['start_time']) | safe }}
 									<i style="color: red" class="fa-solid fa-triangle-exclamation fa-beat fa-xl"></i>
 								</li>
 							{% endfor %}
 						</ul>
+					
 					{% else %}
-						<p>All <strong>{{ day }}</strong> rides start at <strong>{{ DEFAULT_START_TIMES[day] }}</strong>.</p>
+					
+						<!-- All rides start at default time / place -->
+						<p>
+							All <strong>{{ day }}</strong> rides start at
+							{{ default_start_time_html(day) | safe }}.
+						</p>
+						
 					{% endif %}
-				
-				
-					<!-- Remind people to log in -->
-					{% if not current_user.is_authenticated: %}
-						<a href="{{ url_for('login') }}">
-							<p style="color: red"><strong>Log in to download GPX files.</strong></p>
-						</a>
-					{% endif %}
-				
+	
 				{% endif %}
-		
-				<!-- Logged in users can add rides -->
-				{% if current_user.is_authenticated: %}
-					{% if current_user.readwrite() %}
-						<!-- Add ride button -->
-						<a href="{{ url_for('add_ride', date=None) }}">
-							<button type="button" class="btn btn-sm btn-primary float-right">Add ride</button>
-						</a>
-					{% endif %}
-				{% endif %}
-		
-				<!-- GPX Download guide -->
+			</div>
+		</div>
+	</div>
+
+	<div class="container">
+		<div class="row mt-4">
+			<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+				
 				{% if rides[day] %}
-					<p>Guide to downloading GPX files on mobiles
-						<a href="{{ url_for('gpx_guide') }}"><strong>here</strong></a>.
-					</p>
+				
+					<!--------------------------------------------------------------------------------------------->
+					<!--                               Remind people to log in                                   -->
+					<!--------------------------------------------------------------------------------------------->
+					{% if not current_user.is_authenticated: %}
+					
+						<a href="{{ url_for('login') }}">
+							<div class="float-left" style="color: red">
+								<strong>Log in to download GPX files.</strong>
+							</div>
+						</a>
+					
+					{% else %}
+				
+						<div class="float-left">
+							Guide to downloading GPX files on mobiles
+							<a href="{{ url_for('gpx_guide') }}">
+								<strong>here.</strong>
+							</a>
+						</div>
+				
+						{% if current_user.readwrite() %}
+							<!-- Add ride button -->
+							<a href="{{ url_for('add_ride', date=None) }}">
+								<button type="button" class="btn btn-sm btn-primary float-right">
+									Add ride
+								</button>
+							</a>
+						{% endif %}
+						
+					{% endif %}
+				
 				{% endif %}
 				
 			</div>
