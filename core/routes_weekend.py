@@ -24,8 +24,8 @@ from core.dB_gpx import Gpx, TYPE_ROAD, TYPE_GRAVEL
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.dB_events import Event
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, DEFAULT_START_TIMES, MEETING_OTHER, \
-                             MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES2, start_time_string
+from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
+                             MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES, start_time_string
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 
@@ -212,18 +212,6 @@ def split_start_string(start_time):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Format the start time for jinja
-# -------------------------------------------------------------------------------------------------------------- #
-def format_start_time(group, destination, start_time_str):
-    # We expect the form "Doppio", "Danish Camp", "08:00 from Bean Theory Cafe" etc
-    # Split "08:00" from "from Bean Theory Cafe"
-    start_time = start_time_str.split(' ')[0]
-    start_place = " ".join(start_time_str.split(' ')[2:])
-    return f"<strong>{group}</strong> to <strong>{destination}</strong>: <strong style='color: red'>{start_time}</strong> from " \
-           f"<strong>{start_place}</strong>"
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # html routes
@@ -304,7 +292,7 @@ def weekend():
                 if ride.start_time:
                     # NB treat a blank entry as normal start time for that day
                     if ride.start_time.strip() != "":
-                        if ride.start_time.strip() != start_time_string(DEFAULT_START_TIMES2[day]):
+                        if ride.start_time.strip() != start_time_string(DEFAULT_START_TIMES[day]):
                             # start_details[day].append(f"{ride.destination}: {ride.start_time}")
                             start_details[day].append({'group': ride.group,
                                                        'destination': ride.destination,
@@ -354,7 +342,8 @@ def weekend():
                     app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
                     Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
                     flash(
-                        f"Looks like GPX file for ride '{ride.destination}' (ride.id = {ride.id}, leader = '{ride.leader}') has been deleted!")
+                        f"Looks like GPX file for ride '{ride.destination}' "
+                        f"(ride.id = {ride.id}, leader = '{ride.leader}') has been deleted!")
 
             else:
                 # Missing GPX row in the table
@@ -414,7 +403,7 @@ def weekend():
     return render_template("calendar_weekend.html", year=current_year,
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            days=days, dates_long=dates_long, dates_short=dates_short,
-                           DEFAULT_START_TIMES=DEFAULT_START_TIMES2,
+                           DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                            rides=rides, start_details=start_details, weather_data=weather_data,
                            polylines=polylines, cafe_coords=cafe_coords, live_site=live_site(),
                            elevation_data=elevation_data, elevation_cafes=elevation_cafes, anchor=target_date_str)
@@ -582,7 +571,7 @@ def add_ride():
                 Event().log_event("Add ride Fail", f"Failed to get cafe from '{form.destination.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the cafe choice.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
         else:
             # New cafe, not yet in database
             cafe = None
@@ -604,7 +593,7 @@ def add_ride():
                 Event().log_event("Add ride Fail", f"Failed to get GPX from '{form.gpx_name.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the GPX choice.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
         else:
             # They are uploading their own GPX file
             gpx = None
@@ -620,7 +609,7 @@ def add_ride():
                 # Doesn't look like we pass that cafe!
                 flash(f"That GPX route doesn't pass {cafe.name}!")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
         # 5: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
         if not current_user.admin():
@@ -631,7 +620,7 @@ def add_ride():
                 # In case they've forgotten their username, reset it in the form
                 form.leader.data = current_user.name
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
         # ----------------------------------------------------------- #
         # Do we need to upload a GPX?
@@ -643,7 +632,7 @@ def add_ride():
                 Event().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
                 flash("Couldn't find the file.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
             else:
                 # Get the filename
                 file = request.files['gpx_file']
@@ -656,7 +645,7 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"No selected file!")
                     flash('No selected file')
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
                 if not file or \
                         not allowed_file(file.filename):
@@ -664,7 +653,7 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
                     flash("That's not a GPX file!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
                 # Create a new GPX object
                 # We do this first as we need the id in order to create
@@ -701,7 +690,7 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
                 # This is where we will store it
                 filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
@@ -712,7 +701,7 @@ def add_ride():
                     # Failed to delete existing file (func will generate error trace)
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
                 # Upload the GPX file
                 try:
@@ -722,7 +711,7 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
                 # Update gpx object with filename
                 if not Gpx().update_filename(gpx.id, filename):
@@ -730,7 +719,7 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
                 # Strip all excess data from the file
                 strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
@@ -812,7 +801,7 @@ def add_ride():
             Event().log_event("Add ride Fail", f"Failed to add ride '{new_ride}'.")
             flash("Sorry, something went wrong.")
             return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                   live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                                   live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
     # ----------------------------------------------------------- #
     # Handle POST
@@ -826,14 +815,14 @@ def add_ride():
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
         return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site(),
-                               DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                               DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
     # ----------------------------------------------------------- #
     # Handle GET
     # ----------------------------------------------------------- #
 
     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site(),
-                           DEFAULT_START_TIMES=DEFAULT_START_TIMES2)
+                           DEFAULT_START_TIMES=DEFAULT_START_TIMES)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
