@@ -27,6 +27,7 @@ from core.dB_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
 from core.routes_socials import ICS_DIRECTORY
+from core.db_messages import Message, ADMIN_EMAIL
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -375,10 +376,16 @@ def delete_blog():
         password = request.form['password']
     except exceptions.BadRequestKeyError:
         password = None
+    try:
+        reason = request.form['reason']
+    except exceptions.BadRequestKeyError:
+        reason = None
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if password == "":
         password = " "
+    if reason == "":
+        reason = " "
 
     # ----------------------------------------------------------- #
     # Get user's IP
@@ -398,6 +405,10 @@ def delete_blog():
     if not password:
         app.logger.debug(f"delete_blog(): Missing Password!")
         Event().log_event("Delete Blog Fail", f"Missing Password!")
+        return abort(400)
+    if not reason:
+        app.logger.debug(f"delete_blog(): Missing Reason!")
+        Event().log_event("Delete Blog Fail", f"Missing Reason!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -420,8 +431,17 @@ def delete_blog():
         app.logger.debug(f"delete_blog(): Refusing permission for '{current_user.email}' and "
                          f"blog_id = '{blog_id}'.")
         Event().log_event("Delete Blog Fail", f"Refusing permission for '{current_user.email}', "
-                                                 f"blog_id = '{blog_id}'.")
+                                              f"blog_id = '{blog_id}'.")
         return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Must give a reason
+    # ----------------------------------------------------------- #
+    if reason.strip() == "":
+        app.logger.debug(f"delete_blog(): Reason was blank, blog_id = '{blog_id}'.")
+        Event().log_event("Delete Blog Fail", f"Reason was blank, blog_id = '{blog_id}'.")
+        flash("You must give a reason to delete a blog post!")
+        return redirect(url_for('blog', blog_id=blog_id))
 
     # ----------------------------------------------------------- #
     #  Validate password
@@ -434,7 +454,7 @@ def delete_blog():
         app.logger.debug(f"delete_blog(): Delete failed, incorrect password for user_id = '{user.id}'!")
         Event().log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
-        # Go back to socials page
+        # Go back to blogs page
         return redirect(url_for('blog'))
 
     # ----------------------------------------------------------- #
@@ -443,11 +463,31 @@ def delete_blog():
     delete_blog_photos(blog)
 
     # ----------------------------------------------------------- #
+    # Message owner
+    # ----------------------------------------------------------- #
+    if user.email != blog.email:
+        # Create a new message
+        new_message = Message(
+            from_email=ADMIN_EMAIL,
+            to_email=blog.email,
+            body=f"Sorry, an Admin has deleted your blog '{blog.title}'. The reason given was '{reason}'."
+        )
+        # Send the message
+        if Message().add_message(new_message):
+            # Success!
+            app.logger.debug(f"delete_blog(): Sent blog delete message to '{blog.email}'.")
+            Event().log_event("Delete Blog Pass", f"Sent blog delete message to '{blog.email}'.")
+        else:
+            # Should never get here, but...
+            app.logger.debug(f"delete_blog(): Message().add_message() failed, blog.email = '{blog.email}'.")
+            Event().log_event("Delete Blog Fail", f"Message().add_message() failed, blog.email = '{blog.email}'.")
+
+    # ----------------------------------------------------------- #
     # Delete blog
     # ----------------------------------------------------------- #
     if Blog().delete_blog(blog_id):
-        app.logger.debug(f"delete_blog(): Deleted social, blog_id = '{blog_id}'.")
-        Event().log_event("Delete Blog Success", f"Deleted social, blog_id = '{blog_id}'.")
+        app.logger.debug(f"delete_blog(): Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
+        Event().log_event("Delete Blog Success", f"Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
         flash("Blog has been deleted.")
     else:
         app.logger.debug(f"delete_blog(): Failed to delete Blog, blog_id = '{blog_id}'.")
