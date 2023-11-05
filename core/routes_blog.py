@@ -46,7 +46,7 @@ FIRST_PAGE = 0
 # -------------------------------------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Show blog list
+# Show blog list or one particular blog
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/blog", methods=['GET'])
@@ -77,6 +77,7 @@ def blog():
         if not blog:
             app.logger.debug(f"blog(): Failed to locate blog, blog_id = '{blog_id}'.")
             Event().log_event("Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+            flash("Sorry, looks like that Blog post has been deleted...")
             return abort(404)
     else:
         blog = None
