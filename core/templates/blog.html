@@ -304,11 +304,11 @@
 				{% for button_page in range(num_pages) %}
 					
 					{% if button_page == page %}
-						<a href="{{ url_for('blog', page=button_page) }}" class="btn btn-sm btn-primary disabled float-left mr-2 mb-2" role="button">
+						<a href="{{ url_for('blog', page=button_page) }}" class="btn btn-sm btn-primary disabled float-left mr-2 my-2" role="button">
 				            {{ button_page + 1 }}
 				        </a>
 					{% else %}
-						<a href="{{ url_for('blog', page=button_page) }}" class="btn btn-sm btn-primary float-left mr-2 mb-2" role="button">
+						<a href="{{ url_for('blog', page=button_page) }}" class="btn btn-sm btn-primary float-left mr-2 my-2" role="button">
 				            {{ button_page  + 1 }}
 				        </a>
 					{% endif %}
@@ -323,7 +323,7 @@
 				{% if current_user.is_authenticated %}
 					{% if current_user.readwrite() %}
 						
-						<a href="{{ url_for('add_blog') }}" class="btn btn-sm btn-primary float-right mb-2" role="button">
+						<a href="{{ url_for('add_blog') }}" class="btn btn-sm btn-primary float-right my-2" role="button">
 			                  Add Blog
 			            </a>
 						
