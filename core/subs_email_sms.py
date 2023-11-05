@@ -112,10 +112,10 @@ SOCIAL_BODY = "Dear [USER], \n\n" \
               "One click unsubscribe from ALL email notifications link: [UNSUBSCRIBE]\n"
 
 BLOG_BODY = "Dear [USER], \n\n" \
-            "A new blog post has appeared on the website.\n" \
-            "The subject of the blog post is [TITLE].\n" \
+            "A new blog post has appeared on the website, from user '[BLOG_AUTHOR]'.\n" \
+            "The subject of the blog post is '[BLOG_TITLE]'.\n" \
             "Here are some useful links:\n\n" \
-            "See the blog page here: [BLOG_LINK]\n" \
+            "See the blog page here: [BLOGS_LINK]\n" \
             "See this particular blog post here: [THIS_LINK]\n\n" \
             "Thanks, \n\n" \
             "The Admin Team\n\n" \
@@ -194,12 +194,13 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
     # ----------------------------------------------------------- #
     target_email = unidecode(user.email)
     user_name = unidecode(user.name)
-    title = unidecode(blog.title)
+    blog_title = unidecode(blog.title)
+    blog_author = unidecode(get_user_name(blog.email))
 
     # ----------------------------------------------------------- #
     # Create hyperlinks
     # ----------------------------------------------------------- #
-    blog_link = f"https://www.elsr.co.uk/blog"
+    blogs_link = f"https://www.elsr.co.uk/blog"
     this_link = f"https://www.elsr.co.uk/blog?blog_id={blog.id}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
     one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
@@ -220,8 +221,9 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = f"ELSR: New blog post notification"
         body = BLOG_BODY.replace("[USER]", user_name)
-        body = body.replace("[TITLE]", title)
-        body = body.replace("[BLOG_LINK]", blog_link)
+        body = body.replace("[BLOG_AUTHOR]", blog_author)
+        body = body.replace("[BLOG_TITLE]", blog_title)
+        body = body.replace("[BLOGS_LINK]", blogs_link)
         body = body.replace("[THIS_LINK]", this_link)
         body = body.replace("[ACCOUNT_LINK]", user_page)
         body = body.replace("[UNSUBSCRIBE]", one_click_unsubscribe)
