@@ -494,3 +494,50 @@ tr > td {
 .dataTables_info, .dataTables_length {
     font-family: 'Roboto', sans-serif;
 }
+
+
+/* **************************************************************************
+                                 JS UI Pop up
+   ************************************************************************** */
+
+/* Header bar */
+.ui-widget-header {
+    /* Red background for warning */
+    background: #ff4d4d;
+
+    /* White text */
+    color: #FFFFFF;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    padding: 5px 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    /* Blue border */
+    border: 2px solid #ff4d4d;
+    border-bottom: 0px;
+}
+
+/* Main content */
+.ui-widget-content {
+    /* light red */
+    background:  #ffe6e6;
+    border: 2px solid #ff4d4d;
+}
+
+/* Main area */
+.ui-dialog-content {
+    border-bottom: 0px;
+}
+
+/* Button area */
+.ui-dialog-buttonpane {
+    padding: 10px 15px;
+    border-top: 0px;
+}
+
+/* Get rid of close button in the title bar */
+.ui-dialog-titlebar-close {
+    visibility: hidden;
+}
