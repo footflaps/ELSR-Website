@@ -439,6 +439,17 @@
 						
 					{% endif %}
 				
+				{% else %}
+					{% if current_user.is_authenticated: %}
+						{% if current_user.readwrite() %}
+							<!-- Add ride button -->
+							<a href="{{ url_for('add_ride', date=None) }}">
+								<button type="button" class="btn btn-sm btn-primary float-right">
+									Add ride
+								</button>
+							</a>
+						{% endif %}
+					{% endif %}
 				{% endif %}
 				
 			</div>
