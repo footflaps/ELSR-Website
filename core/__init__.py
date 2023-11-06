@@ -48,7 +48,7 @@ GROUP_NOTIFICATIONS = ["When someone posts a Decaff ride",
                        "When someone posts a TWR ride"]
 
 # Global Flash Message
-GLOBAL_FLASH = "Sunday rides now meet at 9am at Bean Theory!"
+GLOBAL_FLASH = None
 
 
 # -------------------------------------------------------------------------------------------------------------- #
