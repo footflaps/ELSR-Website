@@ -86,6 +86,35 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                                             Weather                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!-- https://windy.app/forecast2/spot/9541/Cambridge+United+Kingdom -->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2 class="mb-3">Weather Forecast</h2>
+			
+			<div
+			    data-windywidget="forecast"
+			    data-thememode="white"
+			    data-spotid="9541"
+			    data-appid="9f08492d2deb2de2ea208f9adf6bccb7">
+			</div>
+		    <script async="true" data-cfasync="false" type="text/javascript"
+		            src="https://windy.app/widgets-code/forecast/windy_forecast_async.js?v1.4.14">
+		    </script>
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                          Loop by day                                           -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -467,41 +496,7 @@
 			</div>
 		</div>
 	</div>
-	
-	
-	<!---------------------------------------------------------------------------------------------------->
-	<!--                                             Weather                                            -->
-	<!---------------------------------------------------------------------------------------------------->
-	
-	{% if weather_data[day] %}
-	
-		<div class="container">
-			<div class="row mt-2">
-				<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-				
-					<h2>Weather forecast for {{ dates_long[day] }}</h2>
-					<ul>
-						{% for item in weather_data[day] %}
-						
-							<li>{{ item }}</li>
-						
-						{% endfor %}
-					</ul>
-					
-					<p class="copyright text-muted">
-						<a href="http://www.bbc.co.uk/weather">Copyright &copy; BBC Weather {{year}}
-						</a>
-					</p>
-					
-					<!-- Break before footer -->
-					<hr>
-					
-				</div>
-			</div>
-		</div>
-	
-	{% endif %}
-	
+
 	
 	<!---------------------------------------------------------------------------------------------------->
 	<!--                                      Routes map                                                -->
