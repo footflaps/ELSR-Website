@@ -571,7 +571,8 @@ def add_ride():
                 Event().log_event("Add ride Fail", f"Failed to get cafe from '{form.destination.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the cafe choice.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                       MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
         else:
             # New cafe, not yet in database
             cafe = None
@@ -593,7 +594,8 @@ def add_ride():
                 Event().log_event("Add ride Fail", f"Failed to get GPX from '{form.gpx_name.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the GPX choice.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                       MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
         else:
             # They are uploading their own GPX file
             gpx = None
@@ -609,7 +611,8 @@ def add_ride():
                 # Doesn't look like we pass that cafe!
                 flash(f"That GPX route doesn't pass {cafe.name}!")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                       MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
         # 5: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
         if not current_user.admin():
@@ -620,7 +623,8 @@ def add_ride():
                 # In case they've forgotten their username, reset it in the form
                 form.leader.data = current_user.name
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                       MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
         # ----------------------------------------------------------- #
         # Do we need to upload a GPX?
@@ -632,7 +636,8 @@ def add_ride():
                 Event().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
                 flash("Couldn't find the file.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                       MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
             else:
                 # Get the filename
                 file = request.files['gpx_file']
@@ -645,7 +650,8 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"No selected file!")
                     flash('No selected file')
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 if not file or \
                         not allowed_file(file.filename):
@@ -653,7 +659,8 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
                     flash("That's not a GPX file!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 # Create a new GPX object
                 # We do this first as we need the id in order to create
@@ -690,7 +697,8 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 # This is where we will store it
                 filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
@@ -701,7 +709,8 @@ def add_ride():
                     # Failed to delete existing file (func will generate error trace)
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 # Upload the GPX file
                 try:
@@ -711,7 +720,8 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 # Update gpx object with filename
                 if not Gpx().update_filename(gpx.id, filename):
@@ -719,7 +729,8 @@ def add_ride():
                     Event().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 # Strip all excess data from the file
                 strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
@@ -801,7 +812,8 @@ def add_ride():
             Event().log_event("Add ride Fail", f"Failed to add ride '{new_ride}'.")
             flash("Sorry, something went wrong.")
             return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
-                                   live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                                   live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                   MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
     # ----------------------------------------------------------- #
     # Handle POST
@@ -815,14 +827,16 @@ def add_ride():
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
         return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site(),
-                               DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                               DEFAULT_START_TIMES=DEFAULT_START_TIMES, MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE,
+                               UPLOAD_ROUTE=UPLOAD_ROUTE)
 
     # ----------------------------------------------------------- #
     # Handle GET
     # ----------------------------------------------------------- #
 
     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site(),
-                           DEFAULT_START_TIMES=DEFAULT_START_TIMES)
+                           DEFAULT_START_TIMES=DEFAULT_START_TIMES, MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE,
+                           UPLOAD_ROUTE=UPLOAD_ROUTE)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

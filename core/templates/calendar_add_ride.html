@@ -64,6 +64,8 @@
 			
 			<!-- This is where the form will go -->
 			{{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary", "cancel": "secondary"}) }}
+		
+			<h3 class="mt-2" style="color: red" id="error">This will be changes by JS</h3>
 			
 		</div>
 	</div>
