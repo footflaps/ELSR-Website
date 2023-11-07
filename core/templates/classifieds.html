@@ -136,12 +136,12 @@
 									{% if loop.index == 1 %}
 										<div class="carousel-item active">
 											<img src="{{ url_for('static', filename=image) }}" class="d-block w-100"
-											     style="width: 100%; border: 4px solid #000;">
+											     style="width: 100%; border: 4px solid #000;" alt="{{ classified.title }}">
 										</div>
 									{% else %}
 										<div class="carousel-item">
 											<img src="{{ url_for('static', filename=image) }}" class="d-block w-100"
-											     style="width: 100%; border: 4px solid #000;">
+											     style="width: 100%; border: 4px solid #000;" alt="{{ classified.title }}">
 										</div>
 									{% endif %}
 								
