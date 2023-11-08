@@ -304,7 +304,6 @@ $(function() {
     new_destination.style.display = "none";
     findLableForControl(new_destination).style.display = "none";
 
-
     $( "#validate_start" ).dialog({
         open: function() {
 
@@ -336,6 +335,8 @@ $(function() {
                         `You chose: <strong>${start_time.value}</strong> and ` +
                         `<strong>${meeting_point.value}</strong>. <br><br>` +
                         `Type '<strong>yes</strong>' to confirm your choice.`;
+
+                    // Clear confirm box
                     document.getElementById("confirm").value = "";
 
                     // Cancel submit
@@ -356,7 +357,7 @@ $(function() {
         },
         autoOpen: false,
         modal: true,
-        width: 520,
+        width: Math.min(window.innerWidth, 520),
         buttons: [
             {
                 // Button 1: cancel
