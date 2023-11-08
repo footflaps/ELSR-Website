@@ -71,18 +71,30 @@ function meetingLogic() {
 
     // If they select the Other option, then they must specific the location
     if ( meeting_point.value == "{{ MEETING_OTHER }}" ) {
+
+        // Need to specify what Other is
         if ( new_start.value.trim() == "" ) {
+
             // New start is not specified
             document.getElementById("submit").disabled=true;
             document.getElementById("error").innerHTML="Must define new meeting point!";
+            new_start.style.backgroundColor = '#ffe6e6';
+
         } else {
+
             // Looks ok
             document.getElementById("submit").disabled=false;
             document.getElementById("error").innerHTML="";
+            new_start.style.backgroundColor = 'white';
+
         }
+
     } else {
+
         // Clear new meeting point
         new_start.value = "";
+        new_start.style.backgroundColor = 'white';
+
     }
 
 }
@@ -93,18 +105,31 @@ function destinationLogic() {
 
     // If they select the New Cafe option then they must name it
     if ( destination.value == "{{ NEW_CAFE }}" ) {
+
+        // They must specify new cafe
         if ( new_destination.value.trim() == "" ) {
+
             // New start is not specified
             document.getElementById("submit").disabled=true;
             document.getElementById("error").innerHTML="Must define the destination cafe!";
+            new_destination.style.backgroundColor = '#ffe6e6';
+
+
         } else {
+
             // Looks ok
             document.getElementById("submit").disabled=false;
             document.getElementById("error").innerHTML="";
+            new_destination.style.backgroundColor = 'white';
+
         }
+
     } else {
+
         // Clear new meeting point
         new_destination.value = "";
+        new_destination.style.backgroundColor = 'white';
+
     }
 
 }
@@ -115,22 +140,42 @@ function gpxLogic() {
 
     // If they select the Upload own route option then they must have selected a file
     if ( gpx.value == "{{ UPLOAD_ROUTE }}" ) {
+
+        // Selected to upload a GPX
         if ( gpx_file.value == "" ) {
+
             // New start is not specified
             document.getElementById("submit").disabled=true;
             document.getElementById("error").innerHTML="Must upload a GPX file!";
+            gpx.style.backgroundColor = '#ffe6e6';
+            gpx_file.style.backgroundColor = '#ffe6e6';
+
         } else if ( gpx_file.value.split('.').pop().toLowerCase() != "gpx" ) {
+
             // Not GPX
             document.getElementById("submit").disabled=true;
             document.getElementById("error").innerHTML="File must be a '.gpx'.";
+            gpx.style.backgroundColor = '#ffe6e6';
+            gpx_file.style.backgroundColor = '#ffe6e6';
+
         } else {
+
             // Looks ok
             document.getElementById("submit").disabled=false;
             document.getElementById("error").innerHTML="";
+            gpx.style.backgroundColor = 'white';
+            gpx_file.style.backgroundColor = 'white';
+
         }
+
     } else {
-        // Clear new meeting point
+
+        // Selected an existing GPX file
+        // Clear file value
         gpx_file.value = "";
+        gpx.style.backgroundColor = 'white';
+        gpx_file.style.backgroundColor = 'white';
+
     }
 
 }
@@ -182,6 +227,7 @@ meeting_point.onchange = function() {
 
     }
 
+    meetingLogic();
     runlogic();
 }
 
@@ -194,6 +240,7 @@ new_start.onchange = function() {
         meeting_point.value = "{{ MEETING_OTHER }}";
     }
 
+    meetingLogic();
     runlogic();
 }
 
@@ -215,6 +262,7 @@ destination.onchange = function() {
 
     }
 
+    destinationLogic();
     runlogic();
 }
 
@@ -227,6 +275,7 @@ new_destination.onchange = function() {
         destination.value = "{{ NEW_CAFE }}";
     }
 
+    destinationLogic();
     runlogic();
 }
 
@@ -244,6 +293,9 @@ date.onchange = function() {
     start_time.value = default_start_time['time'];
     meeting_point.value = default_start_time['location'];
     new_start.value = default_start_time['new'];
+
+    // Set colour back to white
+    date.style.backgroundColor = 'white';
 
     // Run validation tests
     runlogic();
@@ -267,10 +319,13 @@ gpx.onchange = function() {
 
     }
 
+    gpxLogic();
     runlogic();
+
 }
 
 gpx_file.onchange = function() {
+    gpxLogic();
     runlogic();
 }
 
@@ -292,6 +347,11 @@ $(function() {
     // Disable ADD RIDE Button right at the start, as the date isn't set
     document.getElementById("submit").disabled=true;
     document.getElementById("error").innerHTML="Date has not been set."
+
+    // Highlight boxes needing completion
+    date.style.backgroundColor = '#ffe6e6';
+    gpx.style.backgroundColor = '#ffe6e6';
+    gpx_file.style.backgroundColor = '#ffe6e6';
 
     // Also edit file input to be gpx files only
     gpx_file.setAttribute('accept', '.gpx');
