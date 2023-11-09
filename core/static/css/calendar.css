@@ -83,6 +83,7 @@
 	background-color: #f0f0f0;
 }
 
+
 /* Shade Weekends */
 table.lightgrey-weekends tbody td:nth-child(n+6) {
 	  background-color: #f3f3f3;
