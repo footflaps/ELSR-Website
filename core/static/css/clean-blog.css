@@ -33,7 +33,7 @@ h4 {
 }
 
 /* Use this for hiding links next to symbols so Google etc know what the link is for */
-h6 {
+.hidden {
     font-size: 0px;
 }
 
