@@ -106,6 +106,7 @@ def calendar():
             datestr = f"{format(day, '02d')}{format(month, '02d')}{year}"
 
             markup = ""
+            added_ride = False
 
             # ----------------------------------------------------------- #
             # Request rides from Calendar class
@@ -113,6 +114,7 @@ def calendar():
             if Calendar().all_calendar_date(datestr):
                 markup += f"<a href='{url_for('weekend', date=f'{datestr}')}'>" \
                           f"<i class='fas fa-solid fa-person-biking fa-2xl'></i></a>"
+                added_ride = True
 
             # ----------------------------------------------------------- #
             # Request socials from Socials class
@@ -139,7 +141,8 @@ def calendar():
             # ----------------------------------------------------------- #
             # Add TWRs
             # ----------------------------------------------------------- #
-            if day_of_week == "Wednesday":
+            if day_of_week == "Wednesday" \
+                    and not added_ride:
                 markup += f"<a href='{url_for('twr')}'>" \
                           f"<i class='fas fa-solid fa-person-biking fa-xl'></i></a>"
 
