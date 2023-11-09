@@ -146,10 +146,10 @@
 			<a name="where" ></a>
 			<h2>Where? <i class="fa-solid fa-map-location-dot"></i></h2>
 			<p>
-				ELSR meet at <strong>Bean Theory Cafe</strong> (next door to Mill Works, by the Mill Pond) for the
-                main Weekend group rides. You can access the cafe from both Newnham Road or from across Sheep's Green
-                via Mill Lane. NB We used to meet at Espresso Library Cafe (hence the name of the collective), but
-                that has sadly closed.
+				ELSR meet at <a href="{{ url_for('cafe_details', cafe_id=65) }}"><strong>Bean Theory Cafe</strong></a>
+				(next door to Mill Works, by the Mill Pond) for the main Weekend group rides. You can access the cafe
+				from both Newnham Road or from across Sheep's Green via Mill Lane. NB We used to meet at Espresso
+				Library Cafe (hence the name of the collective), but that has sadly closed.
 			</p>
 			
 			
@@ -174,16 +174,41 @@
 				We then split into groups by pace and destination before starting our regular cafe
 			    rides, which can be anything between 50 km and 200 km, although the norm is around 100 km. Nearly all
 			    rides include a stop at a local cafe for coffee, cake and for the more discerning, a bacon roll.
-			    Vegetarian / Vegan options are normally available. You can see a list of our regular stops
-			    <strong><a href="{{ url_for('cafe_list') }}">here.</a></strong>
+			    Vegetarian / Vegan options are normally available. You can see a list of our regular stops:
+			    <strong><a href="{{ url_for('cafe_list') }}">Our Cafes.</a></strong>
 			</p>
 		
 			<p>If you want to see our groups rides over the past couple of months, you can find them here:</p>
 			<ul>
-				<li><a href="{{ url_for('ride_history', request='Doppio') }}"><strong>Doppio</strong> Ride History</a></li>
-				<li><a href="{{ url_for('ride_history', request='Espresso') }}"><strong>Espresso</strong> Ride History</a></li>
-				<li><a href="{{ url_for('ride_history', request='Decaff') }}"><strong>Decaff</strong> Ride History</a></li>
-				<li><a href="{{ url_for('ride_history', request='Mixed') }}"><strong>Mixed</strong> Ride History (Sunday Rides)</a></li>
+			
+				<li class="my-2">
+					<i class="fa-solid fa-cog fa-spin fa-xl"></i>
+					<a href="{{ url_for('ride_history', request='Doppio') }}"> &nbsp
+						<strong>Doppio</strong> Ride History
+					</a>
+				</li>
+			
+				<li class="my-2">
+					<a href="{{ url_for('ride_history', request='Espresso') }}">
+						<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 5s;"></i> &nbsp
+						<strong>Espresso</strong> Ride History
+					</a>
+				</li>
+			
+				<li class="my-2">
+					<a href="{{ url_for('ride_history', request='Decaff') }}">
+						<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 10s;"> </i> &nbsp;
+						<strong>Decaff</strong> Ride History
+					</a>
+				</li>
+			
+				<li class="my-2">
+					<a href="{{ url_for('ride_history', request='Mixed') }}">
+						<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 8s;"> </i> &nbsp;
+						<strong>Mixed</strong> Ride History (Sunday Rides)
+					</a>
+				</li>
+			
 			</ul>
 			
 			<hr>
@@ -195,11 +220,11 @@
 			
 			<h2 class="mt-3">Fancy joining in? <i class="fa-solid fa-person-biking"></i></h2>
 			<p>
-				We list routes and ride leaders on the website
-			    <strong><a href="{{ url_for('weekend') }}">here.</a></strong> Registered members can download the GPX
-			    file direct to their phone from the site and push it to Garmin Connect etc (see guide
-				<a href="{{ url_for('gpx_guide') }}"><strong>here</strong></a>). However, as we normally base our rides
-			    according to wind direction and weather etc, details won't normally start appearing until
+				We list routes and ride leaders on the website:
+			    <strong><a href="{{ url_for('weekend') }}">Weekend Ride Schedule.</a></strong> Registered members
+				can download the GPX files direct to their phone from the site and push it to Garmin Connect:
+				<a href="{{ url_for('gpx_guide') }}"><strong>GPX Download Guide</strong></a>. However, as we normally
+				base our rides according to wind direction and weather etc, details won't normally start appearing until
 			    Thursday and sometimes the full compliment of rides isn't complete until Friday afternoon /
 			    evening. Registered members can configure email alerts, so as soon as a ride is posted a download link
 				is sent to them. NB Registration is free and just requires an email address (and you won't receive any
@@ -207,9 +232,9 @@
 			</p>
 			<p>
 				There is no need to 'sign up' in advance (no one does), we just turn up and ride. New riders are welcome
-			    to turn up at the meeting point, say Hello and join the rides. When you get there just ask someone to
-			    point you in the direction of the ride leader, so you can say hello <i class="fa-regular fa-hand fas-l"></i>.
-				The ride leader needs to know who is
+			    to turn up at the meeting point, say hello <i class="fa-regular fa-hand fas-l"></i> and join the rides.
+				When you get there just ask someone to point you in the direction of the ride leader, so you can say
+				hello <i class="fa-regular fa-hand fas-l"></i>. The ride leader needs to know who is
 			    joining the group before they set off, so they know how many are in the group and can check no one has
 			    been dropped etc. They may also decide to split the group in two, if the numbers are too large for a
 			    single group.
@@ -220,9 +245,9 @@
 				Decaff ride and may well find they struggle to keep up. Road bikes are called 'road' bikes for a reason.
 			</p>
 			<p>
-				Please note, we have a mandatory kit list for all riders joining one of our group rides, see
-				<a href="/static/img/kit-list.jpg"><strong>here</strong></a>. Failing that, stuff to repair an inner
-				tube or tubeless tyre and a pump will probably suffice.
+				Please note, we have a <a href="/static/img/kit-list.jpg"><strong>Mandatory Kit</strong></a> list for
+				all riders joining one of our group rides. Failing that, stuff to repair an inner tube or tubeless tyre
+				and a pump will probably suffice.
 			</p>
 			<hr>
 			
@@ -253,14 +278,13 @@
 			</ul>
 			
 			<p>
-				You can see the upcoming rides for this weekend
-				<a href="{{ url_for('weekend') }}"><strong>here</strong></a>. NB Ride
+				You can see the upcoming rides:
+				<a href="{{ url_for('weekend') }}"><strong>Weekend Ride Schedule</strong></a>. NB Ride
 			    details normally start appearing around Thursday / Friday of each week.
 			</p>
 			<p>
-			    Normal start time for all Saturday rides is <strong>8.00am</strong>, but please check the start time for each ride
-				<a href="{{ url_for('weekend') }}"><strong>here</strong></a>,
-			    as occasionally some rides will start earlier or later.
+			    Normal start time for all Saturday rides is <strong>8.00am</strong>, but please check the start time
+			    for each ride (in the link above), as occasionally some rides will start earlier or later.
 			</p>
 			
 			<!------------------------------------------>
@@ -316,14 +340,13 @@
 			<h2 class="mt-3">Sunday - single group</h2>
 			<p>Sunday normally has a smaller turnout with a single group riding at between Decaf and Espresso pace.</p>
 			<p>
-				You can see the upcoming rides for this weekend
-				<a href="{{ url_for('weekend') }}"> <strong>here</strong></a>. NB Ride
+				You can see the upcoming rides for this weekend:
+				<a href="{{ url_for('weekend') }}"> <strong>Weekend Ride Schedule</strong></a>. NB Ride
 			    details normally start appearing around Thursday / Friday of each week.
 			</p>
 			<p>
-			    In the winter, our Sunday rides start a little later at <strong>9.00am</strong>, but please check the start time for
-			    each ride <a href="{{ url_for('weekend') }}"><strong>here</strong></a>,
-			    as occasionally some rides will start earlier or later.
+			    In the winter, our Sunday rides start a little later at <strong>9.00am</strong>, but please check the
+			    start time for each ride (in the link above), as occasionally some rides will start earlier or later.
 			</p>
 			<hr>
 			
@@ -335,8 +358,8 @@
 			<h2 class="mt-3">Thursday night Chaingang / Paceline <i class="fa-solid fa-link"></i></h2>
 			<p>
 				For those of you who missed out on a UCI Pro-team contract this year, we have the next best thing.
-			    From late March till September, there is also a Chaingang. Details can be found
-				<a href="{{ url_for('chaingang') }}"><strong>here</strong>.</a>
+			    From late March till September, there is also a Chaingang. Details:
+				<a href="{{ url_for('chaingang') }}"><strong>Thursday Night Chaingang</strong>.</a>
 			</p>
 			<hr>
 			
@@ -349,7 +372,7 @@
 			<p>
 				We have monthly social gatherings in local drinking establishments. The aim is to use alcohol to
 			    dilute the EPO in our blood to such an extent that we can all pass WADA drug tests.
-			    Details of upcoming events can be found <a href="{{ url_for('social') }}"><strong>here</strong>.</a>
+			    Details: <a href="{{ url_for('social') }}"><strong>Socials Schedule</strong>.</a>
 			</p>
 			<hr>
 			
@@ -360,8 +383,8 @@
 			
 			<h2 class="mt-3">Gravel and Gravel Packing <i class="fa-solid fa-campground"></i></h2>
 			<p>
-				We have quite a few decent bridleways and gravel trails in the region, more info
-				<a href="{{ url_for('gravel') }}"><strong>here</strong>.</a>
+				We have quite a few decent bridleways and gravel trails in the region, more info:
+				<a href="{{ url_for('gravel') }}"><strong>Cambridge Gravel Trails</strong>.</a>
 			</p>
 			<hr>
 			
@@ -372,7 +395,8 @@
 			<h2 class="mt-3">What else do we get up to? <i class="fa-brands fa-microblog"></i></h2>
 			<p>
 				We are a fairly eclectic bunch with a wide variety of cycling related interests, you can see some
-				of the activies we get up to on our blog <a href="{{ url_for('blog') }}"><strong>here</strong>.</a>
+				of the activities we get up to on our blog:
+				<a href="{{ url_for('blog') }}"><strong>ELSR Blog</strong>.</a>
 			</p>
 			<hr>
 			
@@ -385,8 +409,8 @@
 			<img class="mt-2" src="{{ url_for('static', filename='/img/club_kit/elsr-ss-jersey.jpg') }}"
 			     style="width: 100%; border: 4px solid #000;" alt="ELSR Team Kit Jersey">
 			<p>
-				Want to look amazing on the bike? We have ELSR branded kit in both men's and women's fit. See
-				<a href="{{ url_for('club_kit') }}"><strong>here.</strong></a>
+				Want to look amazing on the bike? We have ELSR branded kit in both men's and women's fit:
+				<a href="{{ url_for('club_kit') }}"><strong>Team Kit</strong></a>.
 			</p>
 			<hr>
 			
@@ -398,7 +422,7 @@
 			<h2 class="mt-3">Classifieds <i class="fa-solid fa-store"></i></h2>
 			<p>
 				You can now buy and sell bike parts, bikes, clothing, pretty much anything you want on our
-				classifieds page <a href="{{ url_for('classifieds') }}"><strong>here</strong>.</a>
+				classifieds page: <a href="{{ url_for('classifieds') }}"><strong>Classifieds</strong>.</a>
 			</p>
 			<hr>
 			
@@ -413,8 +437,8 @@
 			    sign up via email, and add cafes and GPX files to the database.
 			</p>
 			<p>
-				If you're curious as to how this site works, you can find out
-				<a href="{{ url_for('about') }}"><strong>here.</strong></a>
+				If you're curious as to how this site works, you can find out here:
+				<a href="{{ url_for('about') }}"><strong>Site Implementation.</strong></a>
 			</p>
 			
 			<p>
