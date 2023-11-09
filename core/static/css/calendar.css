@@ -82,3 +82,18 @@
 .zabuto-calendar.table.clickable > tbody td:hover {
 	background-color: #f0f0f0;
 }
+
+/* Shade Weekends */
+table.lightgrey-weekends tbody td:nth-child(n+6) {
+	  background-color: #f3f3f3;
+}
+
+/* Light pink well hover over day */
+.zabuto-calendar > tbody tr :hover {
+    background-color: #ff9999;
+}
+
+/* Override WE colour when hover over WE day */
+table.lightgrey-weekends tbody td:nth-child(n+6):hover {
+  background-color: #ff9999;
+}
