@@ -15,14 +15,14 @@
 	<!-- Specific cafe photo -->
 	<header class="masthead"
 	        style="background-image: url( {{cafe.image_name}} )"
-			aria-label="Image of cafe {{ cafe.name }}">
+			alt="{{ cafe.name }}">
 
 {% else %}
 	
 	<!-- Generic cafe photo -->
 	<header class="masthead"
-	        style="background-image: url({{ url_for('static', filename='img/cafe-bg.jpg')}})"
-			aria-label="Generic cafe image">
+	        style="background-image: url({{ url_for('static', filename='img/page-headers/cafe-bg.jpg')}})"
+			alt="Generic cafe image">
 
 {% endif %}
 	
