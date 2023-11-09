@@ -1,6 +1,32 @@
 {% extends "base.html" %}
 
 
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                   Page specific JS / CSS                                       -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% block head %}
+	
+	<!-- dataTables Bootstrap 4 CSS -->
+	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+
+	<!-- DataTables 1.13.6 -->
+	<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"
+	        integrity="sha384-k5vbMeKHbxEZ0AEBTSdR7UjAgWCcUfrS8c0c5b2AfIh7olfhNkyCZYwOfzOQhauK"
+	        crossorigin="anonymous"></script>
+	
+	<!-- DataTables Bootstrap 3 integration -->
+	<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap.min.js"
+	        integrity="sha384-xX2rLG/IDoD8nMCCawO1tSmnmivygPR0hHih92wcA9NqItz/WQBRYL3LcGloEQnU"
+	        crossorigin="anonymous"></script>
+
+{% endblock %}
+
+
+
+
+
 {% block content %}
 
 <head>

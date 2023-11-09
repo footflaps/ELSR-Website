@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
 
+
+
 {% block content %}
 
 
@@ -328,38 +330,6 @@
 		</div>
 	</div>
 </div>
-
-
-<!---------------------------------------------------------------------------------------------------->
-<!--                               Activate jQuery on the Table                                     -->
-<!---------------------------------------------------------------------------------------------------->
-
-<script>
-	
-	$(document).ready( function () {
-		$('#gpxTable').dataTable({
-		
-			/* Default table length */
-			pageLength: 20,
-			
-			"autoWidth": false,
-			
-			/* "simple_numbers" => 'Previous' and 'Next' buttons, plus page numbers */
-			"pagingType": "simple_numbers",
-			
-			"oLanguage": {
-				"oPaginate": {
-					"sFirst": "<<", // This is the link to the first page
-					"sPrevious": "<", // This is the link to the previous page
-					"sNext": ">", // This is the link to the next page
-					"sLast": ">>" // This is the link to the last page
-				}
-			}
-			
-		})
-	} );
-	
-</script>
 
 
 {% endblock %}
