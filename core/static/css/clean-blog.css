@@ -32,6 +32,11 @@ h4 {
   font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* Use this for hiding links next to symbols so Google etc know what the link is for */
+h6 {
+    font-size: 0px;
+}
+
 /* **************************************************************************
                                Hyperlink Behaviour
    ************************************************************************** */
