@@ -56,7 +56,7 @@ class Cafe(db.Model):
     # Return a list of all cafes
     def all_cafes(self):
         with app.app_context():
-            cafes = db.session.query(Cafe).order_by('name').all()
+            cafes = db.session.query(Cafe).all()
             return cafes
 
     # Return a single cafe

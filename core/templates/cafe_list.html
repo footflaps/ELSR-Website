@@ -140,29 +140,45 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--                                       Map View of Cafes                                        -->
+<!--                                    Most recent additions                                       -->
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
 	<div class="row">
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+
+			<h2 class="">Recent Additions</h2>
 			
-			<!-- Link to route planning guide -->
-			<h2 class="text-center mt-5 mb-2">
-				<a href="{{ url_for('plan') }}">
-					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
-					How to choose a suitable route
-					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
-				</a>
-			</h2>
+			<ul class="my-3">
+				{% for cafe in cafes | reverse %}
+					{% if loop.index < 6 %}
+						<li class="my-2">
+							<a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}">
+								<strong>{{ cafe.name }}</strong>
+							</a>
+							added {{ cafe.added_date }}
+						</li>
+					{% endif %}
+				{% endfor %}
+			</ul>
+			
+			<!-- Break before next section -->
+			<hr>
 			
 		</div>
 	</div>
+</div>
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Map View of Cafes                                        -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
 	
 	<div class="row">
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
     
-            <h2  class="mt-5 mb-3">Map view of {{ cafes | count() }} cafes</h2>
+            <h2 class="mb-3">Map view of {{ cafes | count() }} cafes</h2>
             
 			
             <!---------------------------------------------------------------------------------------------------->
@@ -175,11 +191,25 @@
 				{% endif %}
 			</div>
 			
-			<!-- Break before next section -->
-			<hr>
 			
 		</div>
 	</div>
+	
+	<div class="row my-3">
+		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+			
+			<!-- Link to route planning guide -->
+			<h2 class="text-center mb-2">
+				<a href="{{ url_for('plan') }}">
+					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
+					How to choose a suitable route
+					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
+				</a>
+			</h2>
+			
+		</div>
+	</div>
+	
 </div>
 
 
