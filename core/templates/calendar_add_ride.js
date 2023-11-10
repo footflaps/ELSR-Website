@@ -69,6 +69,41 @@ function dateLogic() {
 }
 
 
+// Autocomplete start time and location
+function autoCompleteStart() {
+
+    // date.value has form '2023-11-04', so convert to day of week eg 'Saturday' etc
+    let day_of_week = getDayName(date.value);
+
+    // Look up the default start time
+    let default_start_time = {{ DEFAULT_START_TIMES | tojson }}[day_of_week]
+
+    // Populate the form
+    start_time.value = default_start_time['time'];
+    meeting_point.value = default_start_time['location'];
+    new_start.value = default_start_time['new'];
+
+    // If we set 'Other' we need to unhide the new box
+    if ( meeting_point.value == "{{ MEETING_OTHER }}" ) {
+
+        // Show new start box and label
+        new_start.style.display = "";
+        findLableForControl(new_start).style.display = "";
+
+    } else {
+
+        // Hide new start box and label
+        new_start.style.display = "none";
+        findLableForControl(new_start).style.display = "none";
+
+    }
+
+    // Set colour back to white
+    date.style.backgroundColor = 'white';
+
+}
+
+
 // Check logic of Meeting Point and New Meeting point
 function meetingLogic() {
 
@@ -286,34 +321,8 @@ new_destination.onchange = function() {
 // Trap user changing the date and auto complete the rest of the form
 date.onchange = function() {
 
-    // date.value has form '2023-11-04', so convert to day of week eg 'Saturday' etc
-    let day_of_week = getDayName(date.value);
-
-    // Look up the default start time
-    let default_start_time = {{ DEFAULT_START_TIMES | tojson }}[day_of_week]
-
-    // Populate the form
-    start_time.value = default_start_time['time'];
-    meeting_point.value = default_start_time['location'];
-    new_start.value = default_start_time['new'];
-
-    // If we set 'Other' we need to unhide the new box
-    if ( meeting_point.value == "{{ MEETING_OTHER }}" ) {
-
-        // Show new start box and label
-        new_start.style.display = "";
-        findLableForControl(new_start).style.display = "";
-
-    } else {
-
-        // Hide new start box and label
-        new_start.style.display = "none";
-        findLableForControl(new_start).style.display = "none";
-
-    }
-
-    // Set colour back to white
-    date.style.backgroundColor = 'white';
+    // Autocomplete start time and place
+    autoCompleteStart();
 
     // Run validation tests
     runlogic();
@@ -321,6 +330,7 @@ date.onchange = function() {
 };
 
 
+// Trap user changing GPX from upload my route to something else
 gpx.onchange = function() {
 
     if ( gpx.value == "{{ UPLOAD_ROUTE }}" ) {
@@ -362,25 +372,50 @@ document.getElementById("submit").addEventListener("click", function() {
 /* Function to run when Add Ride button is pressed */
 $(function() {
 
-    // Disable ADD RIDE Button right at the start, as the date isn't set
-    document.getElementById("submit").disabled=true;
-    document.getElementById("error").innerHTML="Date has not been set."
+    /* **************************************************************************
+                               Start of Day Settings
+    ***************************************************************************** */
 
-    // Highlight boxes needing completion
-    date.style.backgroundColor = '#ffe6e6';
+    // We might have been called with the date pre-loaded
+    if (date.value == "") {
+
+        // Date unset, so:
+        // Disable ADD RIDE Button right at the start
+        document.getElementById("submit").disabled=true;
+        document.getElementById("error").innerHTML="Date has not been set."
+
+         // Hide New Start Location initially
+        new_start.style.display = "none";
+        findLableForControl(new_start).style.display = "none";
+
+        // Highlight the Date box
+        date.style.backgroundColor = '#ffe6e6';
+
+    } else {
+
+        // Date has been set already, so we need to:
+        // 1. Autocomplete start details based on the pre-loaded date
+        autoCompleteStart();
+        // 2. Run all the test logic to see what else needs doing
+        runlogic();
+
+    }
+
+    // Highlight GPX file boxes, as they need completing
     gpx.style.backgroundColor = '#ffe6e6';
     gpx_file.style.backgroundColor = '#ffe6e6';
 
     // Also edit file input to be gpx files only
     gpx_file.setAttribute('accept', '.gpx');
 
-    // Hide New Start Location initially
-    new_start.style.display = "none";
-    findLableForControl(new_start).style.display = "none";
-
     // Hide New Cafe initially
     new_destination.style.display = "none";
     findLableForControl(new_destination).style.display = "none";
+
+
+    /* **************************************************************************
+                                    Set up Dialog
+    ***************************************************************************** */
 
     $( "#validate_start" ).dialog({
         open: function() {
