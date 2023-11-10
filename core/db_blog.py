@@ -256,7 +256,7 @@ def create_blogs_form(admin: bool):
         # Generate the list of cafes
         # ----------------------------------------------------------- #
         cafe_choices = [NO_CAFE]
-        cafes = Cafe().all_cafes()
+        cafes = Cafe().all_cafes_sorted()
         for cafe in cafes:
             cafe_choices.append(cafe.combo_string())
 

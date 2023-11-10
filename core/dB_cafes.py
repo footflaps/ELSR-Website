@@ -59,6 +59,11 @@ class Cafe(db.Model):
             cafes = db.session.query(Cafe).all()
             return cafes
 
+    def all_cafes_sorted(self):
+        with app.app_context():
+            cafes = db.session.query(Cafe).order_by('name').all()
+            return cafes
+
     # Return a single cafe
     def one_cafe(self, cafe_id):
         with app.app_context():
