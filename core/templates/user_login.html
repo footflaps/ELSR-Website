@@ -52,7 +52,7 @@
 			
 			{% if current_user.is_authenticated %}
 			
-				<h2>You are already logged in as: &nbsp;
+				<h2 style="color: red">You are already logged in as: &nbsp;
 					<img src="{{ current_user.email | gravatar }}"
 					     width="60" height="60"
 					     style="border-radius: 50%;"
@@ -73,6 +73,7 @@
 		</div>
 	</div>
 </div>
+
 
 <div class="container">
 	<div class="row">

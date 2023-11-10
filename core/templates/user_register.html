@@ -43,6 +43,33 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                                     Warn if already logged in                                  -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if current_user.is_authenticated %}
+
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				
+				<h2 style="color: red">You are already logged in as: &nbsp;
+					<img src="{{ current_user.email | gravatar }}"
+					     width="60" height="60"
+					     style="border-radius: 50%;"
+						 alt="Gravatar icon"/>
+				    {{ get_user_name(current_user.email) }}
+				</h2>
+				
+				<hr>
+				
+			</div>
+		</div>
+	</div>
+
+{% endif %}
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                                     Terms and Conditions                                       -->
 <!---------------------------------------------------------------------------------------------------->
 
@@ -172,13 +199,29 @@
 				<div class="card card-body my-3">
 	                <div class="clearfix">
 		    
-		                <h3>Register on www.elsr.co.uk</h3>
-		                <p>NB Registration is a two step process, you need to verify your email address with a code
-		                   which will be emailed to you by <b>{{ admin_email_address }}</b>.
-		                <p>NB Verification codes will expire after <strong>24 hours</strong>.</p>
-						
-		                {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
-		   
+		               
+						{% if current_user.is_authenticated %}
+	
+					
+							<h2 style="color: red">You are already logged in as: &nbsp;
+								<img src="{{ current_user.email | gravatar }}"
+								     width="60" height="60"
+								     style="border-radius: 50%;"
+									 alt="Gravatar icon"/>
+							    {{ get_user_name(current_user.email) }}
+							</h2>
+					
+						{% else %}
+		                
+			                <h3>Register on www.elsr.co.uk</h3>
+			                <p>NB Registration is a two step process, you need to verify your email address with a code
+			                   which will be emailed to you by <b>{{ admin_email_address }}</b>.
+			                <p>NB Verification codes will expire after <strong>24 hours</strong>.</p>
+							
+			                {{ wtf.quick_form(form, novalidate=True, button_map={"submit": "primary"}) }}
+		                
+						{% endif %}
+		    
 					</div>
 				</div>
 			</div>
