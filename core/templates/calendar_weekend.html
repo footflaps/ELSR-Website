@@ -326,7 +326,8 @@
 									<!-- User Gravatar -->
 									<img src="{{ ride.email | gravatar }}"
 								         width="40"
-										 style="border-radius: 50%;"/>
+										 style="border-radius: 50%;"
+										 alt="Gravatar icon"/>
 									{{ ride.leader }}
 									<a href="{{ url_for('gpx_details', gpx_id=ride.gpx_id) }}">
 										<strong>{{ ride.destination }}</strong>

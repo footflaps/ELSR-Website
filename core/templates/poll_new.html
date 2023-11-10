@@ -77,8 +77,9 @@
 							<h4 class="card-title">Created by:
 							    <!-- User Gravatar -->
 								<img src="{{ poll.email | gravatar }}"
-								         width="40"
-										 style="border-radius: 50%;"/>
+								     width="40"
+									 style="border-radius: 50%;"
+								     alt="Gravatar icon"/>
 								{{ get_user_name(poll.email) }}, on
  		                        {{ poll.created_date[0:2] }}/{{ poll.created_date[2:4] }}/{{ poll.created_date[4:8] }}
 							</h4>

@@ -99,8 +99,9 @@
 								</td>
 								
 								<td> <img src="{{ poll.email | gravatar }}"
-							             width="40"
-									     style="border-radius: 50%;"/>  {{ get_user_name(poll.email) }}</td>
+							              width="40"
+									      style="border-radius: 50%;"
+								          alt="Gravatar icon"/>  {{ get_user_name(poll.email) }}</td>
 								<td>{{ poll.termination_date[0:2] }}/{{ poll.termination_date[2:4] }}/{{ poll.termination_date[4:8] }}</td>
 								{% if poll.status == POLL_OPEN %}
 									<td>{{ poll.status.upper() }}</td>

@@ -67,8 +67,9 @@
 					<h4 class="card-title">Created by:
 					    <!-- User Gravatar -->
 						<img src="{{ poll.email | gravatar }}"
-						         width="40"
-								 style="border-radius: 50%;"/>
+						     width="40"
+							 style="border-radius: 50%;"
+						     alt="Gravatar icon"/>
 						{{ get_user_name(poll.email) }}, on
                         {{ poll.created_date[0:2] }}/{{ poll.created_date[2:4] }}/{{ poll.created_date[4:8] }}
 					</h4>
@@ -182,7 +183,8 @@
 										<!-- NO name shown on hover over -->
 										<img src="{{ voter | gravatar }}"
 								             width="40"
-										     style="border-radius: 50%;"/>
+										     style="border-radius: 50%;"
+										     alt="Gravatar icon"/>
 									{% endfor %}
 								
 								{% else %}
@@ -194,7 +196,8 @@
 										<img title="{{ get_user_name(current_user.email) }}"
 										     src="{{ current_user.email | gravatar }}"
 									         width="40"
-											 style="border-radius: 50%;"/>
+											 style="border-radius: 50%;"
+										     alt="Gravatar icon"/>
 								
 										{% for voter in poll.responses[option] %}
 											{% if voter != current_user.email %}
@@ -202,7 +205,8 @@
 												<img title="{{ get_user_name(voter) }}"
 												     src="{{ voter | gravatar }}"
 											         width="40"
-													 style="border-radius: 50%;"/>
+													 style="border-radius: 50%;"
+												     alt="Gravatar icon"/>
 											{% endif %}
 										{% endfor %}
 								
@@ -214,7 +218,8 @@
 											<img title="{{ get_user_name(voter) }}"
 											     src="{{ voter | gravatar }}"
 									             width="40"
-											     style="border-radius: 50%;"/>
+											     style="border-radius: 50%;"
+											     alt="Gravatar icon"/>
 										{% endfor %}
 								
 									{% endif %}
@@ -228,7 +233,8 @@
 									<!-- Everyone WITH name on hover over -->
 									<img src="{{ voter | gravatar }}"
 							             width="40"
-									     style="border-radius: 50%;"/>
+									     style="border-radius: 50%;"
+									     alt="Gravatar icon"/>
 								{% endfor %}
 							
 							{% endif %}
