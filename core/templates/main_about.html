@@ -49,7 +49,11 @@
 		<div class="col-lg-8 col-md-10 mx-auto">
 			
 			<p>
-				I was bored, so I decided to learn Python. After a bit of googling I came across Udemy courses and
+				I was bored, so I decided to learn Python. After a bit of googling I came across
+				<img src="{{ url_for('static', filename='img/about-icons/Udemy_icon.png')}}"
+				                      width=25
+									  alt="Udemy Logo">
+				Udemy courses and
 			    picked their highest rated Python course:
 			    <a class="link-info" href="https://www.udemy.com/course/100-days-of-code/">
 				   <i class="fa fa-external-link fa-2xs"></i> <strong>100 Days of Code</strong>
@@ -98,15 +102,15 @@
 				<!-- Linux -->
 				<li class="my-4">
 					<img src="{{ url_for('static', filename='img/about-icons/linux_icon.png')}}"
-					     width=100 alt="Linux Logo">>
+					     width=100 alt="Linux Logo">
 					<img src="{{ url_for('static', filename='img/about-icons/ubuntu_icon.png')}}"
-					     width=100 alt="Ubuntu Logo">>
+					     width=100 alt="Ubuntu Logo">
 					The virtual machine runs Linux (Ubuntu Server flavour) as an operating system.
 				</li>
 				
 				<!-- Nginx -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/nginx_icon.png')}}"
-				                      width=100 alt="Nginx Logo">>
+				                      width=100 alt="Nginx Logo">
 					This website uses NGINX as a reverse proxy and file server. A reverse proxy is the process which
 					handles your incoming requests, to the server, and decides what to do with them. In most cases it
 					will just pass your request on to Gunicorn, but for files (e.g. css, js, jpg, etc) it also acts as
@@ -117,9 +121,25 @@
 					</a>
 				</li>
 				
+				<!-- HTTP/2 -->
+				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/http2_icon.png')}}"
+				                      width=100 alt="HTTP/2 Logo">
+					ELSR is served using <a href="https://en.wikipedia.org/wiki/HTTP/2">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>HTTP/2</strong></a>, which is the latest
+					revision of the HTTP protocol and increases the speed at which web pages are served over the
+					internet. You can test websites for HTTP/2 compatibility using an online
+					<a href="https://tools.keycdn.com/http2-test">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>HTTP/2 Tester</strong>.
+					</a>
+					Configuring NGINX to use HTTP/2 is absolutely trivial e.g.
+					<a href="https://www.tutorialspoint.com/how-to-enable-http2-0-in-nginx">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>NGINX and HTTP/2</strong>.
+					</a>
+				</li>
+				
 				<!-- Python -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/python_icon.png')}}"
-				                      width=40 alt="Python Logo">>
+				                      width=40 alt="Python Logo">
 					<a href="https://www.python.org/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Python</strong>
 					</a> as the underlying back end language. The website runs in a
@@ -130,7 +150,7 @@
 				
 				<!-- Gunicorn -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/gunicorn_icon.png')}}"
-				                      width=50 alt="Gunicorn Logo">>
+				                      width=80 alt="Gunicorn Logo">
 					This website uses
 					<a href="https://gunicorn.org/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Gunicorn</strong>
@@ -145,7 +165,7 @@
 				<!-- Flask-->
 				<li class="my-4">
 					<img src="{{ url_for('static', filename='img/about-icons/flask_icon.png')}}"
-					     width=80 alt="Flask Logo">>
+					     width=90 alt="Flask Logo">
 					<a href="https://flask.palletsprojects.com/en/2.3.x/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Flask</strong>
 					</a> as the micro framework backend for the website. There is an epic free course on building
@@ -158,7 +178,7 @@
 				<!-- Jinja -->
 				<li class="my-4">
 					<img src="{{ url_for('static', filename='img/about-icons/jinja_icon.png')}}"
-					     width=100 alt="Jinja Logo">>
+					     width=110 alt="Jinja Logo">
 					<a href="https://jinja.palletsprojects.com/en/3.1.x/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Jinja</strong>
 					</a>
@@ -177,7 +197,7 @@
 				
 				<!-- Bootstrap -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/bootstrap_icon.png')}}"
-				                      width=40 alt="Bootstrap Logo">
+				                      width=50 alt="Bootstrap Logo">
 					Responsive CSS / Javascript styling from
 					<a href="https://getbootstrap.com/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Bootstrap</strong>
@@ -188,7 +208,7 @@
 		
 				<!-- Fontawesome -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/font_awesome_icon.png')}}"
-				                      width=30 alt="Fontawesome Logo">>
+				                      width=40 alt="Fontawesome Logo">
 					Fancy font icons from
 					<a href="https://fontawesome.com/"><i class="fa fa-external-link fa-2xs"></i>
 						<strong>Font Awesome</strong>
@@ -202,7 +222,7 @@
 		
 				<!-- Google fonts-->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/google_fonts_icon.png')}}"
-				                      width=50 alt="Google Fonts Logo">>
+				                      width=50 alt="Google Fonts Logo">
 					Website fonts from
 					<a href="https://fonts.google.com/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Google Fonts</strong>
@@ -219,7 +239,7 @@
 		
 				<!-- SQL -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/sqlite_icon.png')}}"
-				                      width=90 alt="SQL Logo">>
+				                      width=90 alt="SQL Logo">
 					SQLite databases courtesy of
 					<a href="https://www.sqlalchemy.org/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>SQLAlchemy.</strong>
