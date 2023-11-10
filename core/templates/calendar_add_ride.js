@@ -391,6 +391,10 @@ $(function() {
         // Highlight the Date box
         date.style.backgroundColor = '#ffe6e6';
 
+         // Highlight GPX file boxes, as they need completing
+        gpx.style.backgroundColor = '#ffe6e6';
+        gpx_file.style.backgroundColor = '#ffe6e6';
+
     } else {
 
         // Date has been set already, so we need to:
@@ -401,16 +405,15 @@ $(function() {
 
     }
 
-    // Highlight GPX file boxes, as they need completing
-    gpx.style.backgroundColor = '#ffe6e6';
-    gpx_file.style.backgroundColor = '#ffe6e6';
+    // If we're editing an existing entry we might have a new cafe selected:
+    if ( destination.value != "{{ NEW_CAFE }}" ) {
+        // Otherwise, hide New Cafe box initially
+        new_destination.style.display = "none";
+        findLableForControl(new_destination).style.display = "none";
+    }
 
     // Also edit file input to be gpx files only
     gpx_file.setAttribute('accept', '.gpx');
-
-    // Hide New Cafe initially
-    new_destination.style.display = "none";
-    findLableForControl(new_destination).style.display = "none";
 
 
     /* **************************************************************************
