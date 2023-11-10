@@ -45,15 +45,18 @@ function dateInPast(dateStr) {
 // Check date logic
 function dateLogic() {
 
+    // Is date set?
     if (date.value != "") {
 
          // Date must be in the future, unless admin
-        if ( "{{ current_user.admin() }}" != "True") {
+        if ( "{{ current_user.admin() }}" != "True" ) {
             if ( dateInPast(date.value) ) {
+
                 // Disable Submit button and warn user
                 document.getElementById("submit").disabled=true;
                 document.getElementById("error").innerHTML="Date is in the past!"
                 return;
+
             }
         }
 
@@ -250,13 +253,13 @@ destination.onchange = function() {
 
     if ( destination.value == "{{ NEW_CAFE }}" ) {
 
-        // Show new start box and label
+        // Show new destination box and label
         new_destination.style.display = "";
         findLableForControl(new_destination).style.display = "";
 
     } else {
 
-        // Hide New Start Location
+        // Hide new destination Location
         new_destination.style.display = "none";
         findLableForControl(new_destination).style.display = "none";
 
@@ -293,6 +296,21 @@ date.onchange = function() {
     start_time.value = default_start_time['time'];
     meeting_point.value = default_start_time['location'];
     new_start.value = default_start_time['new'];
+
+    // If we set 'Other' we need to unhide the new box
+    if ( meeting_point.value == "{{ MEETING_OTHER }}" ) {
+
+        // Show new start box and label
+        new_start.style.display = "";
+        findLableForControl(new_start).style.display = "";
+
+    } else {
+
+        // Hide new start box and label
+        new_start.style.display = "none";
+        findLableForControl(new_start).style.display = "none";
+
+    }
 
     // Set colour back to white
     date.style.backgroundColor = 'white';
