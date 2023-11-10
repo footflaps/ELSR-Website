@@ -148,6 +148,23 @@
 					</a> on a virtual machine. That's a lot of virtualness...
 				</li>
 				
+				<!-- JavaScript -->
+				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/javascript-logo.png')}}"
+				                      width=40 alt="Javascript Logo">
+					<a href="https://www.javascript.com/">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>JavaScript</strong>.
+					</a>
+					Initially the site was mainly written in Python, using a few Javascript frameworks, eg BootStrap.
+					However, I'm now porting more and more functionality to the client in JavaScript and away from
+					the server side and Python. This is because you get a better user experience with a more intelligent
+					client. E.g. Take the <a href="{{ url_for('add_ride') }}"> <strong>Add Ride Form</strong>,</a>
+					originally you filled out the form, posted it back to the server where Python would validate the
+					content and if there were any issues found, the form would be served back to you for correction.
+					This is the standard HTML model. However, with JavaScript, the validation can take place in the
+					browser, and now you can't actually submit an invalid form. Form completion is also sped up
+					e.g. as soon as you pick a date from the calendar, the start time and location auto complete.
+				</li>
+				
 				<!-- Gunicorn -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/gunicorn_icon.png')}}"
 				                      width=80 alt="Gunicorn Logo">
