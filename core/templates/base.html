@@ -238,12 +238,14 @@
 								<!-- User Gravatar -->
 								<img src="{{ current_user.email | gravatar }}"
 							         width="50" height="50"
-									 style="border-radius: 50%;"/>
+									 style="border-radius: 50%;"
+									 alt="User gravatar"/>
 								
 								<!-- Personal Mail icon -->
 								{% if current_user.has_mail() %}
 									<i class="fa-solid fa-envelope fa-bounce fa-xl"
-									   style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;" ></i>
+									   style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;"
+									   alt="Mail icon"></i>
 								{% endif %}
 			
 							</a>
