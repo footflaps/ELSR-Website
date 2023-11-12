@@ -20,7 +20,7 @@ from core.db_users import User, update_last_seen, logout_barred_user, get_user_n
 from core.dB_gpx import Gpx, UploadGPXForm
 from core.dB_cafes import Cafe
 from core.dB_events import Event
-from core.subs_gpx import allowed_file, gpx_direction
+from core.subs_gpx import allowed_file
 from core.subs_google_maps import polyline_json, markers_for_cafes_native, MAP_BOUNDS, google_maps_api_key, \
                                   count_map_loads
 from core.subs_gpx_edit import check_route_name, strip_excess_info_from_gpx
@@ -194,10 +194,10 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     # Need direction (CW / CCW)
     # ----------------------------------------------------------- #
-    if gpx_direction(gpx.id) == "CW":
-        direction = "Clockwise"
-    else:
-        direction = "Anti-clockwise"
+    # if gpx_direction(gpx.id) == "CW":
+    #     direction = "Clockwise"
+    # else:
+    #     direction = "Anti-clockwise"
 
     # ----------------------------------------------------------- #
     # Need path as weird Google proprietary JSON string thing

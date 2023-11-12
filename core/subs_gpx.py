@@ -10,7 +10,7 @@ import numpy
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS
+from core import app, db, GPX_UPLOAD_FOLDER_ABS
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -37,6 +37,9 @@ MIN_DIST_TO_CAFE_KM = 1
 # GPX trails can have many points very close together, these look terrible in GM with an icon for each point
 # so we filter the points with a minimum inter point distance, before passing to GM.
 MIN_DISPLAY_STEP_KM = 0.5
+
+# Maximum distance we allow between start and finish to consider route circular
+MAX_CIRCULAR_DELTA_KM = 10.0
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -205,17 +208,12 @@ def check_new_gpx_with_all_cafes(gpx_id):
 # -------------------------------------------------------------------------------------------------------------- #
 # Work out if a route is Clockwise or anti-Clockwise
 # -------------------------------------------------------------------------------------------------------------- #
-def gpx_direction(gpx_id):
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(gpx_id)
-
+def gpx_direction(gpx: Gpx()):
     # Make sure gpx_id is valid
     if not gpx:
-        app.logger.debug(f"gpx_direction(): Failed to locate GPX: gpx_id = '{gpx_id}'.")
-        Event().log_event("gpx_direction Fail", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
-        return None
+        app.logger.debug(f"gpx_direction(): Called with invalid Gpx.")
+        Event().log_event("gpx_direction Fail", f"Called with invalid Gpx.")
+        return "Error"
 
     # ----------------------------------------------------------- #
     # Check we have an actual file
@@ -226,9 +224,9 @@ def gpx_direction(gpx_id):
 
     # Check GPX file actually exists
     if not os.path.exists(filename):
-        app.logger.debug(f"gpx_direction(): Failed to locate file: gpx_id = '{gpx_id}'.")
-        Event().log_event("gpx_direction Fail", f"Failed to locate file: gpx_id = '{gpx_id}'.")
-        return None
+        app.logger.debug(f"gpx_direction(): Failed to locate file: gpx_id = '{gpx.id}'.")
+        Event().log_event("gpx_direction Fail", f"Failed to locate file: gpx_id = '{gpx.id}'.")
+        return "Missing File"
 
     # ----------------------------------------------------------- #
     # Work out the direction the route goes in
@@ -271,6 +269,14 @@ def gpx_direction(gpx_id):
 
 
 def cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, last_lat, last_lon, debug):
+    # ----------------------------------------------------------- #
+    # Check for circular route
+    # ----------------------------------------------------------- #
+    dist_km = mpu.haversine_distance((last_lat, last_lon), (start_lat, start_lon))
+    if dist_km > MAX_CIRCULAR_DELTA_KM:
+        # Not circular, so can't derive CW / ACW
+        return "Not Circular"
+
     # ----------------------------------------------------------- #
     # Derive angle of two vectors
     # ----------------------------------------------------------- #
@@ -345,17 +351,18 @@ def test_cw_ccw():
 # test_cw_ccw()
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # One off hack to set direction
 # -------------------------------------------------------------------------------------------------------------- #
-
-# gpxes = Gpx().all_gpxes()
-# for gpx in gpxes:
-#     if not gpx.direction:
-#         gpx.direction = gpx_direction(gpx)
-#         Gpx().add_gpx(gpx)
-#
+with app.app_context():
+    gpxes = Gpx().all_gpxes()
+    for gpx in gpxes:
+        direction = gpx_direction(gpx)
+        print(f"ID = '{gpx.id}', Direction = '{direction}'")
+        app.logger.debug(f"ID = '{gpx.id}', Direction = '{direction}'")
+        gpx.direction = direction
+        db.session.add(gpx)
+        db.session.commit()
 
 
 
