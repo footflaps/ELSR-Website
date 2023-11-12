@@ -88,7 +88,7 @@ RIDE_BODY = "Dear [USER], \n\n" \
             "A new [GROUP] ride has been posted to the Calendar for [DATE] by member [POSTER].\n" \
             "The ride start details are: [START]\n" \
             "The ride destination is: [DESTINATION]\n" \
-            "The route is: [DIRECTION]\n" \
+            "The route direction is: [DIRECTION]\n" \
             "Here are some useful links:\n\n" \
             "See the calendar here: [CAL_LINK]\n" \
             "See details of the route here: [GPX_LINK]\n" \
