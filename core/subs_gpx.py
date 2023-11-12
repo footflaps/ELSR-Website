@@ -354,15 +354,15 @@ def test_cw_ccw():
 # -------------------------------------------------------------------------------------------------------------- #
 # One off hack to set direction
 # -------------------------------------------------------------------------------------------------------------- #
-with app.app_context():
-    gpxes = Gpx().all_gpxes()
-    for gpx in gpxes:
-        direction = gpx_direction(gpx)
-        print(f"ID = '{gpx.id}', Direction = '{direction}'")
-        app.logger.debug(f"ID = '{gpx.id}', Direction = '{direction}'")
-        gpx.direction = direction
-        db.session.add(gpx)
-        db.session.commit()
+# with app.app_context():
+#     gpxes = Gpx().all_gpxes()
+#     for gpx in gpxes:
+#         direction = gpx_direction(gpx)
+#         print(f"ID = '{gpx.id}', Direction = '{direction}'")
+#         app.logger.debug(f"ID = '{gpx.id}', Direction = '{direction}'")
+#         gpx.direction = direction
+#         db.session.add(gpx)
+#         db.session.commit()
 
 
 
