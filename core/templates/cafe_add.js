@@ -95,8 +95,6 @@ $(document).ready( function () {
 // Fill the form in with the position
 function fillInForm(position) {
 
-    alert("sub")
-
     // Update the form
     document.getElementById("lat").value = position.coords.latitude;
     document.getElementById("lon").value = position.coords.longitude;
