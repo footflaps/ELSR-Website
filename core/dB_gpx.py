@@ -27,6 +27,7 @@ TYPES = [TYPE_ROAD,
          TYPE_GRAVEL,
          "MTB"]
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Define GPX Class
 # -------------------------------------------------------------------------------------------------------------- #
@@ -71,6 +72,10 @@ class Gpx(db.Model):
 
     # Number times downloaded
     downloads = db.Column(db.Text)
+
+    # Clockwise, Anticlockwise or N/A
+    direction = db.Column(db.Text)
+
 
     # -------------------------------------------------------------------------------------------------------------- #
     # Properties
@@ -238,7 +243,6 @@ class Gpx(db.Model):
                     app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
-
         return False
 
     def remove_cafe_list(self, gpx_id, cafe_id):
@@ -267,7 +271,6 @@ class Gpx(db.Model):
                     app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
-
         return False
 
     # Add length and ascent to the database
@@ -349,16 +352,9 @@ class Gpx(db.Model):
         gpx_id = combo_string.split('(')[-1].split(')')[0]
         return gpx_id
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# One off hack to set type on dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-# gpxes = Gpx().all_gpxes()
-# for gpx in gpxes:
-#     if not gpx.type:
-#         gpx.type = "Road"
-#         Gpx().add_gpx(gpx)
+    # Optional: this will allow each event object to be identified by its details when printed.
+    def __repr__(self):
+        return f'<GPX "{self.name}">'
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -386,7 +382,6 @@ class UploadGPXForm(FlaskForm):
 # -------------------------------------------------------------------------------------------------------------- #
 # Edit route name form
 # -------------------------------------------------------------------------------------------------------------- #
-
 
 def create_rename_gpx_form(admin: bool):
 

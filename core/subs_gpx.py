@@ -259,13 +259,18 @@ def gpx_direction(gpx_id):
                 ret_lon = segment.points[math.floor(num_points * 0.75)].longitude
                 app.logger.debug(f"ret_lat = '{ret_lat}', ret_lon = '{ret_lon}'")
 
+                # Last point
+                last_lat = segment.points[-1].latitude
+                last_lon = segment.points[-1].longitude
+                app.logger.debug(f"last_lat = '{last_lat}', last_lon = '{last_lon}'")
+
     # ----------------------------------------------------------- #
     # Derive angle of two vectors
     # ----------------------------------------------------------- #
-    return cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, False)
+    return cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, last_lat, last_lon, False)
 
 
-def cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, debug):
+def cw_or_ccw(start_lon, start_lat, out_lat, out_lon, ret_lat, ret_lon, last_lat, last_lon, debug):
     # ----------------------------------------------------------- #
     # Derive angle of two vectors
     # ----------------------------------------------------------- #
@@ -341,6 +346,16 @@ def test_cw_ccw():
 
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# One off hack to set direction
+# -------------------------------------------------------------------------------------------------------------- #
+
+# gpxes = Gpx().all_gpxes()
+# for gpx in gpxes:
+#     if not gpx.direction:
+#         gpx.direction = gpx_direction(gpx)
+#         Gpx().add_gpx(gpx)
+#
 
 
 
