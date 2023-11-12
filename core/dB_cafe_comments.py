@@ -24,7 +24,7 @@ class CafeComment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # Which article does it refer to (use id)
     article_id = db.Column(db.Integer, nullable=False)
-    # When it was posted
+    # When it was posted eg "June 28, 2023"
     date = db.Column(db.String(250), unique=False)
     # Who posted it - use email and user name rather than id (as they could leave)
     email = db.Column(db.String(100), unique=False)

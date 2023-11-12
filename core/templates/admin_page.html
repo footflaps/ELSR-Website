@@ -958,7 +958,7 @@
 									<td scope="row">{{ ride.id }}</td>
 									<td scope="row">
 										<a href="{{ url_for('weekend', date=ride.date) }}">
-											{{ ride.date }}
+											{{ beautify_date(ride.date) }}
 										</a>
 									</td>
 									<td scope="row">{{ ride.leader }}</td>
@@ -1055,7 +1055,7 @@
 									<td scope="row">{{ social.id }}</td>
 									<td scope="row">
 										<a href="{{ url_for('social', date=social.date) }}">
-											{{ social.date }}
+											{{ beautify_date(social.date) }}
 										</a>
 									</td>
 									<td scope="row">{{ social.organiser }}</td>
@@ -1151,7 +1151,7 @@
 								
 								<tr>
 									<td scope="row">{{ blog.id }}</td>
-									<td scope="row">{{ blog.date }}</td>
+									<td scope="row">{{ beautify_date(blog.date) }}</td>
 									<td scope="row">{{ get_user_name(blog.email) }} ({{ blog.email }})</td>
 									<td scope="row">
 										<a href="{{ url_for('blog', blog_id = blog.id) }}">{{ blog.title }}</a>
@@ -1239,10 +1239,12 @@
 								
 								<tr>
 									<td scope="row">{{ classified.id }}</td>
-									<td scope="row">{{ classified.date }}</td>
+									<td scope="row">{{  beautify_date(classified.date) }}</td>
 									<td scope="row">{{ get_user_name(classified.email) }} ({{ classified.email }})</td>
 									<td scope="row">
-										<a href="{{ url_for('classifieds', classified_id = classified.id) }}">{{ classified.title }}</a>
+										<a href="{{ url_for('classifieds', classified_id = classified.id) }}">
+											{{ classified.title }}
+										</a>
 									</td>
 									<td scope="row">{{ classified.category }}</td>
 									<td scope="row">£{{ classified.price }}</td>

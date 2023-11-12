@@ -140,6 +140,7 @@ class User(UserMixin, db.Model):
     # Details
     name = db.Column(db.String(1000), unique=False)
     password = db.Column(db.String(100), unique=False)
+
     start_date = db.Column(db.String(100), unique=False)
     last_login = db.Column(db.String(100), unique=False)
     last_login_ip = db.Column(db.String(100), unique=False)

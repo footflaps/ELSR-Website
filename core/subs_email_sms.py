@@ -23,7 +23,7 @@ from core.dB_events import Event
 from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
 from core.db_messages import Message, ADMIN_EMAIL
-from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string
+from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
 from core.db_social import Socials
 from core.db_blog import Blog, PUBLIC_NEWS
 
@@ -293,7 +293,7 @@ def send_one_social_notification_email(user: User(), social: Socials()):
     target_email = unidecode(user.email)
     user_name = unidecode(user.name)
     destination = unidecode(social.destination)
-    date = social.date
+    date = beautify_date(social.date)
 
     # ----------------------------------------------------------- #
     # Create hyperlinks
@@ -397,7 +397,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     target_email = unidecode(user.email)
     user_name = unidecode(user.name)
     group = ride.group
-    date = ride.date
+    date = beautify_date(ride.date)
     leader = unidecode(ride.leader)
     if ride.start_time:
         start = unidecode(ride.start_time)

@@ -50,6 +50,7 @@ class Cafe(db.Model):
     rating = db.Column(db.String(100), nullable=True)
     # Who and when
     added_email = db.Column(db.String(250), nullable=False)
+    # Dates
     added_date = db.Column(db.String(250), nullable=False)
     updated_date = db.Column(db.String(250), nullable=True)
 

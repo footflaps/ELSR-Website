@@ -355,7 +355,7 @@
 									</td>
 								    <td scope="row">{{ number_routes_passing_by(cafe.id, current_user) }}</td>
 									{% if not mobile %}
-										<th scope="row">{{ cafe.added_date }}</th>
+										<td scope="row">{{ cafe.added_date }}</td>
 									{% endif %}
 							    </tr>
 						
@@ -457,12 +457,14 @@
 									<tr>
 								{% endif %}
 									
-									<th scope="row">{{loop.index}}</th>
-									<td scope="row"><a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{gpx.name}}</a></td>
-									<th scope="row">{{gpx.length_km}}</th>
-		                            <td scope="row">{{gpx.ascent_m}}</td>
+									<th scope="row">{{ loop.index }}</th>
+									<td scope="row">
+										<a href="{{ url_for('gpx_details', gpx_id=gpx.id) }}">{{ gpx.name }}</a>
+									</td>
+									<th scope="row">{{ gpx.length_km }}</th>
+		                            <td scope="row">{{ gpx.ascent_m }}</td>
 									{% if not mobile %}
-		                                <td scope="row">{{gpx.date}}</td>
+		                                <td scope="row">{{ gpx.date }}</td>
 									{% endif %}
 							    </tr>
 						
@@ -549,15 +551,15 @@
 							{% for comment in cafe_comments: %}
 								
 								<tr>
-									<td scope="row">{{loop.index}}</td>
+									<td scope="row">{{ loop.index }}</td>
 									<td scope="row">{{ get_cafe_name_from_id(comment.article_id) }}</td>
 									<td scope="row">
 										<a href="{{ url_for('cafe_details', cafe_id=comment.article_id) }}">
-											{{remove_html_tags(comment.body)}}
+											{{ remove_html_tags(comment.body) }}
 										</a>
 									</td>
 									{% if not mobile %}
-										<td scope="row">{{comment.date}}</td>
+										<td scope="row">{{ comment.date }}</td>
 									{% endif %}
 							    </tr>
 						
@@ -593,12 +595,12 @@
 
 			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
-				<h2 class="post-title float-left">{{rides|length}} rides:</h2>
+				<h2 class="post-title float-left">{{ rides|length }} rides:</h2>
 			{% else %}
 				{% if user.id == current_user.id: %}
-					<h2 class="post-title float-left">You have {{rides|length}} rides:</h2>
+					<h2 class="post-title float-left">You have {{ rides|length }} rides:</h2>
 				{% else %}
-					<h2 class="post-title float-left">{{user.name}} has {{rides|length}} rides:</h2>
+					<h2 class="post-title float-left">{{ user.name }} has {{ rides|length }} rides:</h2>
 				{% endif %}
 			{% endif %}
 			
@@ -643,7 +645,7 @@
 									<td scope="row">{{ loop.index }}</td>
 									<td scope="row">
 										<a href="{{ url_for('weekend', date=ride.date) }}">
-											{{ ride.date }}
+											{{ beautify_date(ride.date) }}
 										</a>
 									</td>
 									<td scope="row">
@@ -740,7 +742,7 @@
 									<td scope="row">{{ loop.index }}</td>
 									<td scope="row">
 										<a href="{{ url_for('calendar', date=social.date) }}">
-											{{ social.date }}
+											{{ beautify_date(social.date) }}
 										</a>
 									</td>
 									<td scope="row">{{ social.organiser }}</td>
@@ -919,7 +921,7 @@
 								
 								<tr>
 									<td scope="row">{{ loop.index }}</td>
-									<td scope="row">{{ classified.date }}</td>
+									<td scope="row">{{ beautify_date(classified.date) }}</td>
 									<td scope="row">
 										<a href="{{ url_for('classifieds', classified_id = classified.id) }}">{{ classified.title }}</a>
 									</td>

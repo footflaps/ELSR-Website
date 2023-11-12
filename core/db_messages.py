@@ -49,8 +49,12 @@ class Message(db.Model):
     # Contents of the message
     from_email = db.Column(db.String(250), unique=False)
     to_email = db.Column(db.String(250), unique=False)
+
+    # Dates stored as "June 28, 2023"
     sent_date = db.Column(db.String(250), unique=False)
     read_date = db.Column(db.String(250), unique=False)
+
+    # Actual message itself
     body = db.Column(db.String(1000), unique=False)
 
     # See above for details of how this works

@@ -206,7 +206,7 @@ with app.app_context():
 
 # Convert Unix timestamp to human-readable date
 def readable_date(timestamp):
-    return datetime.utcfromtimestamp(int(timestamp)).strftime('%d%m%Y %H:%M:%S')
+    return datetime.utcfromtimestamp(int(timestamp)).strftime('%d/%m/%Y %H:%M:%S')
 
 
 # Add this to jinja's environment, so we can use it within html templates

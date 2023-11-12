@@ -392,6 +392,22 @@ app.jinja_env.globals.update(custom_start_time_html=custom_start_time_html)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Convert date from '11112023' to '11/11/2023' as more user friendly
+# -------------------------------------------------------------------------------------------------------------- #
+
+def beautify_date(date: str):
+    # Check we have been passed a string in the right format
+    if len(date) != 8:
+        # Just pass it back to be displayed as is
+        return date
+    return f"{date[0:2]}/{date[2:4]}/{date[4:9]}"
+
+
+# Add this to jinja's environment, so we can use it within html templates
+app.jinja_env.globals.update(beautify_date=beautify_date)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Check the dB loaded ok
 # -------------------------------------------------------------------------------------------------------------- #
 
