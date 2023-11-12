@@ -4,6 +4,8 @@
 // Triggered by 'Locate Me' button
 function locateMe() {
 
+    alert("Hi");
+
     // Can we get the user location?
     if (navigator.geolocation) {
 
@@ -96,8 +98,6 @@ $(document).ready( function () {
 
 // Fill the form in with the position
 function fillInForm(position) {
-
-    alert("Hi");
 
     // Update the form
     document.getElementById("lat").value = position.coords.latitude;
