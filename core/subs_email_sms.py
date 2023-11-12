@@ -6,6 +6,7 @@ from twilio.rest import Client
 import requests
 from unidecode import unidecode
 from datetime import datetime
+import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -89,6 +90,7 @@ RIDE_BODY = "Dear [USER], \n\n" \
             "The ride start details are: [START]\n" \
             "The ride destination is: [DESTINATION]\n" \
             "The route direction is: [DIRECTION]\n" \
+            "The cafe is at: [CAFE_DISTANCE]\n" \
             "Here are some useful links:\n\n" \
             "See the calendar here: [CAL_LINK]\n" \
             "See details of the route here: [GPX_LINK]\n" \
@@ -421,6 +423,17 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
             direction = "Anti-clockwise"
 
     # ----------------------------------------------------------- #
+    # Distance to cafe
+    # ----------------------------------------------------------- #
+    cafe_distance = "unknown"
+    if gpx:
+        for cafe_passed in json.loads(gpx.cafes_passed):
+            if cafe_passed["cafe_id"] == ride.cafe_id:
+                km = cafe_passed["range_km"]
+                cafe_distance = f"{km} km / {round(km/1.6,1)} miles"
+                break
+
+    # ----------------------------------------------------------- #
     # Create hyperlinks
     # ----------------------------------------------------------- #
     cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
@@ -452,6 +465,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
         body = body.replace("[START]", start)
         body = body.replace("[DESTINATION]", destination)
         body = body.replace("[DIRECTION]", direction)
+        body = body.replace("[CAFE_DISTANCE]", cafe_distance)
         body = body.replace("[CAL_LINK]", cal_link)
         body = body.replace("[DL_LINK]", dl_link)
         body = body.replace("[GPX_LINK]", gpx_link)

@@ -909,7 +909,7 @@ def delete_ride():
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     if not current_user.admin() \
-            and current_user.email != ride.emai:
+            and current_user.email != ride.email:
         # Failed authentication
         app.logger.debug(f"delete_ride(): Rejected request from '{current_user.email}' as no permissions"
                          f" for ride_id = '{ride_id}'.")
