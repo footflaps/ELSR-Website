@@ -234,7 +234,7 @@
 			<ul>
 	            <li>{{ gpx.length_km|int }} km long</li>
 	            <li>Approx. {{ gpx.ascent_m|int }} m climbing (from GPX altitude data).</li>
-				<li>Route is <strong>{{ direction }}.</strong></li>
+				<li>Route is <strong>{{ gpx.direction }}.</strong></li>
 				<li>Route type is <strong>{{ gpx.type }}.</strong></li>
 				{% if rides %}
 					<li>Route is used by {{ rides | count }} ride(s) in the Calendar</li>

@@ -194,10 +194,12 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     # Need direction (CW / CCW)
     # ----------------------------------------------------------- #
-    # if gpx_direction(gpx.id) == "CW":
-    #     direction = "Clockwise"
-    # else:
-    #     direction = "Anti-clockwise"
+    if gpx.direction == "CW":
+        gpx.direction = "Clockwise"
+    elif gpx.direction == "CCW":
+        gpx.direction = "Anti-clockwise"
+    else:
+        gpx.direction = "n/a"
 
     # ----------------------------------------------------------- #
     # Need path as weird Google proprietary JSON string thing
@@ -251,7 +253,7 @@ def gpx_details(gpx_id):
                            author=author, cafe_list=cafe_list, elevation_data=elevation_data,
                            cafe_elevation_data=cafe_elevation_data, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            polyline=polyline['polyline'], midlat=polyline['midlat'], midlon=polyline['midlon'],
-                           MAP_BOUNDS=MAP_BOUNDS, direction=direction, rides=rides, live_site=live_site())
+                           MAP_BOUNDS=MAP_BOUNDS, rides=rides, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
