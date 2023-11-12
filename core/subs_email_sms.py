@@ -26,6 +26,7 @@ from core.db_messages import Message, ADMIN_EMAIL
 from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
 from core.db_social import Socials
 from core.db_blog import Blog, PUBLIC_NEWS
+from core.dB_gpx import Gpx
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -87,6 +88,7 @@ RIDE_BODY = "Dear [USER], \n\n" \
             "A new [GROUP] ride has been posted to the Calendar for [DATE] by member [POSTER].\n" \
             "The ride start details are: [START]\n" \
             "The ride destination is: [DESTINATION]\n" \
+            "The route is: [DIRECTION]\n" \
             "Here are some useful links:\n\n" \
             "See the calendar here: [CAL_LINK]\n" \
             "See details of the route here: [GPX_LINK]\n" \
@@ -408,6 +410,17 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     destination = unidecode(ride.destination)
 
     # ----------------------------------------------------------- #
+    # Get GPX / Direction
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(ride.gpx_id)
+    direction = "n/a"
+    if gpx:
+        if gpx.direction == "CW":
+            direction = "Clockwise"
+        elif gpx.direction == "CCW":
+            direction = "Anti-clockwise"
+
+    # ----------------------------------------------------------- #
     # Create hyperlinks
     # ----------------------------------------------------------- #
     cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
@@ -438,6 +451,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
         body = body.replace("[POSTER]", leader)
         body = body.replace("[START]", start)
         body = body.replace("[DESTINATION]", destination)
+        body = body.replace("[DIRECTION]", direction)
         body = body.replace("[CAL_LINK]", cal_link)
         body = body.replace("[DL_LINK]", dl_link)
         body = body.replace("[GPX_LINK]", gpx_link)
