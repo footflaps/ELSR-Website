@@ -7,8 +7,9 @@ function locateMe() {
     // Can we get the user location?
     if (navigator.geolocation) {
 
-        alert("Hi");
+        alert("Before");
         navigator.geolocation.getCurrentPosition(fillInForm);
+        alert("After");
 
     } else {
 
