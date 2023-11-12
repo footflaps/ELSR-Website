@@ -4,11 +4,10 @@
 // Triggered by 'Locate Me' button
 function locateMe() {
 
-    alert("Hi");
-
     // Can we get the user location?
     if (navigator.geolocation) {
 
+        alert("Hi");
         navigator.geolocation.getCurrentPosition(fillInForm);
 
     } else {
