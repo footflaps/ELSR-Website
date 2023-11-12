@@ -7,13 +7,6 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 
-<!---------------------------------------------------------------------------------------------------->
-<!--                                         Google Map JS                                          -->
-<!---------------------------------------------------------------------------------------------------->
-
-<!-- Pulling external JS file -->
-<script src="https://polyfill.io/v3/polyfill.min.js?features=default"></script>
-
 
 {% block content %}
 
@@ -54,6 +47,7 @@
 			</div>
 		</div>
 	</div>
+	
 </header>
 
 
@@ -73,87 +67,8 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--             JavaScript for Google Map allowing user to locate a place on a map                 -->
+<!--                                        Google Maps                                             -->
 <!---------------------------------------------------------------------------------------------------->
-
-{% if GOOGLE_MAPS_API_KEY %}
-	
-	<script>
-		
-		(g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
-		    key: "{{ GOOGLE_MAPS_API_KEY }}",
-		    v: "weekly",
-		    // Use the 'v' parameter to indicate the version to use (weekly, beta, alpha, etc.).
-		    // Add other bootstrap parameters as needed, using camel case.
-	    });
-			
-		let map;
-		
-		async function initMap() {
-	       
-	        // Request needed libraries.
-	        const { Map, InfoWindow } = await google.maps.importLibrary("maps");
-	        const { AdvancedMarkerElement, PinElement } = await google.maps.importLibrary("marker",);
-	        
-	        const map = new Map(
-	            document.getElementById("map"), {
-	                center: {{ ELSR_HOME | tojson }},
-	                restriction: {
-	                    latLngBounds: {{ MAP_BOUNDS | tojson }},
-	                    strictBounds: false,
-	                },
-	                zoom: 10,
-	                center: {{ ELSR_HOME | tojson }},
-	            }
-	        );
-	  
-	        // Create the initial InfoWindow.
-	        let infoWindow = new InfoWindow({
-	            content: "Locate the cafe on the map and click to transfer the coordinates to the form below.",
-	            position: {{ ELSR_HOME | tojson }},
-	        });
-	
-	        infoWindow.open(map);
-	  
-	        // Configure the click listener.
-	        map.addListener("click", (mapsMouseEvent) => {
-	            
-	            // Close the current InfoWindow.
-	            infoWindow.close();
-	            
-	            // Populate the form
-	            document.getElementById("lat").value = mapsMouseEvent.latLng.lat();
-	            document.getElementById("lon").value = mapsMouseEvent.latLng.lng();
-	            
-	            // Create a new InfoWindow.
-	            infoWindow = new google.maps.InfoWindow({
-	                position: mapsMouseEvent.latLng,
-	            });
-	        
-	            infoWindow.setContent(
-	                "Form has been updated",
-	            );
-	            
-	            infoWindow.open(map);
-	  
-	        });
-	        
-		}
-		
-		initMap();
-	
-		$(document).ready( function () {
-			
-			if ( document.getElementById("lat").value == "" ) {
-	            document.getElementById("lat").value = "Click on map above to populate";
-	            document.getElementById("lon").value = "Click on map above to populate"; }
-	        
-		})
-	
-	</script>
-	
-{% endif %}
-
 
 <div class="container">
 	<div class="row">
@@ -172,6 +87,41 @@
 		</div>
 	</div>
 </div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                     Locate Me button                                           -->
+<!---------------------------------------------------------------------------------------------------->
+
+<!-- Only bother if mobile -->
+{% if True %}
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+		
+				<h2 class="float-left">Use phone's GPS</h2>
+				
+				<button class="btn btn-primary float-right"
+				        id="gps"
+				        onclick="locateMe()">Locate Me</button>
+		
+			</div>
+		</div>
+	</div>
+	
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+		
+				<!-- Break before next section -->
+				<hr>
+		
+			</div>
+		</div>
+	</div>
+	
+{% endif %}
 
 
 <!---------------------------------------------------------------------------------------------------->
@@ -199,10 +149,18 @@
 </div>
 
 
+<!---------------------------------------------------------------------------------------------------->
+<!--                               JS for Google Map to locate cafe                                 -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% if GOOGLE_MAPS_API_KEY %}
+
+	<script type="text/javascript">
+		<!-- Using include runs jinja over the JS first, so we can pre-load vars etc -->
+		{% include "cafe_add.js" %}
+	</script>
+
+{% endif %}
+
+
 {% endblock %}
-
-
-{% block scripts %}
-
-{% endblock %}
-
