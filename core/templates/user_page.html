@@ -55,7 +55,7 @@
 						         style="border-radius: 50%;"
 							     alt="Gravatar icon"/>
 						</a>
-				        {{user.name}}
+				        {{ user.name }}
 					</h1>
 					
 					<!-- Privacy -->
@@ -154,7 +154,7 @@
 											        data-target="#collapse{{loop.index}}"
 										            aria-expanded="true" aria-controls="collapse{{loop.index}}">
 												<i class="fa-regular fa-envelope-open fa-xl"></i>
-												Message {{loop.index}}
+												Message {{ loop.index }}
 											</button>
 										{% else %}
 											<button class="btn-sm btn-primary mr-2" type="button"
@@ -162,7 +162,7 @@
 											        data-target="#collapse{{loop.index}}"
 										            aria-expanded="true" aria-controls="collapse{{loop.index}}">
 												<i class="fa-regular fa-envelope fa-xl"></i>
-												Message {{loop.index}}
+												Message {{ loop.index }}
 											</button>
 										{% endif %}
 									</h5>
@@ -502,12 +502,12 @@
 
 			<!-- Shorter description on smaller screens -->
 			{% if mobile %}
-				<h2 class="post-title float-left">{{cafe_comments|length}} comments:</h2>
+				<h2 class="post-title float-left">{{ cafe_comments|length }} comments:</h2>
 			{% else %}
 				{% if user.id == current_user.id: %}
-					<h2 class="post-title float-left">You have {{cafe_comments|length}} comments:</h2>
+					<h2 class="post-title float-left">You have {{ cafe_comments|length }} comments:</h2>
 				{% else %}
-					<h2 class="post-title float-left">{{user.name}} has {{cafe_comments|length}} comments:</h2>
+					<h2 class="post-title float-left">{{ user.name }} has {{ cafe_comments|length }} comments:</h2>
 				{% endif %}
 			{% endif %}
 			
