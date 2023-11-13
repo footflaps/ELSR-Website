@@ -141,15 +141,15 @@ with app.app_context():
 # Hack to change date and name
 # -------------------------------------------------------------------------------------------------------------- #
 
-with app.app_context():
-    comments = CafeComment().all()
-    for comment in comments:
-        if comment.name:
-            date_obj = datetime.strptime(comment.date, "%B %d, %Y")
-            new_date = date_obj.strftime("%d%m%Y")
-            print(f"ID = {comment.id}, Name = '{comment.name}', Date = '{comment.date}' or '{new_date}'")
-            comment.date = new_date
-            comment.name = None
-            db.session.add(comment)
-            db.session.commit()
+# with app.app_context():
+#     comments = CafeComment().all()
+#     for comment in comments:
+#         if comment.name:
+#             date_obj = datetime.strptime(comment.date, "%B %d, %Y")
+#             new_date = date_obj.strftime("%d%m%Y")
+#             print(f"ID = {comment.id}, Name = '{comment.name}', Date = '{comment.date}' or '{new_date}'")
+#             comment.date = new_date
+#             comment.name = None
+#             db.session.add(comment)
+#             db.session.commit()
 

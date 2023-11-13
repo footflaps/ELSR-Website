@@ -637,7 +637,7 @@
 					
 					<!-- Author & date -->
 					<div>
-						<span class="date sub-text">{{ get_user_name(comment.email) }},  {{ comment.date }}
+						<span class="date sub-text">{{ get_user_name(comment.email) }},  {{ beautify_date(comment.date) }}
 						 
 							{% if not current_user.is_authenticated: %}
 						    
