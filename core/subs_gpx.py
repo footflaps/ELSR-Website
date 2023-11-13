@@ -37,7 +37,6 @@ MIN_DIST_TO_CAFE_KM = 1
 MIN_DISPLAY_STEP_KM = 0.5
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Ensure only GPX files get uploaded
 # -------------------------------------------------------------------------------------------------------------- #
@@ -199,6 +198,7 @@ def check_new_gpx_with_all_cafes(gpx_id):
                     # Push update to GPX file
                     Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
                                            min_distance_path_km[cafe.id - 1])
+
 
 
 
