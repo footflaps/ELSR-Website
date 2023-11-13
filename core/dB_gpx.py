@@ -459,13 +459,13 @@ with app.app_context():
 # Hack to change date
 # -------------------------------------------------------------------------------------------------------------- #
 
-with app.app_context():
-    gpxes = Gpx().all_gpxes()
-    for gpx in gpxes:
-        if len(gpx.date) != 8:
-            date_obj = datetime.strptime(gpx.date, "%B %d, %Y")
-            new_date = date_obj.strftime("%d%m%Y")
-            print(f"ID = {gpx.id}, Name = '{gpx.name}', Date = '{gpx.date}' or '{new_date}'")
-            gpx.date = new_date
-            db.session.add(gpx)
-            db.session.commit()
+# with app.app_context():
+#     gpxes = Gpx().all_gpxes()
+#     for gpx in gpxes:
+#         if len(gpx.date) != 8:
+#             date_obj = datetime.strptime(gpx.date, "%B %d, %Y")
+#             new_date = date_obj.strftime("%d%m%Y")
+#             print(f"ID = {gpx.id}, Name = '{gpx.name}', Date = '{gpx.date}' or '{new_date}'")
+#             gpx.date = new_date
+#             db.session.add(gpx)
+#             db.session.commit()
