@@ -286,14 +286,14 @@ app.jinja_env.globals.update(get_cafe_name_from_id=get_cafe_name_from_id)
 # Hack to change date
 # -------------------------------------------------------------------------------------------------------------- #
 
-with app.app_context():
-    cafes = Cafe().all_cafes()
-    for cafe in cafes:
-        if len(cafe.added_date) != 8:
-            date_obj = datetime.strptime(cafe.added_date, "%B %d, %Y")
-            new_date = date_obj.strftime("%d%m%Y")
-            print(f"ID = {cafe.id}, Name = '{cafe.name}', Date = '{cafe.added_date}' or '{new_date}'")
-            cafe.added_date = new_date
-            db.session.add(cafe)
-            db.session.commit()
+# with app.app_context():
+#     cafes = Cafe().all_cafes()
+#     for cafe in cafes:
+#         if len(cafe.added_date) != 8:
+#             date_obj = datetime.strptime(cafe.added_date, "%B %d, %Y")
+#             new_date = date_obj.strftime("%d%m%Y")
+#             print(f"ID = {cafe.id}, Name = '{cafe.name}', Date = '{cafe.added_date}' or '{new_date}'")
+#             cafe.added_date = new_date
+#             db.session.add(cafe)
+#             db.session.commit()
 
