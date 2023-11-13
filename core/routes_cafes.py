@@ -239,7 +239,7 @@ def cafe_details(cafe_id):
 
         # New comment
         new_comment = CafeComment(
-            article_id=cafe.id,
+            cafe_id=cafe.id,
             date=date.today().strftime("%B %d, %Y"),
             email=current_user.email,
             name=current_user.name,

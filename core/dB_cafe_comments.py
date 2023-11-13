@@ -22,13 +22,17 @@ class CafeComment(db.Model):
     __bind_key__ = 'cafe_comments'
 
     id = db.Column(db.Integer, primary_key=True)
-    # Which article does it refer to (use id)
-    article_id = db.Column(db.Integer, nullable=False)
+
+    # This is the cafe.id it relates to
+    cafe_id = db.Column(db.Integer, nullable=False)
+
     # When it was posted eg "June 28, 2023"
     date = db.Column(db.String(250), unique=False)
+
     # Who posted it - use email and user name rather than id (as they could leave)
     email = db.Column(db.String(100), unique=False)
     name = db.Column(db.String(100), unique=False)
+
     # Actual comments itself
     body = db.Column(db.String(1000), unique=False)
 
@@ -67,9 +71,9 @@ class CafeComment(db.Model):
             return comment
 
     # Return a list of all comments for a given cafe id
-    def all_comments_by_cafe_id(self, article_id):
+    def all_comments_by_cafe_id(self, cafe_id):
         with app.app_context():
-            comments = db.session.query(CafeComment).filter_by(article_id=article_id).all()
+            comments = db.session.query(CafeComment).filter_by(cafe_id=cafe_id).all()
             return comments
 
     # Return a list of all comments for a given user email
