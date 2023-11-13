@@ -29,8 +29,10 @@ class CafeComment(db.Model):
     # When it was posted eg "June 28, 2023"
     date = db.Column(db.String(250), unique=False)
 
-    # Who posted it - use email and user name rather than id (as they could leave)
+    # Email of user who posted it
     email = db.Column(db.String(100), unique=False)
+
+    # No longer use this, instead use "get_user_name(CafeComment.email)"
     name = db.Column(db.String(100), unique=False)
 
     # Actual comments itself
