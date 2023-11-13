@@ -140,7 +140,7 @@ class Cafe(db.Model):
                 try:
                     # Delete the cafe
                     cafe.active = None
-                    cafe.details = f"<b style='color:red'>{date.today().strftime('%B %d, %Y')} " \
+                    cafe.details = f"<b style='color:red'>{date.today().strftime('%d/%md/%Y')} " \
                                    f"This cafe has been marked as closed or closing: {details}</b><br>{cafe.details}"
                     db.session.commit()
                     return True
@@ -158,7 +158,7 @@ class Cafe(db.Model):
                 try:
                     # Delete the cafe
                     cafe.active = True
-                    cafe.details = f"<b style='color:red'>{date.today().strftime('%B %d, %Y')} " \
+                    cafe.details = f"<b style='color:red'>{date.today().strftime('%d/%md/%Y')} " \
                                    f"Rejoice! This is no longer closing!</b><br>{cafe.details}"
                     db.session.commit()
                     return True
