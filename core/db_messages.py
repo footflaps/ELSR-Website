@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -50,7 +50,7 @@ class Message(db.Model):
     from_email = db.Column(db.String(250), unique=False)
     to_email = db.Column(db.String(250), unique=False)
 
-    # Dates stored as "June 28, 2023"
+    # Dates stored as "11112023"
     sent_date = db.Column(db.String(250), unique=False)
     read_date = db.Column(db.String(250), unique=False)
 
@@ -108,7 +108,7 @@ class Message(db.Model):
 
     def add_message(self, message):
         # Add date and unread
-        message.sent_date = date.today().strftime("%B %d, %Y")
+        message.sent_date = date.today().strftime("%d%m%Y")
         message.status = NEW_MESSAGE_STATUS
         with app.app_context():
             try:
@@ -151,7 +151,7 @@ class Message(db.Model):
             if message:
                 if not message.been_read():
                     message.status += MASK_READ
-                message.read_date = date.today().strftime("%B %d, %Y")
+                message.read_date = date.today().strftime("%d%m%Y")
                 try:
                     db.session.commit()
                     return True
@@ -166,7 +166,7 @@ class Message(db.Model):
             if message:
                 if message.been_read():
                     message.status -= MASK_READ
-                message.read_date = date.today().strftime("%B %d, %Y")
+                message.read_date = date.today().strftime("%d%m%Y")
                 try:
                     db.session.commit()
                     return True
@@ -192,6 +192,7 @@ class Message(db.Model):
     # NB Names are not unique, but emails are, hence added in brackets
     def __repr__(self):
         return f'<Message from {self.from_email}, to {self.to_email}, on {self.sent_date}>'
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Create the actual dB
@@ -223,4 +224,30 @@ with app.app_context():
     messages = db.session.query(Message).all()
     print(f"Found {len(messages)} messages in the dB")
     app.logger.debug(f"Start of day: Found {len(messages)} messages in the dB")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Hack to change date
+# -------------------------------------------------------------------------------------------------------------- #
+
+with app.app_context():
+    messages = Message().all_messages()
+    for message in messages:
+        if len(message.sent_date) != 8:
+            sent_date_obj = datetime.strptime(message.sent_date, "%B %d, %Y")
+            new_sent_date = sent_date_obj.strftime("%d%m%Y")
+
+            if message.read_date:
+                read_date_obj = datetime.strptime(message.read_date, "%B %d, %Y")
+                new_read_date = read_date_obj.strftime("%d%m%Y")
+            else:
+                new_read_date = None
+
+            print(f"ID = {message.id}, Name = '{message.to_email}', '{message.sent_date}' -> '{new_sent_date}', "
+                  f"'{message.read_date}' -> '{new_read_date}'")
+
+            message.sent_date = new_sent_date
+            message.read_date = new_read_date
+            db.session.add(message)
+            db.session.commit()
 

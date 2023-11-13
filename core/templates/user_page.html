@@ -176,7 +176,7 @@
 										
 										<!-- Email details -->
 										<strong>From: {{ message.from_name }}</strong><br>
-										<strong>Date: {{ message.sent_date }}</strong><br>
+										<strong>Date: {{ beautify_date(message.sent_date) }}</strong><br>
 										{{ message.body }}
 										
 										<hr>
