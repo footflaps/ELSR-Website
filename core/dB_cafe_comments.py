@@ -2,7 +2,7 @@ from flask_ckeditor import CKEditorField
 from flask_wtf import FlaskForm
 from wtforms import SubmitField
 from wtforms.validators import DataRequired
-from datetime import date
+from datetime import date, datetime
 import re
 
 
@@ -26,7 +26,7 @@ class CafeComment(db.Model):
     # This is the cafe.id it relates to
     cafe_id = db.Column(db.Integer, nullable=False)
 
-    # When it was posted eg "June 28, 2023"
+    # When it was posted eg "11112023"
     date = db.Column(db.String(250), unique=False)
 
     # Email of user who posted it
@@ -38,11 +38,16 @@ class CafeComment(db.Model):
     # Actual comments itself
     body = db.Column(db.String(1000), unique=False)
 
+    def all(self):
+        with app.app_context():
+            comments = db.session.query(CafeComment).all()
+            return comments
+
     # Add a new comment
     def add_comment(self, new_comment):
         with app.app_context():
             try:
-                new_comment.date = date.today().strftime("%B %d, %Y")
+                new_comment.date = date.today().strftime("%d%m%Y")
                 db.session.add(new_comment)
                 db.session.commit()
                 # Return success
@@ -117,6 +122,7 @@ def remove_html_tags(text):
     clean = re.compile('<.*?>')
     return re.sub(clean, '', text)
 
+
 # Pass this to jinja
 app.jinja_env.globals.update(remove_html_tags=remove_html_tags)
 
@@ -129,4 +135,21 @@ with app.app_context():
     comments = db.session.query(CafeComment).all()
     print(f"Found {len(comments)} comments in the dB")
     app.logger.debug(f"Start of day: Found {len(comments)} comments in the dB")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Hack to change date and name
+# -------------------------------------------------------------------------------------------------------------- #
+
+with app.app_context():
+    comments = CafeComment().all()
+    for comment in comments:
+        if comment.name:
+            date_obj = datetime.strptime(comment.date, "%B %d, %Y")
+            new_date = date_obj.strftime("%d%m%Y")
+            print(f"ID = {comment.id}, Name = '{comment.name}', Date = '{comment.date}' or '{new_date}'")
+            comment.date = new_date
+            comment.name = None
+            db.session.add(comment)
+            db.session.commit()
 
