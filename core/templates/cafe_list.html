@@ -156,7 +156,7 @@
 							<a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}">
 								<strong>{{ cafe.name }}</strong>
 							</a>
-							added {{ cafe.added_date }}
+							added {{ beautify_date(cafe.added_date) }}
 						</li>
 					{% endif %}
 				{% endfor %}

@@ -355,7 +355,7 @@
 									</td>
 								    <td scope="row">{{ number_routes_passing_by(cafe.id, current_user) }}</td>
 									{% if not mobile %}
-										<td scope="row">{{ cafe.added_date }}</td>
+										<td scope="row">{{ beautify_date(cafe.added_date) }}</td>
 									{% endif %}
 							    </tr>
 						
