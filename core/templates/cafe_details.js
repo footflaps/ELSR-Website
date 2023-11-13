@@ -178,5 +178,13 @@ $(document).ready( function () {
         "autoWidth": false,
 
     })
+
+    if ( "{{anchor}}" == "comments" ) {
+
+         /* Jump to anchor */
+        window.location = (""+window.location).replace(/#[A-Za-z0-9_]*$/,'')+"#{{anchor}}"
+
+    }
+
 } );
 

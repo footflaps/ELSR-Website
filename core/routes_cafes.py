@@ -157,6 +157,8 @@ def cafe_top10():
 @update_last_seen
 @logout_barred_user
 def cafe_details(cafe_id):
+    anchor = request.args.get('anchor', None)
+
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -280,7 +282,7 @@ def cafe_details(cafe_id):
         return render_template("cafe_details.html", cafe=cafe, form=form, comments=comments, year=current_year,
                                gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), polylines=polylines, warning=warning,
-                               MAP_BOUNDS=MAP_BOUNDS, live_site=live_site())
+                               MAP_BOUNDS=MAP_BOUNDS, live_site=live_site(), anchor="comments")
 
     else:
 
@@ -304,7 +306,7 @@ def cafe_details(cafe_id):
                                gpxes=gpxes, cafes=cafe_markers, cafe_map_coords=cafe_map_coords,
                                GOOGLE_MAPS_API_KEY=google_maps_api_key(), warning=warning,
                                polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'],
-                               MAP_BOUNDS=MAP_BOUNDS, live_site=live_site())
+                               MAP_BOUNDS=MAP_BOUNDS, live_site=live_site(), anchor=anchor)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -927,7 +929,7 @@ def delete_comment():
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
-    return redirect(url_for('cafe_details', cafe_id=cafe_id))
+    return redirect(url_for('cafe_details', cafe_id=cafe_id, anchor="comments"))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
