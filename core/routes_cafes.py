@@ -838,6 +838,22 @@ def delete_comment():
     # ----------------------------------------------------------- #
     comment_id = request.args.get('comment_id', None)
     cafe_id = request.args.get('cafe_id', None)
+    try:
+        password = request.form['password']
+    except exceptions.BadRequestKeyError:
+        password = None
+
+    # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
+    if password == "":
+        password = " "
+
+    # ----------------------------------------------------------- #
+    # Get user's IP
+    # ----------------------------------------------------------- #
+    if request.headers.getlist("X-Forwarded-For"):
+        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+    else:
+        user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -849,6 +865,10 @@ def delete_comment():
     elif not cafe_id:
         app.logger.debug(f"delete_comment(): Missing cafe_id!")
         Event().log_event("Delete Comment Fail", f"Missing cafe_id!")
+        return abort(400)
+    elif not password:
+        app.logger.debug(f"delete_comment(): Missing Password!")
+        Event().log_event("Delete Comment Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -877,6 +897,20 @@ def delete_comment():
         Event().log_event("Delete Comment Fail", f"Rejected request from user '{current_user.email}' as no "
                                                  f"permissions for comment_id = '{comment_id}'.")
         return abort(403)
+
+    # ----------------------------------------------------------- #
+    #  Validate password
+    # ----------------------------------------------------------- #
+    # Need current user
+    user = User().find_user_from_id(current_user.id)
+
+    # Validate against current_user's password
+    if not user.validate_password(user, password, user_ip):
+        app.logger.debug(f"delete_comment(): Delete failed, incorrect password for user_id = '{user.id}'!")
+        Event().log_event("Delete Comment Fail", f"Incorrect password for user_id = '{user.id}'!")
+        flash(f"Incorrect password for user {user.name}!")
+        # Go back to route detail page
+        return redirect(url_for('cafe_details', cafe_id=cafe_id))
 
     # ----------------------------------------------------------- #
     # Delete comment
