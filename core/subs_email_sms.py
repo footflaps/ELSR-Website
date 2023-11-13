@@ -89,6 +89,7 @@ RIDE_BODY = "Dear [USER], \n\n" \
             "A new [GROUP] ride has been posted to the Calendar for [DATE] by member [POSTER].\n" \
             "The ride start details are: [START]\n" \
             "The ride destination is: [DESTINATION]\n" \
+            "The ride is [DISTANCE] km long and there is approx. [ASCENT] m climbing.\n" \
             "The route direction is: [DIRECTION]\n" \
             "The cafe is at: [CAFE_DISTANCE]\n" \
             "Here are some useful links:\n\n" \
@@ -426,7 +427,11 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     # Distance to cafe
     # ----------------------------------------------------------- #
     cafe_distance = "unknown"
+    ascent = "unknown"
+    distance = "unknown"
     if gpx:
+        ascent = str(gpx.ascent_m)
+        distance = str(gpx.length_km)
         for cafe_passed in json.loads(gpx.cafes_passed):
             if cafe_passed["cafe_id"] == ride.cafe_id:
                 km = cafe_passed["range_km"]
@@ -464,6 +469,8 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
         body = body.replace("[POSTER]", leader)
         body = body.replace("[START]", start)
         body = body.replace("[DESTINATION]", destination)
+        body = body.replace("[ASCENT]", ascent)
+        body = body.replace("[DISTANCE]", distance)
         body = body.replace("[DIRECTION]", direction)
         body = body.replace("[CAFE_DISTANCE]", cafe_distance)
         body = body.replace("[CAL_LINK]", cal_link)
