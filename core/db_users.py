@@ -137,41 +137,46 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(100), unique=True)
 
-    # Details
+    # Name is user defined string, we enforce uniqueness ourselves
     name = db.Column(db.String(1000), unique=False)
+
+    # Password in hashed checksum
     password = db.Column(db.String(100), unique=False)
 
+    # When they signed up
     start_date = db.Column(db.String(100), unique=False)
+
+    # Tracking usage - last_login is of the form "02/10/2023 10:30:53"
     last_login = db.Column(db.String(100), unique=False)
     last_login_ip = db.Column(db.String(100), unique=False)
 
-    # See above for details of how this works
+    # User permission code, see above for details of how this works
     permissions = db.Column(db.Integer, unique=False)
 
     # In case we have to record stuff about a user
     admin_notes = db.Column(db.String(1000), unique=False)
 
-    # For verifying email address
+    # For verifying email address, we have a code and an expiry time (Unix Epoch)
     verification_code = db.Column(db.Integer, unique=False)
     verification_code_timestamp = db.Column(db.Integer, unique=False)
 
-    # For resetting password
+    # For resetting password, we have a code and an expiry time (Unix Epoch)
     reset_code = db.Column(db.Integer, unique=False)
     reset_code_timestamp = db.Column(db.Integer, unique=False)
 
     # Phone number
     phone_number = db.Column(db.String(25), unique=False)
 
-    # Notifications
+    # User Notifications code, see above for details of how this works
     notifications = db.Column(db.Integer, unique=False)
 
-    # Socials
+    # They can store social media handles as JSON string
     socials = db.Column(db.Text, unique=False)
 
-    # Bio
+    # A short biography
     bio = db.Column(db.Text, unique=False)
 
-    # Clothing sizes
+    # They can store club kit clothing sizes as JSON string
     clothing_size = db.Column(db.Text, unique=False)
 
     # ---------------------------------------------------------------------------------------------------------- #
@@ -302,7 +307,7 @@ class User(UserMixin, db.Model):
         # By default new users are not verified and have no permissions until verified
         new_user.verification_code = random_code(NUM_DIGITS_CODES)
         new_user.verification_code_timestamp = time.time()
-        new_user.start_date = date.today().strftime("%B %d, %Y")
+        new_user.start_date = date.today().strftime("%d%m%Y")
         new_user.permissions = DEFAULT_PERMISSIONS_VALUE
         new_user.notifications = NOTIFICATIONS_DEFAULT_VALUE
         app.logger.debug(f"db.create_user(): User '{new_user.email}' issued with code '{new_user.verification_code}'.")
@@ -1111,3 +1116,17 @@ with app.app_context():
 
 
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Hack to change user.start_date
+# -------------------------------------------------------------------------------------------------------------- #
+
+with app.app_context():
+    users = User().all_users()
+    for user in users:
+        if len(user.start_date) != 8:
+            date_obj = datetime.strptime(user.start_date, "%B %d, %Y")
+            new_date = date_obj.strftime("%d%m%Y")
+            print(f"ID = {user.id}, Name = '{user.name}', Date = '{user.start_date}' or '{new_date}'")
+            user.start_date = new_date
+            db.session.add(user)
+            db.session.commit()
