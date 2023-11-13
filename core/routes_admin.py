@@ -27,6 +27,7 @@ from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notif
 from core.subs_google_maps import maps_enabled, get_current_map_count, map_limit_by_day, graph_map_counts
 from core.db_blog import Blog
 from core.db_classifieds import Classified
+from core.dB_cafe_comments import CafeComment
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -226,6 +227,11 @@ def admin_page():
     classifieds = Classified().all()
 
     # ----------------------------------------------------------- #
+    # All cafe comments
+    # ----------------------------------------------------------- #
+    comments = CafeComment().all()
+
+    # ----------------------------------------------------------- #
     # Twilio balance
     # ----------------------------------------------------------- #
     twilio_balance = get_twilio_balance()
@@ -292,7 +298,8 @@ def admin_page():
                            rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                            map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,
                            files=files, free_per=free_per, untrusted_users=untrusted_users, classifieds=classifieds,
-                           dataset=dataset, live_site=live_site(), anchor=anchor, email_alerts=email_alerts)
+                           dataset=dataset, live_site=live_site(), anchor=anchor, email_alerts=email_alerts,
+                           comments=comments)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
