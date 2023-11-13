@@ -625,6 +625,47 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
+<!--                              Note about email notifications                                    -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>Email Notifications</h2>
+		
+			<p>
+				You can set email notification by group, e.g. Espresso or Doppio, and have an email sent
+				directly to you as soon as a new ride appears. The email contains a download link which
+				will work from any device and doesn't require you to be logged in.
+			
+				{% if current_user.is_authenticated %}
+				
+					Sign up on your
+					<a href="{{ url_for('user_page', user_id=current_user.id, anchor='notifications') }}">
+						<strong>User Page.</strong>
+					</a>
+				
+				{% else %}
+				
+					<a href="{{ url_for('login') }}">
+						<strong>Log in</strong>
+					</a>
+					to be able to set email notifications.
+				
+				{% endif %}
+				
+			</p>
+			
+			<!-- Separator before next section -->
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
 <!--                              Script to allow page jump to anchor                               -->
 <!---------------------------------------------------------------------------------------------------->
 
