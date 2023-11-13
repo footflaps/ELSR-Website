@@ -560,7 +560,7 @@
 									{% endif %}
 								</td>
 								{% if not mobile %}
-									<td>{{ user.start_date }}</td>
+									<td>{{ beautify_date(user.start_date) }}</td>
 								{% endif %}
 								<td>{{ user.last_login }}  ({{ user.last_login_ip }})</td>
 								{% if current_user.admin() %}
@@ -674,7 +674,7 @@
 									{% endif %}
 								</td>
 								{% if not mobile %}
-									<td>{{ user.start_date }}</td>
+									<td>{{ beautify_date(user.start_date) }}</td>
 								{% endif %}
 								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
 								<td>{{ user.email }}
@@ -794,7 +794,7 @@
 									{% endif %}
 								</td>
 								{% if not mobile %}
-									<td>{{ user.start_date }}</td>
+									<td>{{ beautify_date(user.start_date) }}</td>
 								{% endif %}
 								<td>{{ user.last_login }} ({{ user.last_login_ip }})</td>
 								<td>{{ user.email }}

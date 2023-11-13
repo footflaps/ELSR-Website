@@ -62,7 +62,7 @@
 					<span class="subheading">This page is private to you.</span>
 					
 					<!-- Member since -->
-					<span class="subheading">Member since {{user.start_date}}</span>
+					<span class="subheading">Member since {{ beautify_date(user.start_date) }}</span>
 					
 					<!-- 2FA -->
 					{% if user.has_valid_phone_number() %}
@@ -1157,7 +1157,7 @@
 			                {% elif user.has_unvalidated_phone_number() %}
 			                    <li>Mobile: '<strong>{{ user.phone_number }}</strong>' [unverified]</li>
 			                {% endif %}
-			                <li>Start date: '<strong>{{ user.start_date }}</strong>'</li>
+			                <li>Start date: '<strong>{{ beautify_date(user.start_date) }}</strong>'</li>
 			                <li>Last login: '<strong>{{ user.last_login }}</strong>' from '<strong>{{ user.last_login_ip }}</strong>'</li>
 		                </ul>
 		                

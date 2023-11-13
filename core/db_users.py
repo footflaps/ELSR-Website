@@ -1115,18 +1115,18 @@ with app.app_context():
     app.logger.debug(f"Start of day: Found {len(users)} users in the dB")
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Hack to change user.start_date
 # -------------------------------------------------------------------------------------------------------------- #
 
-with app.app_context():
-    users = User().all_users()
-    for user in users:
-        if len(user.start_date) != 8:
-            date_obj = datetime.strptime(user.start_date, "%B %d, %Y")
-            new_date = date_obj.strftime("%d%m%Y")
-            print(f"ID = {user.id}, Name = '{user.name}', Date = '{user.start_date}' or '{new_date}'")
-            user.start_date = new_date
-            db.session.add(user)
-            db.session.commit()
+# with app.app_context():
+#     users = User().all_users()
+#     for user in users:
+#         if len(user.start_date) != 8:
+#             date_obj = datetime.strptime(user.start_date, "%B %d, %Y")
+#             new_date = date_obj.strftime("%d%m%Y")
+#             print(f"ID = {user.id}, Name = '{user.name}', Date = '{user.start_date}' or '{new_date}'")
+#             user.start_date = new_date
+#             db.session.add(user)
+#             db.session.commit()
+
