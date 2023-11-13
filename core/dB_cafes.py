@@ -3,7 +3,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, FloatField, SelectField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import DataRequired
-from datetime import date
+from datetime import date, datetime
 import json
 
 
@@ -25,7 +25,6 @@ CLOSED_CAFE_ICON = "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
 
 OPEN_CAFE_COLOUR = "#2196f3"
 CLOSED_CAFE_COLOUR = "#922b21"
-
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -50,8 +49,11 @@ class Cafe(db.Model):
     rating = db.Column(db.String(100), nullable=True)
     # Who and when
     added_email = db.Column(db.String(250), nullable=False)
-    # Dates
+
+    # Added date in format "11112023"
     added_date = db.Column(db.String(250), nullable=False)
+
+    # This is not used
     updated_date = db.Column(db.String(250), nullable=True)
 
     # Return a list of all cafes
@@ -81,7 +83,7 @@ class Cafe(db.Model):
     # Add a new cafe to the dB
     def add_cafe(self, new_cafe):
         # Update some details
-        new_cafe.added_date = date.today().strftime("%B %d, %Y")
+        new_cafe.added_date = date.today().strftime("%d%m%Y")
         new_cafe.active = True
 
         # Try and add to dB
@@ -103,7 +105,7 @@ class Cafe(db.Model):
                 cafe.name = updated_cafe.name
                 cafe.lat = updated_cafe.lat
                 cafe.lon = updated_cafe.lon
-                cafe.website_url= updated_cafe.website_url
+                cafe.website_url = updated_cafe.website_url
                 cafe.details = updated_cafe.details
                 cafe.summary = updated_cafe.summary
                 cafe.rating = updated_cafe.rating
@@ -278,3 +280,20 @@ def get_cafe_name_from_id(cafe_id):
 
 # Add this to jinja's environment, so we can use it within html templates
 app.jinja_env.globals.update(get_cafe_name_from_id=get_cafe_name_from_id)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Hack to change date
+# -------------------------------------------------------------------------------------------------------------- #
+
+with app.app_context():
+    cafes = Cafe().all_cafes()
+    for cafe in cafes:
+        if len(cafe.added_date) != 8:
+            date_obj = datetime.strptime(cafe.added_date, "%B %d, %Y")
+            new_date = date_obj.strftime("%d%m%Y")
+            print(f"ID = {cafe.id}, Name = '{cafe.name}', Date = '{cafe.added_date}' or '{new_date}'")
+            cafe.added_date = new_date
+            db.session.add(cafe)
+            db.session.commit()
+
