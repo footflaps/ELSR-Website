@@ -230,24 +230,24 @@ with app.app_context():
 # Hack to change date
 # -------------------------------------------------------------------------------------------------------------- #
 
-with app.app_context():
-    messages = Message().all_messages()
-    for message in messages:
-        if len(message.sent_date) != 8:
-            sent_date_obj = datetime.strptime(message.sent_date, "%B %d, %Y")
-            new_sent_date = sent_date_obj.strftime("%d%m%Y")
-
-            if message.read_date:
-                read_date_obj = datetime.strptime(message.read_date, "%B %d, %Y")
-                new_read_date = read_date_obj.strftime("%d%m%Y")
-            else:
-                new_read_date = None
-
-            print(f"ID = {message.id}, Name = '{message.to_email}', '{message.sent_date}' -> '{new_sent_date}', "
-                  f"'{message.read_date}' -> '{new_read_date}'")
-
-            message.sent_date = new_sent_date
-            message.read_date = new_read_date
-            db.session.add(message)
-            db.session.commit()
+# with app.app_context():
+#     messages = Message().all_messages()
+#     for message in messages:
+#         if len(message.sent_date) != 8:
+#             sent_date_obj = datetime.strptime(message.sent_date, "%B %d, %Y")
+#             new_sent_date = sent_date_obj.strftime("%d%m%Y")
+#
+#             if message.read_date:
+#                 read_date_obj = datetime.strptime(message.read_date, "%B %d, %Y")
+#                 new_read_date = read_date_obj.strftime("%d%m%Y")
+#             else:
+#                 new_read_date = None
+#
+#             print(f"ID = {message.id}, Name = '{message.to_email}', '{message.sent_date}' -> '{new_sent_date}', "
+#                   f"'{message.read_date}' -> '{new_read_date}'")
+#
+#             message.sent_date = new_sent_date
+#             message.read_date = new_read_date
+#             db.session.add(message)
+#             db.session.commit()
 
