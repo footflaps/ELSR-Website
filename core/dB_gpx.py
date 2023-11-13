@@ -3,9 +3,10 @@ from wtforms import StringField, SubmitField, SelectField
 from flask_ckeditor import CKEditorField
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, Length, InputRequired
-from datetime import date
+from datetime import date, datetime
 import json
 from sqlalchemy import func
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import db object from __init__.py
@@ -59,6 +60,8 @@ class Gpx(db.Model):
 
     # Who and when uploaded it
     email = db.Column(db.String(250), nullable=False)
+
+    # Date is in the format "11112023"
     date = db.Column(db.String(250), nullable=False)
 
     # Is the GPX valid
@@ -123,7 +126,7 @@ class Gpx(db.Model):
     def add_gpx(self, new_gpx):
 
         # Update some details
-        new_gpx.date = date.today().strftime("%B %d, %Y")
+        new_gpx.date = date.today().strftime("%d%m%Y")
 
         # Try and add to dB
         with app.app_context():
@@ -451,3 +454,18 @@ with app.app_context():
 #         direction = gpx_direction(gpx.filename, gpx.id)
 #         print(f"ID = '{gpx.id}', Direction = '{direction}'")
 
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Hack to change date
+# -------------------------------------------------------------------------------------------------------------- #
+
+with app.app_context():
+    gpxes = Gpx().all_gpxes()
+    for gpx in gpxes:
+        if len(gpx.date) != 8:
+            date_obj = datetime.strptime(gpx.date, "%B %d, %Y")
+            new_date = date_obj.strftime("%d%m%Y")
+            print(f"ID = {gpx.id}, Name = '{gpx.name}', Date = '{gpx.date}' or '{new_date}'")
+            gpx.date = new_date
+            db.session.add(gpx)
+            db.session.commit()

@@ -464,7 +464,7 @@
 									<th scope="row">{{ gpx.length_km }}</th>
 		                            <td scope="row">{{ gpx.ascent_m }}</td>
 									{% if not mobile %}
-		                                <td scope="row">{{ gpx.date }}</td>
+		                                <td scope="row">{{ beautify_date(gpx.date) }}</td>
 									{% endif %}
 							    </tr>
 						
