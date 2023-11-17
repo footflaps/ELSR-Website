@@ -441,7 +441,7 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
     # ----------------------------------------------------------- #
     # Create hyperlinks
     # ----------------------------------------------------------- #
-    cal_link = f"https://www.elsr.co.uk/weekend?date={date}"
+    cal_link = f"https://www.elsr.co.uk/weekend?date={ride.date}"
     gpx_link = f"https://www.elsr.co.uk/route/{ride.gpx_id}"
     dl_link = f"https://www.elsr.co.uk//gpx_download2?email={user.email}&gpx_id={ride.gpx_id}&" \
               f"code={user.gpx_download_code(ride.gpx_id)}"
