@@ -27,12 +27,21 @@ from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
-# Day of week
+# ELSR Chaingang details
 CHAINGANG_DAY = "Thursday"
 # From last week of March
 CHAINGANG_START_DATE = datetime(2023, 3, 30, 0, 00)
 # To last week of September
 CHAINGANG_END_DATE = datetime(2023, 9, 28, 0, 00)
+
+# Tim's Turbo Sessions (TTS) details
+TTS_DAY = "Tuesday"
+# From October 2023
+TTS_START_DATE = datetime(2023, 10, 10, 0, 00)
+# To late march 2024
+TTS_END_DATE = datetime(2024, 3, 19, 0, 00)
+
+
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -139,12 +148,20 @@ def calendar():
                               f"<i class='fas fa-solid fa-arrows-spin fa-spin fa-xl'></i></a>"
 
             # ----------------------------------------------------------- #
+            # Add TTS
+            # ----------------------------------------------------------- #
+            if day_of_week == TTS_DAY:
+                if TTS_START_DATE <= day_datestr <= TTS_END_DATE:
+                    markup += f"<a href='{url_for('turbo_training')}'>" \
+                              f"<i class='fa-solid fa-users-rectangle fa-lg'></i></a>&nbsp"
+
+            # ----------------------------------------------------------- #
             # Add TWRs
             # ----------------------------------------------------------- #
             if day_of_week == "Wednesday" \
                     and not added_ride:
                 markup += f"<a href='{url_for('twr')}'>" \
-                          f"<i class='fas fa-solid fa-person-biking fa-xl'></i></a>"
+                          f"<i class='fas fa-solid fa-person-biking fa-xl'></i></a>&nbsp"
 
             # ----------------------------------------------------------- #
             # Add today
