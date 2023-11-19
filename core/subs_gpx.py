@@ -19,7 +19,7 @@ from core.dB_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
 from core.dB_cafes import Cafe
 from core.dB_events import Event
 from core.db_calendar import Calendar
-from subs_email_sms import send_ride_notification_emails
+from core.subs_email_sms import send_ride_notification_emails
 
 
 # -------------------------------------------------------------------------------------------------------------- #
