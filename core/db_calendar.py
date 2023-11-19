@@ -191,14 +191,13 @@ class Calendar(db.Model):
 
 
 # One off code to set sent_email
-# This seems to be the only one which works?
-with app.app_context():
-    rides = Calendar().all_calendar()
-    for ride in rides:
-        if ride.sent_email != "True":
-            ride.sent_email = "True"
-            db.session.add(ride)
-            db.session.commit()
+# with app.app_context():
+#     rides = Calendar().all_calendar()
+#     for ride in rides:
+#         if ride.sent_email != "True":
+#             ride.sent_email = "True"
+#             db.session.add(ride)
+#             db.session.commit()
 
 
 # -------------------------------------------------------------------------------------------------------------- #
