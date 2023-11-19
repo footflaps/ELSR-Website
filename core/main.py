@@ -274,7 +274,7 @@ def twr():
 def turbo_training():
 
     # Render page
-    return render_template("main_pc_spin_class.html", year=current_year, live_site=live_site())
+    return render_template("main_turbo_training.html", year=current_year, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
