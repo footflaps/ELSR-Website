@@ -794,8 +794,6 @@ def add_ride():
                 flash("Ride updated!")
             else:
                 flash("Ride added to Calendar!")
-                # Send all the email notifications
-                Thread(target=send_ride_notification_emails, args=(new_ride,)).start()
 
             # Do they need to edit the just uploaded GPX file to make it public?
             if not gpx.public():
@@ -804,6 +802,8 @@ def add_ride():
                 return redirect(url_for('edit_route', gpx_id=gpx.id,
                                         return_path=f"{url_for('weekend', date=start_date_str)}"))
             else:
+                # Send all the email notifications now as ride us public
+                Thread(target=send_ride_notification_emails, args=(new_ride, )).start()
                 # Go to Calendar page for this ride's date
                 return redirect(url_for('weekend', date=start_date_str))
         else:

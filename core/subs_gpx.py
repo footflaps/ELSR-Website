@@ -18,6 +18,8 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 from core.dB_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
 from core.dB_cafes import Cafe
 from core.dB_events import Event
+from core.db_calendar import Calendar
+from subs_email_sms import send_ride_notification_emails
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -123,7 +125,7 @@ def remove_cafe_from_all_gpxes(cafe_id):
 # Update a GPX from existing cafe dB
 # -------------------------------------------------------------------------------------------------------------- #
 
-def check_new_gpx_with_all_cafes(gpx_id):
+def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -198,6 +200,22 @@ def check_new_gpx_with_all_cafes(gpx_id):
                     # Push update to GPX file
                     Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
                                            min_distance_path_km[cafe.id - 1])
+
+    # ----------------------------------------------------------- #
+    # Have we been asked to send a ride email notification?
+    # ----------------------------------------------------------- #
+    # send_email is either 'False' for no, or set to an int (ride_id) for yes
+    if type(send_email) == int:
+        # We have a ride_id index into the calendar
+        ride = Calendar().one_ride_id(send_email)
+        # Check that worked
+        if not ride:
+            # Should never happen, but...
+            app.logger.debug(f"check_new_gpx_with_all_cafes(): Passed invalid ride ID, send_email = '{send_email}'")
+            Event().log_event("check_new_gpx_with_all_cafes() Fail", f"Passed invalid ride ID, send_email = '{send_email}'")
+            return
+        # Send emails
+        send_ride_notification_emails(ride)
 
 
 

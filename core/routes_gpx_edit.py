@@ -21,6 +21,7 @@ from core.dB_events import Event
 from core.subs_gpx import check_new_gpx_with_all_cafes
 from core.subs_google_maps import start_and_end_maps_native_gm, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx
+from core.db_calendar import Calendar
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -241,7 +242,7 @@ def gpx_cut_start():
     if Gpx().clear_cafe_list(gpx_id):
         # Go ahead and update the list
         flash("Nearby cafe list is being been updated.")
-        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
+        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, False, )).start()
 
     else:
         # Should never happen, but...
@@ -320,7 +321,7 @@ def gpx_cut_end():
     if Gpx().clear_cafe_list(gpx_id):
         # Go ahead and update the list
         flash("Nearby cafe list is being updated...")
-        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
+        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, False, )).start()
     else:
         # Should never get here, but..
         app.logger.debug(f"gpx_cut_end(): Gpx().clear_cafe_list() failed for gpx_id = '{gpx_id}'.")
@@ -401,10 +402,22 @@ def publish_route():
         return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
 
     # ----------------------------------------------------------- #
+    # Is this GPX associated with any rides?
+    # ----------------------------------------------------------- #
+    # If there is a ride which uses this GPX, which hasn't already sent email notification, then it is waiting
+    # on the route being made public, which kicks off this function. We need the updated cafe distances for the
+    # notification email, so this is where we send the emails!
+    need_to_send_emails = False
+    for ride in Calendar().all_rides_gpx_id(gpx_id):
+        if ride.sent_email != "True":
+            need_to_send_emails = ride.id
+            break
+
+    # ----------------------------------------------------------- #
     # Add new existing nearby cafe list
     # ----------------------------------------------------------- #
     flash("Nearby cafe list is being updated.")
-    Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id,)).start()
+    Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, need_to_send_emails)).start()
 
     # Decide where to go next...
     if return_path and \

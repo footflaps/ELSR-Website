@@ -361,9 +361,49 @@ def send_ride_notification_emails(ride: Calendar()):
     # Make sure ride exists
     # ----------------------------------------------------------- #
     if not ride:
+        # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Passed invalid ride object")
         Event().log_event("send_ride_notification_emails() Fail", f"Passed invalid ride object")
         return
+
+    # ----------------------------------------------------------- #
+    # Make sure the GPX exists
+    # ----------------------------------------------------------- #
+    gpx = Gpx().one_gpx(ride.gpx_id)
+    if not gpx:
+        # Should never happen, but...
+        app.logger.debug(f"send_ride_notification_emails(): Can't find GPX, ride.id = '{ride.id}', "
+                         f"ride.gpx_id = '{ride.gpx_id}'.")
+        Event().log_event("send_ride_notification_emails() Fail", f"Can't find GPX, ride.id = '{ride.id}', "
+                                                                  f"ride.gpx_id = '{ride.gpx_id}'.")
+        return
+
+    # ----------------------------------------------------------- #
+    # Make sure the GPX file is public
+    # ----------------------------------------------------------- #
+    if not gpx.public():
+        # Should never happen, but...
+        app.logger.debug(f"send_ride_notification_emails(): Aborting as GPX not public, ride.id = '{ride.id}', "
+                         f"ride.gpx_id = '{ride.gpx_id}'.")
+        Event().log_event("send_ride_notification_emails() Fail", f"Aborting as GPX not public, ride.id = '{ride.id}', "
+                                                                  f"ride.gpx_id = '{ride.gpx_id}'.")
+        return
+
+    # ----------------------------------------------------------- #
+    # Abort if we've already sent an email alert
+    # ----------------------------------------------------------- #
+    if ride.sent_email == "True":
+        # Should never happen, but...
+        app.logger.debug(f"send_ride_notification_emails(): Aborting as already sent email, ride.id = '{ride.id}'.")
+        Event().log_event("send_ride_notification_emails() Fail", f"Aborting as already sent email, "
+                                                                  f"ride.id = '{ride.id}'.")
+        return
+
+    # ----------------------------------------------------------- #
+    # Modify ride to show email have been sent
+    # ----------------------------------------------------------- #
+    # Do this now in case we crash mid-email send
+    Calendar().mark_email_sent(ride.id)
 
     # ----------------------------------------------------------- #
     # Scan all users

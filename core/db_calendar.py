@@ -171,19 +171,34 @@ class Calendar(db.Model):
                                      f"error code '{e.args}'.")
         return False
 
+    def mark_email_sent(self, ride_id):
+        with app.app_context():
+            ride = db.session.query(Calendar).filter_by(id=ride_id).first()
+            if ride:
+                # Modify
+                try:
+                    ride.sent_email = "True"
+                    db.session.commit()
+                    return True
+                except Exception as e:
+                    app.logger.error(f"db_calendar: Failed to set email sent for ride_id = '{ride.id}', "
+                                     f"error code '{e.args}'.")
+        return False
+
     # Optional: this will allow each event object to be identified by its details when printed.
     def __repr__(self):
         return f'<Ride "{self.destination} , lead by {self.leader}">'
 
 
-# # One off code to populate unix dates
-# rides = Calendar().all_calendar()
-# for ride in rides:
-#     if not ride.unix_date:
-#         date_obj = datetime(int(ride.date[4:8]), int(ride.date[2:4]), int(ride.date[0:2]), 0, 00)
-#         date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
-#         ride.unix_date = date_unix
-#         Calendar().add_ride(ride)
+# One off code to set sent_email
+# This seems to be the only one which works?
+# with app.app_context():
+#     rides = Calendar().all_calendar()
+#     for ride in rides:
+#         if ride.sent_email != "True":
+#             ride.sent_email = "True"
+#             db.session.add(ride)
+#             db.session.commit()
 
 
 # -------------------------------------------------------------------------------------------------------------- #
