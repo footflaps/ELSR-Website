@@ -89,6 +89,9 @@ class Calendar(db.Model):
     # Added Unix date for sorting by ride date
     unix_date = db.Column(db.Integer)
 
+    # Column to denote whether we sent an email or not
+    sent_email = db.Column(db.String(20))
+
     # Return all events
     def all_calendar(self):
         with app.app_context():
