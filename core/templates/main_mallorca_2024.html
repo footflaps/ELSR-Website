@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead"
+        style="background-image: url('{{ url_for('static', filename='img/page-headers/mallorca-bg.jpg') }}')"
+		alt="The bench">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Mallorca Training Camp 2024</h1>
+					<span class="subheading">April 20th to April 28th 2024</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Introduction                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+			
+			<h2>Cyclists’ Training Camp</h2>
+			
+			<p>
+				Run by
+				<a href="https://perfectcondition.co.uk/about-me/"><strong>Tim Williams</strong></a>, the camp is open
+				to all members of the Cambridge cycling and triathlon clubs (except unaccompanied minors) and is
+				particularly targeted at the people in the clubs who train regularly together on the weekly rides in
+				Cambridge.
+			</p>
+			
+			<h2>When: April 20th to April 28th 2024</h2>
+			
+			<p>
+				<i class="fa-solid fa-quote-left"></i>
+				Most years the camp takes place just after the clocks change at the end of March. This is the ideal
+				balance of pre-season, long evenings and, hopefully, holiday weather. It’s also normally just before
+				the schools break up for Easter and the real holiday season starts.
+				In 2024, however, Easter is early and falls right in our regular slot. Having considered shifting the
+				camp forward to mid-March I feel that the consensus from most of those who came last year was to
+				shift backward to late April in the hope of ensuring even more holiday-like weather.
+				<i class="fa-solid fa-quote-right"></i>
+			</p>
+			
+			<h2>What</h2>
+			
+			<p>
+				The camp is based on a structured programme of group rides, and includes ad-hoc group and
+				individual coaching sessions and discussions*. The groups are along the lines of those we regularly
+				ride in:
+			</p>
+			
+			<ul>
+				<li class="my-2">
+					<strong>Sporting Plus:</strong> &nbsp; Fast chaingang, BCF license holders. The programme includes
+                    long rides, fast group rides, chain gangs, and lead out and tactical practise. Time trial.
+				</li>
+				<li class="my-2">
+					<strong>Sporting:</strong> &nbsp; Tri-club chaingang. Long mountain rides, technical descending, fast
+					group rides. Time trial.
+				</li>
+				<li class="my-2">
+					<strong>Intermediate Plus:</strong> &nbsp; Tri-club medium chaingang. For those who want to want
+					to do all or most of the above, over the best roads and scenery, but feel that they would
+					enjoy themselves better not having to keep up with the faster groups.
+				</li>
+				<li class="my-2">
+					<strong>Intermediate:</strong> &nbsp; What’s the rush? Happy to ride steadily all day
+				</li>
+			</ul>
+			
+			<p>
+				Tim structures the camp to try and ensure that you get the most out of your time without being too
+				tired to enjoy it. He knows pretty much every road on the island so you are guaranteed to get the
+				best riding that Mallorca has to offer (and that’s pretty much as good it gets anywhere).
+			</p>
+			
+			<h2>Accomodation</h2>
+			
+			<p>
+				<i class="fa-solid fa-quote-left"></i>
+				We will be staying at the Pabisa Sofia. This is a change from the camp as originally announced. The
+				location is essentially the same (250m away). The hotel is part of the same group and is similar to
+				the main building of the Bali hotel that we used in 2022 and 2023. Unlike the Bali It doesn’t have a
+				new block with suites, so these are no longer available
+				<i class="fa-solid fa-quote-right"></i>
+			</p>
+			
+			<p>
+				The programme of the camp will be cycling based, however Arenal is a good base for triathlon as
+				there is an indoor swimming pool close to the hotel and the sea is roughly one minute away. The
+				promenade is largely traffic free for running and there are some trails within easy running distance.
+			</p>
+			
+			<h2>Cost</h2>
+			
+			<ul>
+				<li class="my-2">
+					Single occupancy standard room - <strong>£780</strong> (initial payment £580)
+				</li>
+				<li class="my-2">
+					Double occupancy standard room - <strong>£610</strong> (initial payment £410) per person
+				</li>
+				<li class="my-2">
+					Willing to share a twin room - <strong>£690</strong> (initial payment £560)
+				</li>
+				<li class="my-2">
+					Single occupancy sea-view room - <strong>£890</strong> (initial payment £690)
+				</li>
+				<li class="my-2">
+					Double occupancy sea-view room - <strong>£690</strong> (initial payment £490) per person
+				</li>
+			</ul>
+			
+			<p>
+				<strong style="color: red;">You will have to book your own flights to Palma.</strong>
+			</p>
+			
+			<h2>Payment and Deposit</h2>
+			
+			<p>
+				<i class="fa-solid fa-quote-left"></i>
+				The hotel prices are fixed in Euro. I think that it makes sense to buy Euro as early as possible to
+				guarantee that we don’t end up paying more.
+			</p>
+			<p>
+				To minimise the risk of losing out I therefore require an initial payment with your booking which I
+				will convert to Euro and use to pay a deposit to the hotel The remainder is payable one month
+				before traveling (i.e. by the end of February).
+			</p>
+			<p>
+				If you cancel more than one month before travelling I will return 75% of your deposit.
+			</p>
+			<p>
+				The prices are based on €1 ~ 90p. If the exchange rate fluctuates significantly from that I reserve the
+				right to adjust the price for people who have not yet paid a deposit.
+				<i class="fa-solid fa-quote-right"></i>
+			</p>
+			
+			<h2>Travel Dates and Transfers</h2>
+			
+			<p>
+				<i class="fa-solid fa-quote-left"></i>
+				We will collect you at Palma Airport on 20th and return you to Palma Airport on 28th. If you travel
+				on any other dates you will have to organise your own transfers. I will, however, adjust your hotel
+				reservation for the nights that you will be staying and your bill accordingly.
+				<i class="fa-solid fa-quote-right"></i>
+			</p>
+			
+			<h2>Covid</h2>
+			
+			<p>
+				We will be subject to whatever Covid regulations are in place at the time of travel.
+			</p>
+			
+			<h2>How to book</h2>
+			
+			{% if current_user.is_authenticated %}
+			
+				<p>
+					To reserve your place please submit an
+					<a href="https://docs.google.com/forms/d/e/1FAIpQLSeFqNV_48joNbZBF6FtkXtBC1ipPj9VzupbvfOdvt_Rl-L2wg/viewform?usp=share_link>">
+						<strong>online booking form,</strong>
+					</a>
+					which contains instructions for sending your deposit to Tim.
+				</p>
+			
+			{% else %}
+			
+				<p>
+					Please log in to see registration form details.
+				</p>
+			
+			{% endif %}
+			
+			<hr>
+			
+		</div>
+	</div>
+</div>
+
+
+
+{% endblock %}
