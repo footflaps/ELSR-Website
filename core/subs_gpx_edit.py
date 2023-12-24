@@ -42,10 +42,23 @@ def update_existing_gpx(gpx_file, gpx_filename):
     tmp_filename = f"{old_filename}.tmp"
 
     # ----------------------------------------------------------- #
-    # Step 1: Delete tmp file if it exists
+    # Step 1: Wait for tmp file to clear
     # ----------------------------------------------------------- #
-    # NB It shouldn't exist, but if something went wrong with a deleted GPX, it could end up left orphaned
+    # As Gunicorn has multiple workers, it is possible (and has happened) that two workers call this function
+    # overlapping in time and they corrupt each other's files. What actually seems to happen is one user reloads the
+    # page rapidly, and we end up in a 'right mess'.
+
+    # Wait for the tmp file to get removed by the 'other' version of this function
+    for _ in range(0, 20):
+        if os.path.exists(tmp_filename):
+            app.logger.debug(f"update_existing_gpx(): Detected '{tmp_filename}', so sleeping for 1 second.")
+            sleep(1)
+        else:
+            break
+
+    # If it's still there after 20 seconds, just blow it away
     if os.path.exists(tmp_filename):
+        app.logger.debug(f"update_existing_gpx(): '{tmp_filename}' still there after 20 secs, so deleting.")
         try:
             os.remove(tmp_filename)
             # We need this as remove seems to keep the file locked for a short period
@@ -58,7 +71,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
             return False
 
     # ----------------------------------------------------------- #
-    # Step 2: Write out our shortened file to new_filename
+    # Step 2: Write out our new file to "gpx_XXX.gpx.tmp"
     # ----------------------------------------------------------- #
     try:
         with open(tmp_filename, 'w') as file_ref2:
@@ -69,7 +82,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         return False
 
     # ----------------------------------------------------------- #
-    # Step 3: Delete the existing (unshortened) GPX file
+    # Step 3: Delete the original file "gpx_XXX.gpx"
     # ----------------------------------------------------------- #
     try:
         os.remove(old_filename)
@@ -82,7 +95,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         return False
 
     # ----------------------------------------------------------- #
-    # Step 4: Rename our temp (shortened) file
+    # Step 4: Rename "gpx_XXX.gpx.tmp" --> "gpx_XXX.gpx"
     # ----------------------------------------------------------- #
     try:
         os.rename(tmp_filename, old_filename)
@@ -196,6 +209,7 @@ def new_gpx(route_name):
 
     return gpx
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Make sure the GPX file has an up to date name
 # -------------------------------------------------------------------------------------------------------------- #
@@ -209,7 +223,6 @@ def check_route_name(gpx):
     # ----------------------------------------------------------- #
     # Params we will add
     # ----------------------------------------------------------- #
-
     # This is the name which will appear in the Garmin etc
     route_name = f"ELSR: {gpx.name}"
     route_link = f"https://www.elsr.co.uk/route/{gpx.id}"
