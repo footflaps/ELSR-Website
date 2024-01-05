@@ -106,9 +106,9 @@ def calendar():
         if month == 13:
             year += 1
             month = 1
-        elif month == 0:
+        elif month < 0:
             year -= 1
-            month = 12
+            month = 12 + month
         for day in range(1, cal.monthrange(year, month)[1] + 1):
             day_datestr = datetime(year, month, day, 0, 00)
             day_of_week = day_datestr.strftime("%A")
