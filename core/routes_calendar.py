@@ -30,9 +30,9 @@ from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 # ELSR Chaingang details
 CHAINGANG_DAY = "Thursday"
 # From last week of March
-CHAINGANG_START_DATE = datetime(2023, 3, 30, 0, 00)
+CHAINGANG_START_DATE = datetime(2024, 3, 28, 0, 00)
 # To last week of September
-CHAINGANG_END_DATE = datetime(2023, 9, 28, 0, 00)
+CHAINGANG_END_DATE = datetime(2024, 9, 19, 0, 00)
 
 # Tim's Turbo Sessions (TTS) details
 TTS_DAY = "Tuesday"
@@ -40,8 +40,6 @@ TTS_DAY = "Tuesday"
 TTS_START_DATE = datetime(2023, 10, 10, 0, 00)
 # To late march 2024
 TTS_END_DATE = datetime(2024, 3, 19, 0, 00)
-
-
 
 
 # -------------------------------------------------------------------------------------------------------------- #
