@@ -100,13 +100,12 @@ def calendar():
     # Start three months behind to backfill calendar a bit
     month = datetime.today().month - 3
     today_str = datetime.today().strftime("%Y-%m-%d")
-
     # Just cover 9 month span
     for _ in range(0, 9):
         if month == 13:
             year += 1
             month = 1
-        elif month < 0:
+        elif month <= 0:
             year -= 1
             month = 12 + month
         for day in range(1, cal.monthrange(year, month)[1] + 1):
