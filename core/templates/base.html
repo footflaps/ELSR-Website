@@ -178,6 +178,9 @@
 					        <a class="dropdown-item" href="{{ url_for('poll_list') }}">Polling</a>
 					        <a class="dropdown-item" href="{{ url_for('who_are_we') }}">Member List</a>
                             <a class="dropdown-item" href="{{ url_for('contact') }}">Contact Us</a>
+                            {% if current_user.is_authenticated and current_user.can_see_emergency_contacts() %}
+                            <a class="dropdown-item" href="{{ url_for('emergency') }}">Emergency Contacts</a>
+                            {% endif %}
 					    </div>
 					</li>
 					
@@ -215,7 +218,7 @@
 					</li>
 					
 					<!-- Register / Login links -->
-					{% if not current_user.is_authenticated: %}
+					{% if not current_user.is_authenticated %}
 					
 						<li class="nav-item">
 							<a class="nav-link" href="{{ url_for('login') }}">Login</a>

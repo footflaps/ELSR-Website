@@ -285,6 +285,10 @@ class User(UserMixin, db.Model):
         except KeyError:
             return "n/a"
 
+    def can_see_emergency_contacts(self):
+        # For now, we just use Admin, but will probably expand this to other members
+        return self.admin()
+
     # ---------------------------------------------------------------------------------------------------------- #
     # User functions
     # ---------------------------------------------------------------------------------------------------------- #
@@ -337,7 +341,8 @@ class User(UserMixin, db.Model):
                 app.logger.error(f"dB.create_user(): Failed with error code '{e.args}'.")
                 return False
 
-    def create_new_verification(self, user_id):
+    @staticmethod
+    def create_new_verification(user_id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -357,7 +362,8 @@ class User(UserMixin, db.Model):
                 app.logger.error(f"dB.create_new_verification(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def generate_sms_code(self, user_id):
+    @staticmethod
+    def generate_sms_code(user_id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -377,7 +383,8 @@ class User(UserMixin, db.Model):
                 app.logger.error(f"dB.generate_sms_code(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def find_user_from_id(self, user_id):
+    @staticmethod
+    def find_user_from_id(user_id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             return user
@@ -389,12 +396,14 @@ class User(UserMixin, db.Model):
                 return True
         return False
 
-    def find_user_from_email(self, email):
+    @staticmethod
+    def find_user_from_email(email):
         with app.app_context():
             user = db.session.query(User).filter_by(email=email).first()
             return user
 
-    def find_id_from_email(self, email):
+    @staticmethod
+    def find_id_from_email(email):
         with app.app_context():
             user = db.session.query(User).filter_by(email=email).first()
             if user:
@@ -410,7 +419,8 @@ class User(UserMixin, db.Model):
             else:
                 return "unknown"
 
-    def name_from_id(self, id):
+    @staticmethod
+    def name_from_id(id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=id).first()
             return user.name

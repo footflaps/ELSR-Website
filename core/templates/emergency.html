@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                       Page Header                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<header class="masthead"
+        style="background-image: url('{{ url_for('static', filename='img/page-headers/emergency.jpg')}}')"
+		alt="Broken helmet">
+	<div class="overlay"></div>
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<div class="page-heading">
+					<h1>Emergency Contacts Page</h1>
+					<span class="subheading">Serious shit is going down..</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</header>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                 Show flash messages                                            -->
+<!---------------------------------------------------------------------------------------------------->
+
+{% with messages = get_flashed_messages() %}
+	{% if messages %}
+		{% for message in messages %}
+			<div class="alert alert-warning text-center">
+				{{ message }}
+			</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                      Main Content                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-8 col-md-10 mx-auto">
+
+			<h2>Search by first letter of user name</h2>
+
+			{% for letter in username_letters %}
+				<a href="#{{ letter }}"><strong>{{ letter.upper() }}</strong></a>,
+			{% endfor %}
+
+			{% if not current_user.is_authenticated %}
+
+				<p style="color: red">
+					<strong>Log in to see active social links.</strong>
+				</p>
+
+			{% endif %}
+
+			<hr>
+
+		</div>
+	</div>
+</div>
+
+
+<!---------------------------------------------------------------------------------------------------->
+<!--                                         User List                                              -->
+<!---------------------------------------------------------------------------------------------------->
+
+<div class="container">
+
+	{% set firstletter = "" %}
+
+	{% for user in users %}
+		{% if user.id != 50 %}
+
+		<!-- Create Anchors for next letter in alphabet -->
+		{% if firstletter != user.name[0] %}
+			{% set firstletter = user.name[0] %}
+	        <a name="{{ user.name[0].upper() }}" ></a>
+		{% endif %}
+
+		<!-- User details -->
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+
+				<!-- Name, Group and Bio -->
+				<div>
+
+					<img src="{{ user.email | gravatar }}"
+				         width="60" height="60"
+				         style="border-radius: 50%;"
+					     alt="Gravatar icon"/>
+					&nbsp
+					{{user.name}} ({{ user.email }})
+
+				</div>
+
+				<!-- Socials -->
+                {% if user.emergency_contacts %}
+                    <strong>Emergency Contact Details:</strong>
+                    <p style="color: blue">
+                      {{ user.emergency_contacts }}
+                    </p>
+                {% endif %}
+			</div>
+		</div>
+
+		<div class="row">
+			<div class="col-lg-8 col-md-10 mx-auto">
+				<hr>
+			</div>
+		</div>
+
+		{% endif %}
+	{% endfor %}
+
+</div>
+
+
+
+{% endblock %}

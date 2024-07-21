@@ -634,7 +634,7 @@ def unsubscribe_all():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Show use list
+# Show user list
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/who_are_we', methods=['GET'])
@@ -660,4 +660,41 @@ def who_are_we():
 
     # Render in main index template
     return render_template("user_list.html", year=current_year, users=users, username_letters=username_letters,
+                           live_site=live_site())
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Show Emergency Contacts
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route('/emergency', methods=['GET'])
+@logout_barred_user
+@login_required
+@update_last_seen
+def emergency():
+    # ----------------------------------------------------------- #
+    # Validate user
+    # ----------------------------------------------------------- #
+    if not current_user.can_see_emergency_contacts():
+        # Naughty boy
+        app.logger.debug(f"emergency(): Non Admin access, user_id = '{current_user.id}'!")
+        Event().log_event("Admin Page Fail", f"on emergency access, user_id = '{current_user.id}'!")
+        return abort(403)
+
+    # ----------------------------------------------------------- #
+    # Need a list of users
+    # ----------------------------------------------------------- #
+    users = User().all_users_sorted()
+
+    # ----------------------------------------------------------- #
+    # Need a list of letters
+    # ----------------------------------------------------------- #
+    username_letters = []
+
+    for user in users:
+        username_letter = user.name[0].upper()
+        if not username_letter in username_letters:
+            username_letters.append(username_letter)
+
+    # Render in main index template
+    return render_template("emergency.html", year=current_year, users=users, username_letters=username_letters,
                            live_site=live_site())
