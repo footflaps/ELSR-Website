@@ -289,22 +289,26 @@ class User(UserMixin, db.Model):
     # User functions
     # ---------------------------------------------------------------------------------------------------------- #
 
-    def all_users(self):
+    @staticmethod
+    def all_users():
         with app.app_context():
             users = db.session.query(User).filter(User.name != DELETED_NAME).all()
             return users
 
-    def all_users_sorted(self):
+    @staticmethod
+    def all_users_sorted():
         with app.app_context():
             users = db.session.query(User).order_by(func.lower(User.name)).filter(User.name != DELETED_NAME).all()
             return users
 
-    def all_admins(self):
+    @staticmethod
+    def all_admins():
         with app.app_context():
             admins = db.session.query(User).filter(User.permissions == MASK_ADMIN + MASK_VERIFIED).all()
             return admins
 
-    def all_non_admins(self):
+    @staticmethod
+    def all_non_admins():
         with app.app_context():
             non_admins = db.session.query(User).filter(User.permissions != MASK_ADMIN + MASK_VERIFIED).\
                 filter(User.name != DELETED_NAME).all()
@@ -994,7 +998,7 @@ def get_user_id_from_email(user_email):
     return User().find_id_from_email(user_email)
 
 
-# Add this to jinja's environment, so we can use it within html templates
+# Add these to jinja's environment, so we can use it within html templates
 app.jinja_env.globals.update(get_user_name=get_user_name)
 app.jinja_env.globals.update(get_user_id_from_email=get_user_id_from_email)
 
@@ -1098,6 +1102,7 @@ class ChangeUserDetailsForm(FlaskForm):
     instagram = URLField("Instagram url:", validators=[url_validation])
     twitter = URLField("Twitter / X url:", validators=[url_validation])
     facebook = URLField("Facebook url:", validators=[url_validation])
+    emergency = URLField("Emergency Contact Details:", validators=[])
     submit = SubmitField("Update me!")
 
 
