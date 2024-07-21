@@ -324,7 +324,8 @@ def send_one_social_notification_email(user: User(), social: Socials()):
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
         subject = f"ELSR: New social event notification"
         body = SOCIAL_BODY.replace("[USER]", user_name)
-        body = body.replace("[DATE]", date)
+        # NB The social
+        body = body.replace("[DATE]", date.replace("/", ""))
         body = body.replace("[LOCATION]", destination)
         body = body.replace("[CAL_LINK]", cal_link)
         body = body.replace("[SOCIAL_LINK]", social_link)
