@@ -1102,7 +1102,7 @@ class ChangeUserDetailsForm(FlaskForm):
     instagram = URLField("Instagram url:", validators=[url_validation])
     twitter = URLField("Twitter / X url:", validators=[url_validation])
     facebook = URLField("Facebook url:", validators=[url_validation])
-    emergency = URLField("Emergency Contact Details:", validators=[])
+    emergency = CKEditorField("Emergency Contact Details:", validators=[])
     submit = SubmitField("Update me!")
 
 
