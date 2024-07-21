@@ -1,3 +1,11 @@
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Routes and associated helper functions for managing Users
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
 from flask_login import current_user, logout_user
 from werkzeug import exceptions
@@ -45,7 +53,11 @@ admin_phone_number = os.environ['ELSR_TWILIO_NUMBER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 # Functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
 def same_origin(current_uri, compare_uri):
@@ -292,6 +304,7 @@ def user_page():
         form.instagram.data = user.social_url("instagram")
         form.twitter.data = user.social_url("twitter")
         form.facebook.data = user.social_url("facebook")
+        form.emergency.data = user.emergency_contacts
 
     elif form.validate_on_submit():
         # ----------------------------------------------------------- #
@@ -302,6 +315,7 @@ def user_page():
         made_change = False
         new_name = form.name.data.strip()
         new_bio = form.bio.data
+        new_emergency = form.emergency.data
 
         # Did they change their username?
         if new_name != user.name:
@@ -324,6 +338,12 @@ def user_page():
 
         # Handle socials
         if validate_socials(user, form):
+            made_change = True
+
+        # Emergency Contact Details
+        if new_emergency != user.emergency_contacts:
+            # Update it
+            user.emergency_contacts = new_emergency
             made_change = True
 
         # Update user object
