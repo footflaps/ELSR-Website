@@ -1,3 +1,10 @@
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Define the user table in the database and associated helper functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 from flask import abort, flash, request, redirect, url_for
 from flask_login import UserMixin, current_user, logout_user
 from flask_wtf import FlaskForm
@@ -178,6 +185,9 @@ class User(UserMixin, db.Model):
 
     # They can store club kit clothing sizes as JSON string
     clothing_size = db.Column(db.Text, unique=False)
+
+    # Emergency Contact Details
+    emergency_contacts = db.Column(db.Text, unique=False)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # User permissions
