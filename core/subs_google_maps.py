@@ -617,25 +617,28 @@ def graph_map_counts():
     #   Generate our map count data sets
     # ----------------------------------------------------------- #
     for line in lines:
-        # Get date and number map reads
-        line = line.rstrip('\n')
-        data = line.split(',')
+        try:
+            # Get date and number map reads
+            line = line.rstrip('\n')
+            data = line.split(',')
 
-        # Need the day of week
-        date_str = data[0].strip()
-        date_obj = date(int(date_str[0:4]), int(date_str[4:6]), int(date_str[6:8]))
-        day_of_week = date_obj.strftime('%A')
+            # Need the day of week
+            date_str = data[0].strip()
+            date_obj = date(int(date_str[0:4]), int(date_str[4:6]), int(date_str[6:8]))
+            day_of_week = date_obj.strftime('%A')
 
-        # Need map count
-        count = int(data[1])
+            # Need map count
+            count = int(data[1])
 
-        # Need limit by day of week
-        limit = MAP_LIMITS_BY_DAY[day_of_week]
+            # Need limit by day of week
+            limit = MAP_LIMITS_BY_DAY[day_of_week]
 
-        # Stick in our lists
-        dates.append(date_str)
-        counts.append(count)
-        limits.append(limit)
+            # Stick in our lists
+            dates.append(date_str)
+            counts.append(count)
+            limits.append(limit)
+        except Exception as e:
+            pass
 
     # ----------------------------------------------------------- #
     #   Return all
