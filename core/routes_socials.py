@@ -25,7 +25,7 @@ from core.db_social import Socials, create_social_form, SOCIAL_FORM_PRIVATE, SOC
 from core.dB_events import Event
 from core.db_users import User
 from core.subs_email_sms import send_social_notification_emails
-from subs_photos import get_date_from_url
+from core.subs_photos import get_date_from_url
 
 
 # -------------------------------------------------------------------------------------------------------------- #
