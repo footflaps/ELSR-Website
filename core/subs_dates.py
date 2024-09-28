@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 
-def get_date_from_url(return_none_if_empty: bool = False) -> Optional[str]:
+def get_date_from_url(return_none_if_empty: bool = False):
     """
     Try and get a date from the url search string and return it in the format DDMMYYYY.
     If there wasn't a date passed, just return today's date.
