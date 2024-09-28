@@ -21,7 +21,7 @@ from core.dB_gpx import Gpx
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from subs_dates import get_date_from_url
+from subs_photos import get_date_from_url
 
 
 # -------------------------------------------------------------------------------------------------------------- #
