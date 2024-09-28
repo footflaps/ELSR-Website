@@ -28,6 +28,8 @@ from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE,
                              MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES, start_time_string
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
+from subs_dates import get_date_from_url
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -230,7 +232,7 @@ def weekend():
     # ----------------------------------------------------------- #
     # Did we get passed a date? (Optional)
     # ----------------------------------------------------------- #
-    target_date_str = request.args.get('date', None)
+    target_date_str = get_date_from_url(return_none_if_empty=True)
 
     # ----------------------------------------------------------- #
     # Workout which weekend we're displaying
@@ -423,7 +425,7 @@ def add_ride():
     # ----------------------------------------------------------- #
     # Did we get passed a date or a ride_id? (Optional)
     # ----------------------------------------------------------- #
-    start_date_str = request.args.get('date', None)
+    start_date_str = get_date_from_url()
     ride_id = request.args.get('ride_id', None)
 
     # ----------------------------------------------------------- #
@@ -853,7 +855,7 @@ def delete_ride():
     # Get details from the page
     # ----------------------------------------------------------- #
     ride_id = request.args.get('ride_id', None)
-    date = request.args.get('date', None)
+    date = get_date_from_url()
     try:
         password = request.form['password']
     except exceptions.BadRequestKeyError:

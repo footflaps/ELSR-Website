@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, flash, abort
+from flask import render_template, url_for, flash, abort
 from datetime import datetime
 import calendar as cal
 
@@ -21,6 +21,7 @@ from core.dB_gpx import Gpx
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
 from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from subs_dates import get_date_from_url
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -61,7 +62,7 @@ def calendar():
     # ----------------------------------------------------------- #
     # Did we get passed a date? (Optional)
     # ----------------------------------------------------------- #
-    target_date_str = request.args.get('date', None)
+    target_date_str = get_date_from_url(return_none_if_empty=True)
 
     # ----------------------------------------------------------- #
     # Work out year and month, to pre-load calendar
@@ -74,7 +75,7 @@ def calendar():
         try:
             try_year = int(target_date_str[4:8])
             try_month = int(target_date_str[2:4])
-        except:
+        except Exception:
             # If we get garbage, just use today
             flash(f"Invalid date string '{target_date_str}', was expecting 'DDMMYYYY'.")
             try_year = -1
