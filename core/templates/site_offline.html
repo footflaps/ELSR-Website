@@ -80,12 +80,554 @@
 	<!--                                        Custom style                                            -->
 	<!---------------------------------------------------------------------------------------------------->
     <style>
-        .masthead {
-            /* The height can be whatever you want it to be */
-            min-height: 500px;
-            background-size: cover;
-            background-position: center;
-        }
+        /* **************************************************************************
+                                 Body and Headings
+   ************************************************************************** */
+
+body {
+  background-color:#f2f7fb;
+  font-size: 20px;
+  color: #212529;
+  font-family: 'Lora', 'Times New Roman', serif;
+}
+
+p {
+  line-height: 1.5;
+  margin: 30px 0;
+}
+
+/* NB H1 is defined below with Header Section */
+
+h2 {
+  font-size: 26px;
+  font-weight: 800;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+h3 {
+  font-size: 22px;
+  font-weight: 800;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+h4 {
+  font-size: 18px;
+  font-weight: 800;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Use this for hiding links next to symbols so Google etc know what the link is for */
+.hidden {
+    font-size: 0px;
+}
+
+/* **************************************************************************
+                               Hyperlink Behaviour
+   ************************************************************************** */
+
+a {
+  color: #212529;
+  transition: all 0.2s;
+}
+
+a:focus, a:hover {
+  color: #0085A1;
+  text-decoration: none;
+  /* This displays the title string when hovering over an image */
+  /*display: block;*/
+}
+
+/* **************************************************************************
+                                           Other
+   ************************************************************************** */
+
+blockquote {
+  font-style: italic;
+  color: #868e96;
+}
+
+::-moz-selection {
+  color: #fff;
+  background: #0085A1;
+  text-shadow: none;
+}
+
+::selection {
+  color: #fff;
+  background: #0085A1;
+  text-shadow: none;
+}
+
+img::-moz-selection {
+  color: #fff;
+  background: transparent;
+}
+
+img::selection {
+  color: #fff;
+  background: transparent;
+}
+
+img::-moz-selection {
+  color: #fff;
+  background: transparent;
+}
+
+
+/* **************************************************************************
+                             Navigation bar
+   ************************************************************************** */
+
+#mainNav {
+  position: absolute;
+  border-bottom: 1px solid #e9ecef;
+  background-color: white;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* Targets "EL Social Rides" */
+#mainNav .navbar-brand {
+  font-weight: 800;
+  font-size: 22px;
+  color: #343a40;
+}
+
+/* Menu button on narrow screens */
+#mainNav .navbar-toggler {
+  font-size: 16px;
+  font-weight: 800;
+  padding: 13px;
+  text-transform: uppercase;
+  color: #343a40;
+}
+
+/* Nav bar items */
+#mainNav .navbar-nav > li.nav-item > a {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Set vertical position of dropdown menu box */
+.dropdown-menu {
+  top: 34px;
+}
+
+/* Dropdown nav items */
+.dropdown-item {
+  font-size: 16px;
+  font-weight: 800;
+  color: #808b96;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* Highlight selected item in dropdown */
+.dropdown-item:focus, .dropdown-item:hover {
+    background-color: #ff9999; !important
+}
+
+/* Wide screen behaviour */
+@media only screen and (min-width: 992px) {
+  #mainNav {
+    border-bottom: 1px solid transparent;
+    background: transparent;
+  }
+  #mainNav .navbar-brand {
+    padding: 10px 20px;
+    color: #fff;
+  }
+  #mainNav .navbar-brand:focus, #mainNav .navbar-brand:hover {
+    color: #e74c3c;
+  }
+  #mainNav .navbar-nav > li.nav-item > a {
+    padding: 10px 20px;
+    color: #fff;
+  }
+  #mainNav .navbar-nav > li.nav-item > a:focus,
+  #mainNav .navbar-nav > li.nav-item > a:hover {
+    color:  #e74c3c;
+  }
+}
+
+/* Wide screen behaviour */
+@media only screen and (min-width: 992px) {
+  #mainNav {
+    transition: background-color 0.2s;
+    // Force Hardware Acceleration in WebKit
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+  }
+  #mainNav.is-fixed {
+    // when the user scrolls down, we hide the header right above the viewport
+    position: fixed;
+    top: -67px;
+    transition: transform 0.2s;
+    border-bottom: 1px solid white;
+    background-color: rgba(255, 255, 255, 0.9);
+  }
+  #mainNav.is-fixed .navbar-brand {
+    color: #212529;
+  }
+  #mainNav.is-fixed .navbar-brand:focus, #mainNav.is-fixed .navbar-brand:hover {
+    color: #0085A1;
+  }
+  #mainNav.is-fixed .navbar-nav > li.nav-item > a {
+    color: #212529;
+  }
+  #mainNav.is-fixed .navbar-nav > li.nav-item > a:focus, #mainNav.is-fixed .navbar-nav > li.nav-item > a:hover {
+    color: #0085A1;
+  }
+  #mainNav.is-visible {
+    // if the user changes the scrolling direction, we show the header
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+
+/* **************************************************************************
+                                   Page Header
+   ************************************************************************** */
+
+header.masthead {
+  margin-bottom: 50px;
+  background: no-repeat center center;
+  background-color: #868e96;
+  background-attachment: scroll;
+  position: relative;
+  background-size: cover;
+}
+
+header.masthead .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #212529;
+  opacity: 0.5;
+}
+
+header.masthead .page-heading,
+header.masthead .post-heading {
+  padding: 200px 0 150px;
+  color: white;
+}
+
+@media only screen and (min-width: 768px) {
+  header.masthead .page-heading,
+  header.masthead .post-heading {
+    padding: 200px 0;
+  }
+}
+
+/* Centre page headings etc */
+header.masthead .page-heading {
+  text-align: center;
+}
+
+/* Define subheading */
+header.masthead .page-heading .subheading {
+  font-size: 24px;
+  //font-weight: 300;
+  line-height: 1.1;
+  display: block;
+  margin: 10px 0 0;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* H1 scales with page width */
+h1 {
+  font-size: 50px;
+  font-weight: 800;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* H1 and subheading scale with page width */
+@media only screen and (min-width: 768px) {
+  header.masthead .page-heading h1 {
+    font-size: 80px;
+  }
+  header.masthead .page-heading .subheading {
+    font-size: 30px; !important
+    font-weight: 800; !important
+  }
+}
+
+
+/* **************************************************************************
+                                   Forms
+   ************************************************************************** */
+
+.form-control {
+    font-size: 1.2rem;
+    font-weight: 650;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.floating-label-form-group {
+  font-size: 14px;
+  position: relative;
+  margin-bottom: 0;
+  padding-bottom: 0.5em;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.floating-label-form-group input,
+.floating-label-form-group textarea {
+  font-size: 1.5em;
+  position: relative;
+  z-index: 1;
+  padding: 0;
+  resize: none;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none !important;
+  font-family: 'Lora', 'Times New Roman', serif;
+}
+
+.floating-label-form-group input::-webkit-input-placeholder,
+.floating-label-form-group textarea::-webkit-input-placeholder {
+  color: #868e96;
+  font-family: 'Lora', 'Times New Roman', serif;
+}
+
+.floating-label-form-group label {
+  font-size: 0.85em;
+  line-height: 1.764705882em;
+  position: relative;
+  z-index: 0;
+  top: 2em;
+  display: block;
+  margin: 0;
+  transition: top 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+
+.floating-label-form-group .help-block {
+  margin: 15px 0;
+}
+
+.floating-label-form-group-with-value label {
+  top: 0;
+  opacity: 1;
+}
+
+.floating-label-form-group-with-focus label {
+  color: #0085A1;
+}
+
+form .form-group:first-child .floating-label-form-group {
+  border-top: 1px solid #dee2e6;
+}
+
+
+/* **************************************************************************
+                                       Footer
+   ************************************************************************** */
+
+footer {
+  padding: 50px 0 65px;
+}
+
+footer .list-inline {
+  margin: 0;
+  padding: 0;
+}
+
+footer .copyright {
+  font-size: 14px;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+/* **************************************************************************
+                            Find File box in Forms
+   ************************************************************************** */
+
+input[type=file]::file-selector-button {
+  color: #fff;
+  background-color: #0085A1;
+  border-color: #0085A1;
+  border-style: solid;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 5px 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  // Seems tricky to get border radius to work //
+  border-radius: 10!important;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+}
+
+/* This gets the "No file chosen" text after the "CHOOSE FILE" button */
+input {
+    font-weight: 650;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+input[type=file]::file-selector-button:hover {
+  color: #fff;
+  background-color: #00657b !important;
+  border-color: #00657b !important;
+}
+
+
+/* **************************************************************************
+                          Format Bootstrap's buttons
+   ************************************************************************** */
+
+.btn {
+  font-size: 14px;
+  font-weight: 800;
+  padding: 15px 25px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 10;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.btn-sm {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 10;
+  font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.btn-primary {
+  background-color: #0085A1;
+  border-color: #0085A1;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  color: #fff;
+  background-color: #00657b !important;
+  border-color: #00657b !important;
+}
+
+.btn-lg {
+  font-size: 16px;
+  padding: 25px 35px;
+}
+
+/* Style WTForm error messages to stand out a bit */
+.help-block {
+    color: red;
+    font-weight: 700;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.control-label {
+    font-weight: 600;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* **************************************************************************
+                              JS Table Pagination
+   ************************************************************************** */
+
+.paginate_button {
+    color: #ffffff !important;
+    background-color: #0085A1;
+    border-color: #0085A1;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 10px 16px;
+    margin-right: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 5px;
+    overflow: hidden;
+    perspective: 1px;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.paginate_button:hover, .paginate_button:focus, .paginate_button:active {
+  color: #ffffff !important;
+  background-color: #00657b !important;
+  border-color: #00657b !important;
+}
+
+.previous > a{
+    color: #ffffff !important;
+}
+
+.next > a{
+    color: #ffffff !important;
+}
+
+.paginate_button > a{
+    color: #ffffff !important;
+}
+
+/* **************************************************************************
+                                 Style JS Tables
+   ************************************************************************** */
+
+/* Table Header uses class='sorting' */
+.sorting {
+    font-family: 'Roboto', sans-serif;
+}
+tr > td {
+    font-family: 'Roboto', sans-serif;
+}
+
+.dataTables_info, .dataTables_length {
+    font-family: 'Roboto', sans-serif;
+}
+
+
+/* **************************************************************************
+                                 JS UI Pop up
+   ************************************************************************** */
+
+/* Header bar */
+.ui-widget-header {
+    /* Red background for warning */
+    background: #ff4d4d;
+
+    /* White text */
+    color: #FFFFFF;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    padding: 5px 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+
+    /* Blue border */
+    border: 2px solid #ff4d4d;
+    border-bottom: 0px;
+}
+
+/* Main content */
+.ui-widget-content {
+    /* light red */
+    background:  #ffe6e6;
+    border: 2px solid #ff4d4d;
+}
+
+/* Main area */
+.ui-dialog-content {
+    border-bottom: 0px;
+}
+
+/* Button area */
+.ui-dialog-buttonpane {
+    padding: 10px 15px;
+    border-top: 0px;
+}
+
+/* Get rid of close button in the title bar */
+.ui-dialog-titlebar-close {
+    visibility: hidden;
+}
     </style>
 
 </head>
