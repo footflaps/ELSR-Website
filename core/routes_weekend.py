@@ -28,7 +28,7 @@ from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE,
                              MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES, start_time_string
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
-from core.subs_photos import get_date_from_url
+from core.subs_dates import get_date_from_url
 
 
 # -------------------------------------------------------------------------------------------------------------- #
