@@ -54,6 +54,7 @@ def shrink_image(filename):
 
         # Open and shrink teh image
         img = Image.open(filename)
+        img = img.convert("RGB")  # convert rgba to rgb
         img = img.resize((int(img.size[0] * scaler), int(img.size[1] * scaler)))
 
         # Save as same file
