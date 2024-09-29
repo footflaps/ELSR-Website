@@ -1,10 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang = "en">
+
 <head>
-    <meta charset="UTF-8">
-    <title>The site is offline</title>
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                          Title                                                 -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<title>ELSR</title>
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                      Site meta data                                            -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<meta charset="utf-8">
+	<meta name="description" content="Espresso Library Social Rides Website">
+	<meta name="author" content="Ben Freeman">
+	<meta name="keywords" content="cycling, social rides, cafe rides, cambridge, road riding, cycling club,
+	                               cycle routes, cambridge cycle club">
+	<meta lang = "en">
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                               Configure Bootstrap for Mobile                                   -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<!-- To ensure proper rendering and touch zooming -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                      Favicon Icons                                             -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<link rel="favicon.ico" href="{{ url_for('static', filename='../static/img/favicon_d.ico') }}"
+	      media='(prefers-color-scheme: dark)'>
+	<link rel="favicon.ico" href="{{ url_for('static', filename='../static/img/favicon_l.ico') }}"
+	      media='(prefers-color-scheme: light)'>
+
+	<link rel="icon" href="{{ url_for('static', filename='../static/img/favicon_d.ico') }}"
+	      media='(prefers-color-scheme: dark)'>
+	<link rel="icon" href="{{ url_for('static', filename='../static/img/favicon_l.ico') }}"
+	      media='(prefers-color-scheme: light)'>
+
+	<!-- Apple touch icon -->
+	<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon-120x120-precomposed.png') }}" />
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                              CSS                                               -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<!-- Bootstrap v4.5.3 CSS -->
+	<link href="{{ url_for('static', filename='vendor/bootstrap-4.5.3-dist/css/bootstrap.min.css') }}" rel="stylesheet">
+
+	<!-- Clean Blog v5.0.9 Custom styles (load last) -->
+	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                        Fonts and Icons                                         -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<!-- Fontawesome Fonts (bike logo) -->
+	<script src="https://kit.fontawesome.com/8d975d0298.js"
+	        crossorigin="anonymous"></script>
+
+	<!-- Custom fonts from Google -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+	<!-- Lora -->
+	<link href='https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet'
+	      type='text/css'>
+
+	<!-- Open Sans -->
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+	      rel='stylesheet' type='text/css'>
+
+	<!-- Roboto -->
+	<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                       Google Analytics                                         -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-N0RJH2LSDC"></script>
+	<script>
+		  window.dataLayer = window.dataLayer || [];
+		  function gtag(){dataLayer.push(arguments);}
+		  gtag('js', new Date());
+		  gtag('config', 'G-N0RJH2LSDC');
+	</script>
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                        Java scripts                                            -->
+	<!---------------------------------------------------------------------------------------------------->
+	<!-- Integrity hashes generated by https://www.srihash.org/ -->
+
+	<!-- jQuery -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+	        integrity="sha384-1H217gwSVyLSIfaLxHbE7dRb3v4mYCKbpQvzx0cegeju1MVsGrX5xXxAvs/HgeFs"
+	        crossorigin="anonymous"></script>
+
+	<!-- Bootstrap v4.5.0 (according to header) -->
+	<script src="{{ url_for('static', filename='vendor/bootstrap-4.5.3-dist/js/bootstrap.bundle.min.js') }}"></script>
+
+	<!-- Custom scripts-->
+	<script src="{{ url_for('static', filename='js/clean-blog.min.js') }}"></script>
+
+
 </head>
+
+
 <body>
 
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                       Navigation bar                                           -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
+
+		<div class="container">
+
+
+			<!---------------------------------------------------------------------------------------------------->
+			<!--                                   Website Title Details                                        -->
+			<!---------------------------------------------------------------------------------------------------->
+
+			<a class="navbar-brand float-left" href="{{ url_for('home') }}">
+				<i class="fa-solid fa-person-biking fa-xl"></i>
+				&nbsp; EL Social Rides
+			</a>
+
+
+		</div>
+	</nav>
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                        Page contents                                           -->
+	<!---------------------------------------------------------------------------------------------------->
+
+
+
+	<!---------------------------------------------------------------------------------------------------->
+	<!--                                          Footer                                                -->
+	<!---------------------------------------------------------------------------------------------------->
+
+	<footer>
+		<div class="container">
+			<div class="row">
+				<div class="col-lg-8 col-md-10 mx-auto">
+					<ul class="list-inline text-center">
+
+						<!-- Instagram icon -->
+						<li class="list-inline-item">
+							<a href="https://www.instagram.com/elsr_cambridge_uk/">
+								<div class="hidden">ELSR on Instagram</div>
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-instagram fa-stack-1x fa-inverse"></i>
+                                </span>
+							</a>
+						</li>
+
+						<!-- Facebook icon -->
+						<li class="list-inline-item">
+							<a href="https://www.facebook.com/groups/326130959238218">
+								<div class="hidden">ELSR on Facebook</div>
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+                                    <i class="fab fa-facebook-f fa-stack-1x fa-inverse"></i>
+                                </span>
+							</a>
+						</li>
+
+						<!-- Github icon -->
+						<li class="list-inline-item">
+							<a href="https://github.com/footflaps/ELSR-Website">
+								<div class="hidden">ELSR on Github</div>
+                                <span class="fa-stack fa-lg">
+                                    <i class="fas fa-circle fa-stack-2x"></i>
+	                                <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+							</a>
+						</li>
+
+					</ul>
+
+					<!-- Copyright -->
+					<p class="copyright text-muted">Copyright &copy; Ben Freeman {{year}}</p>
+
+				</div>
+			</div>
+		</div>
+	</footer>
+
+
+
 </body>
+
 </html>
