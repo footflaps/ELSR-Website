@@ -31,32 +31,14 @@
 
 
 	<!---------------------------------------------------------------------------------------------------->
-	<!--                                      Favicon Icons                                             -->
-	<!---------------------------------------------------------------------------------------------------->
-
-	<link rel="favicon.ico" href="{{ url_for('static', filename='../static/img/favicon_d.ico') }}"
-	      media='(prefers-color-scheme: dark)'>
-	<link rel="favicon.ico" href="{{ url_for('static', filename='../static/img/favicon_l.ico') }}"
-	      media='(prefers-color-scheme: light)'>
-
-	<link rel="icon" href="{{ url_for('static', filename='../static/img/favicon_d.ico') }}"
-	      media='(prefers-color-scheme: dark)'>
-	<link rel="icon" href="{{ url_for('static', filename='../static/img/favicon_l.ico') }}"
-	      media='(prefers-color-scheme: light)'>
-
-	<!-- Apple touch icon -->
-	<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon-120x120-precomposed.png') }}" />
-
-
-	<!---------------------------------------------------------------------------------------------------->
 	<!--                                              CSS                                               -->
 	<!---------------------------------------------------------------------------------------------------->
 
 	<!-- Bootstrap v4.5.3 CSS -->
-	<link href="{{ url_for('static', filename='vendor/bootstrap-4.5.3-dist/css/bootstrap.min.css') }}" rel="stylesheet">
+	<link href="/home/ben_freeman_eu/elsr_website/ELSR-Website/core/static/vendor/bootstrap-4.5.3-dist/css/bootstrap.min.css" rel="stylesheet">
 
 	<!-- Clean Blog v5.0.9 Custom styles (load last) -->
-	<link href="{{ url_for('static', filename='css/clean-blog.css') }}" rel="stylesheet">
+	<link href="/home/ben_freeman_eu/elsr_website/ELSR-Website/core/static/clean-blog.css" rel="stylesheet">
 
 
 	<!---------------------------------------------------------------------------------------------------->
@@ -107,10 +89,10 @@
 	        crossorigin="anonymous"></script>
 
 	<!-- Bootstrap v4.5.0 (according to header) -->
-	<script src="{{ url_for('static', filename='vendor/bootstrap-4.5.3-dist/js/bootstrap.bundle.min.js') }}"></script>
+	<script src="/home/ben_freeman_eu/elsr_website/ELSR-Website/core/static/vendor/bootstrap-4.5.3-dist/js/bootstrap.bundle.min.js"></script>
 
 	<!-- Custom scripts-->
-	<script src="{{ url_for('static', filename='js/clean-blog.min.js') }}"></script>
+	<script src="/home/ben_freeman_eu/elsr_website/ELSR-Website/core/static/js/clean-blog.min.js"></script>
 
 
 </head>
@@ -131,7 +113,7 @@
 			<!--                                   Website Title Details                                        -->
 			<!---------------------------------------------------------------------------------------------------->
 
-			<a class="navbar-brand float-left" href="{{ url_for('home') }}">
+			<a class="navbar-brand float-left">
 				<i class="fa-solid fa-person-biking fa-xl"></i>
 				&nbsp; EL Social Rides
 			</a>
