@@ -5,6 +5,11 @@
 /core/config/
 /core/static/img/blog_photos/
 /core/static/img/classifieds_photos/
-/run.env
 
+# Files we don't want public
+/run.env
 /GCP_Instructions.md
+/elsr_website.nginx
+/elsr_website.gunicorn
+
+
