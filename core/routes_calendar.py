@@ -37,10 +37,10 @@ CHAINGANG_END_DATE = datetime(2024, 9, 19, 0, 00)
 
 # Tim's Turbo Sessions (TTS) details
 TTS_DAY = "Tuesday"
-# From October 2023
-TTS_START_DATE = datetime(2023, 10, 10, 0, 00)
-# To late march 2024
-TTS_END_DATE = datetime(2024, 3, 19, 0, 00)
+# From November 2024
+TTS_START_DATE = datetime(2024, 11, 12, 0, 00)
+# To late March 2025
+TTS_END_DATE = datetime(2025, 3, 20, 0, 00)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
