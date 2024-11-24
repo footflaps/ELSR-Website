@@ -18,8 +18,8 @@ from core import app, db
 # -------------------------------------------------------------------------------------------------------------- #
 
 class CafeComment(db.Model):
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'cafe_comments'
+    __tablename__ = 'cafe_comments'
+    __table_args__ = {'schema': 'elsr'}
 
     id = db.Column(db.Integer, primary_key=True)
 

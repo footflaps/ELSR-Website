@@ -34,9 +34,8 @@ TYPES = [TYPE_ROAD,
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Gpx(db.Model):
-
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'gpx'
+    __tablename__ = 'gpx'
+    __table_args__ = {'schema': 'elsr'}
 
     # Primary reference
     id = db.Column(db.Integer, primary_key=True)

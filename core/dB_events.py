@@ -29,8 +29,8 @@ ALL_DAYS = 365 * 10
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Event(db.Model):
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'events'
+    __tablename__ = 'events'
+    __table_args__ = {'schema': 'elsr'}
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50))

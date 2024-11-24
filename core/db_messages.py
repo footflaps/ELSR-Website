@@ -40,8 +40,8 @@ READONLY_MESSAGE = "Sorry, but the Admins have removed your write permissions to
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Message(db.Model):
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'messages'
+    __tablename__ = 'messages'
+    __table_args__ = {'schema': 'elsr'}
 
     # Unique reference in dB
     id = db.Column(db.Integer, primary_key=True)

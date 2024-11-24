@@ -43,8 +43,8 @@ SIGN_UP_CHOICES = [SIGN_UP_NO, SIGN_UP_YES]
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Socials(db.Model):
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'socials'
+    __tablename__ = 'socials'
+    __table_args__ = {'schema': 'elsr'}
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -58,10 +58,10 @@ class Socials(db.Model):
     date = db.Column(db.String(8))
 
     # Destination cafe eg 'Mill End Plants'
-    destination = db.Column(db.String(50))
+    destination = db.Column(db.String(100))
 
     # Details
-    details = db.Column(db.String(500))
+    details = db.Column(db.String(1000))
 
     # Start time
     start_time = db.Column(db.String(20))

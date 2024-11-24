@@ -12,7 +12,7 @@ from core import app,  delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_blog import Blog, BLOG_PHOTO_FOLDER
+from core.db_blog import Blog, BLOG_IMAGE_FOLDER
 from core.dB_events import Event
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 
@@ -38,7 +38,7 @@ def new_blog_photo_filename(blog):
         # First photo for this blog post
         return f"blog_{blog.id}.jpg"
 
-    elif not os.path.exists(os.path.join(BLOG_PHOTO_FOLDER, os.path.basename(blog.image_filename))):
+    elif not os.path.exists(os.path.join(BLOG_IMAGE_FOLDER, os.path.basename(blog.image_filename))):
         # The current referenced photo isn't there, so just reset
         return f"blog_{blog.id}.jpg"
 
@@ -68,7 +68,7 @@ def update_blog_photo(form, blog):
 
     if allowed_image_files(form.photo_filename.data.filename):
         # Create a new filename for the image
-        filename = os.path.join(BLOG_PHOTO_FOLDER, new_blog_photo_filename(blog))
+        filename = os.path.join(BLOG_IMAGE_FOLDER, new_blog_photo_filename(blog))
         app.logger.debug(f"update_blog_photo(): New filename for photo = '{filename}'")
 
         # Make sure it's not there already
@@ -90,7 +90,7 @@ def update_blog_photo(form, blog):
                 flash(f"Sorry, failed to upload the file '{filename}!")
 
             # Shrink image if too large
-            shrink_image(os.path.join(BLOG_PHOTO_FOLDER, filename))
+            shrink_image(os.path.join(BLOG_IMAGE_FOLDER, filename))
 
         else:
             # Failed to delete existing file
@@ -113,11 +113,11 @@ def delete_blog_photos(blog: Blog()):
         return
 
     # Delete the base name
-    filename = os.path.join(BLOG_PHOTO_FOLDER, f"blog_{blog.id}.jpg")
+    filename = os.path.join(BLOG_IMAGE_FOLDER, f"blog_{blog.id}.jpg")
     delete_file_if_exists(filename)
 
     # Now cycle through any updates
     for index in range(1, 10):
-        filename = os.path.join(BLOG_PHOTO_FOLDER, f"blog_{blog.id}_{index}.jpg")
+        filename = os.path.join(BLOG_IMAGE_FOLDER, f"blog_{blog.id}_{index}.jpg")
         delete_file_if_exists(filename)
 

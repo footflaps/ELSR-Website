@@ -31,8 +31,8 @@ POLL_CLOSED = "Closed"
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Polls(db.Model):
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'polls'
+    __tablename__ = 'polls'
+    __table_args__ = {'schema': 'elsr'}
 
     id = db.Column(db.Integer, primary_key=True)
 

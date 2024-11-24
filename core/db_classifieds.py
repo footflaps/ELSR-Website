@@ -60,8 +60,8 @@ DEL_IMAGE = ["Keep",
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Classified(db.Model):
-    # We're using multiple dbs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'classifieds'
+    __tablename__ = 'classifieds'
+    __table_args__ = {'schema': 'elsr'}
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Define the table
@@ -77,7 +77,7 @@ class Classified(db.Model):
     date = db.Column(db.String(20))
 
     # Title
-    title = db.Column(db.String(50))
+    title = db.Column(db.String(100))
 
     # Type (Buy or Sell)
     buy_sell = db.Column(db.String(10))

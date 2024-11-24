@@ -19,7 +19,7 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required, rw_required
-from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_PHOTO_FOLDER, NO_CAFE, \
+from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_IMAGE_FOLDER, NO_CAFE, \
                          NO_GPX, DRUNK_OPTION, CCC_OPTION, EVENT_OPTION
 from core.dB_events import Event
 from core.dB_cafes import Cafe
@@ -150,15 +150,15 @@ def blog():
         else:
             blog.private = False
 
-        # 4. Filename for image
+        # Get image filename and pass to Jinja (if present)
         blog.filename = None
         if blog.image_filename:
             filename = f"/img/blog_photos/{blog.image_filename}"
             # Check file(s) actually exist
-            if os.path.exists(os.path.join(BLOG_PHOTO_FOLDER, os.path.basename(filename))):
+            if os.path.exists(os.path.join(BLOG_IMAGE_FOLDER, os.path.basename(filename))):
                 blog.filename = filename
 
-    return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=NO_CAFE, no_gpx=NO_GPX, page=page,
+    return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=0, no_gpx=0, page=page,
                            num_pages=num_pages, page_size=PAGE_SIZE, event_option=EVENT_OPTION, live_site=live_site())
 
 
@@ -188,6 +188,8 @@ def add_blog():
             return abort(404)
     else:
         blog = None
+
+    print("blog", blog)
 
     # ----------------------------------------------------------- #
     # Work out what we're doing (Add / Edit)

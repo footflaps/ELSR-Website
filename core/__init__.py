@@ -5,6 +5,8 @@ from flask_ckeditor import CKEditor
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
 from itsdangerous.url_safe import URLSafeTimedSerializer
+from sqlalchemy import event
+from sqlalchemy.pool import Pool
 import os
 import sys
 import logging
@@ -12,7 +14,7 @@ from datetime import date
 from time import sleep
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-
+import psycopg2
 
 # We have our own hacked Gravatar module
 from core.gravatar_hack import Gravatar
@@ -24,6 +26,15 @@ from core.gravatar_hack import Gravatar
 
 def live_site():
     return os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py")
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import env vars if on live web server (test site uses Pycharm Env Vars)
+# -------------------------------------------------------------------------------------------------------------- #
+
+if live_site():
+    sys.path.insert(1, '/home/ben_freeman_eu/elsr_website/ELSR-Website/')
+    import env_vars
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -53,20 +64,11 @@ GLOBAL_FLASH = None
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import env vars if on live web server (test site uses Pycharm Env Vars)
-# -------------------------------------------------------------------------------------------------------------- #
-
-if live_site():
-    sys.path.insert(1, '/home/ben_freeman_eu/elsr_website/ELSR-Website/')
-    import env_vars
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # File upload constants
 # -------------------------------------------------------------------------------------------------------------- #
 
 # Flask only seems to allow one global upload folder, but we have two different end folders for GPX files and
-# cafe images. So, we upload to the same place and then move the file afterwards to it's final home.
+# cafe images. So, we upload to the same place and then move the file afterward to its final home.
 GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 
 
@@ -74,9 +76,11 @@ GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 # Initialise Sentry (only for live site)
 # -------------------------------------------------------------------------------------------------------------- #
 
-if live_site():
+dsn = os.environ.get('ELSR_SENTRY_DSN', None)
+
+if dsn:
     sentry_sdk.init(
-        dsn=os.environ['ELSR_SENTRY_DSN'],
+        dsn=dsn,
         integrations=[
             FlaskIntegration(),
         ],
@@ -142,17 +146,46 @@ app.logger.debug('**************************************************************
 # Connect to the different SQLite databases
 # -------------------------------------------------------------------------------------------------------------- #
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
-app.config['SQLALCHEMY_BINDS'] = {'users': 'sqlite:///users.db',
-                                  'cafe_comments': 'sqlite:///cafe_comments.db',
-                                  'gpx': 'sqlite:///gpx.db',
-                                  'messages': 'sqlite:///messages.db',
-                                  'events': 'sqlite:///events.db',
-                                  'calendar': 'sqlite:///calendar.db',
-                                  'socials': 'sqlite:///socials.db',
-                                  'blog': 'sqlite:///blog.db',
-                                  'classifieds': 'sqlite:///classifieds.db',
-                                  'polls': 'sqlite:///polls.db'}
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
+# app.config['SQLALCHEMY_BINDS'] = {'users': 'sqlite:///users.db',
+#                                   'cafe_comments': 'sqlite:///cafe_comments.db',
+#                                   'gpx': 'sqlite:///gpx.db',
+#                                   'messages': 'sqlite:///messages.db',
+#                                   'events': 'sqlite:///events.db',
+#                                   'calendar': 'sqlite:///calendar.db',
+#                                   'socials': 'sqlite:///socials.db',
+#                                   'blog': 'sqlite:///blog.db',
+#                                   'classifieds': 'sqlite:///classifieds.db',
+#                                   'polls': 'sqlite:///polls.db'}
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Connect to the single SQLite database
+# -------------------------------------------------------------------------------------------------------------- #
+
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///elsr_db.db'
+# db = SQLAlchemy(app)
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Connect to the PostgreSQL database
+# -------------------------------------------------------------------------------------------------------------- #
+
+db_host = os.environ.get('ELSR_DB_HOST', 'unset')
+db_user = os.environ.get('ELSR_DB_DB_USER', 'unset')
+db_pass = os.environ.get('ELSR_DB_DB_PASS', 'unset')
+db_name = os.environ.get('ELSR_DB_DB_NAME', 'unset')
+db_port = int(os.environ.get('ELSR_DB_PORT', '5432'))
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql+psycopg2://{db_user}:{db_pass}@{db_host}:{db_port}/{db_name}'.format(
+    db_user=db_user, db_pass=db_pass, db_host=db_host, db_port=db_port, db_name=db_name)
+
+# Custom engine options
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True,
+    'pool_recycle':  3600,
+    'pool_size':     10,
+    'max_overflow':  5,
+}
 
 db = SQLAlchemy(app)
 

@@ -32,6 +32,9 @@ CLOSED_CAFE_COLOUR = "#922b21"
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Cafe(db.Model):
+    __tablename__ = 'cafes'
+    __table_args__ = {'schema': 'elsr'}
+
     # Don't need a bind key as this is the default database
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)

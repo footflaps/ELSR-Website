@@ -32,8 +32,8 @@ PRIVATE_NEWS = "PRIVATE"
 PUBLIC_NEWS = "PUBLIC"
 
 # Don't change these as they are in the db
-NO_CAFE = "NO CAFE"
-NO_GPX = "NO GPX"
+NO_CAFE = 0
+NO_GPX = 0
 
 # Don't change these as they are in the db
 DRUNK_OPTION = "Drunken Ramblings"
@@ -47,7 +47,7 @@ STICKY = "Sticky"
 NON_STICKY = "Not sticky"
 
 # Where we store blog photos
-BLOG_PHOTO_FOLDER = os.environ['ELSR_BLOG_PHOTO_FOLDER']
+BLOG_IMAGE_FOLDER = os.environ.get('ELSR_BLOG_PHOTO_FOLDER', '/img/blog_photos/')
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -59,8 +59,8 @@ BLOG_PHOTO_FOLDER = os.environ['ELSR_BLOG_PHOTO_FOLDER']
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Blog(db.Model):
-    # We're using multiple dbs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'blog'
+    __tablename__ = 'blog'
+    __table_args__ = {'schema': 'elsr'}
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Define the table

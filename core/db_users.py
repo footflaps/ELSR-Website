@@ -136,9 +136,8 @@ class User(UserMixin, db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
     # Define the SQL Table
     # ---------------------------------------------------------------------------------------------------------- #
-
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'users'
+    __tablename__ = 'users'
+    __table_args__ = {'schema': 'elsr'}
 
     # Unique references
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

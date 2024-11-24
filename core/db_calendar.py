@@ -57,8 +57,8 @@ DEFAULT_START_TIMES = {"Monday": {'time': '08:00', 'location': MEETING_BEAN, 'ne
 # -------------------------------------------------------------------------------------------------------------- #
 
 class Calendar(db.Model):
-    # We're using multiple dBs with one instance of SQLAlchemy, so have to bind to the right one.
-    __bind_key__ = 'calendar'
+    __tablename__ = 'calendar'
+    __table_args__ = {'schema': 'elsr'}
 
     id = db.Column(db.Integer, primary_key=True)
 
@@ -75,7 +75,7 @@ class Calendar(db.Model):
     leader = db.Column(db.String(25))
 
     # Destination cafe eg 'Mill End Plants'
-    destination = db.Column(db.String(50))
+    destination = db.Column(db.String(200))
 
     # GPX ID, the route will exist in the gpx dB
     gpx_id = db.Column(db.Integer)
