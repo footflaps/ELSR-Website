@@ -425,7 +425,7 @@ def add_ride():
     # ----------------------------------------------------------- #
     # Did we get passed a date or a ride_id? (Optional)
     # ----------------------------------------------------------- #
-    start_date_str = get_date_from_url()
+    start_date_str = get_date_from_url(return_none_if_empty=True)
     ride_id = request.args.get('ride_id', None)
 
     # ----------------------------------------------------------- #
