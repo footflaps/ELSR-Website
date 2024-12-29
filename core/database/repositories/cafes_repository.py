@@ -34,7 +34,7 @@ class CafeRepository(CafeModel):
     # Create
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def add_cafe(new_cafe: CafeModel) -> CafeModel | None:
+    def add_cafe(new_cafe: CafeModel) -> Union[CafeModel, None]:
         # Update some details
         new_cafe.added_date = date.today().strftime("%d%m%Y")
         new_cafe.active = True
