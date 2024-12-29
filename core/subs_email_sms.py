@@ -26,7 +26,7 @@ from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, g
 from core.db_messages import Message, ADMIN_EMAIL
 from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
 from core.db_social import Socials
-from core.db_blog import Blog, PUBLIC_NEWS
+from core.database.repositories.blog_repository import BlogRepository as Blog, Privacy
 from core.dB_gpx import Gpx
 
 
@@ -173,7 +173,7 @@ def send_blog_notification_emails(blog: Blog()):
     for user in User().all_users():
         if user.notification_choice(BLOG_NOTIFICATION):
             # Users without write permissions can't see private blog posts
-            if blog.privacy == PUBLIC_NEWS \
+            if blog.private == Privacy.PUBLIC \
                     or user.readwrite():
                 # ----------------------------------------------------------- #
                 # Send email

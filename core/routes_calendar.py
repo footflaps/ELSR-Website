@@ -16,7 +16,7 @@ from core import app, current_year, live_site
 from core.db_users import update_last_seen, logout_barred_user
 from core.db_calendar import Calendar, GROUP_CHOICES
 from core.db_social import Socials
-from core.db_blog import Blog
+from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.dB_gpx import Gpx
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads

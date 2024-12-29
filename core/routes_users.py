@@ -37,7 +37,7 @@ from core.dB_events import Event
 from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.db_calendar import Calendar
 from core.db_social import Socials
-from core.db_blog import Blog
+from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.db_classifieds import Classified
 
 

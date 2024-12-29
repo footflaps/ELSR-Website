@@ -12,7 +12,7 @@ from core import app,  delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_blog import Blog, BLOG_IMAGE_FOLDER
+from core.database.repositories.blog_repository import BlogRepository as Blog, BLOG_IMAGE_FOLDER
 from core.dB_events import Event
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 

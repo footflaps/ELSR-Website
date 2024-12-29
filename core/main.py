@@ -43,7 +43,7 @@ from core.routes_messages import mark_read
 from core.routes_events import delete_event
 from core.routes_weekend import weekend
 from core.routes_calendar import calendar
-from core.routes_blog import blog
+from core.routes_blog import display_blog
 from core.routes_classifieds import classifieds
 from core.routes_gravel import gravel
 from core.routes_user_register import register
@@ -145,7 +145,7 @@ def welcome():
 
     if current_user.is_authenticated:
         # Logged in users see the blog
-        return redirect(url_for('blog'))
+        return redirect(url_for('display_blog'))
     else:
         # New users see home
         return redirect(url_for('home'))

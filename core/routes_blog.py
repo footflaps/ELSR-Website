@@ -19,8 +19,9 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required, rw_required
-from core.db_blog import Blog, create_blogs_form, STICKY, NON_STICKY, PRIVATE_NEWS, BLOG_IMAGE_FOLDER, NO_CAFE, \
-                         NO_GPX, DRUNK_OPTION, CCC_OPTION, EVENT_OPTION
+from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky, BLOG_IMAGE_FOLDER,
+                                                        NO_CAFE, NO_GPX, Category)
+from core.forms.blog_forms import create_blogs_form
 from core.dB_events import Event
 from core.dB_cafes import Cafe
 from core.dB_gpx import Gpx
@@ -52,7 +53,7 @@ FIRST_PAGE = 0
 
 @app.route("/blog", methods=['GET'])
 @update_last_seen
-def blog():
+def display_blog():
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
@@ -87,7 +88,7 @@ def blog():
     # Permissions (only apply if trying to see a Private blog post)
     # ----------------------------------------------------------- #
     if blog:
-        if blog.privacy == PRIVATE_NEWS:
+        if blog.private == Privacy.PRIVATE:
             # Need to check user is trusted
             if not current_user.is_authenticated:
                 # Not logged in
@@ -95,6 +96,7 @@ def blog():
                 Event().log_event("Blog Fail", f"Refusing permission for unregistered user.")
                 flash("You must be logged in to see private blog posts!")
                 return redirect(url_for("not_logged_in"))
+
             elif not current_user.readwrite():
                 # Failed authentication
                 app.logger.debug(f"blog(): Refusing permission for '{current_user.email}'.")
@@ -118,6 +120,7 @@ def blog():
     else:
         # No page specified so just do front page
         blogs = Blog().all_sticky()
+        print(f"Found {len(blogs)} sticky blogs...")
         # Then we add a number of non sticky ones
         # NB This means the first page will be slightly longer than normal as we add stickies
         # but, otherwise pagination would be a PITA as we'd have to offset every page by the number
@@ -138,18 +141,6 @@ def blog():
         if blog.date_unix:
             blog.date = datetime.utcfromtimestamp(blog.date_unix).strftime('%d %b %Y')
 
-        # 2. Boolean for sticky
-        if blog.sticky == "True":
-            blog.sticky = True
-        else:
-            blog.sticky = False
-
-        # 3. Boolean for Private
-        if blog.privacy == PRIVATE_NEWS:
-            blog.private = True
-        else:
-            blog.private = False
-
         # Get image filename and pass to Jinja (if present)
         blog.filename = None
         if blog.image_filename:
@@ -159,7 +150,7 @@ def blog():
                 blog.filename = filename
 
     return render_template("blog.html", year=current_year, blogs=blogs, no_cafe=0, no_gpx=0, page=page,
-                           num_pages=num_pages, page_size=PAGE_SIZE, event_option=EVENT_OPTION, live_site=live_site())
+                           num_pages=num_pages, page_size=PAGE_SIZE, event_option=Category.EVENT, live_site=live_site())
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -194,8 +185,7 @@ def add_blog():
     # ----------------------------------------------------------- #
     # Work out what we're doing (Add / Edit)
     # ----------------------------------------------------------- #
-    if blog_id \
-            and request.method == 'GET':
+    if blog_id and request.method == 'GET':
 
         # ----------------------------------------------------------- #
         # Edit event, so pre-fill form from dB
@@ -206,7 +196,6 @@ def add_blog():
         # Now fill the form in....
         form.date.data = datetime.fromtimestamp(blog.date_unix)
         form.title.data = blog.title
-        form.privacy.data = blog.privacy
         form.category.data = blog.category
         if blog.cafe_id == NO_CAFE:
             form.cafe.data = NO_CAFE
@@ -218,14 +207,18 @@ def add_blog():
             form.gpx.data = Gpx().one_gpx(blog.gpx_index).combo_string()
         form.details.data = blog.details
 
+        if blog.private:
+            form.privacy.data = Privacy.PRIVATE.value
+        else:
+            form.privacy.data = Privacy.PUBLIC.value
+
         # Admin things
         if current_user.admin():
-            if blog.sticky == "True":
-                form.sticky.data = STICKY
-            else:
-                form.sticky.data = NON_STICKY
             form.owner.data = User().find_user_from_email(blog.email).combo_str()
-
+            if blog.sticky:
+                form.sticky.data = Sticky.TRUE.value
+            else:
+                form.sticky.data = Sticky.FALSE.value
     else:
         # ----------------------------------------------------------- #
         # Add event, so start with fresh form
@@ -247,16 +240,16 @@ def add_blog():
 
         # Detect cancel button
         if form.cancel.data:
-            return redirect(url_for('blog'))
+            return redirect(url_for('display_blog'))
 
         # ----------------------------------------------------------- #
         # Validate contents
         # ----------------------------------------------------------- #
-        # 1. Killjoy!
-        if form.category.data == DRUNK_OPTION:
+        # Killjoy!
+        if form.category.data == Category.DRUNK_OPTION:
             flash("Best not post stuff when drunk!")
             return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
-        elif form.category.data == CCC_OPTION:
+        elif form.category.data == Category.CCC_OPTION:
             flash("Yep, we all know they're miserable bastards, but no need to shout about it!")
             return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
 
@@ -286,18 +279,18 @@ def add_blog():
 
         # 2. The rest
         new_blog.title = form.title.data
-        new_blog.privacy = form.privacy.data
         new_blog.category = form.category.data
         new_blog.cafe_id = Cafe().cafe_id_from_combo_string(form.cafe.data)
         new_blog.gpx_index = Gpx().gpx_id_from_combo_string(form.gpx.data)
         new_blog.details = form.details.data
+        new_blog.private = form.privacy.data == Privacy.PRIVATE.value
 
         # 3. Admin fields
         if current_user.admin():
             new_blog.email = User().user_from_combo_string(form.owner.data).email
-            new_blog.sticky = str(form.sticky.data.lower() == STICKY.lower())
+            new_blog.sticky = form.sticky.data == Sticky.TRUE.value
         else:
-            new_blog.sticky = "False"
+            new_blog.sticky = False
             new_blog.email = current_user.email
 
         # 4. Image filename
@@ -340,7 +333,7 @@ def add_blog():
                 Thread(target=alert_admin_via_sms, args=(user, "New blog post alert, please check it's OK!",)).start()
 
         # Point them at their blog entry
-        return redirect(url_for('blog', blog_id=new_blog.id))
+        return redirect(url_for('display_blog', blog_id=new_blog.id))
 
     # ----------------------------------------------------------- #
     # Handle POST (but form validation failed)
@@ -349,7 +342,7 @@ def add_blog():
 
         # Detect cancel button
         if form.cancel.data:
-            return redirect(url_for('blog'))
+            return redirect(url_for('display_blog'))
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
@@ -443,7 +436,7 @@ def delete_blog():
         app.logger.debug(f"delete_blog(): Reason was blank, blog_id = '{blog_id}'.")
         Event().log_event("Delete Blog Fail", f"Reason was blank, blog_id = '{blog_id}'.")
         flash("You must give a reason to delete a blog post!")
-        return redirect(url_for('blog', blog_id=blog_id))
+        return redirect(url_for('display_blog', blog_id=blog_id))
 
     # ----------------------------------------------------------- #
     #  Validate password
@@ -457,7 +450,7 @@ def delete_blog():
         Event().log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to blogs page
-        return redirect(url_for('blog'))
+        return redirect(url_for('display_blog'))
 
     # ----------------------------------------------------------- #
     # Delete blog photos first
@@ -496,7 +489,7 @@ def delete_blog():
         Event().log_event("Delete Blog Fail", f"Failed to delete Blog, blog_id = '{blog_id}'.")
         flash("Sorry, something went wrong.")
 
-    return redirect(url_for('blog'))
+    return redirect(url_for('display_blog'))
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -25,7 +25,7 @@ from core.db_calendar import Calendar
 from core.db_social import Socials, SOCIAL_DB_PRIVATE
 from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notification_email, email_ride_alert_summary
 from core.subs_google_maps import maps_enabled, get_current_map_count, map_limit_by_day, graph_map_counts
-from core.db_blog import Blog
+from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.db_classifieds import Classified
 from core.dB_cafe_comments import CafeComment
 
