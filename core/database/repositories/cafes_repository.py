@@ -1,5 +1,6 @@
 from datetime import date
 import json
+from typing import Union
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -181,14 +182,14 @@ class CafeRepository(CafeModel):
 
     # Return a single cafe
     @staticmethod
-    def one_cafe(cafe_id: int) -> CafeModel | None:
+    def one_cafe(cafe_id: int) -> Union[CafeModel, None]:
         with app.app_context():
             cafe = CafeModel.query.filter_by(id=cafe_id).first()
             # Will return nothing if id is invalid
             return cafe
 
     @staticmethod
-    def find_by_name(name: str) -> CafeModel | None:
+    def find_by_name(name: str) -> Union[CafeModel, None]:
         with app.app_context():
             cafe = CafeModel.query.filter_by(name=name).first()
             # Will return nothing if name is invalid
