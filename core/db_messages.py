@@ -6,6 +6,7 @@ from datetime import date, datetime
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
+from core.database.models.messages_model import MessageModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -39,26 +40,7 @@ READONLY_MESSAGE = "Sorry, but the Admins have removed your write permissions to
 # Define Message
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Message(db.Model):
-    __tablename__ = 'messages'
-    __table_args__ = {'schema': 'elsr'}
-
-    # Unique reference in dB
-    id = db.Column(db.Integer, primary_key=True)
-
-    # Contents of the message
-    from_email = db.Column(db.String(250), unique=False)
-    to_email = db.Column(db.String(250), unique=False)
-
-    # Dates stored as "11112023"
-    sent_date = db.Column(db.String(250), unique=False)
-    read_date = db.Column(db.String(250), unique=False)
-
-    # Actual message itself
-    body = db.Column(db.String(1000), unique=False)
-
-    # See above for details of how this works
-    status = db.Column(db.Integer, unique=False)
+class Message(MessageModel):
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Message status
@@ -187,11 +169,6 @@ class Message(db.Model):
                     app.logger.error(f"dB.delete(): Failed with error code '{e.args}'.")
                     return False
         return False
-
-    # Optional: this will allow each user object to be identified by its name when printed.
-    # NB Names are not unique, but emails are, hence added in brackets
-    def __repr__(self):
-        return f'<Message from {self.from_email}, to {self.to_email}, on {self.sent_date}>'
 
 
 # -------------------------------------------------------------------------------------------------------------- #

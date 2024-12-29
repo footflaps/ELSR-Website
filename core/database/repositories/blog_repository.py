@@ -123,7 +123,7 @@ class BlogRepository(BlogModel):
             app.logger.error(f"all_by_date(): Failed to convert date = '{date}', error code '{e.args}'.")
             return []
         with app.app_context():
-            blogs = BlogModel.query.filter_by(date_unix=date_unix).filter_by(category=Category.EVENT).all()
+            blogs = BlogModel.query.filter_by(date_unix=date_unix).filter_by(category=Category.EVENT.value).all()
             return blogs
 
     @staticmethod

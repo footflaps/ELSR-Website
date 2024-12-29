@@ -54,6 +54,5 @@ class BlogModel(db.Model):
     # Details
     details = db.Column(db.Text)
 
-    # Optional: this will allow each event object to be identified by its details when printed.
     def __repr__(self):
         return f'<Blog "{self.title}, by {self.email}">'

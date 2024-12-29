@@ -8,6 +8,7 @@ import time
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
+from core.database.models.events_model import EventModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -28,16 +29,7 @@ ALL_DAYS = 365 * 10
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Event(db.Model):
-    __tablename__ = 'events'
-    __table_args__ = {'schema': 'elsr'}
-
-    id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(50))
-    # Use Unix epoch time (rounded to an Int)
-    date = db.Column(db.Integer)
-    type = db.Column(db.String(50))
-    details = db.Column(db.String(500))
+class Event(EventModel):
 
     # Return a list of all events
     def all_events(self):
@@ -177,10 +169,6 @@ class Event(db.Model):
             except Exception as e:
                 app.logger.error(f"dB.log_event(): Failed with error code '{e.args}'.")
                 return False
-
-    # Optional: this will allow each event object to be identified by its details when printed.
-    def __repr__(self):
-        return f'<Event "{self.details}">'
 
 
 # -------------------------------------------------------------------------------------------------------------- #

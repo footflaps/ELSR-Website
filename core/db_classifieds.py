@@ -10,6 +10,7 @@ import os
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
+from core.database.models.classifieds_model import ClassifiedModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -59,43 +60,7 @@ DEL_IMAGE = ["Keep",
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Classified(db.Model):
-    __tablename__ = 'classifieds'
-    __table_args__ = {'schema': 'elsr'}
-
-    # ---------------------------------------------------------------------------------------------------------- #
-    # Define the table
-    # ---------------------------------------------------------------------------------------------------------- #
-
-    # Unique index number
-    id = db.Column(db.Integer, primary_key=True)
-
-    # Owner
-    email = db.Column(db.String(50))
-
-    # Date (as string)
-    date = db.Column(db.String(20))
-
-    # Title
-    title = db.Column(db.String(100))
-
-    # Type (Buy or Sell)
-    buy_sell = db.Column(db.String(10))
-
-    # Category
-    category = db.Column(db.String(20))
-
-    # CSV of filenames (no path)
-    image_filenames = db.Column(db.Text)
-
-    # Price
-    price = db.Column(db.String(20))
-
-    # Details
-    details = db.Column(db.Text)
-
-    # Status (for sale, under offer, sold, etc)
-    status = db.Column(db.String(20))
+class Classified(ClassifiedModel):
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Properties
@@ -172,10 +137,6 @@ class Classified(db.Model):
                                      f"error code '{e.args}'.")
                     return False
         return False
-
-    # Optional: this will allow each event object to be identified by its details when printed.
-    def __repr__(self):
-        return f'<Classified "{self.title}, by {self.email}">'
 
 
 # -------------------------------------------------------------------------------------------------------------- #

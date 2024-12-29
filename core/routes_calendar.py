@@ -134,7 +134,7 @@ def calendar():
             # Request events from Blog class
             # ----------------------------------------------------------- #
             for event in Blog().all_by_date(datestr):
-                markup += f"<a href='{url_for('blog', blog_id=f'{event.id}')}'>" \
+                markup += f"<a href='{url_for('display_blog', blog_id=f'{event.id}')}'>" \
                           f"<i class='fas fa-solid fa-flag-checkered fa-xl'></i></a>"
 
             # ----------------------------------------------------------- #

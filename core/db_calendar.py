@@ -11,6 +11,8 @@ import time
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db, GPX_UPLOAD_FOLDER_ABS, GROUP_CHOICES
+from core.database.models.calendar_model import CalendarModel
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our own classes
@@ -56,41 +58,7 @@ DEFAULT_START_TIMES = {"Monday": {'time': '08:00', 'location': MEETING_BEAN, 'ne
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Calendar(db.Model):
-    __tablename__ = 'calendar'
-    __table_args__ = {'schema': 'elsr'}
-
-    id = db.Column(db.Integer, primary_key=True)
-
-    # Who created the entry - will determine delete permissions
-    email = db.Column(db.String(50))
-
-    # Use string for date eg '13012023'
-    date = db.Column(db.String(8))
-
-    # Ride group eg 'Decaf', 'Doppio' etc
-    group = db.Column(db.String(20))
-
-    # Ride leader
-    leader = db.Column(db.String(25))
-
-    # Destination cafe eg 'Mill End Plants'
-    destination = db.Column(db.String(200))
-
-    # GPX ID, the route will exist in the gpx dB
-    gpx_id = db.Column(db.Integer)
-
-    # Cafe ID, the cafe might exist in the Cafe dB (could be a new cafe)
-    cafe_id = db.Column(db.Integer)
-
-    # Start time
-    start_time = db.Column(db.String(250))
-
-    # Added Unix date for sorting by ride date
-    unix_date = db.Column(db.Integer)
-
-    # Column to denote whether we sent an email or not
-    sent_email = db.Column(db.String(20))
+class Calendar(CalendarModel):
 
     # Return all events
     def all_calendar(self):
@@ -184,10 +152,6 @@ class Calendar(db.Model):
                     app.logger.error(f"db_calendar: Failed to set email sent for ride_id = '{ride.id}', "
                                      f"error code '{e.args}'.")
         return False
-
-    # Optional: this will allow each event object to be identified by its details when printed.
-    def __repr__(self):
-        return f'<Ride "{self.destination} , lead by {self.leader}">'
 
 
 # One off code to set sent_email
