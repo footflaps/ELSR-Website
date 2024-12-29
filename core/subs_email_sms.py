@@ -25,7 +25,7 @@ from core.database.repositories.db_users import User, UNVERIFIED_PHONE_PREFIX, M
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
 from core.database.repositories.db_messages import Message, ADMIN_EMAIL
 from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
-from core.database.repositories.db_social import Socials
+from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog, Privacy
 from core.database.repositories.db_gpx import Gpx
 
@@ -259,7 +259,7 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
 # Send Social notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_social_notification_emails(social: Socials()):
+def send_social_notification_emails(social: SocialRepository()):
     # ----------------------------------------------------------- #
     # Make sure social exists
     # ----------------------------------------------------------- #
@@ -279,7 +279,7 @@ def send_social_notification_emails(social: Socials()):
             send_one_social_notification_email(user, social)
 
 
-def send_one_social_notification_email(user: User(), social: Socials()):
+def send_one_social_notification_email(user: User(), social: SocialRepository()):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #

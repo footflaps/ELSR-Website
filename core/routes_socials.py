@@ -20,7 +20,7 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import update_last_seen, logout_barred_user, login_required, rw_required
-from core.database.repositories.db_social import Socials, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
+from core.database.repositories.social_repository import SocialRepository, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
                                                  SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.forms.social_forms import create_social_form
 from core.database.repositories.event_repository import EventRepository
@@ -65,7 +65,7 @@ def add_social():
     # Validate social_id
     # ----------------------------------------------------------- #
     if social_id:
-        social = Socials().one_social_id(social_id)
+        social = SocialRepository().one_social_id(social_id)
         if not social:
             app.logger.debug(f"add_social(): Failed to locate social, social_id = '{social_id}'.")
             EventRepository().log_event("Add Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
@@ -144,7 +144,7 @@ def add_social():
             new_social = social
         else:
             # New social
-            new_social = Socials()
+            new_social = SocialRepository()
 
         # Get owner
         if current_user.admin():
@@ -182,7 +182,7 @@ def add_social():
         # ----------------------------------------------------------- #
         # Add to the db
         # ----------------------------------------------------------- #
-        new_social = Socials().add_social(new_social)
+        new_social = SocialRepository().add_social(new_social)
         if new_social:
             # Success
             app.logger.debug(f"add_social(): Successfully added new social.")
@@ -240,11 +240,11 @@ def social():
     # ----------------------------------------------------------- #
     if date:
         # Get socials specific to that date
-        socials = Socials().all_socials_date(date)
+        socials = SocialRepository().all_socials_date(date)
 
     else:
         # Just get ones yet to happen
-        socials = Socials().all_socials_future()
+        socials = SocialRepository().all_socials_future()
 
     # ----------------------------------------------------------- #
     # Tweak the data before we show it
@@ -331,7 +331,7 @@ def delete_social():
     # ----------------------------------------------------------- #
     # Validate social_id
     # ----------------------------------------------------------- #
-    social = Socials().one_social_id(social_id)
+    social = SocialRepository().one_social_id(social_id)
     if not social:
         app.logger.debug(f"delete_social(): Failed to locate social, social_id = '{social_id}'.")
         EventRepository().log_event("Delete Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
@@ -367,7 +367,7 @@ def delete_social():
     # ----------------------------------------------------------- #
     # Delete social
     # ----------------------------------------------------------- #
-    if Socials().delete_social(social_id):
+    if SocialRepository().delete_social(social_id):
         app.logger.debug(f"delete_social(): Deleted social, social_id = '{social_id}'.")
         EventRepository().log_event("Delete Social Success", f"Deleted social, social_id = '{social_id}'.")
         flash("Social has been deleted.")
@@ -404,7 +404,7 @@ def download_ics():
     # ----------------------------------------------------------- #
     # Validate social_id
     # ----------------------------------------------------------- #
-    social = Socials().one_social_id(social_id)
+    social = SocialRepository().one_social_id(social_id)
     if not social:
         app.logger.debug(f"download_ics(): Failed to locate social, social_id = '{social_id}'.")
         EventRepository().log_event("download_ics Fail", f"Failed to locate social, social_id = '{social_id}'.")

@@ -37,7 +37,7 @@ from core.database.repositories.db_messages import Message, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.database.repositories.calendar_repository import CalendarRepository
-from core.database.repositories.db_social import Socials
+from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.database.repositories.classifieds_repository import ClassifiedRepository
 
@@ -265,7 +265,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Gather data: 7. Social events
     # ----------------------------------------------------------- #
-    socials = Socials().all_by_email(user.email)
+    socials = SocialRepository().all_by_email(user.email)
 
     # ----------------------------------------------------------- #
     # Gather data: 8. Classifieds

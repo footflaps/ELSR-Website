@@ -3,7 +3,7 @@
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
-from core.database.models.polls_model import PollsModel
+from core.database.models.poll_model import PollModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -20,25 +20,24 @@ POLL_CLOSED = "Closed"
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
-# Define Poll Class
+# Define Poll Repository Class
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Polls(PollsModel):
+class PollRepository(PollModel):
 
     # -------------------------------------------------------------------------------------------------------------- #
     # Create
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def add_poll(new_poll: PollsModel) -> PollsModel | None:
+    def add_poll(new_poll: PollModel) -> PollModel | None:
         # Try and add to the dB
         with app.app_context():
             try:
                 db.session.add(new_poll)
                 db.session.commit()
                 db.refresh(new_poll)
-                # Return social object
                 return new_poll
 
             except Exception as e:
@@ -55,7 +54,7 @@ class Polls(PollsModel):
         with app.app_context():
 
             # Locate the GPX file
-            poll = db.session.query(Polls).filter_by(id=poll_id).first()
+            poll = PollModel.query.filter_by(id=poll_id).first()
 
             if poll:
                 # Delete the GPX file
@@ -76,13 +75,13 @@ class Polls(PollsModel):
     # Search
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def all() -> list[PollsModel]:
+    def all() -> list[PollModel]:
         with app.app_context():
-            polls = db.session.query(Polls).all()
+            polls = PollModel.query.all()
             return polls
 
     @staticmethod
-    def one_poll_by_id(poll_id: int) -> PollsModel | None:
+    def one_poll_by_id(poll_id: int) -> PollModel | None:
         with app.app_context():
-            poll = db.session.query(Polls).filter_by(id=poll_id).first()
+            poll = PollModel.query.filter_by(id=poll_id).first()
             return poll

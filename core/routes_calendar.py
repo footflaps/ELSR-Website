@@ -15,7 +15,7 @@ from core import app, current_year, live_site
 
 from core.database.repositories.db_users import update_last_seen, logout_barred_user
 from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES
-from core.database.repositories.db_social import Socials
+from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.database.repositories.db_gpx import Gpx
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
@@ -126,7 +126,7 @@ def calendar():
             # ----------------------------------------------------------- #
             # Request socials from Socials class
             # ----------------------------------------------------------- #
-            if Socials().all_socials_date(datestr):
+            if SocialRepository().all_socials_date(datestr):
                 markup += f"<a href='{url_for('social', date=f'{datestr}')}'>" \
                           f"<i class='fas fa-solid fa-champagne-glasses fa-2xl'></i></a>"
 

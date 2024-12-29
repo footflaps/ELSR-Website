@@ -10,7 +10,7 @@ from datetime import datetime
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User
-from core.database.repositories.db_social import SIGN_UP_CHOICES, SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC
+from core.database.repositories.social_repository import SIGN_UP_CHOICES, SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC
 
 
 # -------------------------------------------------------------------------------------------------------------- #

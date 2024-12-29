@@ -16,7 +16,7 @@ from core import app
 
 from core.database.repositories.db_users import update_last_seen, logout_barred_user, login_required, rw_required
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.db_social import Socials
+from core.database.repositories.social_repository import SocialRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -52,7 +52,7 @@ def social_can():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    social = Socials().one_social_id(social_id)
+    social = SocialRepository().one_social_id(social_id)
     if not social:
         app.logger.debug(f"social_can(): Failed to locate Social with social_id = '{social_id}'.")
         EventRepository().log_event("social_can() Fail", f"Failed to Social with social_id = '{social_id}'.")
@@ -92,7 +92,7 @@ def social_can():
     # Push back to poll object as JSON string
     social.attendees = json.dumps(attendees)
     # Update in db
-    social = Socials().add_social(social)
+    social = SocialRepository().add_social(social)
     # Did that work?
     if not social:
         # Should never happen, but...
@@ -132,7 +132,7 @@ def social_cant():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    social = Socials().one_social_id(social_id)
+    social = SocialRepository().one_social_id(social_id)
     if not social:
         app.logger.debug(f"social_cant(): Failed to locate Social with social_id = '{social_id}'.")
         EventRepository().log_event("social_cant() Fail", f"Failed to Social with social_id = '{social_id}'.")
@@ -172,7 +172,7 @@ def social_cant():
     # Push back to poll object as JSON string
     social.attendees = json.dumps(attendees)
     # Update in db
-    social = Socials().add_social(social)
+    social = SocialRepository().add_social(social)
     # Did that work?
     if not social:
         # Should never happen, but...

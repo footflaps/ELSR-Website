@@ -16,7 +16,7 @@ from core import app
 
 from core.database.repositories.db_users import update_last_seen, logout_barred_user, login_required, rw_required
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.db_polls import Polls, POLL_OPEN
+from core.database.repositories.poll_repository import PollRepository, POLL_OPEN
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -58,7 +58,7 @@ def remove_vote():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
+    poll = PollRepository().one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"remove_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
         EventRepository().log_event("remove_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
@@ -115,7 +115,7 @@ def remove_vote():
     # Push back to poll object as JSON string
     poll.responses = json.dumps(votes)
     # Update in db
-    poll = Polls().add_poll(poll)
+    poll = PollRepository().add_poll(poll)
     # Did that work?
     if not poll:
         # Should never happen, but...
@@ -161,7 +161,7 @@ def add_vote():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
+    poll = PollRepository().one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"add_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
         EventRepository().log_event("add_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
@@ -222,7 +222,7 @@ def add_vote():
     # Push back to poll object as JSON string
     poll.responses = json.dumps(votes)
     # Update in db
-    poll = Polls().add_poll(poll)
+    poll = PollRepository().add_poll(poll)
     # Did that work?
     if not poll:
         # Should never happen, but...
@@ -268,7 +268,7 @@ def swap_vote():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
+    poll = PollRepository().one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"swap_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
         EventRepository().log_event("swap_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
@@ -341,7 +341,7 @@ def swap_vote():
     # Convert to JSON string
     poll.responses = json.dumps(votes)
     # Update in db
-    poll = Polls().add_poll(poll)
+    poll = PollRepository().add_poll(poll)
     # Did that work?
     if not poll:
         # Should never happen, but...

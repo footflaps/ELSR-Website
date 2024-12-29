@@ -35,12 +35,12 @@ from core.database.models.users_model import UserModel
 from core.database.models.cafes_model import CafeModel
 from core.database.models.gpx_model import GpxModel
 from core.database.models.calendar_model import CalendarModel
-from core.database.models.socials_model import SocialsModel
+from core.database.models.social_model import SocialModel
 from core.database.models.classifieds_model import ClassifiedModel
 from core.database.models.messages_model import MessageModel
 from core.database.models.cafe_comments_model import CafeCommentModel
 from core.database.models.events_model import EventModel
-from core.database.models.polls_model import PollsModel
+from core.database.models.poll_model import PollModel
 from core.database.models.blog_model import BlogModel
 
 
@@ -535,7 +535,7 @@ with app.app_context():
     num_calendar = db.session.query(func.count(CalendarModel.id)).scalar()
     print(f"Found {num_calendar} calendar entries in the dB")
 
-    num_socials = db.session.query(func.count(SocialsModel.id)).scalar()
+    num_socials = db.session.query(func.count(SocialModel.id)).scalar()
     print(f"Found {num_socials} socials in the dB")
 
     num_classifieds = db.session.query(func.count(ClassifiedModel.id)).scalar()
@@ -550,7 +550,7 @@ with app.app_context():
     num_events = db.session.query(func.count(EventModel.id)).scalar()
     print(f"Found {num_events} events in the dB")
 
-    num_polls = db.session.query(func.count(PollsModel.id)).scalar()
+    num_polls = db.session.query(func.count(PollModel.id)).scalar()
     print(f"Found {num_polls} polls in the dB")
 
     num_blogs = db.session.query(func.count(BlogModel.id)).scalar()

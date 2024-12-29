@@ -22,7 +22,7 @@ from core.database.repositories.db_users import User, admin_only, update_last_se
 from core.database.repositories.db_messages import Message, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
-from core.database.repositories.db_social import Socials, SOCIAL_DB_PRIVATE
+from core.database.repositories.social_repository import SocialRepository, SOCIAL_DB_PRIVATE
 from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notification_email, email_ride_alert_summary
 from core.subs_google_maps import maps_enabled, get_current_map_count, map_limit_by_day, graph_map_counts
 from core.database.repositories.blog_repository import BlogRepository as Blog
@@ -204,7 +204,7 @@ def admin_page():
     # ----------------------------------------------------------- #
     # All scheduled social events
     # ----------------------------------------------------------- #
-    socials = Socials().all()
+    socials = SocialRepository().all()
     for social in socials:
         if social.privacy == SOCIAL_DB_PRIVATE:
             social.private = True

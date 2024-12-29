@@ -9,7 +9,7 @@ from datetime import datetime
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_polls import POLL_PUBLIC, POLL_PRIVATE, POLL_OPEN, POLL_CLOSED
+from core.database.repositories.poll_repository import POLL_PUBLIC, POLL_PRIVATE, POLL_OPEN, POLL_CLOSED
 
 
 # -------------------------------------------------------------------------------------------------------------- #

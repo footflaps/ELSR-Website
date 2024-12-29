@@ -18,7 +18,7 @@ from core import app, current_year, live_site
 
 from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.db_polls import Polls, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
+from core.database.repositories.poll_repository import PollRepository, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 
 from core.forms.polls_forms import create_poll_form
 
@@ -89,7 +89,7 @@ def poll_list():
     # ----------------------------------------------------------- #
     # Grab all the polls
     # ----------------------------------------------------------- #
-    polls = Polls().all()
+    polls = PollRepository().all()
 
     # ----------------------------------------------------------- #
     #   Check polls haven't timed out
@@ -105,7 +105,7 @@ def poll_list():
             if poll_date < today_date:
                 poll.status = POLL_CLOSED
                 # Update poll
-                Polls().add_poll(poll)
+                PollRepository().add_poll(poll)
 
     # ----------------------------------------------------------- #
     #   Messages
@@ -138,7 +138,7 @@ def poll_details(poll_id):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
+    poll = PollRepository().one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"poll_details(): Failed to locate Poll with poll_id = '{poll_id}'.")
         EventRepository().log_event("One Poll Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
@@ -173,7 +173,7 @@ def poll_details(poll_id):
             flash("The poll has now closed")
             poll.status = POLL_CLOSED
             # Update poll
-            Polls().add_poll(poll)
+            PollRepository().add_poll(poll)
 
     # ----------------------------------------------------------- #
     #   Render page
@@ -243,7 +243,7 @@ def add_poll():
     # ----------------------------------------------------------- #
     if poll_id:
         # Look up the poll
-        poll = Polls().one_poll_by_id(poll_id)
+        poll = PollRepository().one_poll_by_id(poll_id)
 
         if not poll:
             # Poll no longer / never existed
@@ -309,7 +309,7 @@ def add_poll():
         # Save form details in the db
         if not poll:
             # Creating a new poll, so define these now
-            poll = Polls()
+            poll = PollRepository()
             poll.created_date = datetime.today().date().strftime("%d%m%Y")
             poll.email = user.email
             poll.responses = POLL_NO_RESPONSE
@@ -326,7 +326,7 @@ def add_poll():
         poll.options = json.dumps(extract_options_from_form(form.options.data))
 
         # Add to db
-        poll = Polls().add_poll(poll)
+        poll = PollRepository().add_poll(poll)
         if poll:
             # Success
             app.logger.debug(f"add_poll(): Successfully added new poll.")
@@ -417,7 +417,7 @@ def edit_poll():
     # ----------------------------------------------------------- #
     # Get poll from db
     # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
+    poll = PollRepository().one_poll_by_id(poll_id)
     if not poll:
         # Poll no longer / never existed
         app.logger.debug(f"edit_poll(): Failed to find Poll, id = '{poll_id}'!")
@@ -517,7 +517,7 @@ def edit_poll():
         poll.privacy = form.privacy.data
 
         # Add to db
-        poll = Polls().add_poll(poll)
+        poll = PollRepository().add_poll(poll)
         if poll:
             # Success
             app.logger.debug(f"edit_poll(): Successfully added new poll.")
@@ -611,7 +611,7 @@ def delete_poll():
     # ----------------------------------------------------------- #
     # Validate poll_id
     # ----------------------------------------------------------- #
-    poll = Polls().one_poll_by_id(poll_id)
+    poll = PollRepository().one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"delete_poll(): Failed to locate poll, poll_id = '{poll_id}'.")
         EventRepository().log_event("Delete poll Fail", f"Failed to locate poll, poll_id = '{poll_id}'.")
@@ -647,7 +647,7 @@ def delete_poll():
     # ----------------------------------------------------------- #
     # Delete Poll
     # ----------------------------------------------------------- #
-    if Polls().delete_poll(poll_id):
+    if PollRepository().delete_poll(poll_id):
         app.logger.debug(f"delete_poll(): Deleted poll, poll_id = '{poll_id}'.")
         EventRepository().log_event("Delete poll Success", f"Deleted poll, poll_id = '{poll_id}'.")
         flash("Poll has been deleted.")

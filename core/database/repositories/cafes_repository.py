@@ -1,6 +1,5 @@
 from datetime import date
 import json
-from typing import Union
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -25,7 +24,11 @@ CLOSED_CAFE_COLOUR = "#922b21"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Define Cafe Class
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Define Cafe Repository Class
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
 class CafeRepository(CafeModel):
@@ -34,7 +37,7 @@ class CafeRepository(CafeModel):
     # Create
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def add_cafe(new_cafe: CafeModel) -> Union[CafeModel, None]:
+    def add_cafe(new_cafe: CafeModel) -> CafeModel | None:
         # Update some details
         new_cafe.added_date = date.today().strftime("%d%m%Y")
         new_cafe.active = True
@@ -182,14 +185,14 @@ class CafeRepository(CafeModel):
 
     # Return a single cafe
     @staticmethod
-    def one_cafe(cafe_id: int) -> Union[CafeModel, None]:
+    def one_cafe(cafe_id: int) -> CafeModel | None:
         with app.app_context():
             cafe = CafeModel.query.filter_by(id=cafe_id).first()
             # Will return nothing if id is invalid
             return cafe
 
     @staticmethod
-    def find_by_name(name: str) -> Union[CafeModel, None]:
+    def find_by_name(name: str) -> CafeModel | None:
         with app.app_context():
             cafe = CafeModel.query.filter_by(name=name).first()
             # Will return nothing if name is invalid
@@ -217,7 +220,7 @@ class CafeRepository(CafeModel):
         return f"{self.name} ({self.id})"
 
     def cafe_list(self, cafes_passed):
-        # Take the cafe_passed JSON string from the GPX data base and from it, returns the details of the
+        # Take the cafe_passed JSON string from the GPX database and from it, returns the details of the
         # Cafes which were referenced in the string (referenced by id).
 
         cafes_json = json.loads(cafes_passed)

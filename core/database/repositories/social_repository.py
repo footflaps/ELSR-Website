@@ -6,7 +6,7 @@ from datetime import datetime
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
-from core.database.models.socials_model import SocialsModel
+from core.database.models.social_model import SocialModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -27,47 +27,44 @@ SIGN_UP_CHOICES = [SIGN_UP_NO, SIGN_UP_YES]
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
-# Define Social Class
+# Define Social Repository Class
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Socials(SocialsModel):
+class SocialRepository(SocialModel):
 
-    # Return all socials
-    def all(self):
-        with app.app_context():
-            socials = db.session.query(Socials).all()
-            return socials
-
-    def all_by_email(self, email):
-        with app.app_context():
-            socials = db.session.query(Socials).filter_by(email=email).all()
-            return socials
-
-    def one_social_id(self, social_id):
-        with app.app_context():
-            social = db.session.query(Socials).filter_by(id=social_id).first()
-            return social
-
-    def add_social(self, new_social):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Create
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def add_social(new_social: SocialModel) -> SocialModel | None:
         # Try and add to the dB
         with app.app_context():
             try:
                 db.session.add(new_social)
                 db.session.commit()
-                # Return social object
-                return db.session.query(Socials).filter_by(id=new_social.id).first()
+                db.refresh(new_social)
+                return new_social
+
             except Exception as e:
                 db.rollback()
                 app.logger.error(f"dB.add_social(): Failed with error code '{e.args}'.")
                 return None
 
-    def delete_social(self, social_id):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Update
+    # -------------------------------------------------------------------------------------------------------------- #
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Delete
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def delete_social(social_id: int) -> bool:
         with app.app_context():
 
             # Locate the GPX file
-            social = db.session.query(Socials).filter_by(id=social_id).first()
+            social = SocialModel.query.filter_by(id=social_id).first()
 
             if social:
                 # Delete the GPX file
@@ -75,26 +72,51 @@ class Socials(SocialsModel):
                     db.session.delete(social)
                     db.session.commit()
                     return True
+
                 except Exception as e:
                     db.rollback()
                     app.logger.error(f"db_social: Failed to delete Social for social_id = '{social_id}', "
                                      f"error code '{e.args}'.")
                     return False
+
         return False
 
-    def all_socials_date(self, date_str: str):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Search
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def all() -> list[SocialModel]:
         with app.app_context():
-            socials = db.session.query(Socials).filter_by(date=date_str).all()
+            socials = SocialModel.query.all()
+            return socials
+
+    @staticmethod
+    def all_by_email(email: str) -> list[SocialModel]:
+        with app.app_context():
+            socials = SocialModel.query.filter_by(email=email).all()
+            return socials
+
+    @staticmethod
+    def one_social_id(social_id: id) -> SocialModel | None:
+        with app.app_context():
+            social = SocialModel.query.filter_by(id=social_id).first()
+            return social
+
+    @staticmethod
+    def all_socials_date(date_str: str) -> list[SocialModel]:
+        with app.app_context():
+            socials = SocialModel.query.filter_by(date=date_str).all()
             for social in socials:
                 date_str = social.date
                 social_date = datetime(int(date_str[4:8]), int(date_str[2:4]), int(date_str[0:2]), 0, 00).date()
                 social.long_date = social_date.strftime("%A %b %d %Y")
             return socials
 
-    def all_socials_future(self):
+    @staticmethod
+    def all_socials_future() -> list[SocialModel]:
         socials = []
         today = datetime.today().date()
-        all_socials = self.all()
+        all_socials = SocialModel.query.all()
         for social in all_socials:
             date_str = social.date
             social_date = datetime(int(date_str[4:8]), int(date_str[2:4]), int(date_str[0:2]), 0, 00).date()
