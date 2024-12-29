@@ -19,18 +19,20 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.dB_cafes import Cafe, CreateCafeForm, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.dB_cafe_comments import CafeComment, CreateCafeCommentForm
+from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
+from core.database.repositories.db_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.forms.cafe_forms import CreateCafeForm
+from core.database.repositories.db_cafe_comments import CafeComment
+from core.forms.cafe_comments_forms import CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes, remove_cafe_from_all_gpxes
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
-from core.dB_gpx import Gpx
-from core.db_messages import Message, ADMIN_EMAIL
-from core.dB_events import Event
+from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.db_events import Event
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
-from core.db_calendar import Calendar
+from core.database.repositories.db_calendar import Calendar
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -14,9 +14,9 @@ from core import app
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import update_last_seen, logout_barred_user, login_required, rw_required
-from core.dB_events import Event
-from core.db_social import Socials
+from core.database.repositories.db_users import update_last_seen, logout_barred_user, login_required, rw_required
+from core.database.repositories.db_events import Event
+from core.database.repositories.db_social import Socials
 
 
 # -------------------------------------------------------------------------------------------------------------- #

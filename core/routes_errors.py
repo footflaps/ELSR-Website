@@ -13,7 +13,7 @@ from core import app, current_year, live_site, user_ip
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_events import Event
+from core.database.repositories.db_events import Event
 
 
 # -------------------------------------------------------------------------------------------------------------- #

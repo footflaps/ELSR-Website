@@ -11,7 +11,7 @@ import mpu
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, GPX_UPLOAD_FOLDER_ABS
-from core.dB_events import Event
+from core.database.repositories.db_events import Event
 
 
 # -------------------------------------------------------------------------------------------------------------- #

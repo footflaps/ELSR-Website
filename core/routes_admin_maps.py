@@ -14,8 +14,8 @@ from core import app
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, admin_only, update_last_seen, login_required
-from core.dB_events import Event
+from core.database.repositories.db_users import User, admin_only, update_last_seen, login_required
+from core.database.repositories.db_events import Event
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, boost_map_limit
 
 

@@ -15,13 +15,14 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.dB_gpx import Gpx, create_rename_gpx_form
-from core.dB_events import Event
+from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
+from core.database.repositories.db_gpx import Gpx
+from core.forms.gpx_forms import create_rename_gpx_form
+from core.database.repositories.db_events import Event
 from core.subs_gpx import check_new_gpx_with_all_cafes
 from core.subs_google_maps import start_and_end_maps_native_gm, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx
-from core.db_calendar import Calendar
+from core.database.repositories.db_calendar import Calendar
 
 
 # -------------------------------------------------------------------------------------------------------------- #

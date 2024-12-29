@@ -7,20 +7,14 @@ from datetime import datetime
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import Blog Model
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import GPX_UPLOAD_FOLDER_ABS
+from core.database.repositories.db_users import User
+from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.db_cafes import Cafe
 from core.database.repositories.blog_repository import NO_GPX, NO_CAFE, Sticky, Privacy, Category
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Import our own classes
-# -------------------------------------------------------------------------------------------------------------- #
-
-from core.db_users import User
-from core.dB_gpx import Gpx
-from core.dB_cafes import Cafe
 
 
 # -------------------------------------------------------------------------------------------------------------- #

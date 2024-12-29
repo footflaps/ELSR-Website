@@ -18,17 +18,17 @@ from core import app, current_year, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required, rw_required
+from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required, rw_required
 from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky, BLOG_IMAGE_FOLDER,
                                                         NO_CAFE, NO_GPX, Category)
 from core.forms.blog_forms import create_blogs_form
-from core.dB_events import Event
-from core.dB_cafes import Cafe
-from core.dB_gpx import Gpx
+from core.database.repositories.db_events import Event
+from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.db_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
 from core.routes_socials import ICS_DIRECTORY
-from core.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.db_messages import Message, ADMIN_EMAIL
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -17,10 +17,10 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, is_mobile, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import update_last_seen
+from core.database.repositories.db_users import update_last_seen
 from core.subs_google_maps import google_maps_api_key, MAP_BOUNDS, count_map_loads, \
                                   create_polyline_set, MAX_NUM_GPX_PER_GRAPH
-from core.dB_gpx import Gpx
+from core.database.repositories.db_gpx import Gpx
 from core.subs_gpx import ELSR_LAT, ELSR_LON
 
 

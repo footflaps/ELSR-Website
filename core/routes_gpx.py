@@ -16,18 +16,21 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required, rw_required
-from core.dB_gpx import Gpx, UploadGPXForm
-from core.dB_cafes import Cafe
-from core.dB_events import Event
+from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, get_user_name, login_required, rw_required
+from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.db_events import Event
+from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.db_calendar import Calendar
+
+from core.forms.gpx_forms import UploadGPXForm
+
 from core.subs_gpx import allowed_file
 from core.subs_google_maps import polyline_json, markers_for_cafes_native, MAP_BOUNDS, google_maps_api_key, \
                                   count_map_loads
 from core.subs_gpx_edit import check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
-from core.db_messages import Message, ADMIN_EMAIL
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
-from core.db_calendar import Calendar
 
 
 # -------------------------------------------------------------------------------------------------------------- #

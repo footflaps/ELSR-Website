@@ -14,8 +14,8 @@ from core import app
 # Import our Event class
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, admin_only, login_required
-from core.dB_events import Event
+from core.database.repositories.db_users import User, update_last_seen, admin_only, login_required
+from core.database.repositories.db_events import Event
 
 
 # -------------------------------------------------------------------------------------------------------------- #

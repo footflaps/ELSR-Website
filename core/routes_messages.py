@@ -15,9 +15,9 @@ from core import app
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, admin_only, update_last_seen, logout_barred_user, login_required
-from core.db_messages import Message, ADMIN_EMAIL
-from core.dB_events import Event
+from core.database.repositories.db_users import User, admin_only, update_last_seen, logout_barred_user, login_required
+from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.db_events import Event
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 
 

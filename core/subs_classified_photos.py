@@ -12,8 +12,8 @@ from core import app,  delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER, DELETE_PHOTO
-from core.dB_events import Event
+from core.database.repositories.db_classifieds import Classified, CLASSIFIEDS_PHOTO_FOLDER, DELETE_PHOTO
+from core.database.repositories.db_events import Event
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 
 

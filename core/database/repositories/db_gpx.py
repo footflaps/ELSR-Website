@@ -1,9 +1,4 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField
-from flask_ckeditor import CKEditorField
-from flask_wtf.file import FileField
-from wtforms.validators import DataRequired, Length, InputRequired
-from datetime import date, datetime
+from datetime import date
 import json
 from sqlalchemy import func
 
@@ -13,7 +8,6 @@ from sqlalchemy import func
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db, GRAVEL_CHOICE
-from core.db_users import User
 from core.subs_gpx_direction import gpx_direction
 from core.database.models.gpx_model import GpxModel
 
@@ -319,51 +313,6 @@ class Gpx(GpxModel):
 
 with app.app_context():
     db.create_all()
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create our upload forms
-# -------------------------------------------------------------------------------------------------------------- #
-
-class UploadGPXForm(FlaskForm):
-    name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
-    type = SelectField("Type of route:", choices=TYPES,
-                       validators=[InputRequired("Please enter a type.")])
-    details = CKEditorField("If gravel, add any useful details:", validators=[])
-    filename = FileField("", validators=[DataRequired()])
-
-    submit = SubmitField("Upload GPX")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Edit route name form
-# -------------------------------------------------------------------------------------------------------------- #
-
-def create_rename_gpx_form(admin: bool):
-
-    # ----------------------------------------------------------- #
-    # Generate the list of users
-    # ----------------------------------------------------------- #
-    users = User().all_users_sorted()
-    all_users = []
-    for user in users:
-        all_users.append(f"{user.name} ({user.id})")
-
-    class Form(FlaskForm):
-        name = StringField("Route name eg 'Hilly route to Mill End Plants'", validators=[Length(min=6, max=50)])
-
-        type = SelectField("Type of route:", choices=TYPES,
-                           validators=[InputRequired("Please enter a type.")])
-
-        details = CKEditorField("If gravel, add any useful details:", validators=[])
-
-        # Admin can assign ownership
-        if admin:
-            owner = SelectField("Owner (Admin only field):", choices=all_users, validators=[DataRequired()])
-
-        submit = SubmitField("Update")
-
-    return Form()
 
 
 # -------------------------------------------------------------------------------------------------------------- #

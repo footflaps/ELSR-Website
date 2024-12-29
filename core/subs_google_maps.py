@@ -18,10 +18,10 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, SUPER_ADMIN_USER_ID
-from core.dB_cafes import Cafe
+from core.database.repositories.db_users import User, SUPER_ADMIN_USER_ID
+from core.database.repositories.db_cafes import Cafe
 from core.subs_email_sms import send_system_alert_email, send_sms
-from core.dB_events import Event
+from core.database.repositories.db_events import Event
 
 
 # -------------------------------------------------------------------------------------------------------------- #

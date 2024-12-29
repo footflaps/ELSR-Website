@@ -17,15 +17,18 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.dB_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
+from core.database.repositories.db_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.db_gpx import Gpx, TYPE_ROAD, TYPE_GRAVEL
+from core.database.repositories.db_calendar import Calendar, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
+                                                   MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES, start_time_string
+from core.database.repositories.db_events import Event
+
+from core.forms.calendar_forms import create_ride_form
+
 from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
-from core.dB_gpx import Gpx, TYPE_ROAD, TYPE_GRAVEL
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
-from core.dB_events import Event
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.db_calendar import Calendar, create_ride_form, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
-                             MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES, start_time_string
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 from core.subs_dates import get_date_from_url

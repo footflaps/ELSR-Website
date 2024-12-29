@@ -15,10 +15,10 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
-from core.dB_cafes import Cafe
-from core.dB_events import Event
-from core.db_calendar import Calendar
+from core.database.repositories.db_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
+from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.db_events import Event
+from core.database.repositories.db_calendar import Calendar
 from core.subs_email_sms import send_ride_notification_emails
 
 

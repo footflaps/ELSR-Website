@@ -6,11 +6,7 @@
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 from flask import abort, flash, request, redirect, url_for
-from flask_login import UserMixin, current_user, logout_user
-from flask_wtf import FlaskForm
-from flask_ckeditor import CKEditorField
-from wtforms import StringField, EmailField, SubmitField, PasswordField, IntegerField, URLField, SelectField, validators
-from wtforms.validators import InputRequired, Email
+from flask_login import current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import time
@@ -20,14 +16,13 @@ import os
 import hashlib
 from sqlalchemy import func
 import json
-from validators import url as check_url
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import out database connection from __init__
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import db, app, login_manager, GROUP_CHOICES, GROUP_NOTIFICATIONS
+from core import db, app, login_manager, GROUP_NOTIFICATIONS
 from core.database.models.users_model import UserModel
 
 
@@ -35,8 +30,8 @@ from core.database.models.users_model import UserModel
 # We need Messages & Events
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_messages import Message
-from core.dB_events import Event
+from core.database.repositories.db_messages import Message
+from core.database.repositories.db_events import Event
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -951,124 +946,6 @@ def get_user_id_from_email(user_email):
 # Add these to jinja's environment, so we can use it within html templates
 app.jinja_env.globals.update(get_user_name=get_user_name)
 app.jinja_env.globals.update(get_user_id_from_email=get_user_id_from_email)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-#                                                WT Forms
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create User Registration form
-# -------------------------------------------------------------------------------------------------------------- #
-class CreateUserForm(FlaskForm):
-    name = StringField("Name (this will appear on the website)",
-                       validators=[InputRequired("Please enter your name.")])
-    email = EmailField("Email address (this will be kept hidden)",
-                       validators=[InputRequired("Please enter your email address."), Email()])
-    password = PasswordField("Password",
-                             validators=[InputRequired("Please enter a password.")])
-    submit = SubmitField("Register")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Verify User email form
-# -------------------------------------------------------------------------------------------------------------- #
-class VerifyUserForm(FlaskForm):
-    email = EmailField("Email address",
-                       validators=[InputRequired("Please enter your email address."), Email()])
-    verification_code = IntegerField("Verification code",
-                                     validators=[InputRequired("Please enter the six digit code emailed to you.")])
-    submit = SubmitField("Verify email address")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Verify User SMS form
-# -------------------------------------------------------------------------------------------------------------- #
-class TwoFactorLoginForm(FlaskForm):
-    email = EmailField("Email address",
-                       validators=[InputRequired("Please enter your email address."), Email()])
-    verification_code = IntegerField("Verification code",
-                                     validators=[InputRequired("Please enter the six digit code SMSed to you.")])
-    submit = SubmitField("2FA Login")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Verify User SMS form
-# -------------------------------------------------------------------------------------------------------------- #
-class VerifySMSForm(FlaskForm):
-    verification_code = IntegerField("Verification code",
-                                     validators=[InputRequired("Please enter the six digit code SMSed to you.")])
-    submit = SubmitField("Verify Mobile")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Login User form
-# -------------------------------------------------------------------------------------------------------------- #
-class LoginUserForm(FlaskForm):
-    email = EmailField("Email address",
-                       validators=[InputRequired("Please enter your email address."), Email()])
-    # Don't require a password in the form as they might have forgotten it...
-    password = PasswordField("Password")
-
-    # Two buttons, Log in and I've forgotten my password...
-    submit = SubmitField("Log in")
-    forgot = SubmitField("Reset Password")
-    verify = SubmitField("re-send Verification Code")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Reset Password form
-# -------------------------------------------------------------------------------------------------------------- #
-class ResetPasswordForm(FlaskForm):
-    email = EmailField("Email address", validators=[InputRequired("Please enter your email address."), Email()])
-    password1 = PasswordField("Password", validators=[InputRequired("Please enter a password.")])
-    password2 = PasswordField("Password again", validators=[InputRequired("Please enter a password.")])
-    submit = SubmitField("Reset password")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Custom validator for URLs (which accepts a blank field)
-# -------------------------------------------------------------------------------------------------------------- #
-def url_validation(form, field):
-    if field.data.strip() != "" and \
-         not check_url(field.data):
-        raise validators.ValidationError('This is not a valid url eg https://www.strava.com/')
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# User details form
-# -------------------------------------------------------------------------------------------------------------- #
-class ChangeUserDetailsForm(FlaskForm):
-    name = StringField("Change user name:", validators=[InputRequired("Please enter your name.")])
-    bio = CKEditorField("Witty one liner:", validators=[])
-    groups = GROUP_CHOICES.copy()
-    groups.insert(0, "n/a")
-    group = SelectField("Main Group:", choices=groups)
-    strava = URLField("Strava url:", validators=[url_validation])
-    instagram = URLField("Instagram url:", validators=[url_validation])
-    twitter = URLField("Twitter / X url:", validators=[url_validation])
-    facebook = URLField("Facebook url:", validators=[url_validation])
-    emergency = CKEditorField("Emergency Contact Details (number, relationship, etc):", validators=[])
-    submit = SubmitField("Update me!")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Clothing size form
-# -------------------------------------------------------------------------------------------------------------- #
-class ClothingSizesForm(FlaskForm):
-    jersey_ss_relaxed = SelectField("Sunny Day (relaxed fit) SS Jersey:", choices=SIZES)
-    jersey_ss_race = SelectField("Hard Day (race fit) SS Jersey:", choices=SIZES)
-    jersey_ls = SelectField("Long Sleeve Jersey:", choices=SIZES)
-    gilet = SelectField("Gilet:", choices=SIZES)
-    bib_shorts = SelectField("Bib shorts:", choices=SIZES)
-    bib_longs = SelectField("Bib longs:", choices=SIZES)
-    notes = CKEditorField("Notes:", validators=[])
-    submit = SubmitField("Save me!")
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Check the dB loaded ok

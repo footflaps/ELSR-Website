@@ -18,16 +18,16 @@ from core import app, current_year, is_mobile, live_site
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID, login_required
-from core.db_messages import Message, ADMIN_EMAIL
-from core.dB_events import Event
-from core.db_calendar import Calendar
-from core.db_social import Socials, SOCIAL_DB_PRIVATE
+from core.database.repositories.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID, login_required
+from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.db_events import Event
+from core.database.repositories.db_calendar import Calendar
+from core.database.repositories.db_social import Socials, SOCIAL_DB_PRIVATE
 from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notification_email, email_ride_alert_summary
 from core.subs_google_maps import maps_enabled, get_current_map_count, map_limit_by_day, graph_map_counts
 from core.database.repositories.blog_repository import BlogRepository as Blog
-from core.db_classifieds import Classified
-from core.dB_cafe_comments import CafeComment
+from core.database.repositories.db_classifieds import Classified
+from core.database.repositories.db_cafe_comments import CafeComment
 
 
 # -------------------------------------------------------------------------------------------------------------- #

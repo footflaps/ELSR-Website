@@ -1,8 +1,4 @@
-from flask_ckeditor import CKEditorField
-from flask_wtf import FlaskForm
-from wtforms import SubmitField
-from wtforms.validators import DataRequired
-from datetime import date, datetime
+from datetime import date
 import re
 
 
@@ -70,16 +66,6 @@ class CafeComment(CafeCommentModel):
         with app.app_context():
             comments = db.session.query(CafeComment).filter_by(email=email).all()
             return comments
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create user comment form
-# -------------------------------------------------------------------------------------------------------------- #
-
-class CreateCafeCommentForm(FlaskForm):
-    # Use the full feature editor for the comment
-    body = CKEditorField("Comments should be polite and helpful!", validators=[DataRequired()])
-    submit = SubmitField("Submit")
 
 
 # -------------------------------------------------------------------------------------------------------------- #

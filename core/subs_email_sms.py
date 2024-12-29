@@ -20,14 +20,14 @@ from core import app, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.dB_events import Event
-from core.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
+from core.database.repositories.db_events import Event
+from core.database.repositories.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
-from core.db_messages import Message, ADMIN_EMAIL
-from core.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
-from core.db_social import Socials
+from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
+from core.database.repositories.db_social import Socials
 from core.database.repositories.blog_repository import BlogRepository as Blog, Privacy
-from core.dB_gpx import Gpx
+from core.database.repositories.db_gpx import Gpx
 
 
 # -------------------------------------------------------------------------------------------------------------- #

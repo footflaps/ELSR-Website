@@ -13,7 +13,7 @@ from core import app,  delete_file_if_exists
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.blog_repository import BlogRepository as Blog, BLOG_IMAGE_FOLDER
-from core.dB_events import Event
+from core.database.repositories.db_events import Event
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 
 

@@ -11,12 +11,14 @@ from urllib.parse import urlparse
 
 from core import app, current_year, live_site
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, LoginUserForm, ResetPasswordForm, update_last_seen
-from core.dB_events import Event
+from core.database.repositories.db_users import User, update_last_seen
+from core.forms.user_forms import LoginUserForm, ResetPasswordForm
+from core.database.repositories.db_events import Event
 from core.subs_email_sms import send_reset_email, send_verification_email, send_2fa_sms
 
 

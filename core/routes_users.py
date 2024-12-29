@@ -27,18 +27,19 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, DELETED_NAME, ChangeUserDetailsForm, \
-                          NOTIFICATIONS_DEFAULT_VALUE, login_required, rw_required
-from core.dB_cafes import Cafe
-from core.dB_gpx import Gpx
-from core.dB_cafe_comments import CafeComment
-from core.db_messages import Message, ADMIN_EMAIL
-from core.dB_events import Event
+from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, DELETED_NAME, \
+                          NOTIFICATIONS_DEFAULT_VALUE, login_required
+from core.forms.user_forms import ChangeUserDetailsForm
+from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.db_cafe_comments import CafeComment
+from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.db_events import Event
 from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
-from core.db_calendar import Calendar
-from core.db_social import Socials
+from core.database.repositories.db_calendar import Calendar
+from core.database.repositories.db_social import Socials
 from core.database.repositories.blog_repository import BlogRepository as Blog
-from core.db_classifieds import Classified
+from core.database.repositories.db_classifieds import Classified
 
 
 # -------------------------------------------------------------------------------------------------------------- #

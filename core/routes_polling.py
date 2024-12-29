@@ -16,9 +16,11 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.dB_events import Event
-from core.db_polls import Polls, create_poll_form, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
+from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
+from core.database.repositories.db_events import Event
+from core.database.repositories.db_polls import Polls, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
+
+from core.forms.polls_forms import create_poll_form
 
 
 # -------------------------------------------------------------------------------------------------------------- #

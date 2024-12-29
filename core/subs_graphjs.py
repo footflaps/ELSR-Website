@@ -6,7 +6,7 @@ import os
 
 from core import GPX_UPLOAD_FOLDER_ABS
 from core.subs_google_maps import gpx_colour
-from core.dB_cafes import Cafe
+from core.database.repositories.db_cafes import Cafe
 
 
 # -------------------------------------------------------------------------------------------------------------- #
