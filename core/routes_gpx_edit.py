@@ -18,11 +18,11 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, live_site
 from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
 from core.database.repositories.db_gpx import Gpx
 from core.forms.gpx_forms import create_rename_gpx_form
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.subs_gpx import check_new_gpx_with_all_cafes
 from core.subs_google_maps import start_and_end_maps_native_gm, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx
-from core.database.repositories.db_calendar import Calendar
+from core.database.repositories.calendar_repository import CalendarRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -56,7 +56,7 @@ def edit_route():
     # ----------------------------------------------------------- #
     if not gpx_id:
         app.logger.debug(f"edit_route(): Missing gpx_id!")
-        Event().log_event("Edit GPX Fail", f"Missing gpx_id!")
+        EventRepository().log_event("Edit GPX Fail", f"Missing gpx_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -65,7 +65,7 @@ def edit_route():
     gpx = Gpx().one_gpx(gpx_id)
     if not gpx:
         app.logger.debug(f"edit_route(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        Event().log_event("Edit GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Edit GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -77,7 +77,7 @@ def edit_route():
     # Check the file is actually there, before we try and parse it etc
     if not os.path.exists(filename):
         app.logger.debug(f"edit_route(): Failed to locate GPX file for gpx_id = '{gpx_id}'.")
-        Event().log_event("Edit GPX Fail", f"Failed to locate GPX file for gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Edit GPX Fail", f"Failed to locate GPX file for gpx_id = '{gpx_id}'.")
         flash(f"We seem to have lost the GPX file for route #{gpx_id} ({gpx.name})!")
         return redirect(url_for('gpx_list'))
 
@@ -91,7 +91,7 @@ def edit_route():
             and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"edit_route(): Refusing permission for '{current_user.email}' and route '{gpx.id}'.")
-        Event().log_event("Edit GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Edit GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -132,12 +132,12 @@ def edit_route():
             # Write to db
             if Gpx().add_gpx(gpx):
                 app.logger.debug(f"edit_route(): Successfully updated GPX '{gpx.id}'.")
-                Event().log_event("Edit GPX Success", f"Successfully updated GPX '{gpx_id}'.")
+                EventRepository().log_event("Edit GPX Success", f"Successfully updated GPX '{gpx_id}'.")
                 flash("Details have been updated!")
             else:
                 # Should never get here, but...
                 app.logger.debug(f"edit_route(): Failed to update GPX '{gpx.id}'.")
-                Event().log_event("Edit GPX Fail", f"Failed to update GPX '{gpx_id}'.")
+                EventRepository().log_event("Edit GPX Fail", f"Failed to update GPX '{gpx_id}'.")
                 flash("Sorry, something went wrong!")
 
         else:
@@ -199,11 +199,11 @@ def gpx_cut_start():
     # ----------------------------------------------------------- #
     if not gpx_id:
         app.logger.debug(f"gpx_cut_start(): Missing gpx_id!")
-        Event().log_event("Cut Start Fail", f"Missing gpx_id!")
+        EventRepository().log_event("Cut Start Fail", f"Missing gpx_id!")
         return abort(400)
     elif not index:
         app.logger.debug(f"gpx_cut_start(): Missing index!")
-        Event().log_event("Cut Start Fail", f"Missing index!")
+        EventRepository().log_event("Cut Start Fail", f"Missing index!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -214,7 +214,7 @@ def gpx_cut_start():
 
     if not gpx:
         app.logger.debug(f"gpx_cut_start(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        Event().log_event("GPX Cut Start Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("GPX Cut Start Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         return abort(404)
 
     # ToDo: Need to check index is valid
@@ -229,7 +229,7 @@ def gpx_cut_start():
             and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"gpx_cut_start(): Refusing permission for '{current_user.email}' and route '{gpx_id}'.")
-        Event().log_event("GPX Cut Start Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("GPX Cut Start Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -248,7 +248,7 @@ def gpx_cut_start():
     else:
         # Should never happen, but...
         app.logger.debug(f"gpx_cut_start(): Failed to clear cafe list, gpx_id = '{gpx_id}'.")
-        Event().log_event("GPX Cut Start Fail", f"Failed to clear cafe list, gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("GPX Cut Start Fail", f"Failed to clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to the edit page
@@ -278,11 +278,11 @@ def gpx_cut_end():
     # ----------------------------------------------------------- #
     if not gpx_id:
         app.logger.debug(f"gpx_cut_end(): Missing gpx_id!")
-        Event().log_event("Cut End Fail", f"Missing gpx_id!")
+        EventRepository().log_event("Cut End Fail", f"Missing gpx_id!")
         return abort(400)
     elif not index:
         app.logger.debug(f"gpx_cut_end(): Missing index!")
-        Event().log_event("Cut End Fail", f"Missing index!")
+        EventRepository().log_event("Cut End Fail", f"Missing index!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -293,7 +293,7 @@ def gpx_cut_end():
 
     if not gpx:
         app.logger.debug(f"gpx_cut_end(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        Event().log_event("GPX Cut End Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("GPX Cut End Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         return abort(404)
 
     # ToDo: Need to check index is valid
@@ -308,7 +308,7 @@ def gpx_cut_end():
             and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"gpx_cut_end(): Refusing permission for '{current_user.email}' and route '{gpx_id}'!")
-        Event().log_event("GPX Cut End Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("GPX Cut End Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -326,7 +326,7 @@ def gpx_cut_end():
     else:
         # Should never get here, but..
         app.logger.debug(f"gpx_cut_end(): Gpx().clear_cafe_list() failed for gpx_id = '{gpx_id}'.")
-        Event().log_event("GPX Cut End Fail", f"Gpx().clear_cafe_list() failed for gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("GPX Cut End Fail", f"Gpx().clear_cafe_list() failed for gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to the edit page
@@ -355,7 +355,7 @@ def publish_route():
     # ----------------------------------------------------------- #
     if not gpx_id:
         app.logger.debug(f"publish_route(): Missing gpx_id!")
-        Event().log_event("Publish GPX Fail", f"Missing gpx_id!")
+        EventRepository().log_event("Publish GPX Fail", f"Missing gpx_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -365,7 +365,7 @@ def publish_route():
 
     if not gpx:
         app.logger.debug(f"publish_route(): Failed to locate GPX with gpx_id = '{gpx_id}'!")
-        Event().log_event("Publish GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'!")
+        EventRepository().log_event("Publish GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'!")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -378,7 +378,7 @@ def publish_route():
             and not current_user.admin():
         # Failed authentication
         app.logger.debug(f"publish_route(): Refusing permission for '{current_user.email}' to and route '{gpx.id}'!")
-        Event().log_event("Publish GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Publish GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -386,11 +386,11 @@ def publish_route():
     # ----------------------------------------------------------- #
     if Gpx().publish(gpx_id):
         app.logger.debug(f"publish_route(): Route published gpx.id = '{gpx.id}'.")
-        Event().log_event("Publish GPX Success", f"Route published with gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Publish GPX Success", f"Route published with gpx_id = '{gpx_id}'.")
         flash("Route has been published!")
     else:
         app.logger.debug(f"publish_route(): Failed to publish route gpx.id = '{gpx.id}'.")
-        Event().log_event("Publish GPX Fail", f"Failed to publish, gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Publish GPX Fail", f"Failed to publish, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
 
     # ----------------------------------------------------------- #
@@ -398,7 +398,7 @@ def publish_route():
     # ----------------------------------------------------------- #
     if not Gpx().clear_cafe_list(gpx_id):
         app.logger.debug(f"publish_route(): Failed clear cafe list gpx.id = '{gpx.id}'.")
-        Event().log_event("Publish GPX Fail", f"Failed clear cafe list, gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Publish GPX Fail", f"Failed clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
         return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
 
@@ -409,7 +409,7 @@ def publish_route():
     # on the route being made public, which kicks off this function. We need the updated cafe distances for the
     # notification email, so this is where we send the emails!
     need_to_send_emails = False
-    for ride in Calendar().all_rides_gpx_id(gpx_id):
+    for ride in CalendarRepository().all_rides_gpx_id(gpx_id):
         if ride.sent_email != "True":
             need_to_send_emails = ride.id
             break
@@ -452,7 +452,7 @@ def hide_route():
     # ----------------------------------------------------------- #
     if not gpx_id:
         app.logger.debug(f"hide_route(): Missing gpx_id!")
-        Event().log_event("Hide GPX Fail", f"Missing gpx_id!")
+        EventRepository().log_event("Hide GPX Fail", f"Missing gpx_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -462,7 +462,7 @@ def hide_route():
 
     if not gpx:
         app.logger.debug(f"hide_route(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        Event().log_event("Hide GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Hide GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -476,7 +476,7 @@ def hide_route():
         # Failed authentication
         app.logger.debug(f"hide_route(): Refusing permission for {current_user.email} to "
                          f"and route gpx_id = '{gpx_id}'.")
-        Event().log_event("Hide GPX Fail", f"Refusing permission for {current_user.email} to "
+        EventRepository().log_event("Hide GPX Fail", f"Refusing permission for {current_user.email} to "
                                            f"and route gpx_id = '{gpx_id}'.")
         return abort(403)
 
@@ -485,12 +485,12 @@ def hide_route():
     # ----------------------------------------------------------- #
     if Gpx().hide(gpx_id):
         app.logger.debug(f"hide_route(): Route hidden gpx_id = '{gpx_id}'.")
-        Event().log_event("Hide GPX Success", f"Route hidden gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Hide GPX Success", f"Route hidden gpx_id = '{gpx_id}'.")
         flash("Route has been hidden.")
     else:
         # Should never happen, but...
         app.logger.debug(f"hide_route(): Gpx().hide() failed for gpx_id = '{gpx_id}'.")
-        Event().log_event("Hide GPX Fail", f"SGpx().hide() failed for gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("Hide GPX Fail", f"SGpx().hide() failed for gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
 
     # Redirect back to the edit page as that's probably what they want to do next

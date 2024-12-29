@@ -18,11 +18,11 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.database.repositories.db_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.database.repositories.db_gpx import Gpx, TYPE_ROAD, TYPE_GRAVEL
-from core.database.repositories.db_calendar import Calendar, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
+from core.database.repositories.calendar_repository import CalendarRepository, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
                                                    MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES, start_time_string
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 
 from core.forms.calendar_forms import create_ride_form
 
@@ -145,7 +145,7 @@ def work_out_days(target_date_str):
                                int(dates_short["Saturday"][0:2]), 0, 00) - timedelta(days=1)
         friday_date_str = friday_date.strftime("%d%m%Y")
         # Do we have any rides in the dB
-        if Calendar().all_calendar_date(friday_date_str):
+        if CalendarRepository().all_calendar_date(friday_date_str):
             # We a ride on the Friday, so pre-pend Friday
             days.insert(0, "Friday")
             dates_short["Friday"] = friday_date_str
@@ -158,7 +158,7 @@ def work_out_days(target_date_str):
                                int(dates_short["Sunday"][0:2]), 0, 00) + timedelta(days=1)
         monday_date_str = monday_date.strftime("%d%m%Y")
         # Do we have any rides in the dB
-        if Calendar().all_calendar_date(monday_date_str):
+        if CalendarRepository().all_calendar_date(monday_date_str):
             # We a ride on the Friday, so append Monday
             days.append("Monday")
             dates_short["Monday"] = monday_date_str
@@ -246,7 +246,7 @@ def weekend():
     if not tmp:
         # Fed invalid date
         app.logger.debug(f"weekend(): Failed to understand target_date_str = '{target_date_str}'.")
-        Event().log_event("Weekend Fail", f"Failed to understand target_date_str = '{target_date_str}'.")
+        EventRepository().log_event("Weekend Fail", f"Failed to understand target_date_str = '{target_date_str}'.")
         return abort(404)
     else:
         # Get what we actually wanted from work_out_days()
@@ -271,7 +271,7 @@ def weekend():
     # Populate everything for each day eg loop over ['Saturday', 'Sunday']
     for day in days:
         # Get a set of rides for this day from the calendar indexed by short dates eg '01022024'
-        tmp_rides = Calendar().all_calendar_date(dates_short[day])
+        tmp_rides = CalendarRepository().all_calendar_date(dates_short[day])
 
         # Create empty sets for all the data jinja will need to populate each day
         rides[day] = []
@@ -315,7 +315,7 @@ def weekend():
                 rides[day].append(ride)
 
                 # Look up cafe (which might not yet be in the db)
-                cafe = Cafe().one_cafe(ride.cafe_id)
+                cafe = CafeRepository().one_cafe(ride.cafe_id)
                 if cafe:
                     # Update destination (as cafe may have changed name)
                     ride.destination = cafe.name
@@ -334,7 +334,7 @@ def weekend():
                     cafes[day].append(cafe)
                 else:
                     # Just add a blank cafe object
-                    cafes[day].append(Cafe())
+                    cafes[day].append(CafeRepository())
 
                 # Double check we can find the GPX file
                 # NB have seen once where it was stuck as a tmp file - wonder if I updated the website mid edit?
@@ -345,7 +345,7 @@ def weekend():
                     # Flag missing GPX file (will only be shown to Admins)
                     ride.missing_gpx = True
                     app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
-                    Event().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
+                    EventRepository().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
                     flash(
                         f"Looks like GPX file for ride '{ride.destination}' "
                         f"(ride.id = {ride.id}, leader = '{ride.leader}') has been deleted!")
@@ -353,7 +353,7 @@ def weekend():
             else:
                 # Missing GPX row in the table
                 app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
-                Event().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
+                EventRepository().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
                 flash(f"Looks like GPX route for ride {ride.id} has been deleted (Saturday)!")
 
     # ----------------------------------------------------------- #
@@ -435,10 +435,10 @@ def add_ride():
     # Validate ride_id
     # ----------------------------------------------------------- #
     if ride_id:
-        ride = Calendar().one_ride_id(ride_id)
+        ride = CalendarRepository().one_ride_id(ride_id)
         if not ride:
             app.logger.debug(f"add_ride(): Failed to locate ride, ride_id = '{ride_id}'.")
-            Event().log_event("Edit Ride Fail", f"Failed to locate ride, ride_id = '{ride_id}'.")
+            EventRepository().log_event("Edit Ride Fail", f"Failed to locate ride, ride_id = '{ride_id}'.")
             return abort(404)
     else:
         ride = None
@@ -457,13 +457,13 @@ def add_ride():
             # Should never happen, but...
             app.logger.debug(f"add_ride(): Failed to locate gpx, ride_id  = '{ride_id}', "
                              f"ride.gpx_id = '{ride.gpx_id}'.")
-            Event().log_event("Edit Ride Fail", f"Failed to locate gpx, ride_id  = '{ride_id}', "
+            EventRepository().log_event("Edit Ride Fail", f"Failed to locate gpx, ride_id  = '{ride_id}', "
                                                 f"ride.gpx_id = '{ride.gpx_id}'.")
             flash("Sorry, something went wrong..")
             return redirect(url_for('weekend', date=start_date_str))
 
         # 2: Need to locate the target cafe for the ride (might be a new cafe so None is acceptable)
-        cafe = Cafe().one_cafe(ride.cafe_id)
+        cafe = CafeRepository().one_cafe(ride.cafe_id)
 
         # 3: Need to locate the owner of the ride
         user = User().find_user_from_email(ride.email)
@@ -471,7 +471,7 @@ def add_ride():
             # Should never happen, but...
             app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{ride_id}', "
                              f"ride.email = '{ride.email}'.")
-            Event().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
+            EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
                                                 f"ride.email = '{ride.email}'.")
             flash("Sorry, something went wrong..")
             return redirect(url_for('weekend', date=start_date_str))
@@ -568,12 +568,12 @@ def add_ride():
         if form.destination.data != NEW_CAFE:
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
-            cafe_id = Cafe().cafe_id_from_combo_string(form.destination.data)
-            cafe = Cafe().one_cafe(cafe_id)
+            cafe_id = CafeRepository().cafe_id_from_combo_string(form.destination.data)
+            cafe = CafeRepository().one_cafe(cafe_id)
             if not cafe:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get cafe from '{form.destination.data}'.")
-                Event().log_event("Add ride Fail", f"Failed to get cafe from '{form.destination.data}'.")
+                EventRepository().log_event("Add ride Fail", f"Failed to get cafe from '{form.destination.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the cafe choice.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -596,7 +596,7 @@ def add_ride():
             if not gpx:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get GPX from '{form.gpx_name.data}'.")
-                Event().log_event("Add ride Fail", f"Failed to get GPX from '{form.gpx_name.data}'.")
+                EventRepository().log_event("Add ride Fail", f"Failed to get GPX from '{form.gpx_name.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the GPX choice.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -638,7 +638,7 @@ def add_ride():
             if 'gpx_file' not in request.files:
                 # Almost certain the form failed validation
                 app.logger.debug(f"add_ride(): Failed to find 'gpx_file' in request.files!")
-                Event().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
+                EventRepository().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
                 flash("Couldn't find the file.")
                 return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -652,7 +652,7 @@ def add_ride():
                 # empty file without a filename.
                 if file.filename == '':
                     app.logger.debug(f"add_ride(): No selected file!")
-                    Event().log_event(f"Add ride Fail", f"No selected file!")
+                    EventRepository().log_event(f"Add ride Fail", f"No selected file!")
                     flash('No selected file')
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -661,7 +661,7 @@ def add_ride():
                 if not file or \
                         not allowed_file(file.filename):
                     app.logger.debug(f"add_ride(): Invalid file '{file.filename}'!")
-                    Event().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
+                    EventRepository().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
                     flash("That's not a GPX file!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -695,11 +695,11 @@ def add_ride():
                     # Have to re-get the GPX as it's changed since we created it
                     gpx = Gpx().one_gpx(new_id)
                     app.logger.debug(f"add_ride(): GPX added to dB, id = '{gpx.id}'.")
-                    Event().log_event(f"Add ride Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
+                    EventRepository().log_event(f"Add ride Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
                 else:
                     # Failed to create new dB entry
                     app.logger.debug(f"add_ride(): Failed to add gpx to the dB!")
-                    Event().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
+                    EventRepository().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -722,7 +722,7 @@ def add_ride():
                     file.save(filename)
                 except Exception as e:
                     app.logger.debug(f"add_ride(): Failed to upload/save '{filename}', error code was {e.args}.")
-                    Event().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
+                    EventRepository().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -731,7 +731,7 @@ def add_ride():
                 # Update gpx object with filename
                 if not Gpx().update_filename(gpx.id, filename):
                     app.logger.debug(f"add_ride(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
-                    Event().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                    EventRepository().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     flash("Sorry, something went wrong!")
                     return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -740,7 +740,7 @@ def add_ride():
                 # Strip all excess data from the file
                 strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
                 app.logger.debug(f"add_ride(): New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
-                Event().log_event(f"Add ride Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
+                EventRepository().log_event(f"Add ride Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
 
         # ----------------------------------------------------------- #
         # We can now add / update the ride in the Calendar
@@ -750,7 +750,7 @@ def add_ride():
             new_ride = ride
         else:
             # New event
-            new_ride = Calendar()
+            new_ride = CalendarRepository()
 
         # Populate the calendar entry
         # Convert form date format '2023-06-23' to preferred format '23062023'
@@ -781,7 +781,7 @@ def add_ride():
                 # Should never happen, but...
                 app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{ride_id}', "
                                  f"form.owner.data = '{form.owner.data}'.")
-                Event().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
+                EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
                                                     f"form.owner.data = '{form.owner.data}'.")
                 flash("Sorry, something went wrong..")
                 return redirect(url_for('weekend', date=start_date_str))
@@ -790,11 +790,11 @@ def add_ride():
             new_ride.email = current_user.email
 
         # Add to the dB
-        new_ride = Calendar().add_ride(new_ride)
+        new_ride = CalendarRepository().add_ride(new_ride)
         if new_ride:
             # Success
             app.logger.debug(f"add_ride(): Successfully added new ride.")
-            Event().log_event("Add ride Pass", f"Successfully added new_ride.")
+            EventRepository().log_event("Add ride Pass", f"Successfully added new_ride.")
             if ride:
                 flash("Ride updated!")
             else:
@@ -814,7 +814,7 @@ def add_ride():
         else:
             # Should never happen, but...
             app.logger.debug(f"add_ride(): Failed to add ride from '{new_ride}'.")
-            Event().log_event("Add ride Fail", f"Failed to add ride '{new_ride}'.")
+            EventRepository().log_event("Add ride Fail", f"Failed to add ride '{new_ride}'.")
             flash("Sorry, something went wrong.")
             return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
                                    live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
@@ -881,24 +881,24 @@ def delete_ride():
     # ----------------------------------------------------------- #
     if not ride_id:
         app.logger.debug(f"delete_ride(): Missing ride_id!")
-        Event().log_event("Delete Ride Fail", f"Missing ride_id!")
+        EventRepository().log_event("Delete Ride Fail", f"Missing ride_id!")
         return abort(400)
     if not date:
         app.logger.debug(f"delete_ride(): Missing date!")
-        Event().log_event("Delete Ride Fail", f"Missing date!")
+        EventRepository().log_event("Delete Ride Fail", f"Missing date!")
         return abort(400)
     elif not password:
         app.logger.debug(f"delete_ride(): Missing password!")
-        Event().log_event("Delete Ride Fail", f"Missing password!")
+        EventRepository().log_event("Delete Ride Fail", f"Missing password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check the ride_id is valid
     # ----------------------------------------------------------- #
-    ride = Calendar().one_ride_id(ride_id)
+    ride = CalendarRepository().one_ride_id(ride_id)
     if not ride:
         app.logger.debug(f"delete_ride(): Failed to locate ride with cafe_id = '{ride_id}'.")
-        Event().log_event("Delete Ride Fail", f"Failed to locate ride with cafe_id = '{ride_id}'.")
+        EventRepository().log_event("Delete Ride Fail", f"Failed to locate ride with cafe_id = '{ride_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -906,7 +906,7 @@ def delete_ride():
     # ----------------------------------------------------------- #
     if not current_user.validate_password(current_user, password, user_ip):
         app.logger.debug(f"make_admin(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
-        Event().log_event("Make Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        EventRepository().log_event("Make Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
         return redirect(url_for('weekend', date=date))
 
@@ -918,22 +918,22 @@ def delete_ride():
         # Failed authentication
         app.logger.debug(f"delete_ride(): Rejected request from '{current_user.email}' as no permissions"
                          f" for ride_id = '{ride_id}'.")
-        Event().log_event("Delete Ride Fail", f"Rejected request from user '{current_user.email}' as no "
+        EventRepository().log_event("Delete Ride Fail", f"Rejected request from user '{current_user.email}' as no "
                                               f"permissions for ride_id = '{ride_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Delete event from calendar
     # ----------------------------------------------------------- #
-    if Calendar().delete_ride(ride_id):
+    if CalendarRepository().delete_ride(ride_id):
         # Success
         app.logger.debug(f"delete_ride(): Successfully deleted the ride, ride_id = '{ride_id}'.")
-        Event().log_event("Delete Ride Success", f"Successfully deleted the ride. ride_id = '{ride_id}''.")
+        EventRepository().log_event("Delete Ride Success", f"Successfully deleted the ride. ride_id = '{ride_id}''.")
         flash("Ride deleted.")
     else:
         # Should never get here, but....
         app.logger.debug(f"delete_ride(): Failed to delete the ride, ride_id = '{ride_id}'.")
-        Event().log_event("Delete Ride Fail", f"Failed to delete the ride, ride_id = '{ride_id}'.")
+        EventRepository().log_event("Delete Ride Fail", f"Failed to delete the ride, ride_id = '{ride_id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to weekend ride summary page for the day in question

@@ -1,11 +1,10 @@
-import os
 import math
 from datetime import datetime, timedelta
 from enum import Enum
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import Blog Model
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import db, app
@@ -15,10 +14,6 @@ from core.database.models.blog_model import BlogModel
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
-
-# Where we store blog photos
-BLOG_IMAGE_FOLDER = os.environ.get('ELSR_BLOG_PHOTO_FOLDER', '/img/blog_photos/')
-
 
 # Don't change these as they are in the db
 class Privacy(Enum):
@@ -59,7 +54,67 @@ class Category(Enum):
 class BlogRepository(BlogModel):
 
     # ---------------------------------------------------------------------------------------------------------- #
-    # Functions
+    # Create
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def add_blog(new_blog):
+        # Try and add to the dB
+        with app.app_context():
+            try:
+                db.session.add(new_blog)
+                db.session.commit()
+                # Return blog item
+                return BlogModel.query.filter_by(id=new_blog.id).first()
+
+            except Exception as e:
+                db.rollback()
+                app.logger.error(f"db.add_blog(): Failed with error code '{e.args}'.")
+                return None
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Modify
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def update_photo(blog_id: int, filename: str):
+        with app.app_context():
+            blog = BlogModel.query.filter_by(id=blog_id).first()
+            if blog:
+                try:
+                    blog.image_filename = filename
+                    db.session.commit()
+                    return True
+
+                except Exception as e:
+                    db.rollback()
+                    app.logger.error(f"db_update_photo: Failed to update Blog for blog_id = '{blog_id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+
+        return False
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Delete
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def delete_blog(blog_id):
+        with app.app_context():
+            blog = BlogModel.query.filter_by(id=blog_id).first()
+            if blog:
+                try:
+                    db.session.delete(blog)
+                    db.session.commit()
+                    return True
+
+                except Exception as e:
+                    db.rollback()
+                    app.logger.error(f"db_delete_blog: Failed to delete Blog for blog_id = '{blog_id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+
+        return False
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Search
     # ---------------------------------------------------------------------------------------------------------- #
     @staticmethod
     def all():
@@ -125,75 +180,3 @@ class BlogRepository(BlogModel):
         with app.app_context():
             blogs = BlogModel.query.filter_by(date_unix=date_unix).filter_by(category=Category.EVENT.value).all()
             return blogs
-
-    @staticmethod
-    def add_blog(new_blog):
-        # Try and add to the dB
-        with app.app_context():
-            try:
-                db.session.add(new_blog)
-                db.session.commit()
-                # Return blog item
-                return BlogModel.query.filter_by(id=new_blog.id).first()
-            except Exception as e:
-                app.logger.error(f"db.add_blog(): Failed with error code '{e.args}'.")
-                return None
-
-    @staticmethod
-    def delete_blog(blog_id):
-        with app.app_context():
-            blog = BlogModel.query.filter_by(id=blog_id).first()
-            if blog:
-                try:
-                    db.session.delete(blog)
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"db_delete_blog: Failed to delete Blog for blog_id = '{blog_id}', "
-                                     f"error code '{e.args}'.")
-                    return False
-        return False
-
-    @staticmethod
-    def update_photo(blog_id: int, filename: str):
-        with app.app_context():
-            blog = BlogModel.query.filter_by(id=blog_id).first()
-            if blog:
-                try:
-                    blog.image_filename = filename
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"db_update_photo: Failed to update Blog for blog_id = '{blog_id}', "
-                                     f"error code '{e.args}'.")
-                    return False
-        return False
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-# This seems to be the only one which works?
-with app.app_context():
-    db.create_all()
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-#                                               Functions
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    blogs = BlogModel.query.all()
-    print(f"Found {len(blogs)} blog items in the dB")
-    app.logger.debug(f"Start of day: Found {len(blogs)} blogs in the dB")
-

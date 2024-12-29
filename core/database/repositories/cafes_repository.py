@@ -3,7 +3,7 @@ import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import db object from __init__.py
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import db, app
@@ -27,34 +27,13 @@ CLOSED_CAFE_COLOUR = "#922b21"
 # Define Cafe Class
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Cafe(CafeModel):
+class CafeRepository(CafeModel):
 
-    # Return a list of all cafes
-    def all_cafes(self):
-        with app.app_context():
-            cafes = db.session.query(Cafe).all()
-            return cafes
-
-    def all_cafes_sorted(self):
-        with app.app_context():
-            cafes = db.session.query(Cafe).order_by('name').all()
-            return cafes
-
-    # Return a single cafe
-    def one_cafe(self, cafe_id):
-        with app.app_context():
-            cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
-            # Will return nothing if id is invalid
-            return cafe
-
-    def find_by_name(self, name):
-        with app.app_context():
-            cafe = db.session.query(Cafe).filter_by(name=name).first()
-            # Will return nothing if name is invalid
-            return cafe
-
-    # Add a new cafe to the dB
-    def add_cafe(self, new_cafe):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Create
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def add_cafe(new_cafe: CafeModel) -> CafeModel | None:
         # Update some details
         new_cafe.added_date = date.today().strftime("%d%m%Y")
         new_cafe.active = True
@@ -64,16 +43,45 @@ class Cafe(CafeModel):
             try:
                 db.session.add(new_cafe)
                 db.session.commit()
-                # Return success
-                return True
-            except Exception as e:
-                app.logger.error(f"dB.add_cafe(): Failed to add cafe '{new_cafe.name}', error code was '{e.args}'.")
-                return False
+                db.refresh(new_cafe)
+                return new_cafe
 
-    # Update an existing cafe
-    def update_cafe(self, cafe_id, updated_cafe):
+            except Exception as e:
+                db.rollback()
+                app.logger.error(f"dB.add_cafe(): Failed to add cafe '{new_cafe.name}', error code was '{e.args}'.")
+                return None
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Delete
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def delete_cafe(cafe_id: int) -> bool:
         with app.app_context():
-            cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
+            # Locate the cafe file
+            cafe = CafeModel.query.filter_by(id=cafe_id).first()
+            if cafe:
+                # Delete the Cafe
+                try:
+                    db.session.delete(cafe)
+                    db.session.commit()
+                    return True
+
+                except Exception as e:
+                    db.rollback()
+                    app.logger.error(f"db_cafe: Failed to delete Cafe for cafe_id = '{cafe_id}', "
+                                     f"error code '{e.args}'.")
+                    return False
+
+        return False
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Modify
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Update an existing cafe
+    @staticmethod
+    def update_cafe(cafe_id: int, updated_cafe: CafeModel) -> bool:
+        with app.app_context():
+            cafe = CafeModel.query.filter_by(id=cafe_id).first()
             if cafe:
                 cafe.name = updated_cafe.name
                 cafe.lat = updated_cafe.lat
@@ -85,29 +93,37 @@ class Cafe(CafeModel):
                 try:
                     db.session.commit()
                     return True
+
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.update_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
+
         app.logger.error(f"dB.update_cafe(): Failed to with cafe '{cafe.name}', invalid cafe_id='{cafe_id}'.")
         return False
 
-    def update_photo(self, cafe_id, filename):
+    @staticmethod
+    def update_photo(cafe_id: int, filename: str) -> bool:
         with app.app_context():
-            cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
+            cafe = CafeModel.query.filter_by(id=cafe_id).first()
             if cafe:
                 try:
                     cafe.image_name = filename
                     db.session.commit()
                     return True
+
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.update_photo(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
+
         return False
 
     # Mark a cafe as being closed or closing
-    def close_cafe(self, cafe_id, details):
+    @staticmethod
+    def close_cafe(cafe_id: int, details: str) -> bool:
         with app.app_context():
-            cafe = db.session.query(Cafe).get(cafe_id)
+            cafe = CafeModel.query.get(cafe_id)
             # Found one?
             if cafe:
                 try:
@@ -117,15 +133,19 @@ class Cafe(CafeModel):
                                    f"This cafe has been marked as closed or closing: {details}</b><br>{cafe.details}"
                     db.session.commit()
                     return True
+
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.close_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
+
         return False
 
     # Mark a cafe as no longer being closed
-    def unclose_cafe(self, cafe_id):
+    @staticmethod
+    def unclose_cafe(cafe_id: int) -> bool:
         with app.app_context():
-            cafe = db.session.query(Cafe).get(cafe_id)
+            cafe = CafeModel.query.get(cafe_id)
             # Found one?
             if cafe:
                 try:
@@ -135,31 +155,65 @@ class Cafe(CafeModel):
                                    f"Rejoice! This is no longer closing!</b><br>{cafe.details}"
                     db.session.commit()
                     return True
+
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.unclose_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
+
         return False
 
-    def delete_cafe(self, cafe_id):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Search
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Return a list of all cafes
+    @staticmethod
+    def all_cafes() -> list[CafeModel]:
         with app.app_context():
-            # Locate the cafe file
-            cafe = db.session.query(Cafe).filter_by(id=cafe_id).first()
-            if cafe:
-                # Delete the Cafe
-                try:
-                    db.session.delete(cafe)
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"db_cafe: Failed to delete Cafe for cafe_id = '{cafe_id}', "
-                                     f"error code '{e.args}'.")
-                    return False
-        return False
-
-    def find_all_cafes_by_email(self, email):
-        with app.app_context():
-            cafes = db.session.query(Cafe).filter_by(added_email=email).all()
+            cafes = CafeModel.query.all()
             return cafes
+
+    @staticmethod
+    def all_cafes_sorted() -> list[CafeModel]:
+        with app.app_context():
+            cafes = CafeModel.query.order_by('name').all()
+            return cafes
+
+    # Return a single cafe
+    @staticmethod
+    def one_cafe(cafe_id: int) -> CafeModel | None:
+        with app.app_context():
+            cafe = CafeModel.query.filter_by(id=cafe_id).first()
+            # Will return nothing if id is invalid
+            return cafe
+
+    @staticmethod
+    def find_by_name(name: str) -> CafeModel | None:
+        with app.app_context():
+            cafe = CafeModel.query.filter_by(name=name).first()
+            # Will return nothing if name is invalid
+            return cafe
+
+    @staticmethod
+    def find_all_cafes_by_email(email) -> list[CafeModel]:
+        with app.app_context():
+            cafes = CafeModel.query.filter_by(added_email=email).all()
+            return cafes
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Other
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def cafe_id_from_combo_string(combo_string: str) -> str:
+        # Extract id from number in last set of brackets
+        cafe_id = combo_string.split('(')[-1].split(')')[0]
+        return cafe_id
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Properties
+    # -------------------------------------------------------------------------------------------------------------- #
+    def combo_string(self) -> str:
+        return f"{self.name} ({self.id})"
 
     def cafe_list(self, cafes_passed):
         # Take the cafe_passed JSON string from the GPX data base and from it, returns the details of the
@@ -186,62 +240,4 @@ class Cafe(CafeModel):
                 cafe_list.append(cafe_summary)
 
         return sorted(cafe_list, key=lambda x: x['range_km'])
-
-    def combo_string(self):
-        return f"{self.name} ({self.id})"
-
-    def cafe_id_from_combo_string(self, combo_string):
-        # Extract id from number in last set of brackets
-        cafe_id = combo_string.split('(')[-1].split(')')[0]
-        return cafe_id
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-# This seems to be the only one which works?
-with app.app_context():
-    db.create_all()
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    cafes = db.session.query(Cafe).all()
-    print(f"Found {len(cafes)} cafes in the dB")
-    app.logger.debug(f"Start of day: Found {len(cafes)} cafes in the dB")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Functions
-# -------------------------------------------------------------------------------------------------------------- #
-
-# Jinja needs to be able to look up the cafe name from it's id when resolving comments on the user's page
-
-
-def get_cafe_name_from_id(cafe_id):
-    return Cafe().one_cafe(cafe_id).name
-
-
-# Add this to jinja's environment, so we can use it within html templates
-app.jinja_env.globals.update(get_cafe_name_from_id=get_cafe_name_from_id)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Hack to change date
-# -------------------------------------------------------------------------------------------------------------- #
-
-# with app.app_context():
-#     cafes = Cafe().all_cafes()
-#     for cafe in cafes:
-#         if len(cafe.added_date) != 8:
-#             date_obj = datetime.strptime(cafe.added_date, "%B %d, %Y")
-#             new_date = date_obj.strftime("%d%m%Y")
-#             print(f"ID = {cafe.id}, Name = '{cafe.name}', Date = '{cafe.added_date}' or '{new_date}'")
-#             cafe.added_date = new_date
-#             db.session.add(cafe)
-#             db.session.commit()
 

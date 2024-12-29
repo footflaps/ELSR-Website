@@ -23,7 +23,7 @@ from core.database.repositories.db_users import update_last_seen, logout_barred_
 from core.database.repositories.db_social import Socials, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
                                                  SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.forms.social_forms import create_social_form
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.db_users import User
 from core.subs_email_sms import send_social_notification_emails
 from core.subs_dates import get_date_from_url
@@ -68,7 +68,7 @@ def add_social():
         social = Socials().one_social_id(social_id)
         if not social:
             app.logger.debug(f"add_social(): Failed to locate social, social_id = '{social_id}'.")
-            Event().log_event("Add Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
+            EventRepository().log_event("Add Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
             return abort(404)
     else:
         social = None
@@ -86,7 +86,7 @@ def add_social():
                 # Should never happen but....
                 app.logger.debug(f"add_social(): Failed to locate owner, "
                                  f"social_id = '{social_id}', social.email = '{social.email}'.")
-                Event().log_event("Edit Social Fail", f"Failed to locate owner, "
+                EventRepository().log_event("Edit Social Fail", f"Failed to locate owner, "
                                                       f"social_id = '{social_id}', social.email = '{social.email}'.")
                 flash("Failed to locate owner, so defaulting to current_user")
                 # Default to current user
@@ -153,7 +153,7 @@ def add_social():
                 # Should never happen but....
                 app.logger.debug(f"add_social(): Failed to locate owner, "
                                  f"social_id = '{social_id}', social.email = '{social.email}'.")
-                Event().log_event("Edit Social Fail", f"Failed to locate owner, "
+                EventRepository().log_event("Edit Social Fail", f"Failed to locate owner, "
                                                       f"social_id = '{social_id}', social.email = '{social.email}'.")
                 flash("Failed to locate owner, so defaulting to current_user")
                 # Default to current user
@@ -186,7 +186,7 @@ def add_social():
         if new_social:
             # Success
             app.logger.debug(f"add_social(): Successfully added new social.")
-            Event().log_event("Add social Pass", f"Successfully added new social.")
+            EventRepository().log_event("Add social Pass", f"Successfully added new social.")
             if social:
                 flash("Social updated!")
             else:
@@ -198,7 +198,7 @@ def add_social():
         else:
             # Should never happen, but...
             app.logger.debug(f"add_social(): Failed to add social for '{new_social}'.")
-            Event().log_event("Add Social Fail", f"Failed to add social for '{new_social}'.")
+            EventRepository().log_event("Add Social Fail", f"Failed to add social for '{new_social}'.")
             flash("Sorry, something went wrong.")
             return render_template("calendar_add_social.html", year=current_year, form=form, social=social,
                                    live_site=live_site())
@@ -321,11 +321,11 @@ def delete_social():
     # ----------------------------------------------------------- #
     if not social_id:
         app.logger.debug(f"delete_social(): Missing social_id!")
-        Event().log_event("Delete social Fail", f"Missing social_id!")
+        EventRepository().log_event("Delete social Fail", f"Missing social_id!")
         return abort(400)
     if not password:
         app.logger.debug(f"delete_social(): Missing Password!")
-        Event().log_event("Delete social Fail", f"Missing Password!")
+        EventRepository().log_event("Delete social Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -334,7 +334,7 @@ def delete_social():
     social = Socials().one_social_id(social_id)
     if not social:
         app.logger.debug(f"delete_social(): Failed to locate social, social_id = '{social_id}'.")
-        Event().log_event("Delete Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
+        EventRepository().log_event("Delete Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -346,7 +346,7 @@ def delete_social():
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}'.")
-        Event().log_event("Delete Social Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository().log_event("Delete Social Fail", f"Refusing permission for '{current_user.email}', "
                                                 f"social_id = '{social_id}'.")
         return abort(403)
 
@@ -359,7 +359,7 @@ def delete_social():
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
         app.logger.debug(f"delete_social(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        Event().log_event("Social Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository().log_event("Social Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
         return redirect(url_for('social'))
@@ -369,11 +369,11 @@ def delete_social():
     # ----------------------------------------------------------- #
     if Socials().delete_social(social_id):
         app.logger.debug(f"delete_social(): Deleted social, social_id = '{social_id}'.")
-        Event().log_event("Delete Social Success", f"Deleted social, social_id = '{social_id}'.")
+        EventRepository().log_event("Delete Social Success", f"Deleted social, social_id = '{social_id}'.")
         flash("Social has been deleted.")
     else:
         app.logger.debug(f"delete_social(): Failed to delete social, social_id = '{social_id}'.")
-        Event().log_event("Delete Social Fail", f"Failed to delete social, social_id = '{social_id}'.")
+        EventRepository().log_event("Delete Social Fail", f"Failed to delete social, social_id = '{social_id}'.")
         flash("Sorry, something went wrong.")
 
     return redirect(url_for('social'))
@@ -398,7 +398,7 @@ def download_ics():
     # ----------------------------------------------------------- #
     if not social_id:
         app.logger.debug(f"download_ics(): Missing social_id!")
-        Event().log_event("download_ics Fail", f"Missing social_id!")
+        EventRepository().log_event("download_ics Fail", f"Missing social_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -407,7 +407,7 @@ def download_ics():
     social = Socials().one_social_id(social_id)
     if not social:
         app.logger.debug(f"download_ics(): Failed to locate social, social_id = '{social_id}'.")
-        Event().log_event("download_ics Fail", f"Failed to locate social, social_id = '{social_id}'.")
+        EventRepository().log_event("download_ics Fail", f"Failed to locate social, social_id = '{social_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -418,7 +418,7 @@ def download_ics():
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}' as Private.")
-        Event().log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository().log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
                                                  f"social_id = '{social_id}' as Private.")
         flash("Private events are for regular riders only!")
         return redirect(url_for("not_rw"))
@@ -450,7 +450,7 @@ def download_ics():
 
     app.logger.debug(f"download_ics(): Serving ICS social_id = '{social_id}' ({social.date}), "
                      f"download_name = '{download_name}'.")
-    Event().log_event("ICS Downloaded", f"Serving ICS social_idd = '{social_id}' ({social.date}).")
+    EventRepository().log_event("ICS Downloaded", f"Serving ICS social_idd = '{social_id}' ({social.date}).")
     return send_from_directory(directory=ICS_DIRECTORY,
                                path=os.path.basename(filename),
                                download_name=download_name)

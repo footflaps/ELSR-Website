@@ -4,7 +4,7 @@ import time
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import db object from __init__.py
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
@@ -29,44 +29,13 @@ ALL_DAYS = 365 * 10
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Event(EventModel):
+class EventRepository(EventModel):
 
-    # Return a list of all events
-    def all_events(self):
-        with app.app_context():
-            events = db.session.query(Event).all()
-            return events
-
-    def event_id(self, id):
-        with app.app_context():
-            event = db.session.query(Event).filter_by(id=id).first()
-            return event
-
-    def all_events_days(self, days):
-        if days == "all":
-            days = ALL_DAYS
-        timestamp = time.time() - SECONDS_IN_DAY * int(days)
-        with app.app_context():
-            events = db.session.query(Event).filter(Event.date > timestamp).all()
-            return events
-
-    # Return all events from a given user
-    def all_events_email(self, email):
-        with app.app_context():
-            events = db.session.query(Event).filter_by(email=email).all()
-            # Will return nothing if id is invalid
-            return events
-
-    def all_events_email_days(self, email, days):
-        if days == "all":
-            days = ALL_DAYS
-        timestamp = time.time() - SECONDS_IN_DAY * int(days)
-        with app.app_context():
-            events = db.session.query(Event).filter(Event.date > timestamp).filter_by(email=email).all()
-            return events
-
-    # Add a new event to the dB
-    def add_event(self, event):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Create
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def add_event(event: EventModel) -> bool:
         # Time stamp the event bases on when we add to dB
         # NB Use Unix epoch time (rounded to an Int)
         event.date = int(time.time())
@@ -78,68 +47,14 @@ class Event(EventModel):
                 db.session.commit()
                 # Return success
                 return True
+
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.add_event(): Failed with error code '{e.args}'.")
                 return False
 
-    def delete_events_email_days(self, email, days):
-        if days == "all":
-            days = ALL_DAYS
-        timestamp = time.time() - SECONDS_IN_DAY * int(days)
-        try:
-            with app.app_context():
-                events = db.session.query(Event).filter_by(email=email).filter(Event.date > timestamp).all()
-                for event in events:
-                    db.session.delete(event)
-                db.session.commit()
-                return True
-        except Exception as e:
-            app.logger.error(f"dB.delete_events_email_days(): Failed with error code '{e.args}'.")
-            return False
-
-    def delete_events_all_days(self, days):
-        if days == "all":
-            days = ALL_DAYS
-        timestamp = time.time() - SECONDS_IN_DAY * int(days)
-        try:
-            with app.app_context():
-                events = db.session.query(Event).filter(Event.date > timestamp).all()
-                for event in events:
-                    db.session.delete(event)
-                db.session.commit()
-                return True
-        except Exception as e:
-            app.logger.error(f"dB.delete_events_all_days(): Failed with error code '{e.args}'.")
-            return False
-
-    def delete_all_404s(self):
-        try:
-            with app.app_context():
-                events = db.session.query(Event).filter_by(type="404").all()
-                for event in events:
-                    db.session.delete(event)
-                db.session.commit()
-                return True
-        except Exception as e:
-            app.logger.error(f"dB.delete_all_404s(): Failed with error code '{e.args}'.")
-            return False
-
-    def delete_event(self, event_id):
-        with app.app_context():
-            event = db.session.query(Event).filter_by(id=event_id).first()
-
-            if event:
-                try:
-                    db.session.delete(event)
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    app.logger.error(f"dB.delete_event(): Failed with error code '{e.args}'.")
-                    return False
-        app.logger.error(f"dB.delete_event(): Failed to delete event.id = {event_id}, event not found.")
-        return False
-
-    def log_event(self, event_type, event_details):
+    @staticmethod
+    def log_event(event_type: int, event_details: str) -> bool:
         with app.app_context():
             # Can we get a user email address
             # If this is called from a Threaded task it won't necessarily have a valid
@@ -153,7 +68,7 @@ class Event(EventModel):
                 user_email = "background"
 
             # Create a new event
-            event = Event(
+            event = EventRepository(
                 email=user_email,
                 type=event_type,
                 details=event_details,
@@ -167,17 +82,126 @@ class Event(EventModel):
                 # Return success
                 return True
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.log_event(): Failed with error code '{e.args}'.")
                 return False
 
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Modify
+    # -------------------------------------------------------------------------------------------------------------- #
 
-# -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Delete
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def delete_events_email_days(email: str, days: int) -> bool:
+        if days == "all":
+            days = ALL_DAYS
+        timestamp = time.time() - SECONDS_IN_DAY * int(days)
 
-# This seems to be the only one which works?
-with app.app_context():
-    db.create_all()
+        try:
+            with app.app_context():
+                events = EventModel.query.filter_by(email=email).filter(EventRepository.date > timestamp).all()
+                for event in events:
+                    db.session.delete(event)
+                db.session.commit()
+                return True
+
+        except Exception as e:
+            db.rollback()
+            app.logger.error(f"dB.delete_events_email_days(): Failed with error code '{e.args}'.")
+            return False
+
+    @staticmethod
+    def delete_events_all_days(days: int) -> bool:
+        if days == "all":
+            days = ALL_DAYS
+        timestamp = time.time() - SECONDS_IN_DAY * int(days)
+        try:
+            with app.app_context():
+                events = db.session.query(EventRepository).filter(EventRepository.date > timestamp).all()
+                for event in events:
+                    db.session.delete(event)
+                db.session.commit()
+                return True
+
+        except Exception as e:
+            db.rollback()
+            app.logger.error(f"dB.delete_events_all_days(): Failed with error code '{e.args}'.")
+            return False
+
+    @staticmethod
+    def delete_all_404s() -> bool:
+        try:
+            with app.app_context():
+                events = db.session.query(EventRepository).filter_by(type="404").all()
+                for event in events:
+                    db.session.delete(event)
+                db.session.commit()
+                return True
+
+        except Exception as e:
+            db.rollback()
+            app.logger.error(f"dB.delete_all_404s(): Failed with error code '{e.args}'.")
+            return False
+
+    @staticmethod
+    def delete_event(event_id: int) -> bool:
+        with app.app_context():
+            event = db.session.query(EventRepository).filter_by(id=event_id).first()
+
+            if event:
+                try:
+                    db.session.delete(event)
+                    db.session.commit()
+                    return True
+
+                except Exception as e:
+                    db.rollback()
+                    app.logger.error(f"dB.delete_event(): Failed with error code '{e.args}'.")
+                    return False
+        app.logger.error(f"dB.delete_event(): Failed to delete event.id = {event_id}, event not found.")
+        return False
+
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Search
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def all_events() -> list[EventModel]:
+        with app.app_context():
+            events = EventModel.query.all()
+            return events
+
+    @staticmethod
+    def event_id(id: int) -> EventModel | None:
+        with app.app_context():
+            event = EventModel.query.filter_by(id=id).first()
+            return event
+
+    @staticmethod
+    def all_events_days(days: int) -> list[EventModel]:
+        if days == "all":
+            days = ALL_DAYS
+        timestamp = time.time() - SECONDS_IN_DAY * int(days)
+        with app.app_context():
+            events = EventModel.query.filter(EventRepository.date > timestamp).all()
+            return events
+
+    @staticmethod
+    def all_events_email(email: str) -> list[EventModel]:
+        with app.app_context():
+            events = EventModel.query.filter_by(email=email).all()
+            # Will return nothing if id is invalid
+            return events
+
+    @staticmethod
+    def all_events_email_days(email: str, days: int) -> list[EventModel]:
+        if days == "all":
+            days = ALL_DAYS
+        timestamp = time.time() - SECONDS_IN_DAY * int(days)
+        with app.app_context():
+            events = EventModel.query.filter(EventRepository.date > timestamp).filter_by(email=email).all()
+            return events
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -235,14 +259,4 @@ def toandfro_event(event_type):
 app.jinja_env.globals.update(flag_event=flag_event)
 app.jinja_env.globals.update(good_event=good_event)
 app.jinja_env.globals.update(toandfro_event=toandfro_event)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    events = db.session.query(Event).all()
-    print(f"Found {len(events)} events in the dB")
-    app.logger.debug(f"Start of day: Found {len(events)} events in the dB")
 

@@ -1,8 +1,8 @@
-from datetime import date, datetime
+from datetime import date
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import out database connection from __init__
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
@@ -100,6 +100,7 @@ class Message(MessageModel):
                 # Have to re-acquire the message to return it (else we get Detached Instance Error)
                 return db.session.query(Message).filter_by(id=message.id).first()
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.add_message(): Failed with error code '{e.args}'.")
                 return None
 
@@ -138,6 +139,7 @@ class Message(MessageModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.mark_as_read(): Failed with error code '{e.args}'.")
                     return False
         return False
@@ -153,6 +155,7 @@ class Message(MessageModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.mark_as_unread(): Failed with error code '{e.args}'.")
                     return False
         return False
@@ -166,18 +169,10 @@ class Message(MessageModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.delete(): Failed with error code '{e.args}'.")
                     return False
         return False
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-# This one doesn't seem to work, need to use the one in the same module as the Primary dB
-with app.app_context():
-    db.create_all()
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -191,40 +186,3 @@ def admin_has_mail():
         return False
 
 app.jinja_env.globals.update(admin_has_mail=admin_has_mail)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    messages = db.session.query(Message).all()
-    print(f"Found {len(messages)} messages in the dB")
-    app.logger.debug(f"Start of day: Found {len(messages)} messages in the dB")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Hack to change date
-# -------------------------------------------------------------------------------------------------------------- #
-
-# with app.app_context():
-#     messages = Message().all_messages()
-#     for message in messages:
-#         if len(message.sent_date) != 8:
-#             sent_date_obj = datetime.strptime(message.sent_date, "%B %d, %Y")
-#             new_sent_date = sent_date_obj.strftime("%d%m%Y")
-#
-#             if message.read_date:
-#                 read_date_obj = datetime.strptime(message.read_date, "%B %d, %Y")
-#                 new_read_date = read_date_obj.strftime("%d%m%Y")
-#             else:
-#                 new_read_date = None
-#
-#             print(f"ID = {message.id}, Name = '{message.to_email}', '{message.sent_date}' -> '{new_sent_date}', "
-#                   f"'{message.read_date}' -> '{new_read_date}'")
-#
-#             message.sent_date = new_sent_date
-#             message.read_date = new_read_date
-#             db.session.add(message)
-#             db.session.commit()
-

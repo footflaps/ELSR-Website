@@ -1,23 +1,12 @@
-from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, DateField, TimeField, validators
-from wtforms.validators import InputRequired
-from flask_ckeditor import CKEditorField
 from datetime import datetime
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import db object from __init__.py
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
 from core.database.models.socials_model import SocialsModel
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Import our own classes
-# -------------------------------------------------------------------------------------------------------------- #
-
-from core.database.repositories.db_users import User
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -70,6 +59,7 @@ class Socials(SocialsModel):
                 # Return social object
                 return db.session.query(Socials).filter_by(id=new_social.id).first()
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.add_social(): Failed with error code '{e.args}'.")
                 return None
 
@@ -86,6 +76,7 @@ class Socials(SocialsModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_social: Failed to delete Social for social_id = '{social_id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -112,31 +103,3 @@ class Socials(SocialsModel):
                 social.long_date = social_date.strftime("%A %b %d %Y")
                 socials.append(social)
         return socials
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    db.create_all()
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-#                                               Functions
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    rides = db.session.query(Socials).all()
-    print(f"Found {len(rides)} socials in the dB")
-    app.logger.debug(f"Start of day: Found {len(rides)} socials in the dB")
-

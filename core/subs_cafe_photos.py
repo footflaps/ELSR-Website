@@ -4,25 +4,13 @@ from PIL import Image
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import app from __init__.py
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app,  delete_file_if_exists
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Import our three database classes and associated forms, decorators etc
-# -------------------------------------------------------------------------------------------------------------- #
-
-from core.database.repositories.db_cafes import Cafe
-from core.database.repositories.db_events import Event
+from core import app,  delete_file_if_exists, CAFE_FOLDER
+from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.event_repository import EventRepository
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Constants used for uploading pictures of the cafes
-# -------------------------------------------------------------------------------------------------------------- #
-
-CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -86,15 +74,15 @@ def update_cafe_photo(form, cafe):
             form.cafe_photo.data.save(filename)
 
             # Update cafe object with filename
-            if Cafe().update_photo(cafe.id, f"{os.path.basename(filename)}"):
+            if CafeRepository().update_photo(cafe.id, f"{os.path.basename(filename)}"):
                 # Uploaded OK
                 app.logger.debug(f"update_cafe_photo(): Successfully uploaded the photo.")
-                Event().log_event("Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
+                EventRepository().log_event("Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
                 flash("Cafe photo has been uploaded.")
             else:
                 # Failed to upload eg invalid path
                 app.logger.debug(f"update_cafe_photo(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
-                Event().log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
+                EventRepository().log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
                 flash(f"Sorry, failed to upload the file '{filename}!")
 
             # Shrink image if too large
@@ -108,7 +96,7 @@ def update_cafe_photo(form, cafe):
     else:
         # allowed_file() failed.
         app.logger.debug(f"update_cafe_photo(): Invalid file type for image.")
-        Event().log_event("Cafe Fail", f"Invalid image filename '{os.path.basename(form.cafe_photo.data.filename)}',"
+        EventRepository().log_event("Cafe Fail", f"Invalid image filename '{os.path.basename(form.cafe_photo.data.filename)}',"
                                        f"permitted file types are '{IMAGE_ALLOWED_EXTENSIONS}'.")
         flash("Invalid file type for image!")
 

@@ -15,7 +15,7 @@ from core import app
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, update_last_seen, admin_only, login_required
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -47,33 +47,33 @@ def delete_event():
     # ----------------------------------------------------------- #
     if not event_id:
         app.logger.debug(f"delete_event(): Missing message_id!")
-        Event().log_event("Delete Event Fail", f"Missing event_id!")
+        EventRepository().log_event("Delete Event Fail", f"Missing event_id!")
         return abort(400)
     elif not user_id \
             and url_for("user_page") in request.referrer:
         # NB If we are jumping back to user_page, we must have a valid user_id
         app.logger.debug(f"delete_event(): Missing user_id!")
-        Event().log_event("Delete Event Fail", f"Missing user_id!")
+        EventRepository().log_event("Delete Event Fail", f"Missing user_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    event = Event().event_id(event_id)
+    event = EventRepository().event_id(event_id)
     if not event:
         app.logger.debug(f"delete_event(): Can't locate event event_id = '{event_id}'.")
-        Event().log_event("Delete Event Fail", f"Can't locate event id = '{event_id}'.")
+        EventRepository().log_event("Delete Event Fail", f"Can't locate event id = '{event_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
     # Delete event
     # ----------------------------------------------------------- #
-    if Event().delete_event(event_id):
+    if EventRepository().delete_event(event_id):
         flash("Event has been deleted")
     else:
         # Should never get here, but...
         app.logger.debug(f"delete_event(): Event().delete_event() failed, event_id = '{event_id}'")
-        Event().log_event("MDelete Event Fail", f"Failed to delete, event_id = '{event_id}'")
+        EventRepository().log_event("MDelete Event Fail", f"Failed to delete, event_id = '{event_id}'")
         flash("Sorry, something went wrong")
 
     # Back to calling page, which will either be:
@@ -129,15 +129,15 @@ def delete_events():
     # ----------------------------------------------------------- #
     if not days:
         app.logger.debug(f"delete_events(): Missing days!")
-        Event().log_event("Delete Events Fail", f"Missing days!")
+        EventRepository().log_event("Delete Events Fail", f"Missing days!")
         return abort(400)
     elif not user_id:
         app.logger.debug(f"delete_events(): Missing user_id!")
-        Event().log_event("Delete Events Fail", f"Missing user_id!")
+        EventRepository().log_event("Delete Events Fail", f"Missing user_id!")
         return abort(400)
     elif not password:
         app.logger.debug(f"delete_events(): Missing password!")
-        Event().log_event("Delete Events Fail", f"Missing password!")
+        EventRepository().log_event("Delete Events Fail", f"Missing password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -147,7 +147,7 @@ def delete_events():
         user = User().find_user_from_id(user_id)
         if not user:
             app.logger.debug(f"delete_events(): Invalid user_id = '{user_id}'.")
-            Event().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'.")
+            EventRepository().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'.")
             return abort(404)
 
     # ----------------------------------------------------------- #
@@ -155,7 +155,7 @@ def delete_events():
     # ----------------------------------------------------------- #
     if not current_user.validate_password(current_user, password, user_ip):
         app.logger.debug(f"delete_events(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
-        Event().log_event("Delete Events Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        EventRepository().log_event("Delete Events Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
         if user_id == "admin":
             # Back to Admin page
@@ -171,21 +171,21 @@ def delete_events():
     # we're on the user page and just deleting their events
     if user_id.lower() == "admin":
         app.logger.debug(f"delete_events(): We think we're called from admin, so delete events for all users.")
-        if Event().delete_events_all_days(days):
+        if EventRepository().delete_events_all_days(days):
             flash("Messages deleted!")
         else:
             # Should never get here, but...
             app.logger.debug(f"delete_events(): Event().delete_events_all_days() failed, days = '{days}'.")
-            Event().log_event("Delete Events Fail", f"days = '{days}'")
+            EventRepository().log_event("Delete Events Fail", f"days = '{days}'")
     else:
         app.logger.debug(f"delete_events(): Delete '{days}' days of events for user '{user.email}'.")
-        if Event().delete_events_email_days(user.email, days):
+        if EventRepository().delete_events_email_days(user.email, days):
             flash("Messages deleted!")
         else:
             # Should never get here, but...
             app.logger.debug(f"delete_events(): Event().delete_events_email_days() failed, "
                              f"days = '{days}', email = '{user.email}'.")
-            Event().log_event("Delete Events Fail", f"Days = '{days}', email = '{user.email}'")
+            EventRepository().log_event("Delete Events Fail", f"Days = '{days}', email = '{user.email}'")
 
     # Back to calling page, which will either be:
     #   1. user_page
@@ -238,7 +238,7 @@ def delete_404s():
     # ----------------------------------------------------------- #
     if not password:
         app.logger.debug(f"delete_404s(): Missing password!")
-        Event().log_event("Delete 404s Fail", f"Missing password!")
+        EventRepository().log_event("Delete 404s Fail", f"Missing password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -246,7 +246,7 @@ def delete_404s():
     # ----------------------------------------------------------- #
     if not current_user.admin():
         app.logger.debug(f"delete_404s(): Invalid user_id = '{current_user.id}'.")
-        Event().log_event("Delete 404s Fail", f"Invalid user_id = '{current_user.id}'.")
+        EventRepository().log_event("Delete 404s Fail", f"Invalid user_id = '{current_user.id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -254,7 +254,7 @@ def delete_404s():
     # ----------------------------------------------------------- #
     if not current_user.validate_password(current_user, password, user_ip):
         app.logger.debug(f"delete_events(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
-        Event().log_event("Delete Events Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        EventRepository().log_event("Delete Events Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
         # Back to Admin page
         return redirect(url_for('admin_page', anchor="eventLog"))
@@ -262,12 +262,12 @@ def delete_404s():
     # ----------------------------------------------------------- #
     # Delete 404 events
     # ----------------------------------------------------------- #
-    if Event().delete_all_404s():
+    if EventRepository().delete_all_404s():
         flash("404 Events deleted!")
     else:
         # Should never get here, but...
         app.logger.debug(f"delete_404s(): Event().delete_all_404s() failed.")
-        Event().log_event("Delete 404s Fail", f"Event().delete_all_404s() failed.")
+        EventRepository().log_event("Delete 404s Fail", f"Event().delete_all_404s() failed.")
 
     # Back to Admin page
     return redirect(url_for("admin_page", anchor="eventLog"))

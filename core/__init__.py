@@ -71,6 +71,14 @@ GLOBAL_FLASH = None
 # cafe images. So, we upload to the same place and then move the file afterward to its final home.
 GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 
+# -------------------------------------------------------------------------------------------------------------- #
+# Env Vars
+# -------------------------------------------------------------------------------------------------------------- #
+CONFIG_FOLDER = os.environ['ELSR_CONFIG_FOLDER']
+CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
+CLASSIFIEDS_PHOTO_FOLDER = os.environ['ELSR_CLASSIFIEDS_PHOTO_FOLDER']
+BLOG_IMAGE_FOLDER = os.environ.get('ELSR_BLOG_PHOTO_FOLDER', '/img/blog_photos/')
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Initialise Sentry (only for live site)

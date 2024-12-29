@@ -13,7 +13,7 @@ from datetime import datetime
 from core import GPX_UPLOAD_FOLDER_ABS
 from core.database.repositories.db_users import User
 from core.database.repositories.db_gpx import Gpx
-from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.blog_repository import NO_GPX, NO_CAFE, Sticky, Privacy, Category
 
 
@@ -59,7 +59,7 @@ def create_blogs_form(admin: bool):
         # Generate the list of cafes
         # ----------------------------------------------------------- #
         cafe_choices = [NO_CAFE]
-        cafes = Cafe().all_cafes_sorted()
+        cafes = CafeRepository().all_cafes_sorted()
         for cafe in cafes:
             cafe_choices.append(cafe.combo_string())
 

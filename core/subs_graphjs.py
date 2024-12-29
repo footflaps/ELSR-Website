@@ -6,7 +6,7 @@ import os
 
 from core import GPX_UPLOAD_FOLDER_ABS
 from core.subs_google_maps import gpx_colour
-from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.cafes_repository import CafeRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -151,7 +151,7 @@ def get_destination_cafe_height(elevation_data_set, gpx_set, cafe_set):
         gpx = gpx_set[n]
         target_cafe = cafe_set[n]
 
-        cafe_list = Cafe().cafe_list(gpx.cafes_passed)
+        cafe_list = CafeRepository().cafe_list(gpx.cafes_passed)
 
         # NB The cafe list is a JSON string from the gpx object
         for cafe in cafe_list:

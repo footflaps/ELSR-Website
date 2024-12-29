@@ -4,7 +4,7 @@ from sqlalchemy import func
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import db object from __init__.py
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db, GRAVEL_CHOICE
@@ -87,6 +87,7 @@ class Gpx(GpxModel):
                 # Return new GPX id
                 return new_gpx.id
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"db_gpx: Failed to add GPX '{new_gpx.name}', "
                                  f"error code '{e.args}'.")
                 return False
@@ -101,6 +102,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to delete GPX for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -118,6 +120,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to update filename for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -141,6 +144,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to update downloads for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -156,6 +160,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to clear cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -194,6 +199,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -222,6 +228,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -240,6 +247,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -279,6 +287,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to publish gpx for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -293,6 +302,7 @@ class Gpx(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_gpx: Failed to hide gpx for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -308,14 +318,6 @@ class Gpx(GpxModel):
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    db.create_all()
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # Jinja needs to know how many routes pass a cafe for the cafe page
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -325,49 +327,3 @@ def number_routes_passing_by(cafe_id, user):
 
 
 app.jinja_env.globals.update(number_routes_passing_by=number_routes_passing_by)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    gpxes = db.session.query(Gpx).all()
-    print(f"Found {len(gpxes)} GPXes in the dB")
-    app.logger.debug(f"Start of day: Found {len(gpxes)} GPXes in the dB")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# One off hack to set direction
-# -------------------------------------------------------------------------------------------------------------- #
-# with app.app_context():
-#     gpxes = Gpx().all_gpxes()
-#     for gpx in gpxes:
-#         direction = gpx_direction(gpx)
-#         print(f"ID = '{gpx.id}', Direction = '{direction}'")
-#         app.logger.debug(f"ID = '{gpx.id}', Direction = '{direction}'")
-#         gpx.direction = direction
-#         db.session.add(gpx)
-#         db.session.commit()
-
-# # Test GPX Direction
-# gpxes = Gpx().all_gpxes()
-# for gpx in gpxes:
-#         direction = gpx_direction(gpx.filename, gpx.id)
-#         print(f"ID = '{gpx.id}', Direction = '{direction}'")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Hack to change date
-# -------------------------------------------------------------------------------------------------------------- #
-
-# with app.app_context():
-#     gpxes = Gpx().all_gpxes()
-#     for gpx in gpxes:
-#         if len(gpx.date) != 8:
-#             date_obj = datetime.strptime(gpx.date, "%B %d, %Y")
-#             new_date = date_obj.strftime("%d%m%Y")
-#             print(f"ID = {gpx.id}, Name = '{gpx.name}', Date = '{gpx.date}' or '{new_date}'")
-#             gpx.date = new_date
-#             db.session.add(gpx)
-#             db.session.commit()

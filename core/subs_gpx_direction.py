@@ -11,7 +11,7 @@ import mpu
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, GPX_UPLOAD_FOLDER_ABS
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -36,7 +36,7 @@ def gpx_direction(gpx_filename, gpx_id):
     # Check GPX file actually exists
     if not os.path.exists(filename):
         app.logger.debug(f"gpx_direction(): Failed to locate file: gpx_id = '{gpx_id}'.")
-        Event().log_event("gpx_direction Fail", f"Failed to locate file: gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("gpx_direction Fail", f"Failed to locate file: gpx_id = '{gpx_id}'.")
         return "Missing File"
 
     # ----------------------------------------------------------- #

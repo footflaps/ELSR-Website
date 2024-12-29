@@ -14,13 +14,13 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import update_last_seen, logout_barred_user
-from core.database.repositories.db_calendar import Calendar, GROUP_CHOICES
+from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES
 from core.database.repositories.db_social import Socials
 from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.database.repositories.db_gpx import Gpx
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
-from core.database.repositories.db_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_dates import get_date_from_url
 
 
@@ -118,7 +118,7 @@ def calendar():
             # ----------------------------------------------------------- #
             # Request rides from Calendar class
             # ----------------------------------------------------------- #
-            if Calendar().all_calendar_date(datestr):
+            if CalendarRepository().all_calendar_date(datestr):
                 markup += f"<a href='{url_for('weekend', date=f'{datestr}')}'>" \
                           f"<i class='fas fa-solid fa-person-biking fa-2xl'></i></a>"
                 added_ride = True
@@ -210,7 +210,7 @@ def ride_history(request):
     # ----------------------------------------------------------- #
     # Extract all the rides from the calendar
     # ----------------------------------------------------------- #
-    rides = Calendar().all_calender_group_in_past(group)
+    rides = CalendarRepository().all_calender_group_in_past(group)
 
     # ----------------------------------------------------------- #
     # Extract details from the GPX and add to the ride objects
@@ -230,7 +230,7 @@ def ride_history(request):
 
             # Also add marker for the cafe (but only if we're showing the GPX)
             cafe_id = ride.cafe_id
-            cafe = Cafe().one_cafe(cafe_id)
+            cafe = CafeRepository().one_cafe(cafe_id)
             if cafe:
                 if len(gpxes) <= MAX_NUM_GPX_PER_GRAPH:
                     if cafe.active:

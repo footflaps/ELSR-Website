@@ -11,7 +11,7 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site
+from core import app, current_year, live_site, BLOG_IMAGE_FOLDER
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -19,11 +19,11 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required, rw_required
-from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky, BLOG_IMAGE_FOLDER,
+from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky,
                                                         NO_CAFE, NO_GPX, Category)
 from core.forms.blog_forms import create_blogs_form
-from core.database.repositories.db_events import Event
-from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.event_repository import EventRepository
+from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.db_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
@@ -78,7 +78,7 @@ def display_blog():
         blog = Blog().find_blog_from_id(blog_id)
         if not blog:
             app.logger.debug(f"blog(): Failed to locate blog, blog_id = '{blog_id}'.")
-            Event().log_event("Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+            EventRepository().log_event("Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
             flash("Sorry, looks like that Blog post has been deleted...")
             return abort(404)
     else:
@@ -93,14 +93,14 @@ def display_blog():
             if not current_user.is_authenticated:
                 # Not logged in
                 app.logger.debug(f"blog(): Refusing permission for unregistered user.")
-                Event().log_event("Blog Fail", f"Refusing permission for unregistered user.")
+                EventRepository().log_event("Blog Fail", f"Refusing permission for unregistered user.")
                 flash("You must be logged in to see private blog posts!")
                 return redirect(url_for("not_logged_in"))
 
             elif not current_user.readwrite():
                 # Failed authentication
                 app.logger.debug(f"blog(): Refusing permission for '{current_user.email}'.")
-                Event().log_event("Blog Fail", f"Refusing permission for '{current_user.email}'.")
+                EventRepository().log_event("Blog Fail", f"Refusing permission for '{current_user.email}'.")
                 flash("You do not have permission to see private blog posts!")
                 return redirect(url_for("not_rw"))
 
@@ -175,7 +175,7 @@ def add_blog():
         blog = Blog().find_blog_from_id(blog_id)
         if not blog:
             app.logger.debug(f"add_blog(): Failed to locate blog, blog_id = '{blog_id}'.")
-            Event().log_event("Edit Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+            EventRepository().log_event("Edit Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
             return abort(404)
     else:
         blog = None
@@ -200,7 +200,7 @@ def add_blog():
         if blog.cafe_id == NO_CAFE:
             form.cafe.data = NO_CAFE
         else:
-            form.cafe.data = Cafe().one_cafe(blog.cafe_id).combo_string()
+            form.cafe.data = CafeRepository().one_cafe(blog.cafe_id).combo_string()
         if blog.gpx_index == NO_GPX:
             form.gpx.data = NO_GPX
         else:
@@ -280,7 +280,7 @@ def add_blog():
         # 2. The rest
         new_blog.title = form.title.data
         new_blog.category = form.category.data
-        new_blog.cafe_id = Cafe().cafe_id_from_combo_string(form.cafe.data)
+        new_blog.cafe_id = CafeRepository().cafe_id_from_combo_string(form.cafe.data)
         new_blog.gpx_index = Gpx().gpx_id_from_combo_string(form.gpx.data)
         new_blog.details = form.details.data
         new_blog.private = form.privacy.data == Privacy.PRIVATE.value
@@ -306,7 +306,7 @@ def add_blog():
         if not new_blog:
             # Should never happen, but...
             app.logger.debug(f"add_blog(): Failed to add ride from '{new_blog}'.")
-            Event().log_event("Add blog Fail", f"Failed to add ride '{new_blog}'.")
+            EventRepository().log_event("Add blog Fail", f"Failed to add ride '{new_blog}'.")
             flash("Sorry, something went wrong.")
             return render_template("blog_new.html", year=current_year, form=form, live_site=live_site())
 
@@ -321,7 +321,7 @@ def add_blog():
         #   Success
         # ----------------------------------------------------------- #
         app.logger.debug(f"add_blog(): Successfully added new blog post.")
-        Event().log_event("Add Blog Pass", f"Successfully added new blog post.")
+        EventRepository().log_event("Add Blog Pass", f"Successfully added new blog post.")
         if blog:
             flash("Blog updated!")
         else:
@@ -395,15 +395,15 @@ def delete_blog():
     # ----------------------------------------------------------- #
     if not blog_id:
         app.logger.debug(f"delete_blog(): Missing blog_id!")
-        Event().log_event("Delete Blog Fail", f"Missing blog_id!")
+        EventRepository().log_event("Delete Blog Fail", f"Missing blog_id!")
         return abort(400)
     if not password:
         app.logger.debug(f"delete_blog(): Missing Password!")
-        Event().log_event("Delete Blog Fail", f"Missing Password!")
+        EventRepository().log_event("Delete Blog Fail", f"Missing Password!")
         return abort(400)
     if not reason:
         app.logger.debug(f"delete_blog(): Missing Reason!")
-        Event().log_event("Delete Blog Fail", f"Missing Reason!")
+        EventRepository().log_event("Delete Blog Fail", f"Missing Reason!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -412,7 +412,7 @@ def delete_blog():
     blog = Blog().find_blog_from_id(blog_id)
     if not blog:
         app.logger.debug(f"delete_blog(): Failed to locate blog, blog_id = '{blog_id}'.")
-        Event().log_event("Delete Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}'.")
+        EventRepository().log_event("Delete Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -425,7 +425,7 @@ def delete_blog():
         # Failed authentication
         app.logger.debug(f"delete_blog(): Refusing permission for '{current_user.email}' and "
                          f"blog_id = '{blog_id}'.")
-        Event().log_event("Delete Blog Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository().log_event("Delete Blog Fail", f"Refusing permission for '{current_user.email}', "
                                               f"blog_id = '{blog_id}'.")
         return abort(403)
 
@@ -434,7 +434,7 @@ def delete_blog():
     # ----------------------------------------------------------- #
     if reason.strip() == "":
         app.logger.debug(f"delete_blog(): Reason was blank, blog_id = '{blog_id}'.")
-        Event().log_event("Delete Blog Fail", f"Reason was blank, blog_id = '{blog_id}'.")
+        EventRepository().log_event("Delete Blog Fail", f"Reason was blank, blog_id = '{blog_id}'.")
         flash("You must give a reason to delete a blog post!")
         return redirect(url_for('display_blog', blog_id=blog_id))
 
@@ -447,7 +447,7 @@ def delete_blog():
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
         app.logger.debug(f"delete_blog(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        Event().log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository().log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to blogs page
         return redirect(url_for('display_blog'))
@@ -471,22 +471,22 @@ def delete_blog():
         if Message().add_message(new_message):
             # Success!
             app.logger.debug(f"delete_blog(): Sent blog delete message to '{blog.email}'.")
-            Event().log_event("Delete Blog Pass", f"Sent blog delete message to '{blog.email}'.")
+            EventRepository().log_event("Delete Blog Pass", f"Sent blog delete message to '{blog.email}'.")
         else:
             # Should never get here, but...
             app.logger.debug(f"delete_blog(): Message().add_message() failed, blog.email = '{blog.email}'.")
-            Event().log_event("Delete Blog Fail", f"Message().add_message() failed, blog.email = '{blog.email}'.")
+            EventRepository().log_event("Delete Blog Fail", f"Message().add_message() failed, blog.email = '{blog.email}'.")
 
     # ----------------------------------------------------------- #
     # Delete blog
     # ----------------------------------------------------------- #
     if Blog().delete_blog(blog_id):
         app.logger.debug(f"delete_blog(): Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
-        Event().log_event("Delete Blog Success", f"Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
+        EventRepository().log_event("Delete Blog Success", f"Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
         flash("Blog has been deleted.")
     else:
         app.logger.debug(f"delete_blog(): Failed to delete Blog, blog_id = '{blog_id}'.")
-        Event().log_event("Delete Blog Fail", f"Failed to delete Blog, blog_id = '{blog_id}'.")
+        EventRepository().log_event("Delete Blog Fail", f"Failed to delete Blog, blog_id = '{blog_id}'.")
         flash("Sorry, something went wrong.")
 
     return redirect(url_for('display_blog'))
@@ -510,7 +510,7 @@ def blog_ics():
     # ----------------------------------------------------------- #
     if not blog_id:
         app.logger.debug(f"blog_ics(): Missing blog_id.")
-        Event().log_event("Blog ICS Fail", f"Missing blog_id.")
+        EventRepository().log_event("Blog ICS Fail", f"Missing blog_id.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -519,7 +519,7 @@ def blog_ics():
     blog = Blog().find_blog_from_id(blog_id)
     if not blog:
         app.logger.debug(f"blog_icsg(): Failed to locate blog, blog_id = '{blog_id}'.")
-        Event().log_event("Blog ICS Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+        EventRepository().log_event("Blog ICS Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -547,7 +547,7 @@ def blog_ics():
 
     app.logger.debug(f"download_ics(): Serving ICS blog_id = '{blog_id}' ({blog.title}), "
                      f"download_name = '{download_name}'.")
-    Event().log_event("ICS Downloaded", f"Serving ICS blog_id = '{blog_id}' ({blog.title}).")
+    EventRepository().log_event("ICS Downloaded", f"Serving ICS blog_id = '{blog_id}' ({blog.title}).")
     return send_from_directory(directory=ICS_DIRECTORY,
                                path=os.path.basename(filename),
                                download_name=download_name)

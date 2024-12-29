@@ -16,9 +16,9 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
-from core.database.repositories.db_cafes import Cafe
-from core.database.repositories.db_events import Event
-from core.database.repositories.db_calendar import Calendar
+from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.event_repository import EventRepository
+from core.database.repositories.calendar_repository import CalendarRepository
 from core.subs_email_sms import send_ride_notification_emails
 
 
@@ -134,16 +134,16 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # Make sure gpx_id is valid
     if not gpx:
         app.logger.debug(f"check_new_gpx_with_all_cafes(): Failed to locate GPX: gpx_id = '{gpx_id}'.")
-        Event().log_event("GPX Fail", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        EventRepository().log_event("GPX Fail", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
         return False
 
     app.logger.debug(f"check_new_gpx_with_all_cafes(): Updating GPX '{gpx.name}' for closeness to all cafes.")
-    Event().log_event("Update GPX", f"Updating GPX '{gpx.name}' for closeness to all cafes.'")
+    EventRepository().log_event("Update GPX", f"Updating GPX '{gpx.name}' for closeness to all cafes.'")
 
     # ----------------------------------------------------------- #
     # Get all the cafes
     # ----------------------------------------------------------- #
-    cafes = Cafe().all_cafes()
+    cafes = CafeRepository().all_cafes()
 
     # Need a list of closeness
     min_distance_km = [100] * len(cafes)
@@ -207,12 +207,12 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # send_email is either 'False' for no, or set to an int (ride_id) for yes
     if type(send_email) == int:
         # We have a ride_id index into the calendar
-        ride = Calendar().one_ride_id(send_email)
+        ride = CalendarRepository().one_ride_id(send_email)
         # Check that worked
         if not ride:
             # Should never happen, but...
             app.logger.debug(f"check_new_gpx_with_all_cafes(): Passed invalid ride ID, send_email = '{send_email}'")
-            Event().log_event("check_new_gpx_with_all_cafes() Fail", f"Passed invalid ride ID, send_email = '{send_email}'")
+            EventRepository().log_event("check_new_gpx_with_all_cafes() Fail", f"Passed invalid ride ID, send_email = '{send_email}'")
             return
         # Send emails
         send_ride_notification_emails(ride)

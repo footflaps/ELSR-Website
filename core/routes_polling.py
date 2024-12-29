@@ -17,7 +17,7 @@ from core import app, current_year, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.db_polls import Polls, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 
 from core.forms.polls_forms import create_poll_form
@@ -141,7 +141,7 @@ def poll_details(poll_id):
     poll = Polls().one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"poll_details(): Failed to locate Poll with poll_id = '{poll_id}'.")
-        Event().log_event("One Poll Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
+        EventRepository().log_event("One Poll Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -150,12 +150,12 @@ def poll_details(poll_id):
     if poll.privacy == POLL_PRIVATE:
         if not current_user.is_authenticated:
             app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
-            Event().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
+            EventRepository().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You must be logged in to see private polls.")
             return redirect(url_for("not_logged_in"))
         elif not current_user.readwrite():
             app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
-            Event().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
+            EventRepository().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You don't have permission to see private polls.")
             flash("Please contact an Admin via your user page.")
             return redirect(url_for("not_rw"))
@@ -248,14 +248,14 @@ def add_poll():
         if not poll:
             # Poll no longer / never existed
             app.logger.debug(f"add_poll(): Failed to find Poll, id = '{poll_id}'!")
-            Event().log_event("add_poll Fail", f"Failed to find Poll, id = '{poll_id}'!")
+            EventRepository().log_event("add_poll Fail", f"Failed to find Poll, id = '{poll_id}'!")
             flash(f"That poll id '{poll_id}' doesn't seem to exist!")
             abort(404)
 
         # Not allowed to edit a poll in progress
         if poll.responses != POLL_NO_RESPONSE:
             app.logger.debug(f"add_poll(): Denied attempt to edit active poll, id = '{poll_id}'!")
-            Event().log_event("add_poll Fail", f"Denied attempt to edit active poll, id = '{poll_id}'!")
+            EventRepository().log_event("add_poll Fail", f"Denied attempt to edit active poll, id = '{poll_id}'!")
             flash("You can't edit a poll once people have voted!")
             abort(403)
 
@@ -270,7 +270,7 @@ def add_poll():
     if not user:
         # Should never get here, but...
         app.logger.debug(f"add_poll(): Failed to find user, id = '{current_user.id}'!")
-        Event().log_event("add_poll Fail", f"Failed to find user, id = '{current_user.id}'!")
+        EventRepository().log_event("add_poll Fail", f"Failed to find user, id = '{current_user.id}'!")
         flash("The current user doesn't seem to exist!")
         abort(404)
 
@@ -330,12 +330,12 @@ def add_poll():
         if poll:
             # Success
             app.logger.debug(f"add_poll(): Successfully added new poll.")
-            Event().log_event("Add Poll Pass", f"Successfully added new poll.")
+            EventRepository().log_event("Add Poll Pass", f"Successfully added new poll.")
 
         else:
             # Should never happen, but...
             app.logger.debug(f"add_poll(): Failed to add poll for '{poll}'.")
-            Event().log_event("Add Poll Fail", f"Failed to add poll for '{poll}'.")
+            EventRepository().log_event("Add Poll Fail", f"Failed to add poll for '{poll}'.")
             flash("Sorry, something went wrong.")
 
         # They're finished
@@ -411,7 +411,7 @@ def edit_poll():
     # ----------------------------------------------------------- #
     if not poll_id:
         app.logger.debug(f"edit_poll(): No poll_id!")
-        Event().log_event("edit_poll Fail", f"No poll_id!")
+        EventRepository().log_event("edit_poll Fail", f"No poll_id!")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -421,7 +421,7 @@ def edit_poll():
     if not poll:
         # Poll no longer / never existed
         app.logger.debug(f"edit_poll(): Failed to find Poll, id = '{poll_id}'!")
-        Event().log_event("edit_poll Fail", f"Failed to find Poll, id = '{poll_id}'!")
+        EventRepository().log_event("edit_poll Fail", f"Failed to find Poll, id = '{poll_id}'!")
         flash(f"That poll id '{poll_id}' doesn't seem to exist!")
         abort(404)
 
@@ -434,7 +434,7 @@ def edit_poll():
         # Failed authentication
         app.logger.debug(f"edit_poll(): Refusing permission for '{current_user.email}' and "
                          f"poll_id = '{poll_id}'.")
-        Event().log_event("edit_poll Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository().log_event("edit_poll Fail", f"Refusing permission for '{current_user.email}', "
                                             f"poll_id = '{poll_id}'.")
         abort(403)
 
@@ -456,7 +456,7 @@ def edit_poll():
         # Validate against current_user's password
         if not user.validate_password(user, password, user_ip):
             app.logger.debug(f"edit_poll(): Delete failed, incorrect password for user_id = '{user.id}'!")
-            Event().log_event("edit_poll Fail", f"Incorrect password for user_id = '{user.id}'!")
+            EventRepository().log_event("edit_poll Fail", f"Incorrect password for user_id = '{user.id}'!")
             flash(f"Incorrect password for user {user.name}!")
             # Go back to polls page
             return redirect(url_for('poll_details', poll_id=poll_id))
@@ -473,7 +473,7 @@ def edit_poll():
     if not user:
         # Should never get here, but...
         app.logger.debug(f"edit_poll(): Failed to find user, id = '{current_user.id}'!")
-        Event().log_event("edit_poll Fail", f"Failed to find user, id = '{current_user.id}'!")
+        EventRepository().log_event("edit_poll Fail", f"Failed to find user, id = '{current_user.id}'!")
         flash("The current user doesn't seem to exist!")
         abort(404)
 
@@ -521,12 +521,12 @@ def edit_poll():
         if poll:
             # Success
             app.logger.debug(f"edit_poll(): Successfully added new poll.")
-            Event().log_event("edit_poll Pass", f"Successfully added new poll.")
+            EventRepository().log_event("edit_poll Pass", f"Successfully added new poll.")
 
         else:
             # Should never happen, but...
             app.logger.debug(f"edit_poll(): Failed to add poll for '{poll}'.")
-            Event().log_event("edit_poll Fail", f"Failed to add poll for '{poll}'.")
+            EventRepository().log_event("edit_poll Fail", f"Failed to add poll for '{poll}'.")
             flash("Sorry, something went wrong.")
 
         # They're finished
@@ -601,11 +601,11 @@ def delete_poll():
     # ----------------------------------------------------------- #
     if not poll_id:
         app.logger.debug(f"delete_poll(): Missing poll_id!")
-        Event().log_event("Delete poll Fail", f"Missing poll_id!")
+        EventRepository().log_event("Delete poll Fail", f"Missing poll_id!")
         return abort(400)
     if not password:
         app.logger.debug(f"delete_poll(): Missing Password!")
-        Event().log_event("Delete poll Fail", f"Missing Password!")
+        EventRepository().log_event("Delete poll Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
@@ -614,7 +614,7 @@ def delete_poll():
     poll = Polls().one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"delete_poll(): Failed to locate poll, poll_id = '{poll_id}'.")
-        Event().log_event("Delete poll Fail", f"Failed to locate poll, poll_id = '{poll_id}'.")
+        EventRepository().log_event("Delete poll Fail", f"Failed to locate poll, poll_id = '{poll_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -626,7 +626,7 @@ def delete_poll():
         # Failed authentication
         app.logger.debug(f"delete_poll(): Refusing permission for '{current_user.email}' and "
                          f"poll_id = '{poll_id}'.")
-        Event().log_event("Delete poll Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository().log_event("Delete poll Fail", f"Refusing permission for '{current_user.email}', "
                                               f"poll_id = '{poll_id}'.")
         return abort(403)
 
@@ -639,7 +639,7 @@ def delete_poll():
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
         app.logger.debug(f"delete_poll(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        Event().log_event("Poll Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository().log_event("Poll Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to polls page
         return redirect(url_for('poll_list'))
@@ -649,11 +649,11 @@ def delete_poll():
     # ----------------------------------------------------------- #
     if Polls().delete_poll(poll_id):
         app.logger.debug(f"delete_poll(): Deleted poll, poll_id = '{poll_id}'.")
-        Event().log_event("Delete poll Success", f"Deleted poll, poll_id = '{poll_id}'.")
+        EventRepository().log_event("Delete poll Success", f"Deleted poll, poll_id = '{poll_id}'.")
         flash("Poll has been deleted.")
     else:
         app.logger.debug(f"delete_poll(): Failed to delete poll, poll_id = '{poll_id}''.")
-        Event().log_event("Delete poll Fail", f"Failed to delete poll, poll_id = '{poll_id}'.")
+        EventRepository().log_event("Delete poll Fail", f"Failed to delete poll, poll_id = '{poll_id}'.")
         flash("Sorry, something went wrong.")
 
     # Back to list of all polls

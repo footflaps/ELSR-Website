@@ -1,10 +1,3 @@
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# Define the user table in the database and associated helper functions
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
 from flask import abort, flash, request, redirect, url_for
 from flask_login import current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,19 +12,13 @@ import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import out database connection from __init__
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import db, app, login_manager, GROUP_NOTIFICATIONS
 from core.database.models.users_model import UserModel
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# We need Messages & Events
-# -------------------------------------------------------------------------------------------------------------- #
-
 from core.database.repositories.db_messages import Message
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -279,6 +266,7 @@ class User(UserModel):
                 # Return success
                 return True
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.create_user(): Failed with error code '{e.args}'.")
                 return False
 
@@ -296,6 +284,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.create_new_verification(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
@@ -317,6 +306,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.generate_sms_code(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
@@ -381,6 +371,7 @@ class User(UserModel):
                         db.session.commit()
                         return True
                     except Exception as e:
+                        db.rollback()
                         app.logger.error(f"dB.validate_password(): Failed with error code '{e.args}'.")
                         return False
             else:
@@ -396,6 +387,7 @@ class User(UserModel):
                 db.session.commit()
                 return True
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.log_activity(): Failed with error code '{e.args}'.")
                 return False
 
@@ -433,6 +425,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.validate_email(): Failed with error code '{e.args}'.")
                     return False
 
@@ -474,6 +467,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.validate_sms(): Failed with error code '{e.args}'.")
                     return False
 
@@ -493,6 +487,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.create_new_reset_code(): Failed with error code '{e.args}'.")
                     return False
             else:
@@ -534,6 +529,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.reset_password(): Failed with error code '{e.args}' with email = '{email}'.")
                     return False
             else:
@@ -568,6 +564,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -595,6 +592,7 @@ class User(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.block_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -612,6 +610,7 @@ class User(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.unblock_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -629,6 +628,7 @@ class User(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.set_readwrite(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -646,6 +646,7 @@ class User(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.set_readonly(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -662,6 +663,7 @@ class User(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.make_admin(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -681,6 +683,7 @@ class User(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"dB.unmake_admin(): Failed with error code '{e.args}' for user '{user.email}'.")
                     return False
             else:
@@ -695,6 +698,7 @@ class User(UserModel):
                 db.session.commit()
                 return True
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.set_phone_number(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                 return False
         else:
@@ -709,6 +713,7 @@ class User(UserModel):
                 db.session.commit()
                 return True
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.set_notifications(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                 return False
         else:
@@ -724,6 +729,7 @@ class User(UserModel):
                 # Return success
                 return True
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.update_user(): Failed to update user '{user.id}', error code was '{e.args}'.")
                 return False
 
@@ -743,17 +749,6 @@ class User(UserModel):
     def gpx_download_code(self, gpx_id):
         # Need something secret, that no one else would know, so hash their password hash
         return hashlib.md5(f"{self.password}{gpx_id}".encode('utf-8')).hexdigest()
-
-# user = User().find_user_from_id(1)
-# print(user.notification_choices_set())
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    db.create_all()
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -819,7 +814,7 @@ def rw_required(f):
 
         # Return 403
         app.logger.debug(f"rw_required(): User '{who}' attempted access to a rw only page!")
-        Event().log_event("RW Access Fail", f"User '{who}' attempted access to a rw only page!")
+        EventRepository().log_event("RW Access Fail", f"User '{who}' attempted access to a rw only page!")
         return redirect(url_for('not_rw'))
     return decorated_function
 
@@ -846,7 +841,7 @@ def admin_only(f):
 
         # Return 403
         app.logger.debug(f"admin_only(): User '{who}' attempted access to an admin page!")
-        Event().log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
+        EventRepository().log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
         return abort(403)
 
     return decorated_function
@@ -899,7 +894,7 @@ def logout_barred_user(f):
                 if user.blocked():
                     # Log out the user
                     app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
-                    Event().log_event("Blocked User logout", "Logged out user as blocked")
+                    EventRepository().log_event("Blocked User logout", "Logged out user as blocked")
                     flash("You have been logged out.")
                     logout_user()
             return f(*args, **kwargs)
@@ -923,7 +918,7 @@ def must_be_readwrite(f):
                 if not user.blocked():
                     # Log out the user
                     app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
-                    Event().log_event("Blocked User logout", "Logged out user as blocked")
+                    EventRepository().log_event("Blocked User logout", "Logged out user as blocked")
                     flash("You have been logged out.")
                     logout_user()
             return f(*args, **kwargs)
@@ -947,14 +942,7 @@ def get_user_id_from_email(user_email):
 app.jinja_env.globals.update(get_user_name=get_user_name)
 app.jinja_env.globals.update(get_user_id_from_email=get_user_id_from_email)
 
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
 
-with app.app_context():
-    users = db.session.query(User).all()
-    print(f"Found {len(users)} users in the dB")
-    app.logger.debug(f"Start of day: Found {len(users)} users in the dB")
 
 
 # -------------------------------------------------------------------------------------------------------------- #

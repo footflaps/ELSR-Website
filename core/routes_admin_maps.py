@@ -15,7 +15,7 @@ from core import app
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, admin_only, update_last_seen, login_required
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, boost_map_limit
 
 
@@ -62,7 +62,7 @@ def enable_maps():
     user = User().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"enable_maps(): Invalid user current_user.id = '{current_user.id}'!")
-        Event().log_event("Enable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
+        EventRepository().log_event("Enable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -70,7 +70,7 @@ def enable_maps():
     # ----------------------------------------------------------- #
     if not user.validate_password(current_user, password, user_ip):
         app.logger.debug(f"enable_maps(): Incorrect password for user_id = '{current_user.id}'!")
-        Event().log_event("Enable Maps Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        EventRepository().log_event("Enable Maps Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
         return redirect(url_for('admin_page', user_id=current_user.id))
 
@@ -82,11 +82,11 @@ def enable_maps():
     # Verify
     if maps_enabled():
         app.logger.debug(f"enable_maps(): Enabled Maps, current_user.id = '{current_user.id}'!")
-        Event().log_event("Enable Maps Success", f"Enabled Maps, current_user.id = '{current_user.id}'.")
+        EventRepository().log_event("Enable Maps Success", f"Enabled Maps, current_user.id = '{current_user.id}'.")
         flash("Maps enabled")
     else:
         app.logger.debug(f"enable_maps(): Failed to enable maps, current_user.id = '{current_user.id}'!")
-        Event().log_event("Enable Maps Fail", f"Failed to enable maps, current_user.id = '{current_user.id}'.")
+        EventRepository().log_event("Enable Maps Fail", f"Failed to enable maps, current_user.id = '{current_user.id}'.")
         flash("Sorry, something went wrong")
 
     # Back to user page
@@ -128,7 +128,7 @@ def disable_maps():
     user = User().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"disable_maps(): Invalid user current_user.id = '{current_user.id}'!")
-        Event().log_event("Disable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
+        EventRepository().log_event("Disable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -136,7 +136,7 @@ def disable_maps():
     # ----------------------------------------------------------- #
     if not user.validate_password(current_user, password, user_ip):
         app.logger.debug(f"disable_maps(): Incorrect password for user_id = '{current_user.id}'!")
-        Event().log_event("Disable Maps Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        EventRepository().log_event("Disable Maps Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
         return redirect(url_for('admin_page', user_id=current_user.id))
 
@@ -148,11 +148,11 @@ def disable_maps():
     # Verify
     if not maps_enabled():
         app.logger.debug(f"disable_maps(): Disabled Maps, current_user.id = '{current_user.id}'!")
-        Event().log_event("Disable Maps Success", f"Disabled Maps, current_user.id = '{current_user.id}'.")
+        EventRepository().log_event("Disable Maps Success", f"Disabled Maps, current_user.id = '{current_user.id}'.")
         flash("Maps disabled")
     else:
         app.logger.debug(f"disable_maps(): Failed to disable maps, current_user.id = '{current_user.id}'!")
-        Event().log_event("Disable Maps Fail", f"Failed to disable maps, current_user.id = '{current_user.id}'.")
+        EventRepository().log_event("Disable Maps Fail", f"Failed to disable maps, current_user.id = '{current_user.id}'.")
         flash("Sorry, something went wrong")
 
     # Back to user page
@@ -194,7 +194,7 @@ def boost_maps():
     user = User().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"boost_maps(): Invalid user current_user.id = '{current_user.id}'!")
-        Event().log_event("Boost Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
+        EventRepository().log_event("Boost Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -202,7 +202,7 @@ def boost_maps():
     # ----------------------------------------------------------- #
     if not user.validate_password(current_user, password, user_ip):
         app.logger.debug(f"boost_maps(): Incorrect password for '{current_user.email}'!")
-        Event().log_event("Boost Maps Fail", f"Incorrect password for '{current_user.email}'!")
+        EventRepository().log_event("Boost Maps Fail", f"Incorrect password for '{current_user.email}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
         return redirect(url_for('admin_page', user_id=current_user.id))
 
@@ -213,7 +213,7 @@ def boost_maps():
 
     # Feedback
     app.logger.debug(f"boost_maps(): Map boost applied by '{current_user.email}'.")
-    Event().log_event("Boost Maps Success", f"Map boost applied by '{current_user.email}'.")
+    EventRepository().log_event("Boost Maps Success", f"Map boost applied by '{current_user.email}'.")
     flash("Maps boost has been applied")
 
     # Back to user page

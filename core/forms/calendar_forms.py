@@ -10,10 +10,11 @@ from datetime import datetime
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_cafes import Cafe
+from core import GPX_UPLOAD_FOLDER_ABS
+from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.db_gpx import Gpx
 from core.database.repositories.db_users import User
-from core.database.repositories.db_calendar import MEETING_OTHER, NEW_CAFE, UPLOAD_ROUTE, GROUP_CHOICES, MEETING_CHOICES, GPX_UPLOAD_FOLDER_ABS
+from core.database.repositories.calendar_repository import MEETING_OTHER, NEW_CAFE, UPLOAD_ROUTE, GROUP_CHOICES, MEETING_CHOICES
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -79,7 +80,7 @@ def create_ride_form(admin: bool, gpx_id=None):
         # Generate the list of cafes
         # ----------------------------------------------------------- #
         cafe_choices = []
-        cafes = Cafe().all_cafes_sorted()
+        cafes = CafeRepository().all_cafes_sorted()
         for cafe in cafes:
             cafe_choices.append(cafe.combo_string())
         cafe_choices.append(NEW_CAFE)

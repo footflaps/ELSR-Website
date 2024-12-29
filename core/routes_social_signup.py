@@ -15,7 +15,7 @@ from core import app
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import update_last_seen, logout_barred_user, login_required, rw_required
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.db_social import Socials
 
 
@@ -46,7 +46,7 @@ def social_can():
     # ----------------------------------------------------------- #
     if not social_id:
         app.logger.debug(f"social_can(): Missing social_id!")
-        Event().log_event("social_can() Fail", f"Missing social_id!")
+        EventRepository().log_event("social_can() Fail", f"Missing social_id!")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -55,7 +55,7 @@ def social_can():
     social = Socials().one_social_id(social_id)
     if not social:
         app.logger.debug(f"social_can(): Failed to locate Social with social_id = '{social_id}'.")
-        Event().log_event("social_can() Fail", f"Failed to Social with social_id = '{social_id}'.")
+        EventRepository().log_event("social_can() Fail", f"Failed to Social with social_id = '{social_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -64,7 +64,7 @@ def social_can():
     # Social must be subscribable
     if social.sign_up != "True":
         app.logger.debug(f"social_can(): Social doesn't have sign up, social_id = '{social_id}'.")
-        Event().log_event("social_can() Fail", f"Social doesn't have sign up, social_id = '{social_id}'.")
+        EventRepository().log_event("social_can() Fail", f"Social doesn't have sign up, social_id = '{social_id}'.")
         flash("This social isn't subscribable!")
         return abort(403)
 
@@ -80,7 +80,7 @@ def social_can():
     if current_user.email in attendees:
         # Should never happen, but...
         app.logger.debug(f"social_can(): Already signed up, social_id = '{social_id}'.")
-        Event().log_event("social_can() Fail", f"Already signed up, social_id = '{social_id}'.")
+        EventRepository().log_event("social_can() Fail", f"Already signed up, social_id = '{social_id}'.")
         flash("Invalid option!")
         return abort(404)
 
@@ -97,7 +97,7 @@ def social_can():
     if not social:
         # Should never happen, but...
         app.logger.debug(f"social_can(): Can't update social, social_id = '{social_id}'.")
-        Event().log_event("social_can() Fail", f"Can't update social, social_id = '{social_id}'.")
+        EventRepository().log_event("social_can() Fail", f"Can't update social, social_id = '{social_id}'.")
         flash("Sorry, something went wrong!")
 
     # ----------------------------------------------------------- #
@@ -126,7 +126,7 @@ def social_cant():
     # ----------------------------------------------------------- #
     if not social_id:
         app.logger.debug(f"social_cant(): Missing social_id!")
-        Event().log_event("social_cant() Fail", f"Missing social_id!")
+        EventRepository().log_event("social_cant() Fail", f"Missing social_id!")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -135,7 +135,7 @@ def social_cant():
     social = Socials().one_social_id(social_id)
     if not social:
         app.logger.debug(f"social_cant(): Failed to locate Social with social_id = '{social_id}'.")
-        Event().log_event("social_cant() Fail", f"Failed to Social with social_id = '{social_id}'.")
+        EventRepository().log_event("social_cant() Fail", f"Failed to Social with social_id = '{social_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -144,7 +144,7 @@ def social_cant():
     # Social must be subscribable
     if social.sign_up != "True":
         app.logger.debug(f"social_cant(): Social doesn't have sign up, social_id = '{social_id}'.")
-        Event().log_event("social_cant() Fail", f"Social doesn't have sign up, social_id = '{social_id}'.")
+        EventRepository().log_event("social_cant() Fail", f"Social doesn't have sign up, social_id = '{social_id}'.")
         flash("This social isn't subscribable!")
         return abort(403)
 
@@ -160,7 +160,7 @@ def social_cant():
     if not current_user.email in attendees:
         # Should never happen, but...
         app.logger.debug(f"social_cant(): Can't remove non existent vote!")
-        Event().log_event("social_cant() Fail", f"Can't remove non existent vote!")
+        EventRepository().log_event("social_cant() Fail", f"Can't remove non existent vote!")
         flash("Invalid option!")
         return abort(404)
 
@@ -177,7 +177,7 @@ def social_cant():
     if not social:
         # Should never happen, but...
         app.logger.debug(f"social_cant(): Can't update social, social_id = '{social_id}'.")
-        Event().log_event("social_cant() Fail", f"Can't update social, social_id = '{social_id}'.")
+        EventRepository().log_event("social_cant() Fail", f"Can't update social, social_id = '{social_id}'.")
         flash("Sorry, something went wrong!")
 
     # ----------------------------------------------------------- #

@@ -6,14 +6,14 @@ import os
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app,  delete_file_if_exists
+from core import app, delete_file_if_exists, BLOG_IMAGE_FOLDER
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.blog_repository import BlogRepository as Blog, BLOG_IMAGE_FOLDER
-from core.database.repositories.db_events import Event
+from core.database.repositories.blog_repository import BlogRepository as Blog
+from core.database.repositories.event_repository import EventRepository
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 
 
@@ -81,12 +81,12 @@ def update_blog_photo(form, blog):
             if Blog().update_photo(blog.id, f"{os.path.basename(filename)}"):
                 # Updated ok
                 app.logger.debug(f"update_blog_photo(): Successfully uploaded the photo.")
-                Event().log_event("Blog Pass", f"Blog photo updated. blog.id = '{blog.id}'.")
+                EventRepository().log_event("Blog Pass", f"Blog photo updated. blog.id = '{blog.id}'.")
                 flash("Blog photo has been uploaded.")
             else:
                 # Failed to upload eg invalid path
                 app.logger.debug(f"update_blog_photo(): Failed to upload the photo '{filename}' for blog '{blog.id}'.")
-                Event().log_event("Add Blog Fail", f"Couldn't upload file '{filename}' for blog '{blog.id}'.")
+                EventRepository().log_event("Add Blog Fail", f"Couldn't upload file '{filename}' for blog '{blog.id}'.")
                 flash(f"Sorry, failed to upload the file '{filename}!")
 
             # Shrink image if too large
@@ -100,7 +100,7 @@ def update_blog_photo(form, blog):
     else:
         # allowed_file() failed.
         app.logger.debug(f"update_blog_photo(): Invalid file type for image.")
-        Event().log_event("Blog Fail", f"Invalid image filename '{os.path.basename(form.photo_filename.data.filename)}',"
+        EventRepository().log_event("Blog Fail", f"Invalid image filename '{os.path.basename(form.photo_filename.data.filename)}',"
                                        f"permitted file types are '{IMAGE_ALLOWED_EXTENSIONS}'.")
         flash("Invalid file type for image!")
 
@@ -109,7 +109,7 @@ def delete_blog_photos(blog: Blog()):
     # Check it has an id!
     if not blog.id:
         app.logger.debug(f"delete_blog_photos(): Passed blog object with no id!")
-        Event().log_event("Blog Fail", "delete_blog_photos(): Passed blog object with no id!")
+        EventRepository().log_event("Blog Fail", "delete_blog_photos(): Passed blog object with no id!")
         return
 
     # Delete the base name

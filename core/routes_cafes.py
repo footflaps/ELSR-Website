@@ -20,19 +20,19 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.database.repositories.db_cafes import Cafe, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.forms.cafe_forms import CreateCafeForm
-from core.database.repositories.db_cafe_comments import CafeComment
+from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 from core.forms.cafe_comments_forms import CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes, remove_cafe_from_all_gpxes
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
 from core.database.repositories.db_gpx import Gpx
 from core.database.repositories.db_messages import Message, ADMIN_EMAIL
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
-from core.database.repositories.db_calendar import Calendar
+from core.database.repositories.calendar_repository import CalendarRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -67,7 +67,7 @@ def cafe_list():
     # ----------------------------------------------------------- #
     # Get all known cafes
     # ----------------------------------------------------------- #
-    cafes = Cafe().all_cafes()
+    cafes = CafeRepository().all_cafes()
 
     # ----------------------------------------------------------- #
     # Map of all cafes
@@ -111,7 +111,7 @@ def cafe_top10():
     # ----------------------------------------------------------- #
     # Get all the rides
     # ----------------------------------------------------------- #
-    rides = Calendar().all_calendar()
+    rides = CalendarRepository().all_calendar()
 
     # This is our cafe list
     cafes = {}
@@ -135,7 +135,7 @@ def cafe_top10():
     # Build list for jinja
     cafes = []
     for index, data in sorted_cafes.items():
-        cafe = Cafe().one_cafe(index)
+        cafe = CafeRepository().one_cafe(index)
         if cafe:
             cafes.append({"name": cafe.name,
                           "id": cafe.id,
@@ -164,12 +164,12 @@ def cafe_details(cafe_id):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = Cafe().one_cafe(cafe_id)
+    cafe = CafeRepository().one_cafe(cafe_id)
 
     # Check id is valid
     if not cafe:
         app.logger.debug(f"cafe_details(): Failed to locate cafe with cafe.id = '{cafe_id}'.")
-        Event().log_event("Cafe Fail", f"Failed to locate cafe with cafe.id = '{cafe_id}'.")
+        EventRepository().log_event("Cafe Fail", f"Failed to locate cafe with cafe.id = '{cafe_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -180,7 +180,7 @@ def cafe_details(cafe_id):
     form = CreateCafeCommentForm()
 
     # Get any exiting comments for this cafe
-    comments = CafeComment().all_comments_by_cafe_id(cafe_id)
+    comments = CafeCommentRepository().all_comments_by_cafe_id(cafe_id)
 
     # Get all GPX routes which pass this cafe and that can be seen by current_user
     gpxes = Gpx().find_all_gpx_for_cafe(cafe_id, current_user)
@@ -227,7 +227,7 @@ def cafe_details(cafe_id):
         if not user:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): Couldn't locate user, current_user.id = '{current_user.id}'.")
-            Event().log_event("Cafe Comment Fail", f"Couldn't locate user, current_user.id = '{current_user.id}'.")
+            EventRepository().log_event("Cafe Comment Fail", f"Couldn't locate user, current_user.id = '{current_user.id}'.")
             flash("Sorry, something went wrong.")
             return redirect(url_for('cafe_details', cafe_id=cafe.id))
 
@@ -237,12 +237,12 @@ def cafe_details(cafe_id):
         if not user.readwrite():
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): User doesn't have write permissions user.id = '{user.id}'.")
-            Event().log_event("Cafe Comment Fail", f"User doesn't have write permissions user.id = '{user.id}'.")
+            EventRepository().log_event("Cafe Comment Fail", f"User doesn't have write permissions user.id = '{user.id}'.")
             flash("Sorry, you do not have write permissions.")
             return redirect(url_for('cafe_details', cafe_id=cafe.id))
 
         # New comment
-        new_comment = CafeComment(
+        new_comment = CafeCommentRepository(
             cafe_id=cafe.id,
             date=date.today().strftime("%B %d, %Y"),
             email=current_user.email,
@@ -251,14 +251,14 @@ def cafe_details(cafe_id):
         )
 
         # Add to the dB
-        if CafeComment().add_comment(new_comment):
+        if CafeCommentRepository().add_comment(new_comment):
             # Success!
             app.logger.debug(f"cafe_details(): Comment posted successfully cafe.id = '{cafe.id}'.")
-            Event().log_event("Cafe Comment Success", f"Comment posted successfully cafe.id = '{cafe.id}'.")
+            EventRepository().log_event("Cafe Comment Success", f"Comment posted successfully cafe.id = '{cafe.id}'.")
         else:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): Comment post failed cafe.id = '{cafe.id}'.")
-            Event().log_event("Cafe Comment Fail", f"Comment post failed.")
+            EventRepository().log_event("Cafe Comment Fail", f"Comment post failed.")
 
         # We can't reset form, so to show the post completed, we have to redirect
         # back to the start of ourselves.
@@ -348,7 +348,7 @@ def new_cafe():
         if range_km > ELSR_MAX_KM:
             # Too far out of range from Cambridge
             app.logger.debug(f"new_cafe(): Fail, Lat and Lon are {round(range_km, 1)} km from Cambridge.")
-            Event().log_event("New Cafe Fail", f"Lat and Lon are {round(range_km, 1)} km from Cambridge.")
+            EventRepository().log_event("New Cafe Fail", f"Lat and Lon are {round(range_km, 1)} km from Cambridge.")
             flash(f"Lat and Lon are {round(range_km, 1)} km from Cambridge!")
 
             # Keep count of Google Map Loads
@@ -360,7 +360,7 @@ def new_cafe():
 
         # Create a new Cafe object
         cafe_name = form.name.data.strip()
-        new_cafe = Cafe(
+        new_cafe = CafeRepository(
             name=cafe_name,
             lat=form.lat.data,
             lon=form.lon.data,
@@ -374,9 +374,9 @@ def new_cafe():
         # ----------------------------------------------------------- #
         #   Name must be unique
         # ----------------------------------------------------------- #
-        if Cafe().find_by_name(new_cafe.name):
+        if CafeRepository().find_by_name(new_cafe.name):
             app.logger.debug(f"new_cafe(): Detected duplicate cafe name '{new_cafe.name}'.")
-            Event().log_event("New Cafe Fail", f"Detected duplicate cafe name '{new_cafe.name}'.")
+            EventRepository().log_event("New Cafe Fail", f"Detected duplicate cafe name '{new_cafe.name}'.")
             flash("Sorry, that name is already in use, choose another!")
 
             # Keep count of Google Map Loads
@@ -390,14 +390,14 @@ def new_cafe():
         # ----------------------------------------------------------- #
         #   Try to add the cafe
         # ----------------------------------------------------------- #
-        if Cafe().add_cafe(new_cafe):
+        if CafeRepository().add_cafe(new_cafe):
             app.logger.debug(f"new_cafe(): Success, cafe '{cafe_name}' has been added!")
-            Event().log_event("New Cafe Success", f"Cafe '{cafe_name}' has been added!")
+            EventRepository().log_event("New Cafe Success", f"Cafe '{cafe_name}' has been added!")
             flash(f"Cafe {cafe_name} has been added!")
         else:
             # Should never get here, but....
             app.logger.debug(f"new_cafe(): Cafe add failed '{cafe_name}'.")
-            Event().log_event("New Cafe Fail", f"Something went wrong! '{cafe_name}'.")
+            EventRepository().log_event("New Cafe Fail", f"Something went wrong! '{cafe_name}'.")
             flash("Sorry, something went wrong.")
 
             # Keep count of Google Map Loads
@@ -412,7 +412,7 @@ def new_cafe():
         #   Look up our new cafe
         # ----------------------------------------------------------- #
         # Look up our new cafe in the dB as we can't know its ID until after it's been added
-        cafe = Cafe().find_by_name(cafe_name)
+        cafe = CafeRepository().find_by_name(cafe_name)
         app.logger.debug(f"new_cafe(): Cafe added, cafe_id = '{cafe.id}'.")
 
         # ----------------------------------------------------------- #
@@ -469,18 +469,18 @@ def edit_cafe():
     # ----------------------------------------------------------- #
     if not cafe_id:
         app.logger.debug(f"edit_cafe(): Missing cafe_id!")
-        Event().log_event("Edit Cafe Fail", f"Missing cafe_id!")
+        EventRepository().log_event("Edit Cafe Fail", f"Missing cafe_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = Cafe().one_cafe(cafe_id)
+    cafe = CafeRepository().one_cafe(cafe_id)
 
     # Check id is valid
     if not cafe:
         app.logger.debug(f"edit_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        Event().log_event("Edit Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
+        EventRepository().log_event("Edit Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -491,7 +491,7 @@ def edit_cafe():
         # Failed authentication
         app.logger.debug(f"edit_cafe(): Rejected request for '{current_user.email}' as no permissions for "
                          f"cafe_id = '{cafe_id}'.")
-        Event().log_event("Edit Cafe Fail", f"Rejected request for '{current_user.email}' as no permission for "
+        EventRepository().log_event("Edit Cafe Fail", f"Rejected request for '{current_user.email}' as no permission for "
                                             f"cafe_id = '{cafe_id}'.")
         return abort(403)
 
@@ -524,7 +524,7 @@ def edit_cafe():
         # ----------------------------------------------------------- #
 
         # Create a new BP object
-        updated_cafe = Cafe(
+        updated_cafe = CafeRepository(
             name=form.name.data,
             lat=form.lat.data,
             lon=form.lon.data,
@@ -538,11 +538,11 @@ def edit_cafe():
         # ----------------------------------------------------------- #
         #   Name must be unique
         # ----------------------------------------------------------- #
-        if Cafe().find_by_name(updated_cafe.name) \
+        if CafeRepository().find_by_name(updated_cafe.name) \
                 and updated_cafe.name != cafe.name:
             # Duplicate cafe name, so tell then to stop copying....
             app.logger.debug(f"edit_cafe(): Detected duplicate cafe name '{updated_cafe.name}'.")
-            Event().log_event("Edit Cafe Fail", f"Detected duplicate cafe name '{updated_cafe.name}'.")
+            EventRepository().log_event("Edit Cafe Fail", f"Detected duplicate cafe name '{updated_cafe.name}'.")
             flash("Sorry, that name is already in use, choose another!")
 
             # Keep count of Google Map Loads
@@ -556,15 +556,15 @@ def edit_cafe():
         # ----------------------------------------------------------- #
         # Update details
         # ----------------------------------------------------------- #
-        if Cafe().update_cafe(cafe_id, updated_cafe):
+        if CafeRepository().update_cafe(cafe_id, updated_cafe):
             # Flash back a message
             app.logger.debug(f"edit_cafe(): Successfully updated the cafe, cafe_id = '{cafe_id}'.")
-            Event().log_event("Edit Cafe Success", f"Cafe updated '{updated_cafe.name}', cafe_id = '{cafe_id}'.")
+            EventRepository().log_event("Edit Cafe Success", f"Cafe updated '{updated_cafe.name}', cafe_id = '{cafe_id}'.")
             flash("The cafe details have been updated.")
         else:
             # Should never get here, but....
             app.logger.debug(f"edit_cafe(): Something went wrong with Cafe().update_cafe cafe_id = '{cafe_id}'.")
-            Event().log_event("Edit Cafe Fail", f"Something went wrong. cafe_id = '{cafe_id}'.")
+            EventRepository().log_event("Edit Cafe Fail", f"Something went wrong. cafe_id = '{cafe_id}'.")
             flash("Sorry, something went wrong!")
 
         # ----------------------------------------------------------- #
@@ -578,7 +578,7 @@ def edit_cafe():
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
         # ----------------------------------------------------------- #
-        updated_cafe = Cafe().one_cafe(cafe_id)
+        updated_cafe = CafeRepository().one_cafe(cafe_id)
         dist_km = mpu.haversine_distance((last_lat, last_lon), (updated_cafe.lat, updated_cafe.lon))
 
         # Only update GPX if it's really moved
@@ -640,20 +640,20 @@ def close_cafe():
     # ----------------------------------------------------------- #
     if not cafe_id:
         app.logger.debug(f"close_cafe(): Missing cafe_id!")
-        Event().log_event("Close Cafe Fail", f"Missing cafe_id")
+        EventRepository().log_event("Close Cafe Fail", f"Missing cafe_id")
         return abort(400)
     elif not details:
         app.logger.debug(f"close_cafe(): Missing details!")
-        Event().log_event("Close Cafe Fail", f"Missing details")
+        EventRepository().log_event("Close Cafe Fail", f"Missing details")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = Cafe().one_cafe(cafe_id)
+    cafe = CafeRepository().one_cafe(cafe_id)
     if not cafe:
         app.logger.debug(f"close_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        Event().log_event("Close Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
+        EventRepository().log_event("Close Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -664,22 +664,22 @@ def close_cafe():
         # Failed authentication
         app.logger.debug(f"close_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
-        Event().log_event("Close Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions"
+        EventRepository().log_event("Close Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions"
                                              f" for cafe.id = '{cafe.id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Close the cafe
     # ----------------------------------------------------------- #
-    if Cafe().close_cafe(cafe.id, details):
+    if CafeRepository().close_cafe(cafe.id, details):
         # Success
         app.logger.debug(f"close_cafe(): Successfully closed the cafe, cafe.id = '{cafe.id}'.")
-        Event().log_event("Close Cafe Success", f"Cafe marked as closed. cafe.id = '{cafe.id}'.")
+        EventRepository().log_event("Close Cafe Success", f"Cafe marked as closed. cafe.id = '{cafe.id}'.")
         flash("Cafe marked as closed.")
     else:
         # Should never get here, but....
         app.logger.debug(f"close_cafe(): Cafe().close_cafe() failed with cafe.id = '{cafe.id}'.")
-        Event().log_event("Close Cafe Fail", f"Cafe().close_cafe() failed with cafe.id = '{cafe.id}'.")
+        EventRepository().log_event("Close Cafe Fail", f"Cafe().close_cafe() failed with cafe.id = '{cafe.id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
@@ -706,17 +706,17 @@ def unclose_cafe():
     # ----------------------------------------------------------- #
     if not cafe_id:
         app.logger.debug(f"unclose_cafe(): Missing cafe_id!")
-        Event().log_event("unClose Cafe Fail", f"Missing cafe_id")
+        EventRepository().log_event("unClose Cafe Fail", f"Missing cafe_id")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = Cafe().one_cafe(cafe_id)
+    cafe = CafeRepository().one_cafe(cafe_id)
 
     if not cafe:
         app.logger.debug(f"unclose_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        Event().log_event("unClose Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
+        EventRepository().log_event("unClose Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -727,21 +727,21 @@ def unclose_cafe():
         # Failed authentication
         app.logger.debug(f"unclose_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
-        Event().log_event("unClose Cafe Fail", f"Rejected request as no permissions. cafe_id = '{cafe_id}'")
+        EventRepository().log_event("unClose Cafe Fail", f"Rejected request as no permissions. cafe_id = '{cafe_id}'")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Open the cafe
     # ----------------------------------------------------------- #
-    if Cafe().unclose_cafe(cafe.id):
+    if CafeRepository().unclose_cafe(cafe.id):
         # Success!
         app.logger.debug(f"unclose_cafe(): Successfully unclosed cafe with cafe_id = '{cafe_id}'.")
-        Event().log_event("unClose Cafe Success", f"Successfully unclosed the cafe. cafe_id = '{cafe_id}'")
+        EventRepository().log_event("unClose Cafe Success", f"Successfully unclosed the cafe. cafe_id = '{cafe_id}'")
         flash("Cafe marked as open.")
     else:
         # Should never get here, but....
         app.logger.debug(f"unclose_cafe(): Cafe().unclose_cafe() failed with cafe_id = '{cafe_id}'.")
-        Event().log_event("unClose Cafe Fail", f"Something went wrong. cafe_id = '{cafe_id}'")
+        EventRepository().log_event("unClose Cafe Fail", f"Something went wrong. cafe_id = '{cafe_id}'")
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
@@ -776,20 +776,20 @@ def flag_cafe():
     # ----------------------------------------------------------- #
     if not reason:
         app.logger.debug(f"flag_cafe(): Missing reason!")
-        Event().log_event("Flag Cafe Fail", f"Missing reason!")
+        EventRepository().log_event("Flag Cafe Fail", f"Missing reason!")
         return abort(400)
     elif not cafe_id:
         app.logger.debug(f"flag_cafe(): Missing cafe_id!")
-        Event().log_event("Flag Cafe Fail", f"Missing cafe_id!")
+        EventRepository().log_event("Flag Cafe Fail", f"Missing cafe_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = Cafe().one_cafe(cafe_id)
+    cafe = CafeRepository().one_cafe(cafe_id)
     if not cafe:
         app.logger.debug(f"flag_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        Event().log_event("Flag Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
+        EventRepository().log_event("Flag Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -807,12 +807,12 @@ def flag_cafe():
         # Success
         Thread(target=send_message_notification_email, args=(message, ADMIN_EMAIL,)).start()
         app.logger.debug(f"flag_cafe(): Flagged cafe, cafe_id = '{cafe_id}'.")
-        Event().log_event("Flag Cafe Success", f"Flagged cafe, cafe_id = '{cafe_id}', reason = '{reason}'.")
+        EventRepository().log_event("Flag Cafe Success", f"Flagged cafe, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Your message has been forwarded to an admin.")
     else:
         # Should never get here, but....
         app.logger.debug(f"flag_cafe(): Message().add_message failed, cafe_id = '{cafe_id}'.")
-        Event().log_event("Flag Cafe Fail",
+        EventRepository().log_event("Flag Cafe Fail",
                           f"Message().add_message failed, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Sorry, something went wrong.")
 
@@ -864,30 +864,30 @@ def delete_comment():
     # ----------------------------------------------------------- #
     if not comment_id:
         app.logger.debug(f"delete_comment(): Missing comment_id!")
-        Event().log_event("Delete Comment Fail", f"Missing comment_id!")
+        EventRepository().log_event("Delete Comment Fail", f"Missing comment_id!")
         return abort(400)
     elif not cafe_id:
         app.logger.debug(f"delete_comment(): Missing cafe_id!")
-        Event().log_event("Delete Comment Fail", f"Missing cafe_id!")
+        EventRepository().log_event("Delete Comment Fail", f"Missing cafe_id!")
         return abort(400)
     elif not password:
         app.logger.debug(f"delete_comment(): Missing Password!")
-        Event().log_event("Delete Comment Fail", f"Missing Password!")
+        EventRepository().log_event("Delete Comment Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = Cafe().one_cafe(cafe_id)
+    cafe = CafeRepository().one_cafe(cafe_id)
     if not cafe:
         app.logger.debug(f"delete_comment(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        Event().log_event("Delete Comment Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
+        EventRepository().log_event("Delete Comment Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
         return abort(404)
 
-    comment = CafeComment().get_comment(comment_id)
+    comment = CafeCommentRepository().get_comment(comment_id)
     if not comment:
         app.logger.debug(f"delete_comment(): Failed to locate comment with comment_id = '{comment_id}'.")
-        Event().log_event("Delete Comment Fail", f"Failed to locate comment with comment_id = '{comment_id}'.")
+        EventRepository().log_event("Delete Comment Fail", f"Failed to locate comment with comment_id = '{comment_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -898,7 +898,7 @@ def delete_comment():
         # Failed authentication
         app.logger.debug(f"delete_comment(): Rejected request from '{current_user.email}' as no permissions"
                          f" for comment_id = '{comment_id}'.")
-        Event().log_event("Delete Comment Fail", f"Rejected request from user '{current_user.email}' as no "
+        EventRepository().log_event("Delete Comment Fail", f"Rejected request from user '{current_user.email}' as no "
                                                  f"permissions for comment_id = '{comment_id}'.")
         return abort(403)
 
@@ -911,7 +911,7 @@ def delete_comment():
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
         app.logger.debug(f"delete_comment(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        Event().log_event("Delete Comment Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository().log_event("Delete Comment Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to route detail page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))
@@ -919,15 +919,15 @@ def delete_comment():
     # ----------------------------------------------------------- #
     # Delete comment
     # ----------------------------------------------------------- #
-    if CafeComment().delete_comment(comment_id):
+    if CafeCommentRepository().delete_comment(comment_id):
         # Success
         app.logger.debug(f"delete_comment(): Successfully deleted the comment, comment_id = '{comment_id}'.")
-        Event().log_event("Delete Comment Success", f"Successfully deleted the comment. comment_id = '{comment_id}''.")
+        EventRepository().log_event("Delete Comment Success", f"Successfully deleted the comment. comment_id = '{comment_id}''.")
         flash("Comment deleted.")
     else:
         # Should never get here, but....
         app.logger.debug(f"delete_comment(): Failed to delete the comment, comment_id = '{comment_id}'.")
-        Event().log_event("Delete Comment Fail", f"Failed to delete the comment, comment_id = '{comment_id}'.")
+        EventRepository().log_event("Delete Comment Fail", f"Failed to delete the comment, comment_id = '{comment_id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
@@ -970,20 +970,20 @@ def delete_cafe():
     # ----------------------------------------------------------- #
     if not cafe_id:
         app.logger.debug(f"delete_cafe(): Missing cafe_id!")
-        Event().log_event("Delete Cafe Fail", f"Missing cafe_id!")
+        EventRepository().log_event("Delete Cafe Fail", f"Missing cafe_id!")
         return abort(400)
     if not password:
         app.logger.debug(f"delete_cafe(): Missing password!")
-        Event().log_event("Delete Cafe Fail", f"Missing password!")
+        EventRepository().log_event("Delete Cafe Fail", f"Missing password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = Cafe().one_cafe(cafe_id)
+    cafe = CafeRepository().one_cafe(cafe_id)
     if not cafe:
         app.logger.debug(f"delete_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        Event().log_event("Delete Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
+        EventRepository().log_event("Delete Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -994,7 +994,7 @@ def delete_cafe():
         # Failed authentication
         app.logger.debug(f"delete_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe_id = '{cafe_id}'.")
-        Event().log_event("Delete Cafe Fail", f"Rejected request from user '{current_user.email}' as no "
+        EventRepository().log_event("Delete Cafe Fail", f"Rejected request from user '{current_user.email}' as no "
                                               f"permissions for cafe_id = '{cafe_id}'.")
         return abort(403)
 
@@ -1007,7 +1007,7 @@ def delete_cafe():
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
         app.logger.debug(f"delete_cafe(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        Event().log_event("Delete Cafe Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository().log_event("Delete Cafe Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))
@@ -1015,12 +1015,12 @@ def delete_cafe():
     # ----------------------------------------------------------- #
     #  Delete any comments
     # ----------------------------------------------------------- #
-    comments = CafeComment().all_comments_by_cafe_id(cafe.id)
+    comments = CafeCommentRepository().all_comments_by_cafe_id(cafe.id)
     for comment in comments:
-        if not CafeComment().delete_comment(comment.id):
+        if not CafeCommentRepository().delete_comment(comment.id):
             # This is not terminal, just leaves orphaned comments in the db
             app.logger.debug(f"delete_cafe(): Failed to delete cafe comment id = '{comment.id}'!")
-            Event().log_event("Delete Cafe Fail", f"Failed to delete cafe comment id = '{comment.id}'!")
+            EventRepository().log_event("Delete Cafe Fail", f"Failed to delete cafe comment id = '{comment.id}'!")
 
     # ----------------------------------------------------------- #
     #  Delete any images
@@ -1033,22 +1033,22 @@ def delete_cafe():
     #  Remove cafe id from all GPX files
     # ----------------------------------------------------------- #
     app.logger.debug(f"delete_cafe(): calling remove_cafe_from_all_gpxes for cafe, id = '{cafe.id}'.")
-    Event().log_event("Delete Cafe Success", f"calling remove_cafe_from_all_gpxes for cafe, id = '{cafe.id}'.")
+    EventRepository().log_event("Delete Cafe Success", f"calling remove_cafe_from_all_gpxes for cafe, id = '{cafe.id}'.")
     # Update the routes in the background
     Thread(target=remove_cafe_from_all_gpxes, args=(cafe.id,)).start()
 
     # ----------------------------------------------------------- #
     #  Delete the cafe itself
     # ----------------------------------------------------------- #
-    if Cafe().delete_cafe(cafe.id):
+    if CafeRepository().delete_cafe(cafe.id):
         # Success
         app.logger.debug(f"delete_cafe(): Successfully deleted the cafe, id = '{cafe.id}'.")
-        Event().log_event("Delete Cafe Success", f"Successfully deleted the cafe, id = '{cafe.id}'.")
+        EventRepository().log_event("Delete Cafe Success", f"Successfully deleted the cafe, id = '{cafe.id}'.")
         flash("Cafe deleted.")
     else:
         # Should never get here, but....
         app.logger.debug(f"delete_cafe(): Failed to delete the cafe, id = '{cafe.id}'.")
-        Event().log_event("Delete Cafe Fail", f"Failed to delete the cafe, id = '{cafe.id}'.")
+        EventRepository().log_event("Delete Cafe Fail", f"Failed to delete the cafe, id = '{cafe.id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to cafe list page

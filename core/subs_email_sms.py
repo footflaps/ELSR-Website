@@ -20,11 +20,11 @@ from core import app, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
 from core.database.repositories.db_messages import Message, ADMIN_EMAIL
-from core.database.repositories.db_calendar import Calendar, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
+from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
 from core.database.repositories.db_social import Socials
 from core.database.repositories.blog_repository import BlogRepository as Blog, Privacy
 from core.database.repositories.db_gpx import Gpx
@@ -164,7 +164,7 @@ def send_blog_notification_emails(blog: Blog()):
     # ----------------------------------------------------------- #
     if not blog:
         app.logger.debug(f"send_blog_notification_emails(): Passed invalid blog object")
-        Event().log_event("send_blog_notification_emails() Fail", f"Passed invalid blog object")
+        EventRepository().log_event("send_blog_notification_emails() Fail", f"Passed invalid blog object")
         return
 
     # ----------------------------------------------------------- #
@@ -187,11 +187,11 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
     # ----------------------------------------------------------- #
     if not user:
         app.logger.debug(f"send_one_blog_notification_email(): Passed invalid user object")
-        Event().log_event("send_one_blog_notification_email() Fail", f"Passed invalid user object")
+        EventRepository().log_event("send_one_blog_notification_email() Fail", f"Passed invalid user object")
         return
     if not blog:
         app.logger.debug(f"send_one_blog_notification_email(): Passed invalid blog object")
-        Event().log_event("send_one_blog_notification_email() Fail", f"Passed invalid blog object")
+        EventRepository().log_event("send_one_blog_notification_email() Fail", f"Passed invalid blog object")
         return
 
     # ----------------------------------------------------------- #
@@ -240,12 +240,12 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
-            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+            EventRepository().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
                                             f"error code was '{e.args}'.")
             return False
 
@@ -265,7 +265,7 @@ def send_social_notification_emails(social: Socials()):
     # ----------------------------------------------------------- #
     if not social:
         app.logger.debug(f"send_social_notification_emails(): Passed invalid social object")
-        Event().log_event("send_social_notification_emails() Fail", f"Passed invalid social object")
+        EventRepository().log_event("send_social_notification_emails() Fail", f"Passed invalid social object")
         return
 
     # ----------------------------------------------------------- #
@@ -285,11 +285,11 @@ def send_one_social_notification_email(user: User(), social: Socials()):
     # ----------------------------------------------------------- #
     if not user:
         app.logger.debug(f"send_one_social_notification_email(): Passed invalid user object")
-        Event().log_event("send_one_social_notification_email() Fail", f"Passed invalid user object")
+        EventRepository().log_event("send_one_social_notification_email() Fail", f"Passed invalid user object")
         return
     if not social:
         app.logger.debug(f"send_one_social_notification_email(): Passed invalid social object")
-        Event().log_event("send_one_social_notification_email() Fail", f"Passed invalid social object")
+        EventRepository().log_event("send_one_social_notification_email() Fail", f"Passed invalid social object")
         return
 
     # ----------------------------------------------------------- #
@@ -339,12 +339,12 @@ def send_one_social_notification_email(user: User(), social: Socials()):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
-            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+            EventRepository().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
                                             f"error code was '{e.args}'.")
             return False
 
@@ -357,14 +357,14 @@ def send_one_social_notification_email(user: User(), social: Socials()):
 # Send ride notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_ride_notification_emails(ride: Calendar()):
+def send_ride_notification_emails(ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Make sure ride exists
     # ----------------------------------------------------------- #
     if not ride:
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Passed invalid ride object")
-        Event().log_event("send_ride_notification_emails() Fail", f"Passed invalid ride object")
+        EventRepository().log_event("send_ride_notification_emails() Fail", f"Passed invalid ride object")
         return
 
     # ----------------------------------------------------------- #
@@ -375,7 +375,7 @@ def send_ride_notification_emails(ride: Calendar()):
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Can't find GPX, ride.id = '{ride.id}', "
                          f"ride.gpx_id = '{ride.gpx_id}'.")
-        Event().log_event("send_ride_notification_emails() Fail", f"Can't find GPX, ride.id = '{ride.id}', "
+        EventRepository().log_event("send_ride_notification_emails() Fail", f"Can't find GPX, ride.id = '{ride.id}', "
                                                                   f"ride.gpx_id = '{ride.gpx_id}'.")
         return
 
@@ -386,7 +386,7 @@ def send_ride_notification_emails(ride: Calendar()):
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Aborting as GPX not public, ride.id = '{ride.id}', "
                          f"ride.gpx_id = '{ride.gpx_id}'.")
-        Event().log_event("send_ride_notification_emails() Fail", f"Aborting as GPX not public, ride.id = '{ride.id}', "
+        EventRepository().log_event("send_ride_notification_emails() Fail", f"Aborting as GPX not public, ride.id = '{ride.id}', "
                                                                   f"ride.gpx_id = '{ride.gpx_id}'.")
         return
 
@@ -396,7 +396,7 @@ def send_ride_notification_emails(ride: Calendar()):
     if ride.sent_email == "True":
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Aborting as already sent email, ride.id = '{ride.id}'.")
-        Event().log_event("send_ride_notification_emails() Fail", f"Aborting as already sent email, "
+        EventRepository().log_event("send_ride_notification_emails() Fail", f"Aborting as already sent email, "
                                                                   f"ride.id = '{ride.id}'.")
         return
 
@@ -404,7 +404,7 @@ def send_ride_notification_emails(ride: Calendar()):
     # Modify ride to show email have been sent
     # ----------------------------------------------------------- #
     # Do this now in case we crash mid-email send
-    Calendar().mark_email_sent(ride.id)
+    CalendarRepository().mark_email_sent(ride.id)
 
     # ----------------------------------------------------------- #
     # Scan all users
@@ -424,17 +424,17 @@ def send_ride_notification_emails(ride: Calendar()):
                 send_one_ride_notification_email(user, ride)
 
 
-def send_one_ride_notification_email(user: User(), ride: Calendar()):
+def send_one_ride_notification_email(user: User(), ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
     if not user:
         app.logger.debug(f"send_one_ride_notification_email(): Passed invalid user object")
-        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid user object")
+        EventRepository().log_event("send_one_ride_notification_email() Fail", f"Passed invalid user object")
         return
     if not ride:
         app.logger.debug(f"send_one_ride_notification_email(): Passed invalid ride object")
-        Event().log_event("send_one_ride_notification_email() Fail", f"Passed invalid ride object")
+        EventRepository().log_event("send_one_ride_notification_email() Fail", f"Passed invalid ride object")
         return
 
     # ----------------------------------------------------------- #
@@ -527,12 +527,12 @@ def send_one_ride_notification_email(user: User(), ride: Calendar()):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
-            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+            EventRepository().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
                                             f"error code was '{e.args}'.")
             return False
 
@@ -556,11 +556,11 @@ def send_message_notification_email(message: Message(), user: User()):
     # ----------------------------------------------------------- #
     if not user:
         app.logger.debug(f"send_message_notification_email(): Passed invalid user object")
-        Event().log_event("send_message_notification_email() Fail", f"Passed invalid user object")
+        EventRepository().log_event("send_message_notification_email() Fail", f"Passed invalid user object")
         return
     if not message:
         app.logger.debug(f"send_message_notification_email(): Passed invalid message object")
-        Event().log_event("send_message_notification_email() Fail", f"Passed invalid message object")
+        EventRepository().log_event("send_message_notification_email() Fail", f"Passed invalid message object")
         return
 
     # ----------------------------------------------------------- #
@@ -622,12 +622,12 @@ def send_message_notification_email(message: Message(), user: User()):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
-            Event().log_event("Email Success", f"Sent message email to '{target_email}'.")
+            EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
+            EventRepository().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
                                             f"error code was '{e.args}'.")
             return False
 
@@ -652,7 +652,7 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
     user = User().find_user_from_email(classified.email)
     if not user:
         app.logger.debug(f"send_message_to_seller(): Can't locate user from email = '{classified.email}'.")
-        Event().log_event("send_message_to_seller() Fail", f"Can't locate user from email = '{classified.email}'.")
+        EventRepository().log_event("send_message_to_seller() Fail", f"Can't locate user from email = '{classified.email}'.")
         return
 
     # ----------------------------------------------------------- #
@@ -700,12 +700,12 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
                 msg=f"To:{classified.email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Alert Email(): sent message to '{brf_personal_email}'.")
-            Event().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
+            EventRepository().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Alert Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
-            Event().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
+            EventRepository().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
                                                   f"error code was '{e.args}'.")
             return False
 
@@ -742,12 +742,12 @@ def send_verification_email(target_email, user_name, code):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent verification email to '{target_email}'")
-            Event().log_event("Email Success", f"Sent verification email to '{target_email}'.")
+            EventRepository().log_event("Email Success", f"Sent verification email to '{target_email}'.")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send verification email to '{target_email}', "
+            EventRepository().log_event("Email Fail", f"Failed to send verification email to '{target_email}', "
                                             f"error code was '{e.args}'.")
             return False
 
@@ -784,12 +784,12 @@ def send_reset_email(target_email, user_name, code):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent reset email to '{target_email}'")
-            Event().log_event("Email Success", f"Sent reset email to '{target_email}'.")
+            EventRepository().log_event("Email Success", f"Sent reset email to '{target_email}'.")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send reset email to '{target_email}', "
+            EventRepository().log_event("Email Fail", f"Failed to send reset email to '{target_email}', "
                                             f"error code was '{e.args}'.")
             return False
 
@@ -818,12 +818,12 @@ def contact_form_email(from_name, from_email, body):
                 msg=f"To:{brf_personal_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message to '{brf_personal_email}'.")
-            Event().log_event("Email Success", f"Sent message to '{brf_personal_email}'")
+            EventRepository().log_event("Email Success", f"Sent message to '{brf_personal_email}'")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
-            Event().log_event("Email Fail", f"Failed to send message to '{brf_personal_email}', "
+            EventRepository().log_event("Email Fail", f"Failed to send message to '{brf_personal_email}', "
                                             f"error code was '{e.args}'.")
             return False
 
@@ -850,12 +850,12 @@ def send_system_alert_email(body):
                 msg=f"To:{brf_personal_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Alert Email(): sent message to '{brf_personal_email}'.")
-            Event().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
+            EventRepository().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
             return True
         except Exception as e:
             app.logger.debug(
                 f"Alert Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
-            Event().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
+            EventRepository().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
                                                   f"error code was '{e.args}'.")
             return False
 
@@ -892,7 +892,7 @@ def send_2fa_sms(user):
         from_=twilio_mobile_number,
         to=user.phone_number
     )
-    Event().log_event("SMS", f"SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
+    EventRepository().log_event("SMS", f"SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
 
 
@@ -919,7 +919,7 @@ def send_sms_verif_code(user):
         from_=twilio_mobile_number,
         to=user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number)]
     )
-    Event().log_event("SMS", f"SMS code sent to '{user.email}'. Status is '{message.status}'.")
+    EventRepository().log_event("SMS", f"SMS code sent to '{user.email}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): SMS code sent to '{user.email}'. Status is '{message.status}'.")
 
 
@@ -950,7 +950,7 @@ def send_sms(user, body):
         from_=twilio_mobile_number,
         to=user.phone_number
     )
-    Event().log_event("SMS", f"Sent SMS to '{user.email}'. Status is '{message.status}'.")
+    EventRepository().log_event("SMS", f"Sent SMS to '{user.email}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): Sent SMS to '{user.email}'. Status is '{message.status}'.")
 
 
@@ -971,7 +971,7 @@ def alert_admin_via_sms(from_user: User, message: str):
             send_sms(admin, f"ELSR Admin alert from '{from_user.name}': {message}")
         else:
             # Should never get here, but..
-            Event().log_event("SMS admin alert", f"Admin '{admin.email}' doesn't appear to have a valid mobile number.")
+            EventRepository().log_event("SMS admin alert", f"Admin '{admin.email}' doesn't appear to have a valid mobile number.")
             app.logger.debug(f"alert_admin_sms(): Admin '{admin.email}' doesn't appear to have a valid mobile number.")
 
 

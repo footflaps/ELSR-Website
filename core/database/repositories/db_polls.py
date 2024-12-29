@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------------------------------------------------- #
-# Import db object from __init__.py
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
@@ -27,30 +27,31 @@ POLL_CLOSED = "Closed"
 
 class Polls(PollsModel):
 
-    def all(self):
-        with app.app_context():
-            polls = db.session.query(Polls).all()
-            return polls
-
-    def one_poll_by_id(self, poll_id):
-        with app.app_context():
-            poll = db.session.query(Polls).filter_by(id=poll_id).first()
-            return poll
-
-    def add_poll(self, new_poll):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Create
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def add_poll(new_poll: PollsModel) -> PollsModel | None:
         # Try and add to the dB
         with app.app_context():
             try:
                 db.session.add(new_poll)
                 db.session.commit()
+                db.refresh(new_poll)
                 # Return social object
-                return db.session.query(Polls).filter_by(id=new_poll.id).first()
+                return new_poll
+
             except Exception as e:
+                db.rollback()
                 app.logger.error(f"dB.add_poll(): Failed with error code '{e.args}'.")
-                print(f"EdB.add_poll(): Failed with error code '{e.args}'.")
+                print(f"dB.add_poll(): Failed with error code '{e.args}'.")
                 return None
 
-    def delete_poll(self, poll_id):
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Delete
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def delete_poll(poll_id: int) -> bool:
         with app.app_context():
 
             # Locate the GPX file
@@ -62,35 +63,26 @@ class Polls(PollsModel):
                     db.session.delete(poll)
                     db.session.commit()
                     return True
+
                 except Exception as e:
+                    db.rollback()
                     app.logger.error(f"db_poll: Failed to delete Poll for poll_id = '{poll_id}', "
                                      f"error code '{e.args}'.")
                     return False
+
         return False
 
+    # -------------------------------------------------------------------------------------------------------------- #
+    # Search
+    # -------------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def all() -> list[PollsModel]:
+        with app.app_context():
+            polls = db.session.query(Polls).all()
+            return polls
 
-# -------------------------------------------------------------------------------------------------------------- #
-# Create the actual dB
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    db.create_all()
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-#                                               Functions
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Check the dB loaded ok
-# -------------------------------------------------------------------------------------------------------------- #
-
-with app.app_context():
-    polls = db.session.query(Polls).all()
-    print(f"Found {len(polls)} polls in the dB")
-    app.logger.debug(f"Start of day: Found {len(polls)} polls in the dB")
+    @staticmethod
+    def one_poll_by_id(poll_id: int) -> PollsModel | None:
+        with app.app_context():
+            poll = db.session.query(Polls).filter_by(id=poll_id).first()
+            return poll

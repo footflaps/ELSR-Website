@@ -4,30 +4,45 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
+from sqlalchemy import func
 from threading import Thread
 import os
 import requests as requests2
 from bs4 import BeautifulSoup
 import json
+import re
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site, GLOBAL_FLASH
+from core import db, app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site, GLOBAL_FLASH
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_cafes import Cafe, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
+from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
 from core.database.repositories.db_users import User, update_last_seen
 from core.forms.user_forms import ClothingSizesForm
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import contact_form_email
+
+from core.database.models.users_model import UserModel
+from core.database.models.cafes_model import CafeModel
+from core.database.models.gpx_model import GpxModel
+from core.database.models.calendar_model import CalendarModel
+from core.database.models.socials_model import SocialsModel
+from core.database.models.classifieds_model import ClassifiedModel
+from core.database.models.messages_model import MessageModel
+from core.database.models.cafe_comments_model import CafeCommentModel
+from core.database.models.events_model import EventModel
+from core.database.models.polls_model import PollsModel
+from core.database.models.blog_model import BlogModel
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import the other route pages
@@ -112,6 +127,28 @@ def get_chaingang_top10():
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Jinja methods
+# -------------------------------------------------------------------------------------------------------------- #
+
+def remove_html_tags(text):
+    """Remove html tags from a string"""
+    clean = re.compile('<.*?>')
+    return re.sub(clean, '', text)
+
+
+# Pass this to jinja
+app.jinja_env.globals.update(remove_html_tags=remove_html_tags)
+
+
+def get_cafe_name_from_id(cafe_id):
+    return CafeRepository().one_cafe(cafe_id).name
+
+
+# Add this to jinja's environment, so we can use it within html templates
+app.jinja_env.globals.update(get_cafe_name_from_id=get_cafe_name_from_id)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # html routes
@@ -164,7 +201,7 @@ def home():
     # -------------------------------------------------------------------------------------------- #
 
     # Get the cafe
-    cafe = Cafe().one_cafe(BEAN_THEORY_INDEX)
+    cafe = CafeRepository().one_cafe(BEAN_THEORY_INDEX)
 
     # Create a GM marker
     cafe_marker = [{
@@ -208,7 +245,7 @@ def chaingang():
         # Should never happen, but may as well handle it cleanly
         flash("Sorry, we seem to have lost that GPX file!")
         flash("Somebody should probably fire the web developer...")
-        Event().log_event("One GPX Fail", f"Can't find '{filename}'!")
+        EventRepository().log_event("One GPX Fail", f"Can't find '{filename}'!")
         app.logger.error(f"gpx_details(): Can't find '{filename}'!")
         return abort(404)
 
@@ -399,7 +436,7 @@ def club_kit():
         user = User().find_user_from_id(current_user.id)
         if not user:
             app.logger.debug(f"club_kit(): Failed to find user, if = '{current_user.id}'!")
-            Event().log_event("club_kit Fail", f"Failed to find user, if = '{current_user.id}'!")
+            EventRepository().log_event("club_kit Fail", f"Failed to find user, if = '{current_user.id}'!")
             abort(404)
 
         if request.method == 'GET':
@@ -442,12 +479,12 @@ def club_kit():
             # Save to user
             if User().update_user(user):
                 app.logger.debug(f"club_kit(): Updated user, user_id = '{user_id}'.")
-                Event().log_event("club_kit Success", f"Updated user, user_id = '{user_id}'.")
+                EventRepository().log_event("club_kit Success", f"Updated user, user_id = '{user_id}'.")
                 flash("Your sizes have been updated!")
             else:
                 # Should never get here, but..
                 app.logger.debug(f"club_kit(): Failed to update user, user_id = '{user_id}'.")
-                Event().log_event("club_kit Fail", f"Failed to update user, user_id = '{user_id}'.")
+                EventRepository().log_event("club_kit Fail", f"Failed to update user, user_id = '{user_id}'.")
                 flash("Sorry, something went wrong!")
 
         elif request.method == 'POST':
@@ -478,6 +515,46 @@ def club_kit_v1():
     # ----------------------------------------------------------- #
 
     return render_template("main_club_kit_v1.html", year=current_year, live_site=live_site())
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Check the dB loaded ok
+# -------------------------------------------------------------------------------------------------------------- #
+
+with app.app_context():
+
+    num_users = db.session.query(func.count(UserModel.id)).scalar()
+    print(f"Found {num_users} users in the dB")
+
+    num_cafes = db.session.query(func.count(CafeModel.id)).scalar()
+    print(f"Found {num_cafes} cafes in the dB")
+
+    num_gpx = db.session.query(func.count(GpxModel.id)).scalar()
+    print(f"Found {num_gpx} gpx in the dB")
+
+    num_calendar = db.session.query(func.count(CalendarModel.id)).scalar()
+    print(f"Found {num_calendar} calendar entries in the dB")
+
+    num_socials = db.session.query(func.count(SocialsModel.id)).scalar()
+    print(f"Found {num_socials} socials in the dB")
+
+    num_classifieds = db.session.query(func.count(ClassifiedModel.id)).scalar()
+    print(f"Found {num_classifieds} classifieds in the dB")
+
+    num_messages = db.session.query(func.count(MessageModel.id)).scalar()
+    print(f"Found {num_messages} messages in the dB")
+
+    num_cafe_comments = db.session.query(func.count(CafeCommentModel.id)).scalar()
+    print(f"Found {num_cafe_comments} cafe comments in the dB")
+
+    num_events = db.session.query(func.count(EventModel.id)).scalar()
+    print(f"Found {num_events} events in the dB")
+
+    num_polls = db.session.query(func.count(PollsModel.id)).scalar()
+    print(f"Found {num_polls} polls in the dB")
+
+    num_blogs = db.session.query(func.count(BlogModel.id)).scalar()
+    print(f"Found {num_blogs} blogs in the dB")
 
 
 # -------------------------------------------------------------------------------------------------------------- #

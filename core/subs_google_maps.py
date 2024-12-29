@@ -11,7 +11,7 @@ from datetime import datetime, date
 # Import app etc from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS
+from core import app, GPX_UPLOAD_FOLDER_ABS, CONFIG_FOLDER
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -19,9 +19,9 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, SUPER_ADMIN_USER_ID
-from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.cafes_repository import CafeRepository
 from core.subs_email_sms import send_system_alert_email, send_sms
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -53,9 +53,6 @@ MAP_BOUNDS = {
         "west": ELSR_HOME['lng'] - 2,
         "east": ELSR_HOME['lng'] + 3,
 }
-
-# Where we store config files etc
-CONFIG_FOLDER = os.environ['ELSR_CONFIG_FOLDER']
 
 # Maps enable status file location
 MAP_STATUS_FILENAME = "map_status.txt"
@@ -218,7 +215,7 @@ def markers_for_cafes_native(cafes):
     for cafe_summary in cafes:
 
         # Need to look up current cafe open / closed status
-        if Cafe().one_cafe(cafe_summary["id"]).active:
+        if CafeRepository().one_cafe(cafe_summary["id"]).active:
             icon_colour = '#2196f3'
         else:
             icon_colour = '#ff0000'
@@ -355,7 +352,7 @@ def maps_enabled():
     if not os.path.exists(filename):
         # Create it disabled just to be safe
         app.logger.error(f"maps_enabled(): Missing file '{filename}'. Created new one.")
-        Event().log_event("maps_enabled()", f"Missing file '{filename}'. Created new one.")
+        EventRepository().log_event("maps_enabled()", f"Missing file '{filename}'. Created new one.")
         with open(filename, 'w') as file:
             file.write("False")
 
@@ -492,7 +489,7 @@ def count_map_loads(count: int):
             lines = file.readlines()
     else:
         app.logger.error(f"count_map_loads(): Missing file '{filename}'.")
-        Event().log_event("count_map_loads()", f"Missing file '{filename}'.")
+        EventRepository().log_event("count_map_loads()", f"Missing file '{filename}'.")
         lines = []
 
     # ----------------------------------------------------------- #
@@ -535,7 +532,7 @@ def count_map_loads(count: int):
         if maps_enabled():
             # Disable maps
             app.logger.debug(f"count_map_loads(): Disabling maps as count is {total_today} / {map_limit}!")
-            Event().log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
+            EventRepository().log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
             set_disable_maps()
         else:
             # Already disabled
@@ -566,7 +563,7 @@ def get_current_map_count():
             lines = file.readlines()
     else:
         app.logger.error(f"get_current_map_count(): Missing file '{filename}'.")
-        Event().log_event("get_current_map_count()", f"Missing file '{filename}'.")
+        EventRepository().log_event("get_current_map_count()", f"Missing file '{filename}'.")
         lines = []
 
     # ----------------------------------------------------------- #
@@ -658,4 +655,4 @@ def graph_map_counts():
 
 print(f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
 app.logger.debug(f"Start of day: Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
-Event().log_event("Start of day:", f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
+EventRepository().log_event("Start of day:", f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")

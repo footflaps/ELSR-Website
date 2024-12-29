@@ -30,16 +30,16 @@ from core import app, current_year, live_site
 from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, DELETED_NAME, \
                           NOTIFICATIONS_DEFAULT_VALUE, login_required
 from core.forms.user_forms import ChangeUserDetailsForm
-from core.database.repositories.db_cafes import Cafe
+from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.db_gpx import Gpx
-from core.database.repositories.db_cafe_comments import CafeComment
+from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 from core.database.repositories.db_messages import Message, ADMIN_EMAIL
-from core.database.repositories.db_events import Event
+from core.database.repositories.event_repository import EventRepository
 from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
-from core.database.repositories.db_calendar import Calendar
+from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.db_social import Socials
 from core.database.repositories.blog_repository import BlogRepository as Blog
-from core.database.repositories.db_classifieds import Classified
+from core.database.repositories.classifieds_repository import ClassifiedRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -180,7 +180,7 @@ def user_page():
     # ----------------------------------------------------------- #
     if not user_id:
         app.logger.debug(f"user_page(): Missing user_id!")
-        Event().log_event("User Page Fail", f"Missing user_id!")
+        EventRepository().log_event("User Page Fail", f"Missing user_id!")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -189,7 +189,7 @@ def user_page():
     user = User().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"user_page(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("User Page Fail", f"Invalid user_id = '{user_id}'.")
+        EventRepository().log_event("User Page Fail", f"Invalid user_id = '{user_id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -204,7 +204,7 @@ def user_page():
             user.name == DELETED_NAME:
         app.logger.debug(f"user_page(): Rejected request from current_user.id = '{current_user.id}', "
                          f"for user_id = '{user_id}'.")
-        Event().log_event("User Page Fail", f"Rejected request from current_user.id = '{current_user.id}', "
+        EventRepository().log_event("User Page Fail", f"Rejected request from current_user.id = '{current_user.id}', "
                                             f"for user_id = '{user_id}'.")
         abort(403)
 
@@ -212,19 +212,19 @@ def user_page():
     # Gather data: 1. Events
     # ----------------------------------------------------------- #
     if not event_period:
-        events = Event().all_events_email_days(user.email, DEFAULT_EVENT_DAYS)
+        events = EventRepository().all_events_email_days(user.email, DEFAULT_EVENT_DAYS)
         days = DEFAULT_EVENT_DAYS
     elif event_period == "all":
-        events = Event().all_events_email(user.email)
+        events = EventRepository().all_events_email(user.email)
         days = "all"
     else:
-        events = Event().all_events_email_days(user.email, int(event_period))
+        events = EventRepository().all_events_email_days(user.email, int(event_period))
         days = int(event_period)
 
     # ----------------------------------------------------------- #
     # Gather data: 2. Cafes
     # ----------------------------------------------------------- #
-    cafes = Cafe().find_all_cafes_by_email(user.email)
+    cafes = CafeRepository().find_all_cafes_by_email(user.email)
 
     # ----------------------------------------------------------- #
     # Gather data: 3. GPX files
@@ -234,7 +234,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Gather data: 4. Comments
     # ----------------------------------------------------------- #
-    cafe_comments = CafeComment().all_comments_by_email(user.email)
+    cafe_comments = CafeCommentRepository().all_comments_by_email(user.email)
 
     # ----------------------------------------------------------- #
     # Gather data: 5. Messages
@@ -260,7 +260,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Gather data: 6. Rides
     # ----------------------------------------------------------- #
-    rides = Calendar().all_calendar_email(user.email)
+    rides = CalendarRepository().all_calendar_email(user.email)
 
     # ----------------------------------------------------------- #
     # Gather data: 7. Social events
@@ -270,7 +270,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Gather data: 8. Classifieds
     # ----------------------------------------------------------- #
-    classifieds = Classified().all_by_email(user.email)
+    classifieds = ClassifiedRepository().all_by_email(user.email)
 
     # ----------------------------------------------------------- #
     # Gather data: 9. Notification preferences
@@ -325,7 +325,7 @@ def user_page():
                 # Not unique
                 flash(f"Sorry, the name '{new_name}' is already in use!")
                 app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")
-                Event().log_event("User Page Success", f"Username clash '{new_name}' for user_id = '{user_id}'.")
+                EventRepository().log_event("User Page Success", f"Username clash '{new_name}' for user_id = '{user_id}'.")
             else:
                 # Change their name
                 user.name = new_name
@@ -351,13 +351,13 @@ def user_page():
         if made_change:
             if User().update_user(user):
                 app.logger.debug(f"user_page(): Updated user, user_id = '{user_id}'.")
-                Event().log_event("User Page Success", f"Updated user, user_id = '{user_id}'.")
+                EventRepository().log_event("User Page Success", f"Updated user, user_id = '{user_id}'.")
                 flash("User has been updated!")
                 return redirect(url_for('user_page', user_id=user_id, anchor="account"))
             else:
                 # Should never get here, but..
                 app.logger.debug(f"user_page(): Failed to update user, user_id = '{user_id}'.")
-                Event().log_event("User Page Fail", f"Failed to update user, user_id = '{user_id}'.")
+                EventRepository().log_event("User Page Fail", f"Failed to update user, user_id = '{user_id}'.")
                 flash("Sorry, something went wrong!")
                 return redirect(url_for('user_page', user_id=user_id, anchor="account"))
         else:
@@ -423,11 +423,11 @@ def delete_user():
     # ----------------------------------------------------------- #
     if not user_id:
         app.logger.debug(f"delete_user(): Missing user_id!")
-        Event().log_event("Delete User Fail", f"missing user id")
+        EventRepository().log_event("Delete User Fail", f"missing user id")
         abort(400)
     elif not password:
         app.logger.debug(f"delete_user(): Missing user password!")
-        Event().log_event("Delete User Fail", f"Missing user password")
+        EventRepository().log_event("Delete User Fail", f"Missing user password")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -436,7 +436,7 @@ def delete_user():
     user = User().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"delete_user(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
+        EventRepository().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -446,7 +446,7 @@ def delete_user():
             not current_user.admin():
         app.logger.debug(f"delete_user(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
-        Event().log_event("Delete User Fail", f"User isn't allowed "
+        EventRepository().log_event("Delete User Fail", f"User isn't allowed "
                                               f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         abort(403)
 
@@ -457,14 +457,14 @@ def delete_user():
         # Validate against their own password
         if not user.validate_password(user, password, user_ip):
             app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{user.id}'!")
-            Event().log_event("Delete User Fail", f"Delete failed, incorrect password for user_id = '{user.id}'!")
+            EventRepository().log_event("Delete User Fail", f"Delete failed, incorrect password for user_id = '{user.id}'!")
             flash(f"Incorrect password for {user.name}.")
             return redirect(url_for('user_page', user_id=user_id))
     else:
         # Validate against current_user's (admins) password
         if not user.validate_password(current_user, password, user_ip):
             app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
-            Event().log_event("Delete User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+            EventRepository().log_event("Delete User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
             flash(f"Incorrect password for {current_user.name}.")
             return redirect(url_for('user_page', user_id=user_id))
 
@@ -473,7 +473,7 @@ def delete_user():
     # ----------------------------------------------------------- #
     if User().delete_user(user_id):
         app.logger.debug(f"delete_user(): Success, user '{user.email}' deleted.")
-        Event().log_event("Delete User Success", f"User '{user.email}' deleted.")
+        EventRepository().log_event("Delete User Success", f"User '{user.email}' deleted.")
         flash(f"User '{user.name}' successfully deleted.")
 
         if current_user.admin \
@@ -500,7 +500,7 @@ def delete_user():
     else:
         # Should never get here, but...
         app.logger.debug(f"delete_user(): User().delete_user() failed for user_id = '{user_id}'.")
-        Event().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
+        EventRepository().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
         flash("Sorry, something went wrong.")
         return redirect(url_for('user_page', user_id=user_id))
 
@@ -528,11 +528,11 @@ def set_notifications():
     # ----------------------------------------------------------- #
     if not user_id:
         app.logger.debug(f"set_notifications(): Missing user_id!")
-        Event().log_event("Set Notifications Fail", f"missing user id")
+        EventRepository().log_event("Set Notifications Fail", f"missing user id")
         abort(400)
     elif not choices:
         app.logger.debug(f"set_notifications(): Missing choices!")
-        Event().log_event("Set Notifications Fail", f"Missing choices")
+        EventRepository().log_event("Set Notifications Fail", f"Missing choices")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -541,7 +541,7 @@ def set_notifications():
     user = User().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"set_notifications(): Invalid user user_id = '{user_id}'!")
-        Event().log_event("Set Notifications Fail", f"Invalid user user_id = '{user_id}'!")
+        EventRepository().log_event("Set Notifications Fail", f"Invalid user user_id = '{user_id}'!")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -551,7 +551,7 @@ def set_notifications():
             not current_user.admin():
         app.logger.debug(f"set_notifications(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
-        Event().log_event("Set Notifications Fail", f"User isn't allowed "
+        EventRepository().log_event("Set Notifications Fail", f"User isn't allowed "
                                                     f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         abort(403)
 
@@ -560,12 +560,12 @@ def set_notifications():
     # ----------------------------------------------------------- #
     if User().set_notifications(user_id, choices):
         app.logger.debug(f"set_notifications(): Success, user '{user.email}' has set notifications = '{choices}'.")
-        Event().log_event("Set Notifications Success", f"User '{user.email}' has set notifications = '{choices}'.")
+        EventRepository().log_event("Set Notifications Success", f"User '{user.email}' has set notifications = '{choices}'.")
         flash("Notifications have been updated!")
     else:
         # Should never get here, but...
         app.logger.debug(f"dset_notifications():  user.set_notifications failed for user_id = '{user_id}'.")
-        Event().log_event("Set Notifications Fail", f" user.set_notifications failed for user_id = '{user_id}'.")
+        EventRepository().log_event("Set Notifications Fail", f" user.set_notifications failed for user_id = '{user_id}'.")
         flash("Sorry, something went wrong.")
 
     # Back to user page
@@ -591,11 +591,11 @@ def unsubscribe_all():
     # ----------------------------------------------------------- #
     if not email:
         app.logger.debug(f"unsubscribe_all(): Missing email!")
-        Event().log_event("unsubscribe_all Fail", f"missing email!")
+        EventRepository().log_event("unsubscribe_all Fail", f"missing email!")
         abort(400)
     elif not code:
         app.logger.debug(f"unsubscribe_all(): Missing code!")
-        Event().log_event("unsubscribe_all Fail", f"Missing code!")
+        EventRepository().log_event("unsubscribe_all Fail", f"Missing code!")
         abort(400)
 
     # ----------------------------------------------------------- #
@@ -604,11 +604,11 @@ def unsubscribe_all():
     user = User().find_user_from_email(email)
     if not user:
         app.logger.debug(f"unsubscribe_all(): Invalid email = '{email}'!")
-        Event().log_event("unsubscribe_all Fail", f"Invalid email = '{email}'!")
+        EventRepository().log_event("unsubscribe_all Fail", f"Invalid email = '{email}'!")
         abort(404)
     if code != user.unsubscribe_code():
         app.logger.debug(f"unsubscribe_all(): Invalid code = '{code}' for user '{user.email}'!")
-        Event().log_event("unsubscribe_all Fail", f"Invalid code = '{code}' for user '{user.email}'!")
+        EventRepository().log_event("unsubscribe_all Fail", f"Invalid code = '{code}' for user '{user.email}'!")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -617,7 +617,7 @@ def unsubscribe_all():
     flash("You have been unsubscribed from all email notifications EXCEPT classifieds!")
     flash("You must delete any classifieds to prevent emails from buyers.")
     app.logger.debug(f"unsubscribe_all(): Successfully unsubscribed user '{user.email}'!")
-    Event().log_event("unsubscribe_all Fail", f"Successfully unsubscribed user '{user.email}'!")
+    EventRepository().log_event("unsubscribe_all Fail", f"Successfully unsubscribed user '{user.email}'!")
     User().set_notifications(user.id, NOTIFICATIONS_DEFAULT_VALUE)
 
     # ----------------------------------------------------------- #
@@ -678,7 +678,7 @@ def emergency():
     if not current_user.can_see_emergency_contacts():
         # Naughty boy
         app.logger.debug(f"emergency(): Non Admin access, user_id = '{current_user.id}'!")
-        Event().log_event("Admin Page Fail", f"on emergency access, user_id = '{current_user.id}'!")
+        EventRepository().log_event("Admin Page Fail", f"on emergency access, user_id = '{current_user.id}'!")
         return abort(403)
 
     # ----------------------------------------------------------- #
