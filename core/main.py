@@ -87,7 +87,6 @@ from core.routes.routes_messages import mark_read
 from core.routes.routes_polling import add_poll
 from core.routes.routes_polling_voting import swap_vote
 from core.routes.routes_social_signup import social_cant
-#from core.routes.routes_socials import social
 from core.routes.routes_user_login_logout import login
 from core.routes.routes_user_register import register
 from core.routes.routes_users import user_page

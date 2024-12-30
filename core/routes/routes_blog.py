@@ -11,7 +11,7 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site, BLOG_IMAGE_FOLDER,ICS_DIRECTORY
+from core import app, current_year, live_site, BLOG_IMAGE_FOLDER, ICS_DIRECTORY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
