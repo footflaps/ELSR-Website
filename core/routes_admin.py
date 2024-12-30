@@ -18,7 +18,7 @@ from core import app, current_year, is_mobile, live_site
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID, login_required
+from core.database.repositories.db_users import User, SUPER_ADMIN_USER_ID
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
@@ -28,6 +28,8 @@ from core.subs_google_maps import maps_enabled, get_current_map_count, map_limit
 from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.database.repositories.classifieds_repository import ClassifiedRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
+
+from core.decorators.user_decorators import update_last_seen, login_required, admin_only
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -263,7 +265,7 @@ def admin_page():
         # We add the current user's public name to each message before passing to the Jinja.
         # NB Internally we only use email as they are immutable and unique.
         message.from_name = User().find_user_from_email(message.from_email).name
-        if not message.been_read():
+        if not message.been_read:
             count += 1
 
     if count > 0:

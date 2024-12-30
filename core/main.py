@@ -10,7 +10,6 @@ import os
 import requests as requests2
 from bs4 import BeautifulSoup
 import json
-import re
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -19,17 +18,10 @@ import re
 
 from core import db, app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site, GLOBAL_FLASH
 
-# -------------------------------------------------------------------------------------------------------------- #
-# Import our classes
-# -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
-from core.database.repositories.db_users import User, update_last_seen
-from core.forms.user_forms import ClothingSizesForm
-from core.subs_graphjs import get_elevation_data
-from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
-from core.database.repositories.event_repository import EventRepository
-from core.subs_email_sms import contact_form_email
+# -------------------------------------------------------------------------------------------------------------- #
+# Import our Models
+# -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.models.users_model import UserModel
 from core.database.models.cafes_model import CafeModel
@@ -42,6 +34,37 @@ from core.database.models.cafe_comments_model import CafeCommentModel
 from core.database.models.events_model import EventModel
 from core.database.models.poll_model import PollModel
 from core.database.models.blog_model import BlogModel
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import our Jinja Helper functions
+# -------------------------------------------------------------------------------------------------------------- #
+
+from core.database.jinja.gpx_jinja import number_routes_passing_by
+from core.database.jinja.calendar_jinja import start_time_string
+from core.database.jinja.event_jinja import flag_event
+from core.database.jinja.message_jinja import admin_has_mail
+from core.database.jinja.cafe_jinja import get_cafe_name_from_id
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import our Decorators
+# -------------------------------------------------------------------------------------------------------------- #
+
+from core.decorators.user_decorators import update_last_seen
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Import our classes
+# -------------------------------------------------------------------------------------------------------------- #
+
+from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
+from core.database.repositories.db_users import User
+from core.forms.user_forms import ClothingSizesForm
+from core.subs_graphjs import get_elevation_data
+from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
+from core.database.repositories.event_repository import EventRepository
+from core.subs_email_sms import contact_form_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -124,28 +147,6 @@ def get_chaingang_top10():
         if i != 0:
             rows.append([el.text.strip() for el in row.find_all('td')])
     return rows
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Jinja methods
-# -------------------------------------------------------------------------------------------------------------- #
-
-def remove_html_tags(text):
-    """Remove html tags from a string"""
-    clean = re.compile('<.*?>')
-    return re.sub(clean, '', text)
-
-
-# Pass this to jinja
-app.jinja_env.globals.update(remove_html_tags=remove_html_tags)
-
-
-def get_cafe_name_from_id(cafe_id):
-    return CafeRepository().one_cafe(cafe_id).name
-
-
-# Add this to jinja's environment, so we can use it within html templates
-app.jinja_env.globals.update(get_cafe_name_from_id=get_cafe_name_from_id)
 
 
 # -------------------------------------------------------------------------------------------------------------- #

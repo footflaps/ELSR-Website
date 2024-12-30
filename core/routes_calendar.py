@@ -9,19 +9,21 @@ import calendar as cal
 
 from core import app, current_year, live_site
 
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import update_last_seen, logout_barred_user
 from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES
 from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.gpx_repository import GpxRepository
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
 from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_dates import get_date_from_url
+
+from core.decorators.user_decorators import update_last_seen, logout_barred_user
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -222,7 +224,7 @@ def ride_history(request):
 
     for ride in rides:
         gpx_id = ride.gpx_id
-        gpx = Gpx().one_gpx(gpx_id)
+        gpx = GpxRepository().one_gpx(gpx_id)
         if gpx:
             gpxes.append(gpx)
             ride.length_km = gpx.length_km

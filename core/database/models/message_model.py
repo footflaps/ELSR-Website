@@ -48,12 +48,14 @@ class MessageModel(db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
     # Properties
     # ---------------------------------------------------------------------------------------------------------- #
+    @property
     def been_read(self):
+        """
+        Property to help interpret the status value of the message.
+        :return:    Returns True if the message has been read, False otherwise
+        """
         try:
-            if self.status & MASK_READ > 0:
-                return True
-            else:
-                return False
-        except TypeError:
-            self.status = 0
+            return (self.status & MASK_READ) > 0
+        except TypeError:  # Handles None or invalid types
+            self.status = 0  # Reset status to 0
             return False

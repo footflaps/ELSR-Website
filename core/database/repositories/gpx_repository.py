@@ -33,7 +33,7 @@ TYPES = [TYPE_ROAD,
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class Gpx(GpxModel):
+class GpxRepository(GpxModel):
 
     # -------------------------------------------------------------------------------------------------------------- #
     # Create
@@ -292,7 +292,7 @@ class Gpx(GpxModel):
     @staticmethod
     def all_gpxes_sorted_downloads() -> list[GpxModel]:
         with app.app_context():
-            gpxes = GpxModel.query.filter_by(valid=1).order_by(func.json_array_length(Gpx.downloads).desc()).\
+            gpxes = GpxModel.query.filter_by(valid=1).order_by(func.json_array_length(GpxRepository.downloads).desc()).\
                     limit(10).all()
             return gpxes
 
@@ -360,15 +360,3 @@ class Gpx(GpxModel):
 
     def combo_string(self):
         return f"{self.name}, {self.length_km}km / {self.ascent_m}m ({self.id})"
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Jinja needs to know how many routes pass a cafe for the cafe page
-# -------------------------------------------------------------------------------------------------------------- #
-
-def number_routes_passing_by(cafe_id, user):
-    routes = Gpx().find_all_gpx_for_cafe(cafe_id, user)
-    return len(routes)
-
-
-app.jinja_env.globals.update(number_routes_passing_by=number_routes_passing_by)

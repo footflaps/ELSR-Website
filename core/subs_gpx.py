@@ -15,7 +15,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
+from core.database.repositories.gpx_repository import GpxRepository, GPX_ALLOWED_EXTENSIONS
 from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
@@ -56,7 +56,7 @@ def check_new_cafe_with_all_gpxes(cafe):
     app.logger.debug(f"check_new_cafe_with_all_gpxes(): Called with '{cafe.name}'.")
 
     # Get all the routes
-    gpxes = Gpx().all_gpxes()
+    gpxes = GpxRepository().all_gpxes()
 
     # Loop over each GPX file
     for gpx in gpxes:
@@ -101,9 +101,9 @@ def check_new_cafe_with_all_gpxes(cafe):
             if min_km <= MIN_DIST_TO_CAFE_KM:
                 app.logger.debug(f"-- Closest to cafe {cafe.name} was {round(min_km, 1)} km"
                                  f" at {round(min_km_dist, 1)} km along the route. Total length was {round(dist_km, 1)} km")
-                Gpx().update_cafe_list(gpx.id, cafe.id, round(min_km, 1), round(min_km_dist, 1))
+                GpxRepository().update_cafe_list(gpx.id, cafe.id, round(min_km, 1), round(min_km_dist, 1))
             else:
-                Gpx().remove_cafe_list(gpx.id, cafe.id)
+                GpxRepository().remove_cafe_list(gpx.id, cafe.id)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -113,12 +113,12 @@ def remove_cafe_from_all_gpxes(cafe_id):
     app.logger.debug(f"remove_cafe_from_all_gpxes(): Called with cafe_id = '{cafe_id}'.")
 
     # Get all the routes
-    gpxes = Gpx().all_gpxes()
+    gpxes = GpxRepository().all_gpxes()
 
     # Loop over each GPX file
     for gpx in gpxes:
         # Remove this entry
-        Gpx().remove_cafe_list(gpx.id, cafe_id)
+        GpxRepository().remove_cafe_list(gpx.id, cafe_id)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -129,7 +129,7 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(gpx_id)
+    gpx = GpxRepository().one_gpx(gpx_id)
 
     # Make sure gpx_id is valid
     if not gpx:
@@ -198,8 +198,8 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
                     app.logger.debug(f"-- Route passes within {round(min_distance_km[cafe.id - 1], 1)} km of {cafe.name} "
                                      f"after {round(min_distance_path_km[cafe.id - 1], 1)} km.")
                     # Push update to GPX file
-                    Gpx().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
-                                           min_distance_path_km[cafe.id - 1])
+                    GpxRepository().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
+                                                     min_distance_path_km[cafe.id - 1])
 
     # ----------------------------------------------------------- #
     # Have we been asked to send a ride email notification?

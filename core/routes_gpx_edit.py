@@ -15,14 +15,16 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.db_users import User
+from core.database.repositories.gpx_repository import GpxRepository
 from core.forms.gpx_forms import create_rename_gpx_form
 from core.database.repositories.event_repository import EventRepository
 from core.subs_gpx import check_new_gpx_with_all_cafes
 from core.subs_google_maps import start_and_end_maps_native_gm, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx_edit import cut_start_gpx, cut_end_gpx
 from core.database.repositories.calendar_repository import CalendarRepository
+
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -62,7 +64,7 @@ def edit_route():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(gpx_id)
+    gpx = GpxRepository().one_gpx(gpx_id)
     if not gpx:
         app.logger.debug(f"edit_route(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
         EventRepository().log_event("Edit GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -130,7 +132,7 @@ def edit_route():
             gpx.details = new_details
 
             # Write to db
-            if Gpx().add_gpx(gpx):
+            if GpxRepository().add_gpx(gpx):
                 app.logger.debug(f"edit_route(): Successfully updated GPX '{gpx.id}'.")
                 EventRepository().log_event("Edit GPX Success", f"Successfully updated GPX '{gpx_id}'.")
                 flash("Details have been updated!")
@@ -209,7 +211,7 @@ def gpx_cut_start():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(gpx_id)
+    gpx = GpxRepository().one_gpx(gpx_id)
     index = int(index)
 
     if not gpx:
@@ -240,7 +242,7 @@ def gpx_cut_start():
     # ----------------------------------------------------------- #
     # Update GPX for cafes
     # ----------------------------------------------------------- #
-    if Gpx().clear_cafe_list(gpx_id):
+    if GpxRepository().clear_cafe_list(gpx_id):
         # Go ahead and update the list
         flash("Nearby cafe list is being been updated.")
         Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, False, )).start()
@@ -288,7 +290,7 @@ def gpx_cut_end():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(gpx_id)
+    gpx = GpxRepository().one_gpx(gpx_id)
     index = int(index)
 
     if not gpx:
@@ -319,7 +321,7 @@ def gpx_cut_end():
     # ----------------------------------------------------------- #
     # Update GPX for cafes
     # ----------------------------------------------------------- #
-    if Gpx().clear_cafe_list(gpx_id):
+    if GpxRepository().clear_cafe_list(gpx_id):
         # Go ahead and update the list
         flash("Nearby cafe list is being updated...")
         Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, False, )).start()
@@ -361,7 +363,7 @@ def publish_route():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(gpx_id)
+    gpx = GpxRepository().one_gpx(gpx_id)
 
     if not gpx:
         app.logger.debug(f"publish_route(): Failed to locate GPX with gpx_id = '{gpx_id}'!")
@@ -384,7 +386,7 @@ def publish_route():
     # ----------------------------------------------------------- #
     # Publish route
     # ----------------------------------------------------------- #
-    if Gpx().publish(gpx_id):
+    if GpxRepository().publish(gpx_id):
         app.logger.debug(f"publish_route(): Route published gpx.id = '{gpx.id}'.")
         EventRepository().log_event("Publish GPX Success", f"Route published with gpx_id = '{gpx_id}'.")
         flash("Route has been published!")
@@ -396,7 +398,7 @@ def publish_route():
     # ----------------------------------------------------------- #
     # Clear existing nearby cafe list
     # ----------------------------------------------------------- #
-    if not Gpx().clear_cafe_list(gpx_id):
+    if not GpxRepository().clear_cafe_list(gpx_id):
         app.logger.debug(f"publish_route(): Failed clear cafe list gpx.id = '{gpx.id}'.")
         EventRepository().log_event("Publish GPX Fail", f"Failed clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
@@ -458,7 +460,7 @@ def hide_route():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(gpx_id)
+    gpx = GpxRepository().one_gpx(gpx_id)
 
     if not gpx:
         app.logger.debug(f"hide_route(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -483,7 +485,7 @@ def hide_route():
     # ----------------------------------------------------------- #
     # Hide route
     # ----------------------------------------------------------- #
-    if Gpx().hide(gpx_id):
+    if GpxRepository().hide(gpx_id):
         app.logger.debug(f"hide_route(): Route hidden gpx_id = '{gpx_id}'.")
         EventRepository().log_event("Hide GPX Success", f"Route hidden gpx_id = '{gpx_id}'.")
         flash("Route has been hidden.")

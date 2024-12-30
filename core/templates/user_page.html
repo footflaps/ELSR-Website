@@ -148,7 +148,7 @@
 								<!-- Header -->
 								<div class="card-header" id="heading{{loop.index}}">
 									<h5 class="mb-0">
-										{% if message.been_read() %}
+										{% if message.been_read %}
 											<button class="btn-sm btn-secondary mr-2" type="button"
 											        data-toggle="collapse"
 											        data-target="#collapse{{loop.index}}"
@@ -182,7 +182,7 @@
 										<hr>
 								
 										<!-- Read / unread buttons -->
-										{% if message.been_read() %}
+										{% if message.been_read %}
 										
 											<!-- Mini form to mark a message unread -->
 											<form action="{{ url_for('mark_unread', message_id=message.id, return_path=url_for('user_page', user_id=user.id, anchor='messages')) }}"

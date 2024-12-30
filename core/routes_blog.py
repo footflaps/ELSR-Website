@@ -18,17 +18,19 @@ from core import app, current_year, live_site, BLOG_IMAGE_FOLDER
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, SUPER_ADMIN_USER_ID, login_required, rw_required
+from core.database.repositories.db_users import User, SUPER_ADMIN_USER_ID
 from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky,
                                                         NO_CAFE, NO_GPX, Category)
 from core.forms.blog_forms import create_blogs_form
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.cafes_repository import CafeRepository
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.gpx_repository import GpxRepository
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
 from core.routes_socials import ICS_DIRECTORY
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
+
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -204,7 +206,7 @@ def add_blog():
         if blog.gpx_index == NO_GPX:
             form.gpx.data = NO_GPX
         else:
-            form.gpx.data = Gpx().one_gpx(blog.gpx_index).combo_string()
+            form.gpx.data = GpxRepository().one_gpx(blog.gpx_index).combo_string()
         form.details.data = blog.details
 
         if blog.private:
@@ -281,7 +283,7 @@ def add_blog():
         new_blog.title = form.title.data
         new_blog.category = form.category.data
         new_blog.cafe_id = CafeRepository().cafe_id_from_combo_string(form.cafe.data)
-        new_blog.gpx_index = Gpx().gpx_id_from_combo_string(form.gpx.data)
+        new_blog.gpx_index = GpxRepository().gpx_id_from_combo_string(form.gpx.data)
         new_blog.details = form.details.data
         new_blog.private = form.privacy.data == Privacy.PRIVATE.value
 

@@ -12,7 +12,7 @@ from datetime import datetime
 
 from core import GPX_UPLOAD_FOLDER_ABS
 from core.database.repositories.cafes_repository import CafeRepository
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.db_users import User
 from core.database.repositories.calendar_repository import MEETING_OTHER, NEW_CAFE, UPLOAD_ROUTE, GROUP_CHOICES, MEETING_CHOICES
 
@@ -89,7 +89,7 @@ def create_ride_form(admin: bool, gpx_id=None):
         # Generate the list of routes
         # ----------------------------------------------------------- #
         gpx_choices = [UPLOAD_ROUTE]
-        gpxes = Gpx().all_gpxes_sorted()
+        gpxes = GpxRepository().all_gpxes_sorted()
         for gpx in gpxes:
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
             # Route must be public and double check we have an actual GPX file on tap....

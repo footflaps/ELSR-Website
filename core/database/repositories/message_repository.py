@@ -75,7 +75,7 @@ class MessageRepository(MessageModel):
         with app.app_context():
             message = MessageModel.query.filter_by(id=id).first()
             if message:
-                if not message.been_read():
+                if not message.been_read:
                     message.status += MASK_READ
                 message.read_date = date.today().strftime("%d%m%Y")
                 try:
@@ -94,7 +94,7 @@ class MessageRepository(MessageModel):
         with app.app_context():
             message = MessageModel.query.filter_by(id=id).first()
             if message:
-                if message.been_read():
+                if message.been_read:
                     message.status -= MASK_READ
                 message.read_date = date.today().strftime("%d%m%Y")
                 try:
@@ -160,7 +160,7 @@ class MessageRepository(MessageModel):
             messages = MessageModel.query.filter_by(to_email=email).all()
             unread = []
             for message in messages:
-                if not message.been_read():
+                if not message.been_read:
                     unread.append(message)
             return unread
 
@@ -190,17 +190,3 @@ class MessageRepository(MessageModel):
             body=READONLY_MESSAGE
         )
         return self.add_message(message)
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Functions for jinja
-# -------------------------------------------------------------------------------------------------------------- #
-
-def admin_has_mail():
-    if MessageRepository().all_unread_messages_to_email(ADMIN_EMAIL):
-        return True
-    else:
-        return False
-
-
-app.jinja_env.globals.update(admin_has_mail=admin_has_mail)

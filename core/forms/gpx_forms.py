@@ -10,7 +10,7 @@ from wtforms.validators import DataRequired, Length, InputRequired
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User
-from core.database.repositories.db_gpx import TYPES
+from core.database.repositories.gpx_repository import TYPES
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -17,14 +17,16 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, login_required, rw_required
+from core.database.repositories.db_users import User
 from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.database.repositories.db_gpx import Gpx, TYPE_ROAD, TYPE_GRAVEL
+from core.database.repositories.gpx_repository import GpxRepository, TYPE_ROAD, TYPE_GRAVEL
 from core.database.repositories.calendar_repository import CalendarRepository, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
-                                                   MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES, start_time_string
+                                                   MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES
 from core.database.repositories.event_repository import EventRepository
 
 from core.forms.calendar_forms import create_ride_form
+
+from core.database.jinja.calendar_jinja import start_time_string
 
 from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
@@ -32,6 +34,8 @@ from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_heigh
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 from core.subs_dates import get_date_from_url
+
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -283,7 +287,7 @@ def weekend():
         # Loop over each ride
         for ride in tmp_rides:
             # Look up the GPX object referenced in the ride object
-            gpx = Gpx().one_gpx(ride.gpx_id)
+            gpx = GpxRepository().one_gpx(ride.gpx_id)
 
             # NB It could have been deleted, so check it still exists
             if gpx:
@@ -452,7 +456,7 @@ def add_ride():
         # Edit event, so pre-fill form from dB
         # ----------------------------------------------------------- #
         # 1: Need to locate the GPX track used by the ride
-        gpx = Gpx().one_gpx(ride.gpx_id)
+        gpx = GpxRepository().one_gpx(ride.gpx_id)
         if not gpx:
             # Should never happen, but...
             app.logger.debug(f"add_ride(): Failed to locate gpx, ride_id  = '{ride_id}', "
@@ -591,8 +595,8 @@ def add_ride():
         if form.gpx_name.data != UPLOAD_ROUTE:
             # Work out which GPX route they chose
             # eg "20: 'Mill End again', 107.6km / 838.0m"
-            gpx_id = Gpx().gpx_id_from_combo_string(form.gpx_name.data)
-            gpx = Gpx().one_gpx(gpx_id)
+            gpx_id = GpxRepository().gpx_id_from_combo_string(form.gpx_name.data)
+            gpx = GpxRepository().one_gpx(gpx_id)
             if not gpx:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get GPX from '{form.gpx_name.data}'.")
@@ -670,7 +674,7 @@ def add_ride():
                 # Create a new GPX object
                 # We do this first as we need the id in order to create
                 # the filename for the GPX file when we upload it
-                gpx = Gpx()
+                gpx = GpxRepository()
                 if form.destination.data != NEW_CAFE:
                     # Existing cafe, so use name from combobox, but strip off cafe.id in brackets
                     gpx.name = form.destination.data.split('(')[0]
@@ -693,7 +697,7 @@ def add_ride():
                 if new_id:
                     # Success, added GPX to dB
                     # Have to re-get the GPX as it's changed since we created it
-                    gpx = Gpx().one_gpx(new_id)
+                    gpx = GpxRepository().one_gpx(new_id)
                     app.logger.debug(f"add_ride(): GPX added to dB, id = '{gpx.id}'.")
                     EventRepository().log_event(f"Add ride Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
                 else:
@@ -729,7 +733,7 @@ def add_ride():
                                            MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 # Update gpx object with filename
-                if not Gpx().update_filename(gpx.id, filename):
+                if not GpxRepository().update_filename(gpx.id, filename):
                     app.logger.debug(f"add_ride(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     EventRepository().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     flash("Sorry, something went wrong!")

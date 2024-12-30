@@ -354,7 +354,7 @@
 								<div class="card-header" id="heading{{loop.index}}">
 									<h5 class="mb-0">
 										<!-- Show different icon / button if read / unread -->
-										{% if message.been_read() %}
+										{% if message.been_read %}
 											<button class="btn-sm btn-secondary mr-2" type="button" data-toggle="collapse" data-target="#collapse{{loop.index}}"
 										            aria-expanded="true" aria-controls="collapse{{loop.index}}">
 												<i class="fa-regular fa-envelope-open fa-xl"></i>
@@ -387,7 +387,7 @@
 										</a>
 										
 										<!-- Mark read / unread buttons -->
-										{% if message.been_read() %}
+										{% if message.been_read %}
 
 											<!-- Mini form to mark a message unread -->
 											<form class="form-group"

@@ -12,7 +12,7 @@ from datetime import datetime
 
 from core import GPX_UPLOAD_FOLDER_ABS
 from core.database.repositories.db_users import User
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.blog_repository import NO_GPX, NO_CAFE, Sticky, Privacy, Category
 
@@ -67,7 +67,7 @@ def create_blogs_form(admin: bool):
         # Generate the list of routes
         # ----------------------------------------------------------- #
         gpx_choices = [NO_GPX]
-        gpxes = Gpx().all_gpxes_sorted()
+        gpxes = GpxRepository().all_gpxes_sorted()
         for gpx in gpxes:
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
             # Route must be public and double check we have an actual GPX file on tap....

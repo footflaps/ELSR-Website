@@ -19,7 +19,6 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import update_last_seen, logout_barred_user, login_required, rw_required
 from core.database.repositories.social_repository import SocialRepository, SOCIAL_FORM_PRIVATE, SOCIAL_DB_PRIVATE, \
                                                  SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.forms.social_forms import create_social_form
@@ -27,6 +26,8 @@ from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.db_users import User
 from core.subs_email_sms import send_social_notification_emails
 from core.subs_dates import get_date_from_url
+
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #

@@ -21,13 +21,16 @@ from core import app, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
+from core.database.repositories.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, GROUP_NOTIFICATIONS, \
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
-from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
+from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES
 from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog, Privacy
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.gpx_repository import GpxRepository
+
+from core.database.jinja.calendar_jinja import start_time_string, beautify_date
+from core.database.jinja.user_jinja import get_user_name
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -370,7 +373,7 @@ def send_ride_notification_emails(ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Make sure the GPX exists
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(ride.gpx_id)
+    gpx = GpxRepository().one_gpx(ride.gpx_id)
     if not gpx:
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Can't find GPX, ride.id = '{ride.id}', "
@@ -456,7 +459,7 @@ def send_one_ride_notification_email(user: User(), ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Get GPX / Direction
     # ----------------------------------------------------------- #
-    gpx = Gpx().one_gpx(ride.gpx_id)
+    gpx = GpxRepository().one_gpx(ride.gpx_id)
     direction = "n/a"
     if gpx:
         if gpx.direction == "CW":

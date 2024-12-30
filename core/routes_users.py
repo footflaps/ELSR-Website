@@ -27,20 +27,22 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, update_last_seen, logout_barred_user, DELETED_NAME, \
-                          NOTIFICATIONS_DEFAULT_VALUE, login_required
-from core.forms.user_forms import ChangeUserDetailsForm
+from core.database.repositories.db_users import User, DELETED_NAME, NOTIFICATIONS_DEFAULT_VALUE
 from core.database.repositories.cafes_repository import CafeRepository
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
-from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.database.repositories.classifieds_repository import ClassifiedRepository
 
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required
+
+from core.forms.user_forms import ChangeUserDetailsForm
+
+from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
@@ -229,7 +231,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Gather data: 3. GPX files
     # ----------------------------------------------------------- #
-    gpxes = Gpx().all_gpxes_by_email(user.email)
+    gpxes = GpxRepository().all_gpxes_by_email(user.email)
 
     # ----------------------------------------------------------- #
     # Gather data: 4. Comments
@@ -248,7 +250,7 @@ def user_page():
             message.from_name = "Admin team"
         else:
             message.from_name = User().find_user_from_email(message.from_email).name
-        if not message.been_read():
+        if not message.been_read:
             count += 1
 
     if count > 0:

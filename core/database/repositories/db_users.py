@@ -1,7 +1,4 @@
-from flask import abort, flash, request, redirect, url_for
-from flask_login import current_user, logout_user
 from werkzeug.security import generate_password_hash, check_password_hash
-from functools import wraps
 import time
 from datetime import date, datetime
 import random
@@ -18,7 +15,6 @@ import json
 from core import db, app, login_manager, GROUP_NOTIFICATIONS
 from core.database.models.users_model import UserModel
 from core.database.repositories.message_repository import MessageRepository
-from core.database.repositories.event_repository import EventRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -116,6 +112,142 @@ def load_user(user_id):
 # -------------------------------------------------------------------------------------------------------------- #
 
 class User(UserModel):
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Create
+    # ---------------------------------------------------------------------------------------------------------- #
+    def create_user(self, new_user: UserModel, raw_password: str) -> bool:
+        # Hash password before adding to dB
+        new_user.password = self.hash_password(raw_password)
+
+        # By default, new users are not verified and have no permissions until verified
+        new_user.verification_code = random_code(NUM_DIGITS_CODES)
+        new_user.verification_code_timestamp = time.time()
+        new_user.start_date = date.today().strftime("%d%m%Y")
+        new_user.permissions = DEFAULT_PERMISSIONS_VALUE
+        new_user.notifications = NOTIFICATIONS_DEFAULT_VALUE
+        app.logger.debug(f"db.create_user(): User '{new_user.email}' issued with code '{new_user.verification_code}'.")
+
+        # Try and add to the dB
+        with app.app_context():
+            try:
+                db.session.add(new_user)
+                db.session.commit()
+                return True
+            
+            except Exception as e:
+                db.rollback()
+                app.logger.error(f"dB.create_user(): Failed with error code '{e.args}'.")
+                return False
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Update
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def update_user(user: UserModel) -> bool:
+        # Try and add to dB
+        with app.app_context():
+            try:
+                db.session.add(user)
+                db.session.commit()
+                return True
+            
+            except Exception as e:
+                db.rollback()
+                app.logger.error(f"dB.update_user(): Failed to update user '{user.id}', error code was '{e.args}'.")
+                return False
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Delete
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def delete_user(user_id: int) -> bool:
+        with app.app_context():
+            user = db.session.query(User).filter_by(id=user_id).first()
+
+            # You can't delete Admins
+            if user.admin():
+                app.logger.debug(f"dB.delete_user: Rejected attempt to delete admin '{user.email}'.")
+                return False
+
+            # Extra protection in case someone finds a way around route protection
+            if user.email in PROTECTED_USERS:
+                app.logger.debug(f"dB.delete_user: Rejected attempt to delete protected user '{user.email}'.")
+                return False
+
+            if user:
+                try:
+                    # We no longer delete users, we invalidate them. This is because even though we have
+                    # auto-incrementing IDs, if the last entry is deleted, the next user to register gets the next ID,
+                    # which may have valid cookies stored from the previous owner!
+                    user.admin_notes = f"User '{user.name}' ({user.email}) deleted " \
+                                       f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+                    user.password = None
+                    user.email = f"{DELETED_NAME}_{user.id}"
+                    user.name = DELETED_NAME
+                    user.permissions = 0
+                    db.session.commit()
+                    return True
+        
+                except Exception as e:
+                    db.rollback()
+                    app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                    return False
+
+            else:
+                app.logger.error(f"dB.delete_user(): Called with invalid user_id = '{user_id}'.")
+        
+        return False
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Search
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def all_users() -> list[UserModel]:
+        with app.app_context():
+            users = db.session.query(User).filter(User.name != DELETED_NAME).all()
+            return users
+
+    @staticmethod
+    def all_users_sorted() -> list[UserModel]:
+        with app.app_context():
+            users = db.session.query(User).order_by(func.lower(User.name)).filter(User.name != DELETED_NAME).all()
+            return users
+
+    @staticmethod
+    def all_admins() -> list[UserModel]:
+        with app.app_context():
+            admins = db.session.query(User).filter(User.permissions == MASK_ADMIN + MASK_VERIFIED).all()
+            return admins
+
+    @staticmethod
+    def all_non_admins() -> list[UserModel]:
+        with (app.app_context()):
+            non_admins = db.session.query(User).filter(User.permissions != MASK_ADMIN + MASK_VERIFIED) \
+                                        .filter(User.name != DELETED_NAME) \
+                                        .all()
+            return non_admins
+
+    @staticmethod
+    def find_user_from_id(user_id) -> UserModel | None:
+        with app.app_context():
+            user = db.session.query(User).filter_by(id=user_id).first()
+            return user
+
+    @staticmethod
+    def find_user_from_email(email: str) -> UserModel | None:
+        with app.app_context():
+            user = db.session.query(User).filter_by(email=email).first()
+            return user
+
+    @staticmethod
+    def find_id_from_email(email: str) -> int | None:
+        with app.app_context():
+            user = db.session.query(User).filter_by(email=email).first()
+            if user:
+                return user.id
+            else:
+                return None
 
     # ---------------------------------------------------------------------------------------------------------- #
     # User permissions
@@ -221,54 +353,9 @@ class User(UserModel):
     # User functions
     # ---------------------------------------------------------------------------------------------------------- #
 
-    @staticmethod
-    def all_users():
-        with app.app_context():
-            users = db.session.query(User).filter(User.name != DELETED_NAME).all()
-            return users
 
-    @staticmethod
-    def all_users_sorted():
-        with app.app_context():
-            users = db.session.query(User).order_by(func.lower(User.name)).filter(User.name != DELETED_NAME).all()
-            return users
 
-    @staticmethod
-    def all_admins():
-        with app.app_context():
-            admins = db.session.query(User).filter(User.permissions == MASK_ADMIN + MASK_VERIFIED).all()
-            return admins
-
-    @staticmethod
-    def all_non_admins():
-        with app.app_context():
-            non_admins = db.session.query(User).filter(User.permissions != MASK_ADMIN + MASK_VERIFIED).\
-                filter(User.name != DELETED_NAME).all()
-            return non_admins
-
-    def create_user(self, new_user, raw_password):
-        # Hash password before adding to dB
-        new_user.password = self.hash_password(raw_password)
-
-        # By default new users are not verified and have no permissions until verified
-        new_user.verification_code = random_code(NUM_DIGITS_CODES)
-        new_user.verification_code_timestamp = time.time()
-        new_user.start_date = date.today().strftime("%d%m%Y")
-        new_user.permissions = DEFAULT_PERMISSIONS_VALUE
-        new_user.notifications = NOTIFICATIONS_DEFAULT_VALUE
-        app.logger.debug(f"db.create_user(): User '{new_user.email}' issued with code '{new_user.verification_code}'.")
-
-        # Try and add to the dB
-        with app.app_context():
-            try:
-                db.session.add(new_user)
-                db.session.commit()
-                # Return success
-                return True
-            except Exception as e:
-                db.rollback()
-                app.logger.error(f"dB.create_user(): Failed with error code '{e.args}'.")
-                return False
+    
 
     @staticmethod
     def create_new_verification(user_id):
@@ -314,11 +401,7 @@ class User(UserModel):
                 app.logger.error(f"dB.generate_sms_code(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    @staticmethod
-    def find_user_from_id(user_id):
-        with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
-            return user
+
 
     def check_name_in_use(self, name):
         users = self.all_users()
@@ -327,20 +410,6 @@ class User(UserModel):
                 return True
         return False
 
-    @staticmethod
-    def find_user_from_email(email):
-        with app.app_context():
-            user = db.session.query(User).filter_by(email=email).first()
-            return user
-
-    @staticmethod
-    def find_id_from_email(email):
-        with app.app_context():
-            user = db.session.query(User).filter_by(email=email).first()
-            if user:
-                return user.id
-            else:
-                return None
 
     def display_name(self, email):
         with app.app_context():
@@ -356,10 +425,12 @@ class User(UserModel):
             user = db.session.query(User).filter_by(id=id).first()
             return user.name
 
-    def hash_password(self, raw_password):
+    @staticmethod
+    def hash_password(raw_password):
         return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
 
-    def validate_password(self, user, raw_password, user_ip):
+    @staticmethod
+    def validate_password(user, raw_password, user_ip):
         with app.app_context():
             if user.password:
                 if check_password_hash(user.password, raw_password):
@@ -379,7 +450,8 @@ class User(UserModel):
                 return False
         return False
 
-    def log_activity(self, user_id):
+    @staticmethod
+    def log_activity(user_id):
         with app.app_context():
             try:
                 user = db.session.query(User).filter_by(id=user_id).first()
@@ -391,7 +463,8 @@ class User(UserModel):
                 app.logger.error(f"dB.log_activity(): Failed with error code '{e.args}'.")
                 return False
 
-    def validate_email(self, user, code):
+    @staticmethod
+    def validate_email(user, code):
         with app.app_context():
 
             # For some reason we need to re-acquire the user within this context
@@ -433,7 +506,8 @@ class User(UserModel):
                 app.logger.debug(f"dB.validate_email(): Verification code doesn't match, user.email = '{user.email}'.")
                 return False
 
-    def validate_sms(self, user, code):
+    @staticmethod
+    def validate_sms(user, code):
         with app.app_context():
 
             # For some reason we need to re-acquire the user within this context
@@ -475,7 +549,8 @@ class User(UserModel):
                 app.logger.debug(f"dB.validate_sms(): Verification code doesn't match, user.email = '{user.email}'.")
                 return False
 
-    def create_new_reset_code(self, email):
+    @staticmethod
+    def create_new_reset_code(email):
         with app.app_context():
             user = db.session.query(User).filter_by(email=email).first()
             if user:
@@ -494,7 +569,8 @@ class User(UserModel):
                 app.logger.error(f"dB.create_new_reset_code(): Called with invalid email = '{email}'.")
         return False
 
-    def validate_reset_code(self, user_id, code):
+    @staticmethod
+    def validate_reset_code(user_id, code):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -536,42 +612,10 @@ class User(UserModel):
                 app.logger.error(f"dB.reset_password(): Called with invalid email = '{email}'.")
         return False
 
-    def delete_user(self, user_id):
-        with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
+    
 
-            # You can't delete Admins
-            if user.admin():
-                app.logger.debug(f"dB.delete_user: Rejected attempt to delete admin '{user.email}'.")
-                return False
-
-            # Extra protection in case someone finds a way around route protection
-            if user.email in PROTECTED_USERS:
-                app.logger.debug(f"dB.delete_user: Rejected attempt to delete protected user '{user.email}'.")
-                return False
-
-            if user:
-                try:
-                    # We no longer delete users, we invalidate them. This is because even though we have
-                    # auto-incrementing IDs, if the last entry is deleted, the next user to register gets the next ID,
-                    # which may have valid cookies stored from the previous owner!
-                    user.admin_notes = f"User '{user.name}' ({user.email}) deleted " \
-                                       f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
-                    user.password = None
-                    user.email = f"{DELETED_NAME}_{user.id}"
-                    user.name = DELETED_NAME
-                    user.permissions = 0
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    db.rollback()
-                    app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
-                    return False
-            else:
-                app.logger.error(f"dB.delete_user(): Called with invalid user_id = '{user_id}'.")
-        return False
-
-    def block_user(self, user_id):
+    @staticmethod
+    def block_user(user_id):
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
@@ -599,7 +643,8 @@ class User(UserModel):
                 app.logger.error(f"dB.block_user(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def unblock_user(self, user_id):
+    @staticmethod
+    def unblock_user(user_id):
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
@@ -617,7 +662,8 @@ class User(UserModel):
                 app.logger.error(f"dB.unblock_user(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def set_readwrite(self, user_id):
+    @staticmethod
+    def set_readwrite(user_id):
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
@@ -635,7 +681,8 @@ class User(UserModel):
                 app.logger.error(f"dB.set_readwrite(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def set_readonly(self, user_id):
+    @staticmethod
+    def set_readonly(user_id):
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(User).filter_by(id=user_id).first()
@@ -653,7 +700,8 @@ class User(UserModel):
                 app.logger.error(f"dB.set_readonly(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def make_admin(self, user_id):
+    @staticmethod
+    def make_admin(user_id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -670,7 +718,8 @@ class User(UserModel):
                 app.logger.error(f"dB.make_admin(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def unmake_admin(self, user_id):
+    @staticmethod
+    def unmake_admin(user_id):
         with app.app_context():
             user = db.session.query(User).filter_by(id=user_id).first()
             if user:
@@ -690,7 +739,8 @@ class User(UserModel):
                 app.logger.error(f"dB.unmake_admin(): Called with invalid user_id = '{user_id}'.")
         return False
 
-    def set_phone_number(self, user_id, phone_number):
+    @staticmethod
+    def set_phone_number(user_id, phone_number):
         user = db.session.query(User).filter_by(id=user_id).first()
         if user:
             try:
@@ -705,7 +755,8 @@ class User(UserModel):
             app.logger.error(f"dB.set_phone_number(): Called with invalid user_id = '{user_id}'.")
             return False
 
-    def set_notifications(self, user_id, choices):
+    @staticmethod
+    def set_notifications(user_id, choices):
         user = db.session.query(User).filter_by(id=user_id).first()
         if user:
             try:
@@ -720,18 +771,7 @@ class User(UserModel):
             app.logger.error(f"dB.set_notifications(): Called with invalid user_id = '{user_id}'.")
             return False
 
-    def update_user(self, user):
-        # Try and add to dB
-        with app.app_context():
-            try:
-                db.session.add(user)
-                db.session.commit()
-                # Return success
-                return True
-            except Exception as e:
-                db.rollback()
-                app.logger.error(f"dB.update_user(): Failed to update user '{user.id}', error code was '{e.args}'.")
-                return False
+    
 
     def combo_str(self):
         return f"{self.name} ({self.id})"
@@ -766,197 +806,4 @@ def random_code(num_digits):
         code = code + str(random.randint(0, 9))
     return int(code)
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-#                                                Decorators
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Decorator for login required
-# -------------------------------------------------------------------------------------------------------------- #
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if current_user.is_authenticated:
-            # Otherwise continue with the route function
-            return f(*args, **kwargs)
-        else:
-            # Generate a custom 403 error
-            return redirect(url_for('not_logged_in'))
-
-    return decorated_function
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Decorator for readwrite required
-# -------------------------------------------------------------------------------------------------------------- #
-
-def rw_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Non logged in users won't have '.readwrite()' property
-        if current_user.is_authenticated:
-            # Use the readwrite parameter
-            if current_user.readwrite():
-                # Good to go
-                return f(*args, **kwargs)
-
-        # Who are we barring access to?
-        if current_user.is_authenticated:
-            who = current_user.email
-        else:
-            who = "lot logged in"
-
-        # Return 403
-        app.logger.debug(f"rw_required(): User '{who}' attempted access to a rw only page!")
-        EventRepository().log_event("RW Access Fail", f"User '{who}' attempted access to a rw only page!")
-        return redirect(url_for('not_rw'))
-    return decorated_function
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Decorator for admin only
-# -------------------------------------------------------------------------------------------------------------- #
-
-def admin_only(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Non logged in users won't have '.admin()' property
-        if current_user.is_authenticated:
-            # Use the admin parameter
-            if current_user.admin():
-                # Good to go
-                return f(*args, **kwargs)
-
-        # Who are we barring access to?
-        if current_user.is_authenticated:
-            who = current_user.email
-        else:
-            who = "lot logged in"
-
-        # Return 403
-        app.logger.debug(f"admin_only(): User '{who}' attempted access to an admin page!")
-        EventRepository().log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
-        return abort(403)
-
-    return decorated_function
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Decorator to update last seen
-# -------------------------------------------------------------------------------------------------------------- #
-
-def update_last_seen(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Try and get IP
-        try:
-            if request.headers.getlist("X-Forwarded-For"):
-                user_ip = request.headers.getlist("X-Forwarded-For")[0]
-            else:
-                user_ip = request.remote_addr
-        except Exception as e:
-            user_ip = "unknown"
-
-        if not current_user.is_authenticated:
-            # Not logged in, so no idea who they are
-            app.logger.debug(f"update_last_seen(): User not logged in, IP = '{user_ip}', "
-                             f"request = {request.method} '{request.path}'")
-            return f(*args, **kwargs)
-        else:
-            # They are logged in, so log their activity
-            app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}', IP = '{user_ip}', "
-                             f"request = {request.method} '{request.path}'")
-            User().log_activity(current_user.id)
-            return f(*args, **kwargs)
-
-    return decorated_function
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Decorator to logout barred user
-# -------------------------------------------------------------------------------------------------------------- #
-
-def logout_barred_user(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            # Not logged in, so no idea who they are
-            return f(*args, **kwargs)
-        else:
-            user = User().find_user_from_id(current_user.id)
-            if user:
-                if user.blocked():
-                    # Log out the user
-                    app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
-                    EventRepository().log_event("Blocked User logout", "Logged out user as blocked")
-                    flash("You have been logged out.")
-                    logout_user()
-            return f(*args, **kwargs)
-
-    return decorated_function
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Decorator for readwrite
-# -------------------------------------------------------------------------------------------------------------- #
-
-def must_be_readwrite(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated:
-            # Not logged in, so no idea who they are
-            return abort(403)
-        else:
-            user = User().find_user_from_id(current_user.id)
-            if user:
-                if not user.blocked():
-                    # Log out the user
-                    app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
-                    EventRepository().log_event("Blocked User logout", "Logged out user as blocked")
-                    flash("You have been logged out.")
-                    logout_user()
-            return f(*args, **kwargs)
-
-    return decorated_function
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Export some functions to jinja that we want to use inside html templates
-# -------------------------------------------------------------------------------------------------------------- #
-
-def get_user_name(user_email):
-    return User().display_name(user_email)
-
-
-def get_user_id_from_email(user_email):
-    return User().find_id_from_email(user_email)
-
-
-# Add these to jinja's environment, so we can use it within html templates
-app.jinja_env.globals.update(get_user_name=get_user_name)
-app.jinja_env.globals.update(get_user_id_from_email=get_user_id_from_email)
-
-
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Hack to change user.start_date
-# -------------------------------------------------------------------------------------------------------------- #
-
-# with app.app_context():
-#     users = User().all_users()
-#     for user in users:
-#         if len(user.start_date) != 8:
-#             date_obj = datetime.strptime(user.start_date, "%B %d, %Y")
-#             new_date = date_obj.strftime("%d%m%Y")
-#             print(f"ID = {user.id}, Name = '{user.name}', Date = '{user.start_date}' or '{new_date}'")
-#             user.start_date = new_date
-#             db.session.add(user)
-#             db.session.commit()
 

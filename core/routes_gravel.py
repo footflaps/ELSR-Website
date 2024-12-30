@@ -17,11 +17,12 @@ from core import app, current_year, GPX_UPLOAD_FOLDER_ABS, is_mobile, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import update_last_seen
 from core.subs_google_maps import google_maps_api_key, MAP_BOUNDS, count_map_loads, \
                                   create_polyline_set, MAX_NUM_GPX_PER_GRAPH
-from core.database.repositories.db_gpx import Gpx
+from core.database.repositories.gpx_repository import GpxRepository
 from core.subs_gpx import ELSR_LAT, ELSR_LON
+
+from core.decorators.user_decorators import update_last_seen
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -70,7 +71,7 @@ def gravel_all():
     # ----------------------------------------------------------- #
     # Grab all our routes
     # ----------------------------------------------------------- #
-    gpxes = Gpx().all_gravel()
+    gpxes = GpxRepository().all_gravel()
 
     # ----------------------------------------------------------- #
     # Double check we have all the files present
@@ -132,12 +133,12 @@ def gravel_ldt():
     # ----------------------------------------------------------- #
     # Grab the specific routes
     # ----------------------------------------------------------- #
-    gpxes = [Gpx().one_gpx(REBELLION_WAY_INDEX),
-             Gpx().one_gpx(PEDARS_WAY_INDEX),
-             Gpx().one_gpx(WOLF_WAY_INDEX),
-             Gpx().one_gpx(WOLF_CUB_INDEX),
-             Gpx().one_gpx(WOLF_WINTER_INDEX),
-             Gpx().one_gpx(WOLF_EAST_INDEX)]
+    gpxes = [GpxRepository().one_gpx(REBELLION_WAY_INDEX),
+             GpxRepository().one_gpx(PEDARS_WAY_INDEX),
+             GpxRepository().one_gpx(WOLF_WAY_INDEX),
+             GpxRepository().one_gpx(WOLF_CUB_INDEX),
+             GpxRepository().one_gpx(WOLF_WINTER_INDEX),
+             GpxRepository().one_gpx(WOLF_EAST_INDEX)]
 
     # ----------------------------------------------------------- #
     # Double check we have all the files present
@@ -199,7 +200,7 @@ def gravel_local():
     # ----------------------------------------------------------- #
     # Start with all gravel
     # ----------------------------------------------------------- #
-    all_gpxes = Gpx().all_gravel()
+    all_gpxes = GpxRepository().all_gravel()
 
     # ----------------------------------------------------------- #
     # Filter by start location

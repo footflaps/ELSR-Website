@@ -17,13 +17,14 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User,  DELETED_NAME, login_required, \
-                          update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX
+from core.database.repositories.db_users import User, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
 from core.forms.user_forms import CreateUserForm, VerifyUserForm, TwoFactorLoginForm, VerifySMSForm
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import send_verification_email, send_sms_verif_code
 from core.subs_email_sms import alert_admin_via_sms
+
+from core.decorators.user_decorators import login_required, update_last_seen, logout_barred_user
 
 
 # -------------------------------------------------------------------------------------------------------------- #

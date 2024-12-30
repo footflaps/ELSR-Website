@@ -17,7 +17,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_gpx import Gpx, GPX_ALLOWED_EXTENSIONS
+from core.database.repositories.gpx_repository import GpxRepository, GPX_ALLOWED_EXTENSIONS
 from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 
@@ -347,7 +347,7 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
     # ----------------------------------------------------------- #
     # Update stats in the dB
     # ----------------------------------------------------------- #
-    Gpx().update_stats(gpx_id, total_length_km, total_ascent_m)
+    GpxRepository().update_stats(gpx_id, total_length_km, total_ascent_m)
 
     # ----------------------------------------------------------- #
     # Overwrite the existing file

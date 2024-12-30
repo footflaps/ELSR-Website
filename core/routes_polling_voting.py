@@ -14,9 +14,10 @@ from core import app
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import update_last_seen, logout_barred_user, login_required, rw_required
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.poll_repository import PollRepository, POLL_OPEN
+
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #
