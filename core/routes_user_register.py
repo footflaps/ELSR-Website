@@ -17,7 +17,7 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
+from core.database.repositories.user_repository import User, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
 from core.forms.user_forms import CreateUserForm, VerifyUserForm, TwoFactorLoginForm, VerifySMSForm
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository

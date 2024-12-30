@@ -11,9 +11,9 @@ from datetime import datetime
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import GPX_UPLOAD_FOLDER_ABS
-from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.database.repositories.calendar_repository import MEETING_OTHER, NEW_CAFE, UPLOAD_ROUTE, GROUP_CHOICES, MEETING_CHOICES
 
 

@@ -15,7 +15,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.database.repositories.gpx_repository import GpxRepository
 from core.forms.gpx_forms import create_rename_gpx_form
 from core.database.repositories.event_repository import EventRepository

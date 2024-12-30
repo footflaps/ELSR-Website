@@ -9,7 +9,7 @@ from datetime import datetime
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.database.repositories.social_repository import SIGN_UP_CHOICES, SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC
 
 

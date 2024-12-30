@@ -3,7 +3,7 @@
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
-from core.database.models.classifieds_model import ClassifiedModel
+from core.database.models.classified_model import ClassifiedModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #

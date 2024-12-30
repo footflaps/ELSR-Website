@@ -10,7 +10,7 @@ from sqlalchemy import func
 from core import app, db, GRAVEL_CHOICE
 from core.subs_gpx_direction import gpx_direction
 from core.database.models.gpx_model import GpxModel
-from core.database.models.users_model import UserModel
+from core.database.models.user_model import UserModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #

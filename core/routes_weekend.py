@@ -17,8 +17,8 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
-from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.user_repository import User
+from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.database.repositories.gpx_repository import GpxRepository, TYPE_ROAD, TYPE_GRAVEL
 from core.database.repositories.calendar_repository import CalendarRepository, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
                                                    MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES

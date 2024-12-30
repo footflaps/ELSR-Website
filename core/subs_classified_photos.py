@@ -12,7 +12,7 @@ from core import app, CLASSIFIEDS_PHOTO_FOLDER, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.classifieds_repository import ClassifiedRepository, DELETE_PHOTO
+from core.database.repositories.classified_repository import ClassifiedRepository, DELETE_PHOTO
 from core.database.repositories.event_repository import EventRepository
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 

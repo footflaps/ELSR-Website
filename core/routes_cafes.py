@@ -19,11 +19,11 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
-from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.user_repository import User
+from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.forms.cafe_forms import CreateCafeForm
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
-from core.forms.cafe_comments_forms import CreateCafeCommentForm
+from core.forms.cafe_comment_forms import CreateCafeCommentForm
 from core.subs_gpx import check_new_cafe_with_all_gpxes, remove_cafe_from_all_gpxes
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads

@@ -16,11 +16,11 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.poll_repository import PollRepository, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 
-from core.forms.polls_forms import create_poll_form
+from core.forms.poll_forms import create_poll_form
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 

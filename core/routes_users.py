@@ -27,8 +27,8 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, DELETED_NAME, NOTIFICATIONS_DEFAULT_VALUE
-from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.user_repository import User, DELETED_NAME, NOTIFICATIONS_DEFAULT_VALUE
+from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
@@ -36,7 +36,7 @@ from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog
-from core.database.repositories.classifieds_repository import ClassifiedRepository
+from core.database.repositories.classified_repository import ClassifiedRepository
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required
 

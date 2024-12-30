@@ -10,7 +10,7 @@ from validators import url as check_url
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import GROUP_CHOICES
-from core.database.repositories.db_users import SIZES
+from core.database.repositories.user_repository import SIZES
 
 
 # -------------------------------------------------------------------------------------------------------------- #

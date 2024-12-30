@@ -20,7 +20,7 @@ from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.database.repositories.gpx_repository import GpxRepository
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
-from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_dates import get_date_from_url
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user

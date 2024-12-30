@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired, Length, InputRequired
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.database.repositories.gpx_repository import TYPES
 
 

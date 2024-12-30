@@ -13,7 +13,7 @@ import json
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import db, app, login_manager, GROUP_NOTIFICATIONS
-from core.database.models.users_model import UserModel
+from core.database.models.user_model import UserModel
 from core.database.repositories.message_repository import MessageRepository
 
 

@@ -1,6 +1,6 @@
 from core import app
 from core.database.repositories.gpx_repository import GpxRepository
-from core.database.models.users_model import UserModel
+from core.database.models.user_model import UserModel
 
 
 def number_routes_passing_by(cafe_id: id, user: UserModel) -> int:

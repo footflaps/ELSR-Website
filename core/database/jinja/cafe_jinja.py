@@ -1,6 +1,6 @@
 from core import app
 import re
-from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.cafe_repository import CafeRepository
 
 
 def remove_html_tags(text):

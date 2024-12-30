@@ -18,12 +18,12 @@ from core import app, current_year, live_site, BLOG_IMAGE_FOLDER
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, SUPER_ADMIN_USER_ID
+from core.database.repositories.user_repository import User, SUPER_ADMIN_USER_ID
 from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky,
                                                         NO_CAFE, NO_GPX, Category)
 from core.forms.blog_forms import create_blogs_form
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails

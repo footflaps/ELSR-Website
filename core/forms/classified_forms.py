@@ -8,7 +8,7 @@ from flask_ckeditor import CKEditorField
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.classifieds_repository import STATUSES, CATEGORIES, MAX_NUM_PHOTOS, DEL_IMAGE
+from core.database.repositories.classified_repository import STATUSES, CATEGORIES, MAX_NUM_PHOTOS, DEL_IMAGE
 
 
 # -------------------------------------------------------------------------------------------------------------- #

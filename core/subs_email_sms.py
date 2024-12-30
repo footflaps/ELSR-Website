@@ -21,7 +21,7 @@ from core import app, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, GROUP_NOTIFICATIONS, \
+from core.database.repositories.user_repository import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, GROUP_NOTIFICATIONS, \
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES

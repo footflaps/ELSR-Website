@@ -6,7 +6,7 @@ from datetime import date
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
-from core.database.models.cafe_comments_model import CafeCommentModel
+from core.database.models.cafe_comment_model import CafeCommentModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #

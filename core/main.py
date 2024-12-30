@@ -23,15 +23,15 @@ from core import db, app, current_year, GPX_UPLOAD_FOLDER_ABS, live_site, GLOBAL
 # Import our Models
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.models.users_model import UserModel
-from core.database.models.cafes_model import CafeModel
+from core.database.models.user_model import UserModel
+from core.database.models.cafe_model import CafeModel
 from core.database.models.gpx_model import GpxModel
 from core.database.models.calendar_model import CalendarModel
 from core.database.models.social_model import SocialModel
-from core.database.models.classifieds_model import ClassifiedModel
+from core.database.models.classified_model import ClassifiedModel
 from core.database.models.message_model import MessageModel
-from core.database.models.cafe_comments_model import CafeCommentModel
-from core.database.models.events_model import EventModel
+from core.database.models.cafe_comment_model import CafeCommentModel
+from core.database.models.event_model import EventModel
 from core.database.models.poll_model import PollModel
 from core.database.models.blog_model import BlogModel
 
@@ -58,8 +58,8 @@ from core.decorators.user_decorators import update_last_seen
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.cafes_repository import CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
-from core.database.repositories.db_users import User
+from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
+from core.database.repositories.user_repository import User
 from core.forms.user_forms import ClothingSizesForm
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads

@@ -18,7 +18,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.gpx_repository import GpxRepository, GPX_ALLOWED_EXTENSIONS
-from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 
 

@@ -23,7 +23,7 @@ from core.database.repositories.social_repository import SocialRepository, SOCIA
                                                  SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.forms.social_forms import create_social_form
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.subs_email_sms import send_social_notification_emails
 from core.subs_dates import get_date_from_url
 

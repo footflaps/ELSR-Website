@@ -8,7 +8,7 @@ from PIL import Image
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app,  delete_file_if_exists, CAFE_FOLDER
-from core.database.repositories.cafes_repository import CafeRepository
+from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 

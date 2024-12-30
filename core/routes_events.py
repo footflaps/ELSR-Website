@@ -14,7 +14,7 @@ from core import app
 # Import our Event class
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.database.repositories.event_repository import EventRepository
 
 from core.decorators.user_decorators import admin_only, update_last_seen, login_required

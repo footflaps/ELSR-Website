@@ -7,7 +7,7 @@ import json
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import db, app
-from core.database.models.cafes_model import CafeModel
+from core.database.models.cafe_model import CafeModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #

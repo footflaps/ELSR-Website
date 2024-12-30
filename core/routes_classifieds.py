@@ -17,13 +17,13 @@ from core import app, current_year, live_site, CLASSIFIEDS_PHOTO_FOLDER
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
-from core.database.repositories.classifieds_repository import ClassifiedRepository, MAX_NUM_PHOTOS, SELL, STATUS_SOLD
+from core.database.repositories.user_repository import User
+from core.database.repositories.classified_repository import ClassifiedRepository, MAX_NUM_PHOTOS, SELL, STATUS_SOLD
 from core.database.repositories.event_repository import EventRepository
 
 from core.database.jinja.user_jinja import get_user_name
 
-from core.forms.classifieds_forms import create_classified_form
+from core.forms.classified_forms import create_classified_form
 
 from core.subs_classified_photos import delete_classifieds_photos, delete_all_classified_photos, add_classified_photos
 from core.subs_email_sms import send_message_to_seller, alert_admin_via_sms

@@ -7,7 +7,7 @@ import time
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, db
-from core.database.models.events_model import EventModel
+from core.database.models.event_model import EventModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #

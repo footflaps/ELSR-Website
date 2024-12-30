@@ -16,7 +16,7 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 from core.forms.user_forms import LoginUserForm, ResetPasswordForm
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import send_reset_email, send_verification_email, send_2fa_sms

@@ -1,5 +1,5 @@
 from core import app
-from core.database.repositories.db_users import User
+from core.database.repositories.user_repository import User
 
 
 # -------------------------------------------------------------------------------------------------------------- #

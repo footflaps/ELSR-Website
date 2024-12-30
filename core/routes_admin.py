@@ -18,7 +18,7 @@ from core import app, current_year, is_mobile, live_site
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.db_users import User, SUPER_ADMIN_USER_ID
+from core.database.repositories.user_repository import User, SUPER_ADMIN_USER_ID
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
@@ -26,7 +26,7 @@ from core.database.repositories.social_repository import SocialRepository, SOCIA
 from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notification_email, email_ride_alert_summary
 from core.subs_google_maps import maps_enabled, get_current_map_count, map_limit_by_day, graph_map_counts
 from core.database.repositories.blog_repository import BlogRepository as Blog
-from core.database.repositories.classifieds_repository import ClassifiedRepository
+from core.database.repositories.classified_repository import ClassifiedRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 
 from core.decorators.user_decorators import update_last_seen, login_required, admin_only
