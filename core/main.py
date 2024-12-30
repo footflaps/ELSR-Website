@@ -91,6 +91,7 @@ from core.routes.routes_user_login_logout import login
 from core.routes.routes_user_register import register
 from core.routes.routes_users import user_page
 from core.routes.routes_weekend import weekend
+from core.routes.routes_socials import social
 
 
 # -------------------------------------------------------------------------------------------------------------- #
