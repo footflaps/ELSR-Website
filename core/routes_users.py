@@ -33,7 +33,7 @@ from core.forms.user_forms import ChangeUserDetailsForm
 from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.db_gpx import Gpx
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.database.repositories.calendar_repository import CalendarRepository
@@ -239,7 +239,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Gather data: 5. Messages
     # ----------------------------------------------------------- #
-    messages = Message().all_messages_to_email(user.email)
+    messages = MessageRepository().all_messages_to_email(user.email)
 
     # Any unread?
     count = 0

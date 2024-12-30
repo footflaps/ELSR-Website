@@ -17,7 +17,7 @@ import json
 
 from core import db, app, login_manager, GROUP_NOTIFICATIONS
 from core.database.models.users_model import UserModel
-from core.database.repositories.db_messages import Message
+from core.database.repositories.message_repository import MessageRepository
 from core.database.repositories.event_repository import EventRepository
 
 
@@ -148,7 +148,7 @@ class User(UserModel):
             return False
 
     def has_mail(self):
-        if Message().all_unread_messages_to_email(self.email):
+        if MessageRepository().all_unread_messages_to_email(self.email):
             return True
         else:
             return False

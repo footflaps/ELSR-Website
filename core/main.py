@@ -37,7 +37,7 @@ from core.database.models.gpx_model import GpxModel
 from core.database.models.calendar_model import CalendarModel
 from core.database.models.social_model import SocialModel
 from core.database.models.classifieds_model import ClassifiedModel
-from core.database.models.messages_model import MessageModel
+from core.database.models.message_model import MessageModel
 from core.database.models.cafe_comments_model import CafeCommentModel
 from core.database.models.events_model import EventModel
 from core.database.models.poll_model import PollModel

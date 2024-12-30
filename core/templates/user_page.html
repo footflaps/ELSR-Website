@@ -448,7 +448,7 @@
 						<tbody>
 							{% for gpx in gpxes: %}
 								
-								{% if not gpx.public(): %}
+								{% if not gpx.public: %}
 									<!-- We have hidden rows for non public routes -->
 									<tr class="table-warning">
 									{% set ns.hidden = "NB Routes in yellow have not been made public yet by their owner and are only visible to Admins

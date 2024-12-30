@@ -43,8 +43,8 @@ class GpxModel(db.Model):
     # Date is in the format "11112023"
     date = db.Column(db.String(250), nullable=False)
 
-    # Is the GPX valid
-    valid = db.Column(db.Integer, nullable=True)
+    # Is the GPX public
+    public = db.Column(db.Boolean, nullable=False)
 
     # Type (road / offroad)
     type = db.Column(db.String(20))

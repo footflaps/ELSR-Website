@@ -23,7 +23,7 @@ from core import app, live_site
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.db_users import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, get_user_name, GROUP_NOTIFICATIONS, \
                           SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES, start_time_string, beautify_date
 from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository as Blog, Privacy
@@ -382,7 +382,7 @@ def send_ride_notification_emails(ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Make sure the GPX file is public
     # ----------------------------------------------------------- #
-    if not gpx.public():
+    if not gpx.public:
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Aborting as GPX not public, ride.id = '{ride.id}', "
                          f"ride.gpx_id = '{ride.gpx_id}'.")
@@ -550,7 +550,7 @@ def send_one_ride_notification_email(user: User(), ride: CalendarRepository()):
 # Send email notification for message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_message_notification_email(message: Message(), user: User()):
+def send_message_notification_email(message: MessageRepository(), user: User()):
     # ----------------------------------------------------------- #
     # Make sure user and message exist
     # ----------------------------------------------------------- #

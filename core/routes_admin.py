@@ -19,7 +19,7 @@ from core import app, current_year, is_mobile, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, admin_only, update_last_seen, SUPER_ADMIN_USER_ID, login_required
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.social_repository import SocialRepository, SOCIAL_DB_PRIVATE
@@ -194,7 +194,7 @@ def admin_page():
     # ----------------------------------------------------------- #
     # All messages for Admin (for admin page table)
     # ----------------------------------------------------------- #
-    messages = Message().all_messages_to_email(ADMIN_EMAIL)
+    messages = MessageRepository().all_messages_to_email(ADMIN_EMAIL)
 
     # ----------------------------------------------------------- #
     # All scheduled calendar events (routes)
@@ -757,7 +757,7 @@ def user_readwrite():
         app.logger.debug(f"user_readwrite(): Success, user can now write, user.email = '{user.email}'.")
         EventRepository().log_event("ReadWrite Success", f"User can now write, user.email = '{user.email}'.")
         flash(f"User '{user.name}' now has Write permissions.")
-        message = Message().send_readwrite_message(user.email)
+        message = MessageRepository().send_readwrite_message(user.email)
         Thread(target=send_message_notification_email, args=(message, user,)).start()
         return redirect(url_for('user_page', user_id=user_id))
     else:
@@ -850,7 +850,7 @@ def user_readonly():
         app.logger.debug(f"user_readonly(): Success, user is Readonly, user.email = '{user.email}'.")
         EventRepository().log_event("ReadOnly Success", f"User is Readonly, user.email = '{user.email}'.")
         flash(f"User '{user.name}' is now Read ONLY.")
-        message = Message().send_readonly_message(user.email)
+        message = MessageRepository().send_readonly_message(user.email)
         Thread(target=send_message_notification_email, args=(message, user,)).start()
         return redirect(url_for('user_page', user_id=user_id))
     else:

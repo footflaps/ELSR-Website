@@ -20,7 +20,7 @@ from core.database.repositories.db_users import User, update_last_seen, logout_b
 from core.database.repositories.db_gpx import Gpx
 from core.database.repositories.cafes_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.calendar_repository import CalendarRepository
 
 from core.forms.gpx_forms import UploadGPXForm
@@ -141,13 +141,13 @@ def gpx_details(gpx_id):
     # 1. Must be admin or the current author
     # 2. Route must be public
     # Tortuous logic as a non-logged-in user doesn't have any of our custom attributes eg email etc
-    if not gpx.public() and \
+    if not gpx.public and \
             not current_user.is_authenticated:
         app.logger.debug(f"gpx_details(): Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         EventRepository().log_event("One GPX Fail", f"Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         return redirect(url_for('not_logged_in'))
 
-    elif not gpx.public() and \
+    elif not gpx.public and \
             current_user.email != gpx.email and \
             not current_user.admin():
         app.logger.debug(f"gpx_details(): Refusing permission for user '{current_user.email}' to see "
@@ -245,7 +245,7 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     # Flag if hidden
     # ----------------------------------------------------------- #
-    if not gpx.public():
+    if not gpx.public:
         flash("This route is not public yet!")
 
     # Keep count of Google Map Loads
@@ -321,6 +321,7 @@ def new_route():
             gpx.filename = "tmp"
             gpx.type = form.type.data
             gpx.details = form.details.data
+            gpx.public = False
 
             # Add to the dB
             new_id = gpx.add_gpx(gpx)
@@ -545,13 +546,13 @@ def flag_gpx():
     # ----------------------------------------------------------- #
     # Send a message to Admin
     # ----------------------------------------------------------- #
-    message = Message(
+    message = MessageRepository(
         from_email=current_user.email,
         to_email=ADMIN_EMAIL,
         body=f"GPX Objection to '{gpx.name}' (id={gpx.id}). Reason: {reason}"
     )
 
-    if Message().add_message(message):
+    if MessageRepository().add_message(message):
         # Success
         send_message_notification_email(message, current_user)
         app.logger.debug(f"flag_gpx(): Flagged GPX, gpx_id = '{gpx_id}'.")
@@ -608,7 +609,7 @@ def route_download(gpx_id):
     # ----------------------------------------------------------- #
     # Check GPX is public
     # ----------------------------------------------------------- #
-    if not gpx.public():
+    if not gpx.public:
         owner_name = get_user_name(gpx.email)
         app.logger.debug(f"route_download(): Private GPX, gpx_id = '{gpx_id}' in dB.")
         EventRepository().log_event("GPX Download Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")
@@ -723,7 +724,7 @@ def gpx_download2():
     # ----------------------------------------------------------- #
     # Check GPX is public
     # ----------------------------------------------------------- #
-    if not gpx.public():
+    if not gpx.public:
         owner_name = get_user_name(gpx.email)
         app.logger.debug(f"route_download2(): Private GPX, gpx_id = '{gpx_id}' in dB.")
         EventRepository().log_event("gpx_download2 Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")

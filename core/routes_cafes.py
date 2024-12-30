@@ -28,7 +28,7 @@ from core.subs_gpx import check_new_cafe_with_all_gpxes, remove_cafe_from_all_gp
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
 from core.database.repositories.db_gpx import Gpx
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
@@ -795,13 +795,13 @@ def flag_cafe():
     # ----------------------------------------------------------- #
     # Send a message to Admin
     # ----------------------------------------------------------- #
-    message = Message(
+    message = MessageRepository(
         from_email=current_user.email,
         to_email=ADMIN_EMAIL,
         body=f"Cafe Objection to '{cafe.name}' (id={cafe.id}). Reason: {reason}"
     )
     # Send it
-    message = Message().add_message(message)
+    message = MessageRepository().add_message(message)
     # Either get back the message or None
     if message:
         # Success

@@ -16,7 +16,7 @@ from core import app
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.db_users import User, admin_only, update_last_seen, logout_barred_user, login_required
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
 
@@ -55,7 +55,7 @@ def mark_read():
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = Message().find_messages_by_id(message_id)
+    message = MessageRepository().find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"mark_read(): Can't locate message id = '{message_id}'.")
         EventRepository().log_event("Message Read Fail", f"Can't locate message id = '{message_id}'.")
@@ -79,7 +79,7 @@ def mark_read():
     # ----------------------------------------------------------- #
     # Mark as read
     # ----------------------------------------------------------- #
-    if Message().mark_as_read(message_id):
+    if MessageRepository().mark_as_read(message_id):
         flash("Message has been marked as read")
     else:
         # Should never get here, but...
@@ -126,7 +126,7 @@ def mark_unread():
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = Message().find_messages_by_id(message_id)
+    message = MessageRepository().find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"mark_unread(): Can't locate message_id = '{message_id}'")
         EventRepository().log_event("Message unRead Fail", f"Can't locate message_id = '{message_id}'")
@@ -150,7 +150,7 @@ def mark_unread():
     # ----------------------------------------------------------- #
     # Mark as read
     # ----------------------------------------------------------- #
-    if Message().mark_as_unread(message_id):
+    if MessageRepository().mark_as_unread(message_id):
         flash("Message has been marked as unread")
     else:
         # Should never get here, but...
@@ -198,7 +198,7 @@ def delete_message():
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = Message().find_messages_by_id(message_id)
+    message = MessageRepository().find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"delete_message(): Can't locate message id = '{message_id}'.")
         EventRepository().log_event("Message Delete Fail", f"Can't locate message id = '{message_id}'.")
@@ -222,7 +222,7 @@ def delete_message():
     # ----------------------------------------------------------- #
     # Mark as read
     # ----------------------------------------------------------- #
-    if Message().delete(message_id):
+    if MessageRepository().delete(message_id):
         app.logger.debug(f"delete_message(): Success for message_id = '{message_id}'.")
         EventRepository().log_event("Message Delete Success", f"message_id = '{message_id}'")
         flash("Message has been deleted")
@@ -284,7 +284,7 @@ def reply_message():
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = Message().find_messages_by_id(message_id)
+    message = MessageRepository().find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"reply_message(): Can't locate message_id = '{message_id}'.")
         EventRepository().log_event("Message Reply Fail", f"Can't locate message_id = '{message_id}'.")
@@ -309,14 +309,14 @@ def reply_message():
     # Send the reply itself
     # ----------------------------------------------------------- #
     # Create a new message
-    new_message = Message(
+    new_message = MessageRepository(
         from_email=message.to_email,
         to_email=message.from_email,
         body=body
     )
 
     # Try and send it
-    if Message().add_message(new_message):
+    if MessageRepository().add_message(new_message):
         # Success!
         app.logger.debug(f"reply_message(): User '{current_user.email}' has sent message "
                          f"to '{message.from_email}', body = '{body}'.")
@@ -407,13 +407,13 @@ def message_admin():
     # ----------------------------------------------------------- #
 
     # Create a new message
-    message = Message(
+    message = MessageRepository(
         from_email=user.email,
         to_email=ADMIN_EMAIL,
         body=body
     )
     # Send it
-    message = Message().add_message(message)
+    message = MessageRepository().add_message(message)
     # Either get back the message or None
     if message:
         # Success
@@ -482,13 +482,13 @@ def message_user():
     # ----------------------------------------------------------- #
 
     # Create a new message
-    message = Message(
+    message = MessageRepository(
         from_email=ADMIN_EMAIL,
         to_email=user.email,
         body=body
     )
     # Send it
-    message = Message().add_message(message)
+    message = MessageRepository().add_message(message)
     # Either get back the message or None
     if message:
         # Success

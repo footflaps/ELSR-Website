@@ -20,7 +20,7 @@ from core import app, current_year, live_site
 from core.database.repositories.db_users import User,  DELETED_NAME, login_required, \
                           update_last_seen, logout_barred_user, UNVERIFIED_PHONE_PREFIX
 from core.forms.user_forms import CreateUserForm, VerifyUserForm, TwoFactorLoginForm, VerifySMSForm
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import send_verification_email, send_sms_verif_code
 from core.subs_email_sms import alert_admin_via_sms
@@ -171,7 +171,7 @@ def validate_email():
             flash("Email verified, please now log in!")
 
             # Send welcome email
-            Message().send_welcome_message(user.email)
+            MessageRepository().send_welcome_message(user.email)
 
             # ----------------------------------------------------------- #
             # Alert admin via SMS
@@ -182,13 +182,13 @@ def validate_email():
             # ----------------------------------------------------------- #
             # Alert admin via internal message
             # ----------------------------------------------------------- #
-            admin_message = Message(
+            admin_message = MessageRepository(
                 from_email=user.email,
                 to_email=ADMIN_EMAIL,
                 body="New user has joined - check permissions."
             )
 
-            if Message().add_message(admin_message):
+            if MessageRepository().add_message(admin_message):
                 # Success!
                 app.logger.debug(f"validate_email(): User '{user.email}' has sent message to Admin.")
                 EventRepository().log_event("Validate Pass", f"Message to Admin was sent successfully for '{user.email}'.")
@@ -241,7 +241,7 @@ def validate_email():
                 flash("Email verified, please now log in!")
 
                 # Send welcome message
-                Message().send_welcome_message(new_user.email)
+                MessageRepository().send_welcome_message(new_user.email)
 
                 # ----------------------------------------------------------- #
                 # Alert admin via SMS
@@ -252,13 +252,13 @@ def validate_email():
                 # ----------------------------------------------------------- #
                 # Alert admin via internal message
                 # ----------------------------------------------------------- #
-                admin_message = Message(
+                admin_message = MessageRepository(
                     from_email=user.email,
                     to_email=ADMIN_EMAIL,
                     body="New user has joined - check permissions."
                 )
 
-                if Message().add_message(admin_message):
+                if MessageRepository().add_message(admin_message):
                     # Success!
                     app.logger.debug(f"validate_email(): User '{user.email}' has sent message to Admin.")
                     EventRepository().log_event("Validate Pass", f"Message to Admin was sent successfully for '{user.email}'.")

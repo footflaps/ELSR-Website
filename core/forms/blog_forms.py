@@ -71,7 +71,7 @@ def create_blogs_form(admin: bool):
         for gpx in gpxes:
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
             # Route must be public and double check we have an actual GPX file on tap....
-            if gpx.public() \
+            if gpx.public \
                     and os.path.exists(filename):
                 gpx_choices.append(gpx.combo_string())
 

@@ -28,7 +28,7 @@ from core.database.repositories.db_gpx import Gpx
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
 from core.routes_socials import ICS_DIRECTORY
-from core.database.repositories.db_messages import Message, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -462,13 +462,13 @@ def delete_blog():
     # ----------------------------------------------------------- #
     if user.email != blog.email:
         # Create a new message
-        new_message = Message(
+        new_message = MessageRepository(
             from_email=ADMIN_EMAIL,
             to_email=blog.email,
             body=f"Sorry, an Admin has deleted your blog '{blog.title}'. The reason given was '{reason}'."
         )
         # Send the message
-        if Message().add_message(new_message):
+        if MessageRepository().add_message(new_message):
             # Success!
             app.logger.debug(f"delete_blog(): Sent blog delete message to '{blog.email}'.")
             EventRepository().log_event("Delete Blog Pass", f"Sent blog delete message to '{blog.email}'.")

@@ -290,7 +290,7 @@ def weekend():
                 # Extract ride stats which are cached in the GPX object (no need to read the actual file)
                 ride.distance = gpx.length_km
                 ride.elevation = gpx.ascent_m
-                ride.public = gpx.public()
+                ride.public = gpx.public
 
                 # Make a note of any non-standard start times
                 # NB start_time should always be set, but you never know...
@@ -305,7 +305,7 @@ def weekend():
                                                        })
 
                 # Make a note, if we find a non-public GPX as this will stop people downloading the file
-                if not gpx.public():
+                if not gpx.public:
                     private_gpx = True
 
                 # Add gpx object to the list of GPX files for this day
@@ -522,7 +522,7 @@ def add_ride():
         form.submit.label.text = "Update Ride"
 
         # Check if GPX route is still marked private
-        if not gpx.public():
+        if not gpx.public:
             flash(f"Warning the GPX file '{gpx.name}' is still PRIVATE")
 
         # Check if GPX file exists
@@ -801,7 +801,7 @@ def add_ride():
                 flash("Ride added to Calendar!")
 
             # Do they need to edit the just uploaded GPX file to make it public?
-            if not gpx.public():
+            if not gpx.public:
                 # Forward them to the edit_route page to edit it and make it public
                 flash("You need to edit your route and make it public before it can be added to the calendar!")
                 return redirect(url_for('edit_route', gpx_id=gpx.id,

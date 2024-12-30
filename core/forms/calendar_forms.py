@@ -93,7 +93,7 @@ def create_ride_form(admin: bool, gpx_id=None):
         for gpx in gpxes:
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
             # Route must be public and double check we have an actual GPX file on tap....
-            if (gpx.public() and os.path.exists(filename)) \
+            if (gpx.public and os.path.exists(filename)) \
                     or gpx.id == gpx_id:
                 gpx_choices.append(gpx.combo_string())
 

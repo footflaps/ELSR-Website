@@ -256,15 +256,15 @@
 						-->
 						
 						<!-- Tortuous logic: current_user.admin() doesn't exist until they log in -->
-						{% if not current_user.is_authenticated and not gpx.public(): %}
+						{% if not current_user.is_authenticated and not gpx.public: %}
 					
 							<!-- Skip this row -->
 					
-						{% elif gpx.public() or current_user.admin() or gpx.email == current_user.email: %}
+						{% elif gpx.public or current_user.admin() or gpx.email == current_user.email: %}
 							
 							{% if gpx.id in missing_files: %}
 								<tr class="table-danger">
-							{% elif not gpx.public(): %}
+							{% elif not gpx.public: %}
 								<!-- We have hidden rows for non public routes -->
 								<tr class="table-warning">
 								{% set ns.hidden = "NB Routes in yellow have not been made public yet by their owner and are only visible to Admins
