@@ -11,7 +11,7 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site, BLOG_IMAGE_FOLDER
+from core import app, current_year, live_site, BLOG_IMAGE_FOLDER,ICS_DIRECTORY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -27,7 +27,6 @@ from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
 from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
-from routes.routes_socials import ICS_DIRECTORY
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
