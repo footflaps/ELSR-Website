@@ -214,7 +214,7 @@
 					            </a>
 							
 								<!-- Edit social -->
-								<a href="{{ url_for('add_social', social_id=social.id) }}">
+								<a href="{{ url_for('route_add_social', social_id=social.id) }}">
 			                        <button class="btn btn-sm btn-secondary float-right my-2">Edit</button>
 					            </a>
 							
@@ -296,7 +296,7 @@
 				<hr>
 				
 				<!-- Add social button -->
-				<a href="{{ url_for('add_social', date=None) }}">
+				<a href="{{ url_for('route_add_social', date=None) }}">
 					<button type="button" class="btn btn-primary float-right">Add social</button>
 				</a>
 			

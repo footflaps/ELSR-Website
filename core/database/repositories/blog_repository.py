@@ -180,3 +180,21 @@ class BlogRepository(BlogModel):
         with app.app_context():
             blogs = BlogModel.query.filter_by(date_unix=date_unix).filter_by(category=Category.EVENT.value).all()
             return blogs
+
+    @staticmethod
+    def all_by_date_range(start_date: str, end_date: str) -> list[BlogModel] | None:
+        """
+        Retrieve all blog entries that fall between two dates based on the converted_date column.
+        :param start_date:                  Start date in the format 'YYYY-MM-DD'.
+        :param end_date:                    End date in the format 'YYYY-MM-DD'.
+        :return:                            List of rides between the specified dates.
+        """
+        with app.app_context():
+            try:
+                rides = BlogModel.query.filter(BlogModel.converted_date.between(start_date, end_date)).all()
+                return rides
+
+            except Exception as e:
+                app.logger.error(f"db_blog: Failed to filter rides by date range, "
+                                 f"error code '{e.args}'.")
+                return None

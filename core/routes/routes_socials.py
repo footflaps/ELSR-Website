@@ -47,7 +47,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @login_required
 @update_last_seen
 @rw_required
-def add_social():
+def route_add_social():
     # ----------------------------------------------------------- #
     # Did we get passed a social_id? (Optional)
     # ----------------------------------------------------------- #

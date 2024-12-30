@@ -60,7 +60,7 @@ def get_file_sizes():
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         db_dir = "/home/ben_freeman_eu/elsr_website/ELSR-Website/instance/"
     else:
-        db_dir = "../instance/"
+        db_dir = "../../instance/"
 
     for filename in os.listdir(db_dir):
         f = os.path.join(db_dir, filename)
@@ -295,7 +295,7 @@ def admin_page():
         anchor = "eventLog"
 
     # Render page
-    return render_template("admin_page.html",  year=current_year, admins=admins, trusted_users=trusted_users,
+    return render_template("admin_page.html", year=current_year, admins=admins, trusted_users=trusted_users,
                            messages=messages, events=events, days=days, mobile=is_mobile(), socials=socials,
                            rides=rides, twilio_balance=twilio_balance, map_status=map_status, blogs=blogs,
                            map_count=map_count, map_cost_ukp=map_cost_ukp, map_limit=map_limit,

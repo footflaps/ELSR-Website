@@ -25,6 +25,9 @@ class CalendarModel(db.Model):
     # Use string for date eg '13012023'
     date = db.Column(db.String(8))
 
+    # New date column using a proper SQL Date field
+    converted_date = db.Column(db.Date)
+
     # Ride group eg 'Decaf', 'Doppio' etc
     group = db.Column(db.String(20))
 

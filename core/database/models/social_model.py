@@ -28,6 +28,9 @@ class SocialModel(db.Model):
     # Use string for date eg '13012023'
     date = db.Column(db.String(8))
 
+    # New date column using a proper SQL Date field
+    converted_date = db.Column(db.Date)
+
     # Destination cafe eg 'Mill End Plants'
     destination = db.Column(db.String(100))
 

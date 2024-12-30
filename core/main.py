@@ -40,11 +40,12 @@ from core.database.models.blog_model import BlogModel
 # Import our Jinja Helper functions
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.jinja.gpx_jinja import number_routes_passing_by
 from core.database.jinja.calendar_jinja import start_time_string
-from core.database.jinja.event_jinja import flag_event
-from core.database.jinja.message_jinja import admin_has_mail
 from core.database.jinja.cafe_jinja import get_cafe_name_from_id
+from core.database.jinja.event_jinja import flag_event
+from core.database.jinja.gpx_jinja import number_routes_passing_by
+from core.database.jinja.message_jinja import admin_has_mail
+from core.database.jinja.user_jinja import get_user_name
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -71,28 +72,26 @@ from core.subs_email_sms import contact_form_email
 # Import the other route pages
 # -------------------------------------------------------------------------------------------------------------- #
 
-# I don't know why these are needed here, but without it, it complains even though Pycharm highlights them
-# saying they are not actually used!
-from core.routes_users import user_page
-from core.routes_cafes import cafe_list
-from core.routes_gpx import gpx_list
-from core.routes_gpx_edit import edit_route
-from core.routes_admin import admin_page
-from core.routes_messages import mark_read
-from core.routes_events import delete_event
-from core.routes_weekend import weekend
-from core.routes_calendar import calendar
-from core.routes_blog import display_blog
-from core.routes_classifieds import classifieds
-from core.routes_gravel import gravel
-from core.routes_user_register import register
-from core.routes_user_login_logout import login
-from core.routes_admin_maps import enable_maps
-from core.routes_polling import add_poll
-from core.routes_polling_voting import swap_vote
-from core.routes_socials import add_social
-from core.routes_social_signup import social_cant
-from core.routes_errors import csrf_error
+from core.routes.routes_admin import admin_page
+from core.routes.routes_admin_maps import enable_maps
+from core.routes.routes_blog import display_blog
+from core.routes.routes_cafes import cafe_list
+from core.routes.routes_calendar import calendar
+from core.routes.routes_classifieds import classifieds
+from core.routes.routes_errors import page_not_found
+from core.routes.routes_events import delete_event
+from core.routes.routes_gpx import gpx_details
+from core.routes.routes_gpx_edit import edit_route
+from core.routes.routes_gravel import gravel
+from core.routes.routes_messages import mark_read
+from core.routes.routes_polling import add_poll
+from core.routes.routes_polling_voting import swap_vote
+from core.routes.routes_social_signup import social_cant
+#from core.routes.routes_socials import social
+from core.routes.routes_user_login_logout import login
+from core.routes.routes_user_register import register
+from core.routes.routes_users import user_page
+from core.routes.routes_weekend import weekend
 
 
 # -------------------------------------------------------------------------------------------------------------- #

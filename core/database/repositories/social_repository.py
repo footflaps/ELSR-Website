@@ -113,6 +113,24 @@ class SocialRepository(SocialModel):
             return socials
 
     @staticmethod
+    def all_by_date_range(start_date: str, end_date: str) -> list[SocialModel] | None:
+        """
+        Retrieve all social entries that fall between two dates based on the converted_date column.
+        :param start_date:                  Start date in the format 'YYYY-MM-DD'.
+        :param end_date:                    End date in the format 'YYYY-MM-DD'.
+        :return:                            List of rides between the specified dates.
+        """
+        with app.app_context():
+            try:
+                rides = SocialModel.query.filter(SocialModel.converted_date.between(start_date, end_date)).all()
+                return rides
+
+            except Exception as e:
+                app.logger.error(f"db_social: Failed to filter rides by date range, "
+                                 f"error code '{e.args}'.")
+                return None
+
+    @staticmethod
     def all_socials_future() -> list[SocialModel]:
         socials = []
         today = datetime.today().date()
@@ -125,3 +143,4 @@ class SocialRepository(SocialModel):
                 social.long_date = social_date.strftime("%A %b %d %Y")
                 socials.append(social)
         return socials
+

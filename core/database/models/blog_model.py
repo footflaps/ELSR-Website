@@ -30,6 +30,9 @@ class BlogModel(db.Model):
     # Use a unix date to make sorting by date simple
     date_unix = db.Column(db.Integer)
 
+    # New date column using a proper SQL Date field
+    converted_date = db.Column(db.Date)
+
     # Title
     title = db.Column(db.String(50))
 

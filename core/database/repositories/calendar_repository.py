@@ -144,6 +144,24 @@ class CalendarRepository(CalendarModel):
             return rides
 
     @staticmethod
+    def all_by_date_range(start_date: str, end_date: str) -> list[CalendarModel] | None:
+        """
+        Retrieve all rides that fall between two dates based on the converted_date column.
+        :param start_date:                  Start date in the format 'YYYY-MM-DD'.
+        :param end_date:                    End date in the format 'YYYY-MM-DD'.
+        :return:                            List of rides between the specified dates.
+        """
+        with app.app_context():
+            try:
+                rides = CalendarModel.query.filter(CalendarModel.converted_date.between(start_date, end_date)).all()
+                return rides
+
+            except Exception as e:
+                app.logger.error(f"db_calendar: Failed to filter rides by date range, "
+                                 f"error code '{e.args}'.")
+                return None
+
+    @staticmethod
     def all_calender_group_in_past(group: str):
         # Get current Unix Epoch time, plus a bit (6 hours)
         # This is because we add 2 hours to Unix Epoch timestamps to get round GMT/BST problem
