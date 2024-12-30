@@ -65,7 +65,7 @@
 					<span class="subheading">Member since {{ beautify_date(user.start_date) }}</span>
 					
 					<!-- 2FA -->
-					{% if user.has_valid_phone_number() %}
+					{% if user.has_valid_phone_number %}
 						<span class="subheading">
 							<i class="fa-solid fa-user-lock"></i>
 							Using 2FA to secure this account.
@@ -956,7 +956,7 @@
 <!--                                          Events                                                -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if current_user.admin() %}
+{% if current_user.admin %}
 
 	<a name="eventLog"></a>
 	<div class="container">
@@ -1156,11 +1156,11 @@
 			                <li>
                                 Email: '<strong>{{ user.email }}</strong>'
                             </li>
-			                {% if user.has_valid_phone_number() %}
+			                {% if user.has_valid_phone_number %}
 			                    <li>
                                     Mobile: '<strong>{{ user.phone_number }}</strong>'
                                 </li>
-			                {% elif user.has_unvalidated_phone_number() %}
+			                {% elif user.has_unvalidated_phone_number %}
 			                    <li>
                                     Mobile: '<strong>{{ user.phone_number }}</strong>' [unverified]
                                 </li>
@@ -1255,10 +1255,10 @@
 		                <h4>Two Factor Authentication:</h4>
 		                
 		                <!-- Manage phone number -->
-	                    {% if user.has_valid_phone_number() %}
+	                    {% if user.has_valid_phone_number %}
 		                
 		                    <!-- NB An Admin can't change their phone number whilst an admin -->
-							{% if not user.admin() %}
+							{% if not user.admin %}
 		                    
 		                        <!-- Edit existing phone number -->
 		                        <a data-toggle="modal" data-target="#editPhoneModal">
@@ -1285,7 +1285,7 @@
 		                
 	                        {% endif %}
 	                    
-		                {% elif user.has_unvalidated_phone_number() %}
+		                {% elif user.has_unvalidated_phone_number %}
 	                    
 	                        <!-- Validate existing phone number -->
 	                        <form action="{{ url_for('add_phone_number', user_id=user.id) }}" method="post">
@@ -1337,7 +1337,7 @@
 								<tr>
 									<td class="small">Can upload GPXes</td>
 									<td class="small">
-										{% if user.readwrite() %}
+										{% if user.readwrite %}
 											<i class="fa-regular fa-face-smile fa-xl"></i>
 										{% else %}
 											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
@@ -1347,7 +1347,7 @@
 		                        <tr>
 									<td class="small">Can add and comment on Cafes</td>
 									<td class="small">
-										{% if user.readwrite() %}
+										{% if user.readwrite %}
 											<i class="fa-regular fa-face-smile fa-xl"></i>
 										{% else %}
 											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
@@ -1357,7 +1357,7 @@
 		                       <tr>
 									<td class="small">Can add events and socials to Calendar</td>
 									<td class="small">
-										{% if user.readwrite() %}
+										{% if user.readwrite %}
 											<i class="fa-regular fa-face-smile fa-xl"></i>
 										{% else %}
 											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
@@ -1367,7 +1367,7 @@
 		                        <tr>
 									<td class="small">Can add blog posts</td>
 									<td class="small">
-										{% if user.readwrite() %}
+										{% if user.readwrite %}
 											<i class="fa-regular fa-face-smile fa-xl"></i>
 										{% else %}
 											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
@@ -1377,7 +1377,7 @@
 		                        <tr>
 									<td class="small">Can add classifieds</td>
 									<td class="small">
-										{% if user.readwrite() %}
+										{% if user.readwrite %}
 											<i class="fa-regular fa-face-smile fa-xl"></i>
 										{% else %}
 											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
@@ -1387,7 +1387,7 @@
 		                        <tr>
 									<td class="small">Can see Private events</td>
 									<td class="small">
-										{% if user.readwrite() %}
+										{% if user.readwrite %}
 											<i class="fa-regular fa-face-smile fa-xl"></i>
 										{% else %}
 											<i class="fa-regular fa-face-sad-tear fa-xl"></i>
@@ -1427,12 +1427,12 @@
 						<!---------------------------------------------------------------------------------------->
 						
 		                <!-- Options for managing another user -->
-						{% if current_user.admin() and current_user.id != user.id %}
+						{% if current_user.admin and current_user.id != user.id %}
 						
 		                    <h4>Admin tools for '{{ user.name }}' ({{ user.email }}):</h4>
 		                
 		                    <!-- Send Verification Code -->
-		                    {% if not user.verified() %}
+		                    {% if not user.verified %}
 			                    <a href="{{ url_for('reverify_user', user_id=user.id) }}">
 									<button type="button" class="btn btn-secondary mr-2 my-2">Verification</button>
 			                    </a>
@@ -1444,8 +1444,8 @@
 							</a>
 		        
 		                    <!-- Make Admin -->
-		                    {% if current_user.id == 1 and not user.blocked() %}
-		                        {% if user.admin() %}
+		                    {% if current_user.id == 1 and not user.blocked %}
+		                        {% if user.admin %}
 		                            <a data-toggle="modal" data-target="#unmakeAdminModal">
 										<button type="button" class="btn btn-danger mr-2 my-2" >unAdmin</button>
 			                        </a>
@@ -1459,7 +1459,7 @@
 		                    {% endif %}
 		                
 							<!-- Block / unBlock user -->
-							{% if user.blocked() %}
+							{% if user.blocked %}
 		                        <a data-toggle="modal" data-target="#unBlockUserModal">
 									<button type="button" class="btn btn-danger mr-2 my-2" >unBan User</button>
 		                        </a>
@@ -1470,7 +1470,7 @@
 							{% endif %}
 							
 		                    <!-- Allow / Disable Write permissions -->
-							{% if user.readwrite() %}
+							{% if user.readwrite %}
 		                        <a data-toggle="modal" data-target="#removeWriteUserModal">
 									<button type="button" class="btn btn-warning mr-2 my-2" >Read only</button>
 		                        </a>
@@ -1501,7 +1501,7 @@
 						{% endif %}
 						
 						
-						{% if current_user.admin() %}
+						{% if current_user.admin %}
 					
 							<a data-toggle="modal" data-target="#deleteUserModal">
 								<button type="button"
@@ -1536,7 +1536,7 @@
 <!--                                            WhatsApp                                            -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if current_user.readwrite() %}
+{% if current_user.readwrite %}
 	
 	<div class="container">
 		<div class="row">

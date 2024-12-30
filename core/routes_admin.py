@@ -18,7 +18,7 @@ from core import app, current_year, is_mobile, live_site
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User, SUPER_ADMIN_USER_ID
+from core.database.repositories.user_repository import UserRepository, SUPER_ADMIN_USER_ID
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
@@ -149,7 +149,7 @@ def admin_page():
     # ----------------------------------------------------------- #
     # Double check for Admin only (in case decorator fails)
     # ----------------------------------------------------------- #
-    if not current_user.admin():
+    if not current_user.admin:
         app.logger.debug(f"admin_page(): Non Admin access, user_id = '{current_user.id}'!")
         EventRepository().log_event("Admin Page Fail", f"on Admin access, user_id = '{current_user.id}'!")
         return abort(403)
@@ -174,8 +174,8 @@ def admin_page():
     # ----------------------------------------------------------- #
     # List of all users (for admin page table)
     # ----------------------------------------------------------- #
-    admins = User().all_admins()
-    non_admins = User().all_non_admins()
+    admins = UserRepository().all_admins()
+    non_admins = UserRepository().all_non_admins()
 
     # Split users into two camps
     trusted_users = []
@@ -187,8 +187,8 @@ def admin_page():
             user.verification_code_timestamp = \
                 datetime.utcfromtimestamp(user.verification_code_timestamp).strftime('%d%m%Y %H:%M:%S')
         # Split by properties
-        if user.readwrite() and \
-                not user.blocked():
+        if user.readwrite and \
+                not user.blocked:
             trusted_users.append(user)
         else:
             untrusted_users.append(user)
@@ -264,7 +264,7 @@ def admin_page():
     for message in messages:
         # We add the current user's public name to each message before passing to the Jinja.
         # NB Internally we only use email as they are immutable and unique.
-        message.from_name = User().find_user_from_email(message.from_email).name
+        message.from_name = UserRepository().find_user_from_email(message.from_email).name
         if not message.been_read:
             count += 1
 
@@ -349,7 +349,7 @@ def make_admin():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
 
     # Check id is valid
     if not user:
@@ -379,7 +379,7 @@ def make_admin():
     # ----------------------------------------------------------- #
     # Admins must have validated phone number for 2FA login
     # ----------------------------------------------------------- #
-    if not user.has_valid_phone_number():
+    if not user.has_valid_phone_number:
         # Can't make admin
         flash("Sorry, user doesn't have a validated mobile number, so can't use 2FA which is mandatory for Admins!")
         app.logger.debug(f"make_admin(): Rejected request to made user_id = '{user_id}' admin as doesn't have 2FA.")
@@ -391,7 +391,7 @@ def make_admin():
     # ----------------------------------------------------------- #
     # Make admin
     # ----------------------------------------------------------- #
-    if User().make_admin(user_id):
+    if UserRepository().make_admin(user_id):
         # Success
         app.logger.debug(f"make_admin(): Success, user_id = '{user_id}'.")
         EventRepository().log_event(f"Make Admin Success", f"User is now Admin! user_id = '{user_id}'.")
@@ -451,7 +451,7 @@ def unmake_admin():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
 
     # Check id is valid
     if not user:
@@ -480,7 +480,7 @@ def unmake_admin():
     # ----------------------------------------------------------- #
     # Make admin
     # ----------------------------------------------------------- #
-    if User().unmake_admin(user_id):
+    if UserRepository().unmake_admin(user_id):
         # Success
         app.logger.debug(f"unmake_admin(): Success with user_id = '{user_id}'.")
         EventRepository().log_event("unMake Admin Success", f"User '{user.email}' is no longer an Admin!, user_id = '{user_id}'.")
@@ -540,7 +540,7 @@ def block_user():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"block_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Block User Fail", f"invalid user user_id = '{user_id}'.")
@@ -563,7 +563,7 @@ def block_user():
         EventRepository().log_event("Block User Fail", f"Admin can't block themselves, user_id = '{current_user.id}'.")
         flash(f"You can't block yourself!")
         return redirect(url_for('user_page', user_id=user_id))
-    if user.admin():
+    if user.admin:
         app.logger.debug(f"block_user(): Block failed, can't block Admin, user_id = '{current_user.id}'.")
         EventRepository().log_event("Block User Fail", f"Can't block Admin, user_id = '{current_user.id}'.")
         flash(f"You can't block an Admin!")
@@ -572,7 +572,7 @@ def block_user():
     # ----------------------------------------------------------- #
     # Block user
     # ----------------------------------------------------------- #
-    if User().block_user(user_id):
+    if UserRepository().block_user(user_id):
         app.logger.debug(f"block_user(): User '{user_id}' is now blocked.")
         EventRepository().log_event("Block User Success", f"User '{user_id}' is now blocked.")
         flash("User Blocked.")
@@ -631,7 +631,7 @@ def unblock_user():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"unblock_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("unBlock User Fail", f"invalid user user_id = '{user_id}'.")
@@ -655,7 +655,7 @@ def unblock_user():
         EventRepository().log_event("unBlock User Fail", f"Admin can't unblock themselves, user_id = '{current_user.id}'.")
         flash(f"You can't unblock yourself!")
         return redirect(url_for('user_page', user_id=user_id))
-    if user.admin():
+    if user.admin:
         app.logger.debug(f"unblock_user(): unBlock failed, can't block Admin, user_id = '{current_user.id}'.")
         EventRepository().log_event("unBlock User Fail", f"Can't unblock Admin, user_id = '{current_user.id}'.")
         flash(f"You can't unblock an Admin!")
@@ -664,7 +664,7 @@ def unblock_user():
     # ----------------------------------------------------------- #
     # Unblock user
     # ----------------------------------------------------------- #
-    if User().unblock_user(user_id):
+    if UserRepository().unblock_user(user_id):
         app.logger.debug(f"unblock_user(): User '{user_id}' is now unblocked.")
         EventRepository().log_event("unBlock User Success", f"User '{user_id}' is now unblocked.")
         flash("User unblocked.")
@@ -723,7 +723,7 @@ def user_readwrite():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"user_readwrite(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("ReadWrite Fail", f"Invalid user user_id = '{user_id}'!")
@@ -737,7 +737,7 @@ def user_readwrite():
         EventRepository().log_event("ReadWrite Fail", f"Admin can't unblock themselves, user_id = '{user_id}'.")
         flash(f"You can't unblock yourself!")
         return redirect(url_for('user_page', user_id=user_id))
-    if user.admin():
+    if user.admin:
         app.logger.debug(f"user_readwrite(): unBlock failed, can't block Admin, user_id = '{user_id}'.")
         EventRepository().log_event("ReadWrite Fail", f"Can't unblock Admin, user_id = '{user_id}'.")
         flash(f"You can't unblock an Admin!")
@@ -755,7 +755,7 @@ def user_readwrite():
     # ----------------------------------------------------------- #
     # Set Read Write permission
     # ----------------------------------------------------------- #
-    if User().set_readwrite(user_id):
+    if UserRepository().set_readwrite(user_id):
         app.logger.debug(f"user_readwrite(): Success, user can now write, user.email = '{user.email}'.")
         EventRepository().log_event("ReadWrite Success", f"User can now write, user.email = '{user.email}'.")
         flash(f"User '{user.name}' now has Write permissions.")
@@ -815,7 +815,7 @@ def user_readonly():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"user_readonly(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("ReadOnly Fail", f"Invalid user user_id = '{user_id}'!")
@@ -829,7 +829,7 @@ def user_readonly():
         EventRepository().log_event("ReadOnly Fail", f"Admin can't unblock themselves, '{current_user.email}'.")
         flash(f"You can't unblock yourself!")
         return redirect(url_for('user_page', user_id=user_id))
-    if user.admin():
+    if user.admin:
         app.logger.debug(f"user_readonly(): unBlock failed, can't block Admin, "
                          f"'{current_user.email}' blocking '{user.email}'.")
         EventRepository().log_event("ReadOnly Fail", f"Can't unblock Admin, '{current_user.email}' blocking '{user.email}'.")
@@ -848,7 +848,7 @@ def user_readonly():
     # ----------------------------------------------------------- #
     # Set Read Only permission
     # ----------------------------------------------------------- #
-    if User().set_readonly(user_id):
+    if UserRepository().set_readonly(user_id):
         app.logger.debug(f"user_readonly(): Success, user is Readonly, user.email = '{user.email}'.")
         EventRepository().log_event("ReadOnly Success", f"User is Readonly, user.email = '{user.email}'.")
         flash(f"User '{user.name}' is now Read ONLY.")
@@ -888,7 +888,7 @@ def reverify_user():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"reverify_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Send Verify Fail", f"Invalid user_id = '{user_id}'.")
@@ -897,7 +897,7 @@ def reverify_user():
     # ----------------------------------------------------------- #
     # Send verification code
     # ----------------------------------------------------------- #
-    if User().create_new_verification(user_id):
+    if UserRepository().create_new_verification(user_id):
         app.logger.debug(f"reverify_user(): Verification code sent user_id = '{user_id}'.")
         EventRepository().log_event("Send Verify Pass", f"Verification code sent user_id = '{user_id}'.")
         flash("Verification code sent!")
@@ -936,7 +936,7 @@ def password_reset_user():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"password_reset_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Send Reset Fail", f"Invalid user user_id = '{user_id}'.")
@@ -945,7 +945,7 @@ def password_reset_user():
     # ----------------------------------------------------------- #
     # Send reset
     # ----------------------------------------------------------- #
-    if User().create_new_reset_code(user.email):
+    if UserRepository().create_new_reset_code(user.email):
         app.logger.debug(f"password_reset_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Send Reset Pass", f"Reset code sent to '{user.email}'.")
         flash("Reset code sent!")

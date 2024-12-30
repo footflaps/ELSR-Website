@@ -14,7 +14,7 @@ from core import app
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.event_repository import EventRepository
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, boost_map_limit
 
@@ -61,7 +61,7 @@ def enable_maps():
     # ----------------------------------------------------------- #
     #  Need user
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"enable_maps(): Invalid user current_user.id = '{current_user.id}'!")
         EventRepository().log_event("Enable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
@@ -127,7 +127,7 @@ def disable_maps():
     # ----------------------------------------------------------- #
     #  Need user
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"disable_maps(): Invalid user current_user.id = '{current_user.id}'!")
         EventRepository().log_event("Disable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
@@ -193,7 +193,7 @@ def boost_maps():
     # ----------------------------------------------------------- #
     #  Need user
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"boost_maps(): Invalid user current_user.id = '{current_user.id}'!")
         EventRepository().log_event("Boost Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")

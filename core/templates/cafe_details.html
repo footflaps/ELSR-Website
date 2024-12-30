@@ -183,9 +183,9 @@
 						<!-- Edit or Flag post button -->
 		                {% if not current_user.is_authenticated: %}
 		                
-		                    <!-- Tortuous logic as unauthenticated user won't have .admin() attribute etc -->
+		                    <!-- Tortuous logic as unauthenticated user won't have .admin attribute etc -->
 		                
-						{% elif current_user.admin() or current_user.email == cafe.added_email %}
+						{% elif current_user.admin or current_user.email == cafe.added_email %}
 						
 							<div class="clearfix">
 								
@@ -229,7 +229,7 @@
 						
 						
 						{% elif current_user.is_authenticated: %}
-		                    {% if current_user.readwrite() %}
+		                    {% if current_user.readwrite %}
 						
 								<!----------------------------->
 								<!--      FLAG button        -->
@@ -419,7 +419,7 @@
 				<h2 class="float-left">No Comments</h2>
 				
 				{% if current_user.is_authenticated: %}
-					{% if current_user.readwrite() %}
+					{% if current_user.readwrite %}
 						<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseComment" role="button"
 					       aria-expanded="false" aria-controls="collapseExample">
 		                  Comment
@@ -472,8 +472,8 @@
 						 
 							{% if not current_user.is_authenticated: %}
 						    
-		                    {% elif current_user.admin() or
-			                            ( current_user.email == comment.email and current_user.readwrite() ): %}
+		                    {% elif current_user.admin or
+			                            ( current_user.email == comment.email and current_user.readwrite ): %}
 		                        <!-- Show a delete button if they are the author or admin -->
 		                        
 		                        <!--
@@ -562,7 +562,7 @@
 <div class="container">
 
 	{% if current_user.is_authenticated and comments: %}
-		{% if current_user.readwrite() %}
+		{% if current_user.readwrite %}
 			<!-- Button to expose hidden options -->
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">

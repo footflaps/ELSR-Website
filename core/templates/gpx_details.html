@@ -171,7 +171,7 @@
 		So, have to test for that first and handle that separately.
 	-->
 
-{% elif (current_user.email == gpx.email or current_user.admin()) and not gpx.public %}
+{% elif (current_user.email == gpx.email or current_user.admin) and not gpx.public %}
 
 	<div class="container">
 		<div class="row">
@@ -451,7 +451,7 @@
 		So, have to test for that first and handle that separately.
 	-->
 
-{% elif (current_user.email == gpx.email or current_user.admin()) and gpx.public: %}
+{% elif (current_user.email == gpx.email or current_user.admin) and gpx.public: %}
 	
 	<!-- Logged in and either admin or owner and route is public -->
 
@@ -531,7 +531,7 @@
 			<div class="col-lg-8 col-md-10 mx-auto mt-3">
 				
 				{% if current_user.is_authenticated: %}
-                    {% if current_user.readwrite() %}
+                    {% if current_user.readwrite %}
 				
 						<!----------------------------->
 						<!--      FLAG button        -->

@@ -178,7 +178,7 @@
 					        <a class="dropdown-item" href="{{ url_for('poll_list') }}">Polling</a>
 					        <a class="dropdown-item" href="{{ url_for('who_are_we') }}">Member List</a>
                             <a class="dropdown-item" href="{{ url_for('contact') }}">Contact Us</a>
-                            {% if current_user.is_authenticated and current_user.can_see_emergency_contacts() %}
+                            {% if current_user.is_authenticated and current_user.can_see_emergency_contacts %}
                                 <a class="dropdown-item" href="{{ url_for('emergency') }}">Emergency Contacts</a>
                             {% endif %}
 					    </div>
@@ -262,14 +262,14 @@
 						<!-------------------------------------------------------------------------------------------->
 					
 						<!-- Admin icon which links to Admin console -->
-						{% if current_user.admin() %}
+						{% if current_user.admin %}
 							<li class="nav-item">
 								<a class="nav-link" href="{{ url_for('admin_page') }}">Admin</a>
 							</li>
 						{% endif %}
 						
 						<!-- Admins Mail icon which links to Admin console -->
-						{% if current_user.admin() and admin_has_mail() %}
+						{% if current_user.admin and admin_has_mail() %}
 							<li class="nav-item">
 								<a class="nav-link" href="{{ url_for('admin_page') }}">
 									<i class="fa-solid fa-envelope fa-bounce fa-xl"

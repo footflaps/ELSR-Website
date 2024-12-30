@@ -10,14 +10,14 @@ import re
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site
+from core import app, current_year, live_site, admin_email_address, admin_phone_number
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
+from core.database.repositories.user_repository import UserRepository, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
 from core.forms.user_forms import CreateUserForm, VerifyUserForm, TwoFactorLoginForm, VerifySMSForm
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
@@ -32,10 +32,6 @@ from core.decorators.user_decorators import login_required, update_last_seen, lo
 # -------------------------------------------------------------------------------------------------------------- #
 
 DEFAULT_EVENT_DAYS = 7
-
-# This is the admin email address
-admin_email_address = os.environ['ELSR_ADMIN_EMAIL']
-admin_phone_number = os.environ['ELSR_TWILIO_NUMBER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -60,16 +56,16 @@ def register():
     if form.validate_on_submit():
 
         # Grab credentials from form
-        new_user = User()
+        new_user = UserRepository()
         new_user.name = form.name.data
         new_user.email = form.email.data
         app.logger.debug(f"register(): new_user = '{new_user}', new_user.name = '{new_user.name}', "
                          f"new_user.email = '{new_user.email}'")
 
         # Does the user already exist?
-        if User().find_user_from_email(new_user.email):
+        if UserRepository().find_user_from_email(new_user.email):
 
-            if User().find_user_from_email(new_user.email).verified():
+            if UserRepository().find_user_from_email(new_user.email).verified:
                 # Email is validated, so they can just login
                 app.logger.debug(f"register(): Duplicate email '{new_user.email}'.")
                 EventRepository().log_event("Register Fail", f"Duplicate email '{new_user.email}'.")
@@ -90,7 +86,7 @@ def register():
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Names must be unique
-        if User().check_name_in_use(new_user.name):
+        if UserRepository().check_name_in_use(new_user.name):
             app.logger.debug(f"user_page(): Username clash '{new_user.name}' for new_user.id = '{new_user.id}'.")
             EventRepository().log_event("User Page Succes", f"Username clash '{new_user.name}' "
                                                   f"for new_user.id = '{new_user.id}'.")
@@ -99,10 +95,10 @@ def register():
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Add to dB
-        if User().create_user(new_user, form.password.data):
+        if UserRepository().create_user(new_user, form.password.data):
 
             # Debug
-            user = User().find_user_from_email(form.email.data)
+            user = UserRepository().find_user_from_email(form.email.data)
 
             # They now need to validate email address
             app.logger.debug(f"register(): Sending verification email to '{user.email}'.")
@@ -158,14 +154,14 @@ def validate_email():
         # ----------------------------------------------------------- #
 
         email = email.strip('"').strip("'")
-        user = User().find_user_from_email(email)
+        user = UserRepository().find_user_from_email(email)
         if not user:
             # User doesn't exist
             app.logger.debug(f"validate_email(): URL route, can't find user email = '{email}'.")
             EventRepository().log_event("Validate Fail", f"URL route, can't find user email = '{email}'.")
             abort(404)
 
-        if User().validate_email(user, code):
+        if UserRepository().validate_email(user, code):
             # Success, user email validated!
             app.logger.debug(f"validate_email(): URL route, user '{email}' has been validated.")
             EventRepository().log_event("Validate Pass", f"URL route, user '{email}' has been validated.")
@@ -216,25 +212,25 @@ def validate_email():
         # ----------------------------------------------------------- #
 
         # Grab credentials from form
-        new_user = User()
+        new_user = UserRepository()
         new_user.email = form.email.data
         code = form.verification_code.data
 
         # Find out user
-        user = User().find_user_from_email(new_user.email)
+        user = UserRepository().find_user_from_email(new_user.email)
 
         # Did we find that email address
         if user:
 
             # Already verified
-            if user.verified():
+            if user.verified:
                 app.logger.debug(f"validate_email(): Form, user '{user.email}' is already validated.")
                 EventRepository().log_event("Validate Fail", f"Form, user '{user.email}' is already validated.")
                 flash("Email has already been verified! Log in with your password.")
                 return redirect(url_for('login', email=new_user.email))
 
             # Check email exists in db
-            if User().validate_email(user, code):
+            if UserRepository().validate_email(user, code):
 
                 # Go to login page
                 app.logger.debug(f"validate_email(): Form, user '{user.email}' has been validated.")
@@ -319,14 +315,14 @@ def twofa_login():
         # ----------------------------------------------------------- #
 
         email = email.strip('"').strip("'")
-        user = User().find_user_from_email(email)
+        user = UserRepository().find_user_from_email(email)
         if not user:
             # User doesn't exist
             app.logger.debug(f"twofa_login(): URL route, can't find user email = '{email}'.")
             EventRepository().log_event("2FA login Fail", f"URL route, can't find user email = '{email}'.")
             abort(404)
 
-        if User().validate_sms(user, code):
+        if UserRepository().validate_sms(user, code):
             # Success, user validated!
             login_user(user, remember=True)
             flash(f"Welcome back {user.name}!")
@@ -352,7 +348,7 @@ def twofa_login():
         # ----------------------------------------------------------- #
 
         # Is that a valid email address?
-        user = User().find_user_from_email(form.email.data)
+        user = UserRepository().find_user_from_email(form.email.data)
 
         # Did we find that email address
         if user:
@@ -360,7 +356,7 @@ def twofa_login():
             # Verify their SMS code
             code = form.verification_code.data
 
-            if User().validate_sms(user, code):
+            if UserRepository().validate_sms(user, code):
                 # Success, 2FA complete!
                 login_user(user, remember=True)
                 flash(f"Welcome back {user.name}!")
@@ -423,7 +419,7 @@ def add_phone_number():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"add_phone_number(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Add Phone Fail", f"Invalid user user_id = '{user_id}'.")
@@ -458,7 +454,7 @@ def add_phone_number():
     # Restrict access (Admin or user themselves)
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
-            not current_user.admin():
+            not current_user.admin:
         app.logger.debug(f"add_phone_number(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         EventRepository().log_event("Add Phone Fail", f"User isn't allowed "
@@ -468,12 +464,12 @@ def add_phone_number():
     # ----------------------------------------------------------- #
     # Update phone number
     # ----------------------------------------------------------- #
-    if User().set_phone_number(user_id, UNVERIFIED_PHONE_PREFIX + phone_number):
+    if UserRepository().set_phone_number(user_id, UNVERIFIED_PHONE_PREFIX + phone_number):
 
         # Now generate a verification code
-        if User().generate_sms_code(user_id):
+        if UserRepository().generate_sms_code(user_id):
             # Reacquire user
-            user = User().find_user_from_id(user_id)
+            user = UserRepository().find_user_from_id(user_id)
             # Send the code to the user
             send_sms_verif_code(user)
             app.logger.debug(f"add_phone_number(): SMS code sent, user_id='{user_id}'.")
@@ -521,7 +517,7 @@ def mobile_verify():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"mobile_verify(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Verify Mobile Fail", f"Invalid user user_id = '{user_id}'.")
@@ -538,7 +534,7 @@ def mobile_verify():
         # Get code from the form
         code = form.verification_code.data
 
-        if User().validate_sms(user, code):
+        if UserRepository().validate_sms(user, code):
             # Success, user validated!
             login_user(user, remember=True)
             flash(f"Mobile number has been verified!")

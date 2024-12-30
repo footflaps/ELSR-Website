@@ -82,7 +82,7 @@
 					
 					<!-- Card body part 2 -->
 					{% if current_user.is_authenticated %}
-						{% if current_user.readwrite() %}
+						{% if current_user.readwrite %}
 							{% if poll.max_selections == 0 %}
 								<!-- Can vote for all options -->
 								<h4 class="card-text">You have used <strong style="color:red">{{ num_votes }}</strong> out of
@@ -120,7 +120,7 @@
 							
 								{% if current_user.is_authenticated: %}
 									
-									{% if not current_user.readwrite() %}
+									{% if not current_user.readwrite %}
 							
 										<!-- No permission to vote -->
 										<button class="btn btn-sm btn-dark disabled float-right">VOTE</button>
@@ -176,7 +176,7 @@
 							
 							{% if current_user.is_authenticated: %}
 							
-								{% if not current_user.readwrite() %}
+								{% if not current_user.readwrite %}
 							
 									<!-- User is untrusted -->
 									{% for voter in poll.responses[option] %}
@@ -257,13 +257,13 @@
 <!---------------------------------------------------------------------------------------------------->
 
 {% if current_user.is_authenticated %}
-	{% if current_user.admin() or current_user.email == poll.email %}
+	{% if current_user.admin or current_user.email == poll.email %}
 	
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
 				
-				{% if current_user.admin() %}
+				{% if current_user.admin %}
 					<h2 class="float-left">Admin panel</h2>
 				{% else %}
 					<h2 class="float-left">Owner control</h2>

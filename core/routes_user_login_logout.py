@@ -9,14 +9,14 @@ from urllib.parse import urlparse
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site
+from core import app, current_year, live_site, admin_email_address
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.forms.user_forms import LoginUserForm, ResetPasswordForm
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import send_reset_email, send_verification_email, send_2fa_sms
@@ -29,10 +29,6 @@ from core.decorators.user_decorators import update_last_seen
 # -------------------------------------------------------------------------------------------------------------- #
 
 DEFAULT_EVENT_DAYS = 7
-
-# This is the admin email address
-admin_email_address = os.environ['ELSR_ADMIN_EMAIL']
-admin_phone_number = os.environ['ELSR_TWILIO_NUMBER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -95,7 +91,7 @@ def login():
             user_ip = request.remote_addr
 
         # See if user exists by looking up their email address
-        user = User().find_user_from_email(email)
+        user = UserRepository().find_user_from_email(email)
 
         # Test 1: Does the user exist?
         if not user:
@@ -110,9 +106,9 @@ def login():
             app.logger.debug(f"login(): Recovery email requested for '{email}'.")
             EventRepository().log_event("Login Fail", f"Recovery email requested for '{email}'.")
             # Generate a new code
-            User().create_new_reset_code(email)
+            UserRepository().create_new_reset_code(email)
             # Find the user to get the details
-            user = User().find_user_from_email(email)
+            user = UserRepository().find_user_from_email(email)
             # Send an email
             Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()
             # Tell user to expect an email
@@ -124,9 +120,9 @@ def login():
             app.logger.debug(f"login(): Reset email requested for '{email}'.")
             EventRepository().log_event("Login Fail", f"Reset email requested for '{email}'.")
             # Generate a new code
-            User().create_new_verification(user.id)
+            UserRepository().create_new_verification(user.id)
             # Find the user to get the details
-            user = User().find_user_from_email(email)
+            user = UserRepository().find_user_from_email(email)
             # Send an email
             Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
             # Tell user to expect an email
@@ -134,14 +130,14 @@ def login():
             return redirect(url_for('validate_email'))
 
         # Test 4: Is the user validated?
-        if not user.verified():
+        if not user.verified:
             app.logger.debug(f"login(): Failed, Email not verified yet '{email}'.")
             EventRepository().log_event("Login Fail", f"Email not verified yet '{email}'.")
             flash("That email address has not been verified yet!")
             return redirect(url_for('validate_email'))
 
         # Test 5: Is the user barred?
-        if user.blocked():
+        if user.blocked:
             app.logger.debug(f"login(): Failed, Email has been blocked '{email}'.")
             EventRepository().log_event("Login Fail", f"Email has been blocked '{email}'.")
             flash("That email address has been temporarily blocked!")
@@ -149,14 +145,14 @@ def login():
             return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
         # Test 6: Check password
-        if User().validate_password(user, password, user_ip):
+        if UserRepository().validate_password(user, password, user_ip):
             # Admins require 2FA and we'll offer it to anyone with a phone number validated
-            if user.admin() or \
-                    user.has_valid_phone_number():
+            if user.admin or \
+                    user.has_valid_phone_number:
                 # Admins must use 2FA via SMS
-                User().generate_sms_code(user.id)
+                UserRepository().generate_sms_code(user.id)
                 flash(f"2FA code has been sent to '{user.phone_number}'.")
-                user = User().find_user_from_id(user.id)
+                user = UserRepository().find_user_from_id(user.id)
                 send_2fa_sms(user)
                 return redirect(url_for('twofa_login'))
 
@@ -247,12 +243,12 @@ def reset_password():
     # Only validate if we were actually sent them
     if email and code:
         email = email.strip('"').strip("'")
-        user = User().find_user_from_email(email)
+        user = UserRepository().find_user_from_email(email)
         if not user:
             app.logger.debug(f"reset_password(): URL route, invalid email = '{email}'.")
             EventRepository().log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
             abort(404)
-        if not User().validate_reset_code(user.id, int(code)):
+        if not UserRepository().validate_reset_code(user.id, int(code)):
             app.logger.debug(f"reset_password(): URL route, invalid email = '{code}', for user = '{user.email}'.")
             EventRepository().log_event("Reset Fail", f"URL route, invalid email = '{code}', for user = '{user.email}'.")
             abort(404)
@@ -279,7 +275,7 @@ def reset_password():
             # Back to the same page for another try
             return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())
 
-        if User().reset_password(email, form.password1.data):
+        if UserRepository().reset_password(email, form.password1.data):
             app.logger.debug(f"reset_password(): Form route, Password has been reset, email = '{email}'.")
             EventRepository().log_event("Reset Success", f"Form route, Password has been reset, email = '{email}'.")
             flash("Password has been reset, please login!")

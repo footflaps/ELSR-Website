@@ -49,7 +49,7 @@ function dateLogic() {
     if (date.value != "") {
 
          // Date must be in the future, unless admin
-        if ( "{{ current_user.admin() }}" != "True" ) {
+        if ( "{{ current_user.admin }}" != "True" ) {
             if ( dateInPast(date.value) ) {
 
                 // Disable Submit button and warn user

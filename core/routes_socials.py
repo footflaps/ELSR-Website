@@ -12,7 +12,7 @@ import json
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site
+from core import app, current_year, live_site, ICS_DIRECTORY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -23,20 +23,11 @@ from core.database.repositories.social_repository import SocialRepository, SOCIA
                                                  SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.forms.social_forms import create_social_form
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.subs_email_sms import send_social_notification_emails
 from core.subs_dates import get_date_from_url
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Constants
-# -------------------------------------------------------------------------------------------------------------- #
-
-# Where we store calendar ics files
-# "D:/Dropbox/100 Days of Code/Python/ELSR-website/core/ics/"
-ICS_DIRECTORY = os.environ['ELSR_ICS_DIRECTORY']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -77,12 +68,12 @@ def add_social():
     # ----------------------------------------------------------- #
     # Need a form
     # ----------------------------------------------------------- #
-    form = create_social_form(current_user.admin())
+    form = create_social_form(current_user.admin)
 
     if request.method == 'GET':
         if social:
             # Try and get owner from email address in the db
-            owner = User().find_user_from_email(social.email)
+            owner = UserRepository().find_user_from_email(social.email)
             if not owner:
                 # Should never happen but....
                 app.logger.debug(f"add_social(): Failed to locate owner, "
@@ -109,14 +100,14 @@ def add_social():
                 form.sign_up.data = SIGN_UP_NO
 
             # Admin owner option
-            if current_user.admin():
-                form.owner.data = owner.combo_str()
+            if current_user.admin:
+                form.owner.data = owner.combo_str
 
         else:
             # New form, so just assume organiser is current user
             form.organiser.data = current_user.name
-            if current_user.admin():
-                form.owner.data = current_user.combo_str()
+            if current_user.admin:
+                form.owner.data = current_user.combo_str
 
             # Add some guidance
             form.details.data = "<p>If you set the Social type to <strong>Public</strong>:</p>" \
@@ -148,8 +139,8 @@ def add_social():
             new_social = SocialRepository()
 
         # Get owner
-        if current_user.admin():
-            owner = User().user_from_combo_string(form.owner.data)
+        if current_user.admin:
+            owner = UserRepository().user_from_combo_string(form.owner.data)
             if not owner:
                 # Should never happen but....
                 app.logger.debug(f"add_social(): Failed to locate owner, "
@@ -274,7 +265,7 @@ def social():
             social.details = f"<a href={url_for('login')}><p style='color: red'>Log in to see the details</p></a>"
 
         elif social.privacy == SOCIAL_DB_PRIVATE and \
-                not current_user.readwrite():
+                not current_user.readwrite:
             # Private events are for write enabled users only ie WA group members
             social.destination = "** Private event **"
             social.details = "<p>Details for private events are visible to regular riders only.</p>"
@@ -343,7 +334,7 @@ def delete_social():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != social.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}'.")
@@ -355,7 +346,7 @@ def delete_social():
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
@@ -414,7 +405,7 @@ def download_ics():
     # ----------------------------------------------------------- #
     # Permissions
     # ----------------------------------------------------------- #
-    if not current_user.readwrite() and \
+    if not current_user.readwrite and \
             social.privacy == SOCIAL_DB_PRIVATE:
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "

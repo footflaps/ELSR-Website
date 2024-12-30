@@ -63,7 +63,7 @@
 	
 		<!-- Add a blog post -->
 		{% if current_user.is_authenticated %}
-			{% if current_user.readwrite() %}
+			{% if current_user.readwrite %}
 				<div class="row">
 					<div class="col-lg-8 col-md-10 mx-auto">
 						<a href="{{ url_for('add_blog') }}" class="btn btn-primary float-right" role="button">
@@ -90,7 +90,7 @@
 	<!---------------------------------------------------------------------------------------------------->
 
 	{% if current_user.is_authenticated %}
-		{% if current_user.readwrite() %}
+		{% if current_user.readwrite %}
 			<div class="container">
 				<div class="row">
 					<div class="col-lg-8 col-md-10 mx-auto">
@@ -124,7 +124,7 @@
 				<!-- Check user has permission to see this -->
 				{% if blog.private and not current_user.is_authenticated %}
 					<!-- Non logged in user can't see private posts -->
-				{% elif blog.private and not current_user.readwrite() %}
+				{% elif blog.private and not current_user.readwrite %}
 					<!-- Untrusted user can't see private posts -->
 				{% else %}
 		
@@ -206,7 +206,7 @@
 									{% endif %}
 								
 									<!-- Only admin and owner can edit / delete -->
-									{% if current_user.email == blog.email or current_user.admin() %}
+									{% if current_user.email == blog.email or current_user.admin %}
 										
 										<!-- Delete blog -->
 										<a data-toggle="modal" data-target="#deleteBlog{{ blog.id }}">
@@ -239,7 +239,7 @@
 					
 					<!-- Only add modal form is user can delete -->
 					{% if current_user.is_authenticated %}
-						{% if current_user.email == blog.email or current_user.admin() %}
+						{% if current_user.email == blog.email or current_user.admin %}
 					
 							<div class="modal fade" id="deleteBlog{{ blog.id }}" tabindex="-1" role="dialog"
 							     aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -331,7 +331,7 @@
 				<!---------------------------------------------------------------------------------------------------->
 				
 				{% if current_user.is_authenticated %}
-					{% if current_user.readwrite() %}
+					{% if current_user.readwrite %}
 						
 						<a href="{{ url_for('add_blog') }}" class="btn btn-sm btn-primary float-right my-2" role="button">
 			                  Add Blog

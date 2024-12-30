@@ -254,7 +254,7 @@
 							<!-- If GPX file is missing only show to Admins so they can delete it -->
 							{% if ride.missing_gpx and not current_user.is_authenticated: %}
 						
-							{% elif ride.missing_gpx and not (current_user.admin() or current_user.email == ride.email) %}
+							{% elif ride.missing_gpx and not (current_user.admin or current_user.email == ride.email) %}
 						
 							{% else %}
 							
@@ -306,7 +306,7 @@
 									
 									<!-- Admins and author can edit / delete the rides -->
 									{% if current_user.is_authenticated: %}
-										{% if current_user.admin() or current_user.email == ride.email %}
+										{% if current_user.admin or current_user.email == ride.email %}
 											
 											<!-- Edit route -->
 											 <a href="{{ url_for('add_ride', ride_id=ride.id, date=dates_short[day]) }}">
@@ -460,7 +460,7 @@
 							</a>
 						</div>
 				
-						{% if current_user.readwrite() %}
+						{% if current_user.readwrite %}
 							<!-- Add ride button -->
 							<a href="{{ url_for('add_ride', date=dates_short[day]) }}">
 								<button type="button" class="btn btn-sm btn-primary float-right">
@@ -473,7 +473,7 @@
 				
 				{% else %}
 					{% if current_user.is_authenticated: %}
-						{% if current_user.readwrite() %}
+						{% if current_user.readwrite %}
 							<!-- Add ride button -->
 							<a href="{{ url_for('add_ride', date=dates_short[day]) }}">
 								<button type="button" class="btn btn-sm btn-primary float-right">

@@ -11,14 +11,14 @@ from datetime import datetime, date
 # Import app etc from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, GPX_UPLOAD_FOLDER_ABS, CONFIG_FOLDER
+from core import app, GPX_UPLOAD_FOLDER_ABS, CONFIG_FOLDER, NEW_GOOGLE_MAPS_API_KEY
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User, SUPER_ADMIN_USER_ID
+from core.database.repositories.user_repository import UserRepository, SUPER_ADMIN_USER_ID
 from core.database.repositories.cafe_repository import CafeRepository
 from core.subs_email_sms import send_system_alert_email, send_sms
 from core.database.repositories.event_repository import EventRepository
@@ -27,9 +27,6 @@ from core.database.repositories.event_repository import EventRepository
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
-
-# Note: Key is domain restricted to *.elsr.co.uk
-NEW_GOOGLE_MAPS_API_KEY = os.environ['ELSR_GOOGLE_MAPS_API_KEY']
 
 # How far we display along the route for trimming start and end
 TRIM_DISTANCE_KM = 2.0
@@ -393,7 +390,7 @@ def set_enable_maps():
     send_system_alert_email("Maps have been enabled.")
 
     # SMS Alert
-    site_owner = User().find_user_from_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository().find_user_from_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Maps have been enabled")
 
 
@@ -416,7 +413,7 @@ def set_disable_maps():
     send_system_alert_email("Maps have been disabled.")
 
     # SMS Alert
-    site_owner = User().find_user_from_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository().find_user_from_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Maps have been disabled")
 
 
@@ -464,7 +461,7 @@ def boost_map_limit():
     send_system_alert_email("Map boost has been applied.")
 
     # SMS Alert
-    site_owner = User().find_user_from_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository().find_user_from_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Map boost has been applied")
 
 

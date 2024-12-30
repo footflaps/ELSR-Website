@@ -16,7 +16,7 @@ from core import app, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.poll_repository import PollRepository, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 
@@ -115,7 +115,7 @@ def poll_list():
 
     if not current_user.is_authenticated:
         flash("You will need to log in to participate in any polls.")
-    elif not current_user.readwrite():
+    elif not current_user.readwrite:
         flash("Currently you don't have permission to participate in any polls.")
         flash("Please contact an Admin via your user page.")
 
@@ -155,7 +155,7 @@ def poll_details(poll_id):
             EventRepository().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You must be logged in to see private polls.")
             return redirect(url_for("not_logged_in"))
-        elif not current_user.readwrite():
+        elif not current_user.readwrite:
             app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
             EventRepository().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You don't have permission to see private polls.")
@@ -200,7 +200,7 @@ def poll_details(poll_id):
         flash("This poll has now finished.")
     elif not current_user.is_authenticated:
         flash("You will need to log in to participate in any polls.")
-    elif not current_user.readwrite():
+    elif not current_user.readwrite:
         flash("Currently, you don't have permission to participate in polls.")
         flash("Please contact an Admin via your user page.")
     else:
@@ -268,7 +268,7 @@ def add_poll():
     # ----------------------------------------------------------- #
     # Get user
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
     if not user:
         # Should never get here, but...
         app.logger.debug(f"add_poll(): Failed to find user, id = '{current_user.id}'!")
@@ -432,7 +432,7 @@ def edit_poll():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != poll.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"edit_poll(): Refusing permission for '{current_user.email}' and "
                          f"poll_id = '{poll_id}'.")
@@ -453,7 +453,7 @@ def edit_poll():
     # ----------------------------------------------------------- #
     if password:
         # Need current user
-        user = User().find_user_from_id(current_user.id)
+        user = UserRepository().find_user_from_id(current_user.id)
 
         # Validate against current_user's password
         if not user.validate_password(user, password, user_ip):
@@ -471,7 +471,7 @@ def edit_poll():
     # ----------------------------------------------------------- #
     # Get user
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
     if not user:
         # Should never get here, but...
         app.logger.debug(f"edit_poll(): Failed to find user, id = '{current_user.id}'!")
@@ -624,7 +624,7 @@ def delete_poll():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != poll.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"delete_poll(): Refusing permission for '{current_user.email}' and "
                          f"poll_id = '{poll_id}'.")
@@ -636,7 +636,7 @@ def delete_poll():
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

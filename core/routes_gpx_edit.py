@@ -15,7 +15,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, live_site
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.forms.gpx_forms import create_rename_gpx_form
 from core.database.repositories.event_repository import EventRepository
@@ -90,7 +90,7 @@ def edit_route():
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
     if current_user.email != gpx.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"edit_route(): Refusing permission for '{current_user.email}' and route '{gpx.id}'.")
         EventRepository().log_event("Edit GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
@@ -99,7 +99,7 @@ def edit_route():
     # ----------------------------------------------------------- #
     #   Form to help them rename the route
     # ----------------------------------------------------------- #
-    form = create_rename_gpx_form(current_user.admin())
+    form = create_rename_gpx_form(current_user.admin)
 
     if form.validate_on_submit():
         # ----------------------------------------------------------- #
@@ -112,12 +112,12 @@ def edit_route():
         new_details = form.details.data
 
         # Admin can change ownership
-        if current_user.admin():
+        if current_user.admin:
             # Get new owner
-            new_user = User().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
+            new_user = UserRepository().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
         else:
             # Make sure we have new_user defined if not admin user
-            new_user = User().find_user_from_email(gpx.email)
+            new_user = UserRepository().find_user_from_email(gpx.email)
 
         # Do we need to update anything?
         if new_name != gpx.name \
@@ -164,8 +164,8 @@ def edit_route():
         form.type.data = gpx.type
         form.details.data = gpx.details
         # And existing owner
-        if current_user.admin():
-            user = User().find_user_from_email(gpx.email)
+        if current_user.admin:
+            user = UserRepository().find_user_from_email(gpx.email)
             form.owner.data = f"{user.name} ({user.id})"
 
     # Keep count of Google Map Loads
@@ -228,7 +228,7 @@ def gpx_cut_start():
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
     if current_user.email != gpx.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"gpx_cut_start(): Refusing permission for '{current_user.email}' and route '{gpx_id}'.")
         EventRepository().log_event("GPX Cut Start Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
@@ -307,7 +307,7 @@ def gpx_cut_end():
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
     if current_user.email != gpx.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"gpx_cut_end(): Refusing permission for '{current_user.email}' and route '{gpx_id}'!")
         EventRepository().log_event("GPX Cut End Fail", f"Refusing permission for {current_user.email}, gpx_id = '{gpx_id}'.")
@@ -377,7 +377,7 @@ def publish_route():
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
     if current_user.email != gpx.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"publish_route(): Refusing permission for '{current_user.email}' to and route '{gpx.id}'!")
         EventRepository().log_event("Publish GPX Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
@@ -474,7 +474,7 @@ def hide_route():
     # 1. Must be admin or the current author
     # 2. Must not be barred (NB Admins cannot be barred)
     if current_user.email != gpx.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"hide_route(): Refusing permission for {current_user.email} to "
                          f"and route gpx_id = '{gpx_id}'.")

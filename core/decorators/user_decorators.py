@@ -8,7 +8,7 @@ from functools import wraps
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.event_repository import EventRepository
 
 
@@ -44,10 +44,10 @@ def login_required(f):
 def rw_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Non-logged-in users won't have '.readwrite()' property
+        # Non-logged-in users won't have '.readwrite' property
         if current_user.is_authenticated:
             # Use the readwrite parameter
-            if current_user.readwrite():
+            if current_user.readwrite:
                 # Good to go
                 return f(*args, **kwargs)
 
@@ -71,10 +71,10 @@ def rw_required(f):
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Non logged in users won't have '.admin()' property
+        # Non logged in users won't have '.admin' property
         if current_user.is_authenticated:
             # Use the admin parameter
-            if current_user.admin():
+            if current_user.admin:
                 # Good to go
                 return f(*args, **kwargs)
 
@@ -117,7 +117,7 @@ def update_last_seen(f):
             # They are logged in, so log their activity
             app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}', IP = '{user_ip}', "
                              f"request = {request.method} '{request.path}'")
-            User().log_activity(current_user.id)
+            UserRepository().log_activity(current_user.id)
             return f(*args, **kwargs)
 
     return decorated_function
@@ -134,9 +134,9 @@ def logout_barred_user(f):
             # Not logged in, so no idea who they are
             return f(*args, **kwargs)
         else:
-            user = User().find_user_from_id(current_user.id)
+            user = UserRepository().find_user_from_id(current_user.id)
             if user:
-                if user.blocked():
+                if user.blocked:
                     # Log out the user
                     app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
                     EventRepository().log_event("Blocked User logout", "Logged out user as blocked")
@@ -158,9 +158,9 @@ def must_be_readwrite(f):
             # Not logged in, so no idea who they are
             return abort(403)
         else:
-            user = User().find_user_from_id(current_user.id)
+            user = UserRepository().find_user_from_id(current_user.id)
             if user:
-                if not user.blocked():
+                if not user.blocked:
                     # Log out the user
                     app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
                     EventRepository().log_event("Blocked User logout", "Logged out user as blocked")

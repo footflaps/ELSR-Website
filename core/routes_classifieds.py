@@ -17,7 +17,7 @@ from core import app, current_year, live_site, CLASSIFIEDS_PHOTO_FOLDER
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.classified_repository import ClassifiedRepository, MAX_NUM_PHOTOS, SELL, STATUS_SOLD
 from core.database.repositories.event_repository import EventRepository
 
@@ -247,7 +247,7 @@ def add_sell():
             if not classified:
                 flash("New Classified post has been created!")
                 # Can't use current_user with Threading as it doesn't persist past return, so re-acquire user
-                user = User().find_user_from_id(current_user.id)
+                user = UserRepository().find_user_from_id(current_user.id)
                 Thread(target=alert_admin_via_sms,
                        args=(user, "New Classified post alert, please check it's OK!",)).start()
             else:
@@ -327,7 +327,7 @@ def delete_classified():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != classified.email \
-            and not current_user.admin():
+            and not current_user.admin:
         # Failed authentication
         app.logger.debug(f"delete_classified(): Refusing permission for '{current_user.email}' and "
                          f"classified_id = '{classified_id}.")
@@ -339,7 +339,7 @@ def delete_classified():
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

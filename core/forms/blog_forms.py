@@ -11,7 +11,7 @@ from datetime import datetime
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import GPX_UPLOAD_FOLDER_ABS
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.blog_repository import NO_GPX, NO_CAFE, Sticky, Privacy, Category
@@ -50,10 +50,10 @@ def create_blogs_form(admin: bool):
         # Generate the list of users
         # ----------------------------------------------------------- #
 
-        users = User().all_users_sorted()
+        users = UserRepository().all_users_sorted()
         all_users = []
         for user in users:
-            all_users.append(user.combo_str())
+            all_users.append(user.combo_str)
 
         # ----------------------------------------------------------- #
         # Generate the list of cafes

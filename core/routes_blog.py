@@ -18,7 +18,7 @@ from core import app, current_year, live_site, BLOG_IMAGE_FOLDER
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User, SUPER_ADMIN_USER_ID
+from core.database.repositories.user_repository import UserRepository, SUPER_ADMIN_USER_ID
 from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky,
                                                         NO_CAFE, NO_GPX, Category)
 from core.forms.blog_forms import create_blogs_form
@@ -99,7 +99,7 @@ def display_blog():
                 flash("You must be logged in to see private blog posts!")
                 return redirect(url_for("not_logged_in"))
 
-            elif not current_user.readwrite():
+            elif not current_user.readwrite:
                 # Failed authentication
                 app.logger.debug(f"blog(): Refusing permission for '{current_user.email}'.")
                 EventRepository().log_event("Blog Fail", f"Refusing permission for '{current_user.email}'.")
@@ -193,7 +193,7 @@ def add_blog():
         # Edit event, so pre-fill form from dB
         # ----------------------------------------------------------- #
         # Get a blank form
-        form = create_blogs_form(current_user.admin())
+        form = create_blogs_form(current_user.admin)
 
         # Now fill the form in....
         form.date.data = datetime.fromtimestamp(blog.date_unix)
@@ -215,8 +215,8 @@ def add_blog():
             form.privacy.data = Privacy.PUBLIC.value
 
         # Admin things
-        if current_user.admin():
-            form.owner.data = User().find_user_from_email(blog.email).combo_str()
+        if current_user.admin:
+            form.owner.data = UserRepository().find_user_from_email(blog.email).combo_str
             if blog.sticky:
                 form.sticky.data = Sticky.TRUE.value
             else:
@@ -225,13 +225,13 @@ def add_blog():
         # ----------------------------------------------------------- #
         # Add event, so start with fresh form
         # ----------------------------------------------------------- #
-        form = create_blogs_form(current_user.admin())
+        form = create_blogs_form(current_user.admin)
 
         # Fill in today's date
         if request.method == 'GET':
             form.date.data = date.today()
-            if current_user.admin():
-                form.owner.data = User().find_user_from_id(current_user.id).combo_str()
+            if current_user.admin:
+                form.owner.data = UserRepository().find_user_from_id(current_user.id).combo_str
 
     # Are we posting the completed comment form?
     if request.method == 'POST' \
@@ -288,8 +288,8 @@ def add_blog():
         new_blog.private = form.privacy.data == Privacy.PRIVATE.value
 
         # 3. Admin fields
-        if current_user.admin():
-            new_blog.email = User().user_from_combo_string(form.owner.data).email
+        if current_user.admin:
+            new_blog.email = UserRepository().user_from_combo_string(form.owner.data).email
             new_blog.sticky = form.sticky.data == Sticky.TRUE.value
         else:
             new_blog.sticky = False
@@ -328,7 +328,7 @@ def add_blog():
             flash("Blog updated!")
         else:
             flash("New Blog created!")
-            user = User().find_user_from_id(current_user.id)
+            user = UserRepository().find_user_from_id(current_user.id)
             Thread(target=send_blog_notification_emails, args=(new_blog,)).start()
             # Suppress SMS alerts for me as I post 95% of blogs and I'm just wasting my own money alerting myself!
             if current_user.id != SUPER_ADMIN_USER_ID:
@@ -422,8 +422,8 @@ def delete_blog():
     # ----------------------------------------------------------- #
     # Must be admin or the current author
     if current_user.email != blog.email \
-            and not current_user.admin() or \
-            not current_user.readwrite():
+            and not current_user.admin or \
+            not current_user.readwrite:
         # Failed authentication
         app.logger.debug(f"delete_blog(): Refusing permission for '{current_user.email}' and "
                          f"blog_id = '{blog_id}'.")
@@ -444,7 +444,7 @@ def delete_blog():
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

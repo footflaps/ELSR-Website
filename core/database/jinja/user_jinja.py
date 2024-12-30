@@ -1,5 +1,5 @@
 from core import app
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -7,11 +7,11 @@ from core.database.repositories.user_repository import User
 # -------------------------------------------------------------------------------------------------------------- #
 
 def get_user_name(user_email):
-    return User().display_name(user_email)
+    return UserRepository().display_name(user_email)
 
 
 def get_user_id_from_email(user_email):
-    return User().find_id_from_email(user_email)
+    return UserRepository().find_id_from_email(user_email)
 
 
 # Add these to jinja's environment, so we can use it within html templates

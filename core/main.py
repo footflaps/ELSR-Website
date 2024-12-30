@@ -59,7 +59,7 @@ from core.decorators.user_decorators import update_last_seen
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.forms.user_forms import ClothingSizesForm
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
@@ -348,7 +348,7 @@ def gdpr():
     # ----------------------------------------------------------- #
     # List of all admins
     # ----------------------------------------------------------- #
-    admins = User().all_admins()
+    admins = UserRepository().all_admins()
 
     return render_template("main_gdpr.html", year=current_year, admins=admins, live_site=live_site())
 
@@ -434,7 +434,7 @@ def club_kit():
     form = ClothingSizesForm()
 
     if current_user.is_authenticated:
-        user = User().find_user_from_id(current_user.id)
+        user = UserRepository().find_user_from_id(current_user.id)
         if not user:
             app.logger.debug(f"club_kit(): Failed to find user, if = '{current_user.id}'!")
             EventRepository().log_event("club_kit Fail", f"Failed to find user, if = '{current_user.id}'!")
@@ -478,7 +478,7 @@ def club_kit():
             user_id = user.id
 
             # Save to user
-            if User().update_user(user):
+            if UserRepository().update_user(user):
                 app.logger.debug(f"club_kit(): Updated user, user_id = '{user_id}'.")
                 EventRepository().log_event("club_kit Success", f"Updated user, user_id = '{user_id}'.")
                 flash("Your sizes have been updated!")

@@ -14,7 +14,7 @@ from core import app
 # Import our Event class
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.event_repository import EventRepository
 
 from core.decorators.user_decorators import admin_only, update_last_seen, login_required
@@ -146,7 +146,7 @@ def delete_events():
     # Validate user_id (unless it's admin) & Confirm
     # ----------------------------------------------------------- #
     if user_id != "admin":
-        user = User().find_user_from_id(user_id)
+        user = UserRepository().find_user_from_id(user_id)
         if not user:
             app.logger.debug(f"delete_events(): Invalid user_id = '{user_id}'.")
             EventRepository().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'.")
@@ -246,7 +246,7 @@ def delete_404s():
     # ----------------------------------------------------------- #
     # Validate user_id and confirm
     # ----------------------------------------------------------- #
-    if not current_user.admin():
+    if not current_user.admin:
         app.logger.debug(f"delete_404s(): Invalid user_id = '{current_user.id}'.")
         EventRepository().log_event("Delete 404s Fail", f"Invalid user_id = '{current_user.id}'.")
         return abort(403)

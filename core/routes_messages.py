@@ -15,7 +15,7 @@ from core import app
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
@@ -70,7 +70,7 @@ def mark_read():
     # 1. Any admin can read an email to Admin (as we have multiple Admins, each with a different email address)
     # 2. Message must have been sent to the current user
     if (message.to_email == ADMIN_EMAIL
-        and not current_user.admin()) and \
+        and not current_user.admin) and \
             message.to_email != current_user.email:
         app.logger.debug(f"mark_read(): Prevented attempt by '{current_user.email}' to mark as "
                          f"read message id = '{message_id}'.")
@@ -141,7 +141,7 @@ def mark_unread():
     # 1. Any admin can read an email to Admin (as we have multiple Admins, each with a different email address)
     # 2. Message must have been sent to the current user
     if (message.to_email == ADMIN_EMAIL
-        and not current_user.admin()) and \
+        and not current_user.admin) and \
             message.to_email != current_user.email:
         app.logger.debug(f"mark_unread(): Prevented attempt by '{current_user.email}' to mark "
                          f"as unread message id = '{message_id}'.")
@@ -213,7 +213,7 @@ def delete_message():
     # 1. Any admin can read an email to Admin (as we have multiple Admins, each with a different email address)
     # 2. Message must have been sent to the current user
     if (message.to_email == ADMIN_EMAIL
-        and not current_user.admin()) and \
+        and not current_user.admin) and \
             message.to_email != current_user.email:
         app.logger.debug(f"delete_message(): Prevented attempt by '{current_user.email}' to delete "
                          f"message_id = '{message_id}'.")
@@ -299,7 +299,7 @@ def reply_message():
     # 1. Any admin can read an email to Admin (as we have multiple Admins, each with a different email address)
     # 2. Message must have been sent to the current user
     if (message.to_email == ADMIN_EMAIL
-        and not current_user.admin()) and \
+        and not current_user.admin) and \
             message.to_email != current_user.email:
         app.logger.debug(f"reply_message(): Prevented attempt by '{current_user.email}' to "
                          f"reply to message id = '{message_id}'.")
@@ -336,7 +336,7 @@ def reply_message():
     # ----------------------------------------------------------- #
     if message.from_email == ADMIN_EMAIL:
         # Threading won't have access to current_user, so need to acquire persistent user to pass on
-        user = User().find_user_from_id(current_user.id)
+        user = UserRepository().find_user_from_id(current_user.id)
         Thread(target=alert_admin_via_sms, args=(user, f"Reply Message: {body}",)).start()
 
     # ----------------------------------------------------------- #
@@ -386,7 +386,7 @@ def message_admin():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
 
     # Check id is valid
     if not user:
@@ -471,7 +471,7 @@ def message_user():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
 
     # Check id is valid
     if not user:

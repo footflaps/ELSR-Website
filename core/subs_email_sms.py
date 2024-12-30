@@ -13,7 +13,8 @@ import json
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, live_site
+from core import (app, live_site, gmail_admin_acc_email, gmail_admin_acc_password, brf_personal_email,
+                  twilio_account_sid, twilio_auth_token, twilio_mobile_number)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -21,8 +22,8 @@ from core import app, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.user_repository import User, UNVERIFIED_PHONE_PREFIX, MESSAGE_NOTIFICATION, GROUP_NOTIFICATIONS, \
-                          SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, SUPER_ADMIN_USER_ID
+from core.database.models.user_model import MESSAGE_NOTIFICATION, GROUP_NOTIFICATIONS, SOCIAL_NOTIFICATION, BLOG_NOTIFICATION
+from core.database.repositories.user_repository import UserRepository, UNVERIFIED_PHONE_PREFIX, SUPER_ADMIN_USER_ID
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES
 from core.database.repositories.social_repository import SocialRepository
@@ -36,15 +37,6 @@ from core.database.jinja.user_jinja import get_user_name
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
-
-gmail_admin_acc_email = os.environ['ELSR_ADMIN_EMAIL']
-gmail_admin_acc_password = os.environ['ELSR_ADMIN_EMAIL_PASSWORD']
-brf_personal_email = os.environ['ELSR_CONTACT_EMAIL']
-
-# Twilio
-twilio_account_sid = os.environ['ELSR_TWILIO_SID']
-twilio_auth_token = os.environ['ELSR_TWILIO_TOKEN']
-twilio_mobile_number = os.environ['ELSR_TWILIO_NUMBER']
 
 VERIFICATION_BODY = "Dear [USER], \n\n" \
                     "This is a verification email from www.elsr.co.uk. \n\n" \
@@ -173,18 +165,18 @@ def send_blog_notification_emails(blog: Blog()):
     # ----------------------------------------------------------- #
     # Scan all users
     # ----------------------------------------------------------- #
-    for user in User().all_users():
+    for user in UserRepository().all_users():
         if user.notification_choice(BLOG_NOTIFICATION):
             # Users without write permissions can't see private blog posts
             if blog.private == Privacy.PUBLIC \
-                    or user.readwrite():
+                    or user.readwrite:
                 # ----------------------------------------------------------- #
                 # Send email
                 # ----------------------------------------------------------- #
                 send_one_blog_notification_email(user, blog)
 
 
-def send_one_blog_notification_email(user: User(), blog: Blog()):
+def send_one_blog_notification_email(user: UserRepository(), blog: Blog()):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -211,7 +203,7 @@ def send_one_blog_notification_email(user: User(), blog: Blog()):
     blogs_link = f"https://www.elsr.co.uk/blog"
     this_link = f"https://www.elsr.co.uk/blog?blog_id={blog.id}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code}"
 
     # ----------------------------------------------------------- #
     # Don't message from test site
@@ -274,7 +266,7 @@ def send_social_notification_emails(social: SocialRepository()):
     # ----------------------------------------------------------- #
     # Scan all users
     # ----------------------------------------------------------- #
-    for user in User().all_users():
+    for user in UserRepository().all_users():
         if user.notification_choice(SOCIAL_NOTIFICATION):
             # ----------------------------------------------------------- #
             # Send email
@@ -282,7 +274,7 @@ def send_social_notification_emails(social: SocialRepository()):
             send_one_social_notification_email(user, social)
 
 
-def send_one_social_notification_email(user: User(), social: SocialRepository()):
+def send_one_social_notification_email(user: UserRepository(), social: SocialRepository()):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -309,7 +301,7 @@ def send_one_social_notification_email(user: User(), social: SocialRepository())
     cal_link = f"https://www.elsr.co.uk/calendar?date={date}"
     social_link = f"https://www.elsr.co.uk/social?date={date}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code}"
 
     # ----------------------------------------------------------- #
     # Don't message from test site
@@ -412,7 +404,7 @@ def send_ride_notification_emails(ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Scan all users
     # ----------------------------------------------------------- #
-    for user in User().all_users():
+    for user in UserRepository().all_users():
         # Match group, slightly complex as we use different strings in the ride object and the user object
         # GROUP_CHOICES is the set used by Calendar() (of which ride in an instantiation)
         # GROUP_NOTIFICATIONS is the set used by User()
@@ -427,7 +419,7 @@ def send_ride_notification_emails(ride: CalendarRepository()):
                 send_one_ride_notification_email(user, ride)
 
 
-def send_one_ride_notification_email(user: User(), ride: CalendarRepository()):
+def send_one_ride_notification_email(user: UserRepository(), ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -490,7 +482,7 @@ def send_one_ride_notification_email(user: User(), ride: CalendarRepository()):
     dl_link = f"https://www.elsr.co.uk//gpx_download2?email={user.email}&gpx_id={ride.gpx_id}&" \
               f"code={user.gpx_download_code(ride.gpx_id)}"
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code}"
 
     # ----------------------------------------------------------- #
     # Don't message from test site
@@ -553,7 +545,7 @@ def send_one_ride_notification_email(user: User(), ride: CalendarRepository()):
 # Send email notification for message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_message_notification_email(message: MessageRepository(), user: User()):
+def send_message_notification_email(message: MessageRepository(), user: UserRepository()):
     # ----------------------------------------------------------- #
     # Make sure user and message exist
     # ----------------------------------------------------------- #
@@ -595,7 +587,7 @@ def send_message_notification_email(message: MessageRepository(), user: User()):
     # Create hyperlinks
     # ----------------------------------------------------------- #
     user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code()}"
+    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code}"
 
     # ----------------------------------------------------------- #
     # Don't message from test site
@@ -652,7 +644,7 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
     # ----------------------------------------------------------- #
     # Find user
     # ----------------------------------------------------------- #
-    user = User().find_user_from_email(classified.email)
+    user = UserRepository().find_user_from_email(classified.email)
     if not user:
         app.logger.debug(f"send_message_to_seller(): Can't locate user from email = '{classified.email}'.")
         EventRepository().log_event("send_message_to_seller() Fail", f"Can't locate user from email = '{classified.email}'.")
@@ -960,14 +952,14 @@ def send_sms(user, body):
 # -------------------------------------------------------------------------------------------------------------- #
 # Alert Admin
 # -------------------------------------------------------------------------------------------------------------- #
-def alert_admin_via_sms(from_user: User, message: str):
+def alert_admin_via_sms(from_user: UserRepository, message: str):
     # ----------------------------------------------------------- #
     #   Loop over all Admins
     # ----------------------------------------------------------- #
-    admins = User().all_admins()
+    admins = UserRepository().all_admins()
     for admin in admins:
         # All admins should have a valid phone number...
-        if admin.has_valid_phone_number():
+        if admin.has_valid_phone_number:
             # ----------------------------------------------------------- #
             #   Send SMS
             # ----------------------------------------------------------- #
@@ -994,7 +986,7 @@ def get_twilio_balance():
 # -------------------------------------------------------------------------------------------------------------- #
 def email_ride_alert_summary():
     # Get all users
-    users = User().all_users_sorted()
+    users = UserRepository().all_users_sorted()
     # Scan by ride types
     results = {}
     one_words = GROUP_CHOICES + ["Socials", "Blogs", "Messages"]

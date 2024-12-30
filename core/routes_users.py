@@ -27,7 +27,7 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User, DELETED_NAME, NOTIFICATIONS_DEFAULT_VALUE
+from core.database.repositories.user_repository import UserRepository, DELETED_NAME, NOTIFICATIONS_DEFAULT_VALUE
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
@@ -49,10 +49,6 @@ from core.subs_google_maps import MAP_BOUNDS, google_maps_api_key, count_map_loa
 # -------------------------------------------------------------------------------------------------------------- #
 
 DEFAULT_EVENT_DAYS = 7
-
-# This is the admin email address
-admin_email_address = os.environ['ELSR_ADMIN_EMAIL']
-admin_phone_number = os.environ['ELSR_TWILIO_NUMBER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -188,7 +184,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"user_page(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("User Page Fail", f"Invalid user_id = '{user_id}'.")
@@ -202,7 +198,7 @@ def user_page():
     #  2. A user can see their page
     #  3. Deleted users pages are denied
     if int(current_user.id) != int(user_id) and \
-            not current_user.admin() or \
+            not current_user.admin or \
             user.name == DELETED_NAME:
         app.logger.debug(f"user_page(): Rejected request from current_user.id = '{current_user.id}', "
                          f"for user_id = '{user_id}'.")
@@ -249,7 +245,7 @@ def user_page():
         if message.from_email == ADMIN_EMAIL:
             message.from_name = "Admin team"
         else:
-            message.from_name = User().find_user_from_email(message.from_email).name
+            message.from_name = UserRepository().find_user_from_email(message.from_email).name
         if not message.been_read:
             count += 1
 
@@ -277,7 +273,7 @@ def user_page():
     # ----------------------------------------------------------- #
     # Gather data: 9. Notification preferences
     # ----------------------------------------------------------- #
-    notifications = user.notification_choices_set()
+    notifications = user.notification_choices_set
 
     # ----------------------------------------------------------- #
     # Gather data: 10. Blog posts
@@ -323,7 +319,7 @@ def user_page():
         # Did they change their username?
         if new_name != user.name:
             # Needs to be unique
-            if User().check_name_in_use(new_name):
+            if UserRepository().check_name_in_use(new_name):
                 # Not unique
                 flash(f"Sorry, the name '{new_name}' is already in use!")
                 app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")
@@ -351,7 +347,7 @@ def user_page():
 
         # Update user object
         if made_change:
-            if User().update_user(user):
+            if UserRepository().update_user(user):
                 app.logger.debug(f"user_page(): Updated user, user_id = '{user_id}'.")
                 EventRepository().log_event("User Page Success", f"Updated user, user_id = '{user_id}'.")
                 flash("User has been updated!")
@@ -435,7 +431,7 @@ def delete_user():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"delete_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
@@ -445,7 +441,7 @@ def delete_user():
     # Restrict access
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
-            not current_user.admin():
+            not current_user.admin:
         app.logger.debug(f"delete_user(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         EventRepository().log_event("Delete User Fail", f"User isn't allowed "
@@ -473,7 +469,7 @@ def delete_user():
     # ----------------------------------------------------------- #
     # Delete the user
     # ----------------------------------------------------------- #
-    if User().delete_user(user_id):
+    if UserRepository().delete_user(user_id):
         app.logger.debug(f"delete_user(): Success, user '{user.email}' deleted.")
         EventRepository().log_event("Delete User Success", f"User '{user.email}' deleted.")
         flash(f"User '{user.name}' successfully deleted.")
@@ -540,7 +536,7 @@ def set_notifications():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = User().find_user_from_id(user_id)
+    user = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"set_notifications(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Set Notifications Fail", f"Invalid user user_id = '{user_id}'!")
@@ -550,7 +546,7 @@ def set_notifications():
     # Restrict access
     # ----------------------------------------------------------- #
     if int(current_user.id) != int(user_id) and \
-            not current_user.admin():
+            not current_user.admin:
         app.logger.debug(f"set_notifications(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         EventRepository().log_event("Set Notifications Fail", f"User isn't allowed "
@@ -560,7 +556,7 @@ def set_notifications():
     # ----------------------------------------------------------- #
     # Update notification preferences
     # ----------------------------------------------------------- #
-    if User().set_notifications(user_id, choices):
+    if UserRepository().set_notifications(user_id, choices):
         app.logger.debug(f"set_notifications(): Success, user '{user.email}' has set notifications = '{choices}'.")
         EventRepository().log_event("Set Notifications Success", f"User '{user.email}' has set notifications = '{choices}'.")
         flash("Notifications have been updated!")
@@ -603,12 +599,12 @@ def unsubscribe_all():
     # ----------------------------------------------------------- #
     # Validate parameters
     # ----------------------------------------------------------- #
-    user = User().find_user_from_email(email)
+    user = UserRepository().find_user_from_email(email)
     if not user:
         app.logger.debug(f"unsubscribe_all(): Invalid email = '{email}'!")
         EventRepository().log_event("unsubscribe_all Fail", f"Invalid email = '{email}'!")
         abort(404)
-    if code != user.unsubscribe_code():
+    if code != user.unsubscribe_code:
         app.logger.debug(f"unsubscribe_all(): Invalid code = '{code}' for user '{user.email}'!")
         EventRepository().log_event("unsubscribe_all Fail", f"Invalid code = '{code}' for user '{user.email}'!")
         abort(404)
@@ -620,7 +616,7 @@ def unsubscribe_all():
     flash("You must delete any classifieds to prevent emails from buyers.")
     app.logger.debug(f"unsubscribe_all(): Successfully unsubscribed user '{user.email}'!")
     EventRepository().log_event("unsubscribe_all Fail", f"Successfully unsubscribed user '{user.email}'!")
-    User().set_notifications(user.id, NOTIFICATIONS_DEFAULT_VALUE)
+    UserRepository().set_notifications(user.id, NOTIFICATIONS_DEFAULT_VALUE)
 
     # ----------------------------------------------------------- #
     # Return page
@@ -649,7 +645,7 @@ def who_are_we():
     # ----------------------------------------------------------- #
     # Need a list of users
     # ----------------------------------------------------------- #
-    users = User().all_users_sorted()
+    users = UserRepository().all_users_sorted()
 
     # ----------------------------------------------------------- #
     # Need a list of letters
@@ -677,7 +673,7 @@ def emergency():
     # ----------------------------------------------------------- #
     # Validate user
     # ----------------------------------------------------------- #
-    if not current_user.can_see_emergency_contacts():
+    if not current_user.can_see_emergency_contacts:
         # Naughty boy
         app.logger.debug(f"emergency(): Non Admin access, user_id = '{current_user.id}'!")
         EventRepository().log_event("Admin Page Fail", f"on emergency access, user_id = '{current_user.id}'!")
@@ -686,7 +682,7 @@ def emergency():
     # ----------------------------------------------------------- #
     # Need a list of users
     # ----------------------------------------------------------- #
-    users = User().all_users_sorted()
+    users = UserRepository().all_users_sorted()
 
     # ----------------------------------------------------------- #
     # Need a list of letters

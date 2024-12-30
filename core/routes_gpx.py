@@ -16,7 +16,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
@@ -89,7 +89,7 @@ def gpx_list():
     # Need different path for Admin
     if not current_user.is_authenticated:
         admin = False
-    elif current_user.admin():
+    elif current_user.admin:
         admin = True
     else:
         admin = False
@@ -153,7 +153,7 @@ def gpx_details(gpx_id):
 
     elif not gpx.public and \
             current_user.email != gpx.email and \
-            not current_user.admin():
+            not current_user.admin:
         app.logger.debug(f"gpx_details(): Refusing permission for user '{current_user.email}' to see "
                          f"hidden GPX route '{gpx.id}'!")
         EventRepository().log_event("One GPX Fail", f"Refusing permission for user {current_user.email} to see "
@@ -163,7 +163,7 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     # Get info for webpage
     # ----------------------------------------------------------- #
-    author = User().find_user_from_email(gpx.email).name
+    author = UserRepository().find_user_from_email(gpx.email).name
     cafe_list = CafeRepository().cafe_list(gpx.cafes_passed)
 
     # ----------------------------------------------------------- #
@@ -180,7 +180,7 @@ def gpx_details(gpx_id):
         # Need different path for Admin
         if not current_user.is_authenticated:
             admin = False
-        elif current_user.admin():
+        elif current_user.admin:
             admin = True
         else:
             admin = False
@@ -454,7 +454,7 @@ def route_delete():
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
     if current_user.email != gpx.email \
-            and not current_user.admin():
+            and not current_user.admin:
         app.logger.debug(f"route_delete(): Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         EventRepository().log_event("GPX Delete Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         return abort(403)
@@ -463,7 +463,7 @@ def route_delete():
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
@@ -572,7 +572,7 @@ def flag_gpx():
     # Alert admin via SMS
     # ----------------------------------------------------------- #
     # Threading won't have access to current_user, so need to acquire persistent user to pass on
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
     Thread(target=alert_admin_via_sms, args=(user, f"GPX '{gpx.name}', Reason: '{reason}'",)).start()
 
     # Back to GPX details page
@@ -687,7 +687,7 @@ def gpx_download2():
         flash("Sorry, we couldn't find that GPX file in the database!")
         return abort(404)
 
-    user = User().find_user_from_email(email)
+    user = UserRepository().find_user_from_email(email)
     if not user:
         app.logger.debug(f"gpx_download2(): Failed to locate user email = '{email}'.")
         EventRepository().log_event("gpx_download2 Fail", f"Failed to locate user email = '{email}'.")
@@ -697,7 +697,7 @@ def gpx_download2():
     # ----------------------------------------------------------- #
     # Check user isn't banned
     # ----------------------------------------------------------- #
-    if user.blocked():
+    if user.blocked:
         app.logger.debug(f"gpx_download2(): User account blocked, email = '{email}'.")
         EventRepository().log_event("gpx_download2 Fail", f" User account blocked, email = '{email}'.")
         flash("Sorry, but your account has been locked!")

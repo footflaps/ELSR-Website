@@ -84,7 +84,7 @@
 											<!-- Not logged in -->
 											{{ poll.name }}
 											<i class="fa-solid fa-user-lock"></i>
-										{% elif not current_user.readwrite() %}
+										{% elif not current_user.readwrite %}
 											<!-- unTrusted user -->
 											{{ poll.name }}
 											<i class="fa-solid fa-user-lock"></i>
@@ -131,7 +131,7 @@
 <!---------------------------------------------------------------------------------------------------->
 
 {% if current_user.is_authenticated: %}
-	{% if current_user.readwrite(): %}
+	{% if current_user.readwrite: %}
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">

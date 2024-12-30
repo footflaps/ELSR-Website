@@ -9,7 +9,7 @@ from wtforms.validators import DataRequired, Length, InputRequired
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.gpx_repository import TYPES
 
 
@@ -44,7 +44,7 @@ def create_rename_gpx_form(admin: bool):
     # ----------------------------------------------------------- #
     # Generate the list of users
     # ----------------------------------------------------------- #
-    users = User().all_users_sorted()
+    users = UserRepository().all_users_sorted()
     all_users = []
     for user in users:
         all_users.append(f"{user.name} ({user.id})")

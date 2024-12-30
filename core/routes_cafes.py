@@ -19,7 +19,7 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.forms.cafe_forms import CreateCafeForm
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
@@ -225,7 +225,7 @@ def cafe_details(cafe_id):
         # ----------------------------------------------------------- #
 
         # Who is trying to post
-        user = User().find_user_from_id(current_user.id)
+        user = UserRepository().find_user_from_id(current_user.id)
         if not user:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): Couldn't locate user, current_user.id = '{current_user.id}'.")
@@ -236,7 +236,7 @@ def cafe_details(cafe_id):
         # ----------------------------------------------------------- #
         # Permission check for POST
         # ----------------------------------------------------------- #
-        if not user.readwrite():
+        if not user.readwrite:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): User doesn't have write permissions user.id = '{user.id}'.")
             EventRepository().log_event("Cafe Comment Fail", f"User doesn't have write permissions user.id = '{user.id}'.")
@@ -488,7 +488,7 @@ def edit_cafe():
     # ----------------------------------------------------------- #
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
-    if not current_user.admin() and \
+    if not current_user.admin and \
             current_user.email != cafe.added_email:
         # Failed authentication
         app.logger.debug(f"edit_cafe(): Rejected request for '{current_user.email}' as no permissions for "
@@ -661,7 +661,7 @@ def close_cafe():
     # ----------------------------------------------------------- #
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
-    if not current_user.admin() and \
+    if not current_user.admin and \
             current_user.email != cafe.added_email:
         # Failed authentication
         app.logger.debug(f"close_cafe(): Rejected request from '{current_user.email}' as no permissions"
@@ -724,7 +724,7 @@ def unclose_cafe():
     # ----------------------------------------------------------- #
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
-    if not current_user.admin() \
+    if not current_user.admin \
             and current_user.email != cafe.added_email:
         # Failed authentication
         app.logger.debug(f"unclose_cafe(): Rejected request from '{current_user.email}' as no permissions"
@@ -822,7 +822,7 @@ def flag_cafe():
     # Alert admin via SMS
     # ----------------------------------------------------------- #
     # Threading won't have access to current_user, so need to acquire persistent user to pass on
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
     Thread(target=alert_admin_via_sms, args=(user, f"Cafe '{cafe.name}', Reason: '{reason}'",)).start()
 
     # Back to cafe details page
@@ -895,7 +895,7 @@ def delete_comment():
     # ----------------------------------------------------------- #
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
-    if not current_user.admin() \
+    if not current_user.admin \
             and current_user.email != comment.email:
         # Failed authentication
         app.logger.debug(f"delete_comment(): Rejected request from '{current_user.email}' as no permissions"
@@ -908,7 +908,7 @@ def delete_comment():
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
@@ -991,7 +991,7 @@ def delete_cafe():
     # ----------------------------------------------------------- #
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
-    if not current_user.admin() \
+    if not current_user.admin \
             and current_user.email != cafe.added_email:
         # Failed authentication
         app.logger.debug(f"delete_cafe(): Rejected request from '{current_user.email}' as no permissions"
@@ -1004,7 +1004,7 @@ def delete_cafe():
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = User().find_user_from_id(current_user.id)
+    user = UserRepository().find_user_from_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

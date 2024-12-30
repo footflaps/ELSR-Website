@@ -5,8 +5,6 @@ from flask_ckeditor import CKEditor
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
 from itsdangerous.url_safe import URLSafeTimedSerializer
-from sqlalchemy import event
-from sqlalchemy.pool import Pool
 import os
 import sys
 import logging
@@ -14,7 +12,6 @@ from datetime import date
 from time import sleep
 import sentry_sdk
 from sentry_sdk.integrations.flask import FlaskIntegration
-import psycopg2
 
 # We have our own hacked Gravatar module
 from core.gravatar_hack import Gravatar
@@ -74,10 +71,22 @@ GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 # -------------------------------------------------------------------------------------------------------------- #
 # Env Vars
 # -------------------------------------------------------------------------------------------------------------- #
+
 CONFIG_FOLDER = os.environ['ELSR_CONFIG_FOLDER']
 CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
 CLASSIFIEDS_PHOTO_FOLDER = os.environ['ELSR_CLASSIFIEDS_PHOTO_FOLDER']
 BLOG_IMAGE_FOLDER = os.environ.get('ELSR_BLOG_PHOTO_FOLDER', '/img/blog_photos/')
+PROTECTED_USERS = os.environ['ELSR_PROTECTED_USERS']
+ICS_DIRECTORY = os.environ['ELSR_ICS_DIRECTORY']
+admin_email_address = os.environ['ELSR_ADMIN_EMAIL']
+admin_phone_number = os.environ['ELSR_TWILIO_NUMBER']
+NEW_GOOGLE_MAPS_API_KEY = os.environ['ELSR_GOOGLE_MAPS_API_KEY']
+gmail_admin_acc_email = os.environ['ELSR_ADMIN_EMAIL']
+gmail_admin_acc_password = os.environ['ELSR_ADMIN_EMAIL_PASSWORD']
+brf_personal_email = os.environ['ELSR_CONTACT_EMAIL']
+twilio_account_sid = os.environ['ELSR_TWILIO_SID']
+twilio_auth_token = os.environ['ELSR_TWILIO_TOKEN']
+twilio_mobile_number = os.environ['ELSR_TWILIO_NUMBER']
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -137,7 +146,6 @@ app.config['MAX_CONTENT_LENGTH'] = 15 * 1000 * 1000
 
 app.logger.setLevel(logging.DEBUG)
 
-
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
@@ -149,30 +157,6 @@ app.logger.debug('*                         Logging is working!                 
 app.logger.debug('***********************************************************************')
 app.logger.debug('***********************************************************************')
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Connect to the different SQLite databases
-# -------------------------------------------------------------------------------------------------------------- #
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///cafes.db'
-# app.config['SQLALCHEMY_BINDS'] = {'users': 'sqlite:///users.db',
-#                                   'cafe_comments': 'sqlite:///cafe_comments.db',
-#                                   'gpx': 'sqlite:///gpx.db',
-#                                   'messages': 'sqlite:///messages.db',
-#                                   'events': 'sqlite:///events.db',
-#                                   'calendar': 'sqlite:///calendar.db',
-#                                   'socials': 'sqlite:///socials.db',
-#                                   'blog': 'sqlite:///blog.db',
-#                                   'classifieds': 'sqlite:///classifieds.db',
-#                                   'polls': 'sqlite:///polls.db'}
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Connect to the single SQLite database
-# -------------------------------------------------------------------------------------------------------------- #
-
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///elsr_db.db'
-# db = SQLAlchemy(app)
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Connect to the PostgreSQL database

@@ -2,7 +2,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import time
 from datetime import date, datetime
 import random
-import os
 import hashlib
 from sqlalchemy import func
 import json
@@ -12,26 +11,11 @@ import json
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import db, app, login_manager, GROUP_NOTIFICATIONS
-from core.database.models.user_model import UserModel
+from core import db, app, login_manager, PROTECTED_USERS
+from core.database.models.user_model import (UserModel, MASK_ADMIN, MASK_VERIFIED, MASK_BLOCKED, MASK_READWRITE, 
+                                             UNVERIFIED_PHONE_PREFIX, NOTIFICATIONS_DEFAULT_VALUE, NOTIFICATIONS)
 from core.database.repositories.message_repository import MessageRepository
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Constants
-# -------------------------------------------------------------------------------------------------------------- #
-
-# User().permissions is an Integer value with binary breakdown:
-#       1 :     Admin                   1 = Admin,          0 = Normal user
-#       2 :     Verified                1 = Verified,       0 = Unverified
-#       4 :     Blocked                 1 = Active,         0 = Blocked by Admin
-#       8 :     Read/Write              1 = Read+Write,     0 = Read only
-
-# Use these masks on the Integer to extract permissions
-MASK_ADMIN = 1
-MASK_VERIFIED = 2
-MASK_BLOCKED = 4
-MASK_READWRITE = 8
 
 # Default User Permissions on verification
 DEFAULT_PERMISSIONS_VALUE = 0
@@ -43,44 +27,14 @@ RESET_TIMEOUT_SECS = 60 * 60 * 24
 # 15 min time out for SMS
 SMS_VERIFICATION_TIMEOUT_SECS = 60 * 15
 
-# Protected users (can't be deleted)
-PROTECTED_USERS = os.environ['ELSR_PROTECTED_USERS']
-
 # This is the only user who can do things like make / unmake Admins (to stop another Admin locking me out)
 SUPER_ADMIN_USER_ID = 1
 
 # Num digits for Verification / Password Reset Codes
 NUM_DIGITS_CODES = 6
 
-# We prefix unverified phone numbers with this code
-UNVERIFIED_PHONE_PREFIX = "uv"
-
 # For soft deleting users, we change their name to
 DELETED_NAME = "DELETED"
-
-# Notifications
-NOTIFICATIONS_DEFAULT_VALUE = 0
-MESSAGE_NOTIFICATION = "When I receive a message"
-SOCIAL_NOTIFICATION = "When someone posts a social"
-BLOG_NOTIFICATION = "When someone posts a blog entry"
-
-
-NOTIFICATIONS = [
-        {"name": MESSAGE_NOTIFICATION,
-         "mask": 2},
-        {"name": GROUP_NOTIFICATIONS[2],
-         "mask": 4},
-        {"name": GROUP_NOTIFICATIONS[1],
-         "mask": 8},
-        {"name": GROUP_NOTIFICATIONS[0],
-         "mask": 16},
-        {"name": GROUP_NOTIFICATIONS[3],
-         "mask": 32},
-        {"name": SOCIAL_NOTIFICATION,
-         "mask": 64},
-        {"name": BLOG_NOTIFICATION,
-         "mask": 128},
-]
 
 # Sizes for club kit
 SIZES = ["unset", "XS", "S", "M", "L", "XL", "2XL", "3XL", "4XL"]
@@ -100,7 +54,7 @@ def load_user(user_id):
     # Only log user details on the webserver
     # if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
     #     app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
-    return User.query.get(int(user_id))
+    return UserRepository.query.get(int(user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -111,7 +65,7 @@ def load_user(user_id):
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class User(UserModel):
+class UserRepository(UserModel):
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Create
@@ -157,210 +111,62 @@ class User(UserModel):
                 app.logger.error(f"dB.update_user(): Failed to update user '{user.id}', error code was '{e.args}'.")
                 return False
 
-    # ---------------------------------------------------------------------------------------------------------- #
-    # Delete
-    # ---------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def delete_user(user_id: int) -> bool:
+    def block_user(user_id):
         with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
+            # For some reason we need to re-acquire the user within this context
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
 
-            # You can't delete Admins
-            if user.admin():
-                app.logger.debug(f"dB.delete_user: Rejected attempt to delete admin '{user.email}'.")
+            # You can't block Admins
+            if user.admin:
+                app.logger.debug(f"dB.block_user(): Rejected attempt to block admin '{user.email}'.")
                 return False
 
             # Extra protection in case someone finds a way around route protection
             if user.email in PROTECTED_USERS:
-                app.logger.debug(f"dB.delete_user: Rejected attempt to delete protected user '{user.email}'.")
+                app.logger.debug(f"dB.block_user(): Rejected attempt to block protected user '{user.email}'.")
                 return False
 
             if user:
                 try:
-                    # We no longer delete users, we invalidate them. This is because even though we have
-                    # auto-incrementing IDs, if the last entry is deleted, the next user to register gets the next ID,
-                    # which may have valid cookies stored from the previous owner!
-                    user.admin_notes = f"User '{user.name}' ({user.email}) deleted " \
-                                       f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
-                    user.password = None
-                    user.email = f"{DELETED_NAME}_{user.id}"
-                    user.name = DELETED_NAME
-                    user.permissions = 0
+                    user.permissions = user.permissions | MASK_BLOCKED
                     db.session.commit()
                     return True
-        
                 except Exception as e:
                     db.rollback()
-                    app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                    app.logger.error(f"dB.block_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                    return False
+            else:
+                app.logger.error(f"dB.block_user(): Called with invalid user_id = '{user_id}'.")
+
+        return False
+
+    @staticmethod
+    def unblock_user(user_id):
+        with app.app_context():
+            # For some reason we need to re-acquire the user within this context
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
+            if user:
+                try:
+                    if user.permissions & MASK_BLOCKED > 0:
+                        user.permissions = user.permissions - MASK_BLOCKED
+                        db.session.commit()
+                    return True
+
+                except Exception as e:
+                    db.rollback()
+                    app.logger.error(f"dB.unblock_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
 
             else:
-                app.logger.error(f"dB.delete_user(): Called with invalid user_id = '{user_id}'.")
-        
+                app.logger.error(f"dB.unblock_user(): Called with invalid user_id = '{user_id}'.")
+
         return False
-
-    # ---------------------------------------------------------------------------------------------------------- #
-    # Search
-    # ---------------------------------------------------------------------------------------------------------- #
-    @staticmethod
-    def all_users() -> list[UserModel]:
-        with app.app_context():
-            users = db.session.query(User).filter(User.name != DELETED_NAME).all()
-            return users
-
-    @staticmethod
-    def all_users_sorted() -> list[UserModel]:
-        with app.app_context():
-            users = db.session.query(User).order_by(func.lower(User.name)).filter(User.name != DELETED_NAME).all()
-            return users
-
-    @staticmethod
-    def all_admins() -> list[UserModel]:
-        with app.app_context():
-            admins = db.session.query(User).filter(User.permissions == MASK_ADMIN + MASK_VERIFIED).all()
-            return admins
-
-    @staticmethod
-    def all_non_admins() -> list[UserModel]:
-        with (app.app_context()):
-            non_admins = db.session.query(User).filter(User.permissions != MASK_ADMIN + MASK_VERIFIED) \
-                                        .filter(User.name != DELETED_NAME) \
-                                        .all()
-            return non_admins
-
-    @staticmethod
-    def find_user_from_id(user_id) -> UserModel | None:
-        with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
-            return user
-
-    @staticmethod
-    def find_user_from_email(email: str) -> UserModel | None:
-        with app.app_context():
-            user = db.session.query(User).filter_by(email=email).first()
-            return user
-
-    @staticmethod
-    def find_id_from_email(email: str) -> int | None:
-        with app.app_context():
-            user = db.session.query(User).filter_by(email=email).first()
-            if user:
-                return user.id
-            else:
-                return None
-
-    # ---------------------------------------------------------------------------------------------------------- #
-    # User permissions
-    # ---------------------------------------------------------------------------------------------------------- #
-
-    def admin(self):
-        if self.permissions & MASK_ADMIN > 0:
-            return True
-        else:
-            return False
-
-    def verified(self):
-        if self.permissions & MASK_VERIFIED > 0 or \
-           self.permissions & MASK_ADMIN > 0:
-            return True
-        else:
-            return False
-
-    def blocked(self):
-        if self.permissions & MASK_BLOCKED > 0:
-            return True
-        else:
-            return False
-
-    def readwrite(self):
-        if self.permissions & MASK_READWRITE > 0 or \
-           self.permissions & MASK_ADMIN > 0:
-            return True
-        else:
-            return False
-
-    def has_mail(self):
-        if MessageRepository().all_unread_messages_to_email(self.email):
-            return True
-        else:
-            return False
-
-    def has_valid_phone_number(self):
-        if not self.phone_number:
-            return False
-        # Check for UK code
-        elif self.phone_number[0:3] != "+44":
-            return False
-        # Check valid length ('+' and 12 digits)
-        if len(self.phone_number) != 13:
-            return False
-        # Looks OK
-        return True
-
-    def has_unvalidated_phone_number(self):
-        if not self.phone_number:
-            return False
-        # Check for UK code
-        elif self.phone_number[0:3+len(UNVERIFIED_PHONE_PREFIX)] != UNVERIFIED_PHONE_PREFIX + "+44":
-            return False
-        # Check valid length ('+' and 12 digits)
-        if len(self.phone_number) != len(UNVERIFIED_PHONE_PREFIX) + 13:
-            return False
-        # Looks OK
-        return True
-
-    def notification_choices_set(self):
-        # Handle unset as new column
-        if not self.notifications:
-            self.notifications = 0
-        # Return this
-        user_choices = []
-        # Loop through our set
-        for notification in NOTIFICATIONS:
-            name = notification['name']
-            mask = notification['mask']
-            user_choices.append({
-                "name": name,
-                "status": self.notifications & mask > 0
-            })
-        return user_choices
-
-    def notification_choice(self, chosen_name):
-        # Handle unset as new column
-        if not self.notifications:
-            self.notifications = 0
-        # Loop through our set
-        for notification in NOTIFICATIONS:
-            name = notification['name']
-            mask = notification['mask']
-            if name == chosen_name:
-                return self.notifications & mask
-        return False
-
-    def social_url(self, social):
-        if not self.socials:
-            return ""
-        try:
-            return json.loads(self.socials)[social]
-        except KeyError:
-            return "n/a"
-
-    def can_see_emergency_contacts(self):
-        # For now, we just use Admin, but will probably expand this to other members
-        return self.admin()
-
-    # ---------------------------------------------------------------------------------------------------------- #
-    # User functions
-    # ---------------------------------------------------------------------------------------------------------- #
-
-
-
-    
 
     @staticmethod
     def create_new_verification(user_id):
         with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
                 try:
                     user.verification_code = random_code(NUM_DIGITS_CODES)
@@ -370,19 +176,22 @@ class User(UserModel):
                     # Write to dB
                     db.session.commit()
                     return True
+
                 except Exception as e:
                     db.rollback()
                     app.logger.error(f"dB.create_new_verification(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
+
             else:
                 app.logger.error(f"dB.create_new_verification(): Called with invalid user_id = '{user_id}'.")
+
         return False
 
     @staticmethod
     def generate_sms_code(user_id):
         with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
                 try:
                     user.verification_code = random_code(NUM_DIGITS_CODES)
@@ -392,42 +201,17 @@ class User(UserModel):
                     # Write to dB
                     db.session.commit()
                     return True
+
                 except Exception as e:
                     db.rollback()
                     app.logger.error(f"dB.generate_sms_code(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
+
             else:
                 app.logger.error(f"dB.generate_sms_code(): Called with invalid user_id = '{user_id}'.")
+
         return False
-
-
-
-    def check_name_in_use(self, name):
-        users = self.all_users()
-        for user in users:
-            if name.strip().lower() == user.name.strip().lower():
-                return True
-        return False
-
-
-    def display_name(self, email):
-        with app.app_context():
-            user = self.find_user_from_email(email)
-            if user:
-                return user.name
-            else:
-                return "unknown"
-
-    @staticmethod
-    def name_from_id(id):
-        with app.app_context():
-            user = db.session.query(User).filter_by(id=id).first()
-            return user.name
-
-    @staticmethod
-    def hash_password(raw_password):
-        return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
 
     @staticmethod
     def validate_password(user, raw_password, user_ip):
@@ -436,28 +220,32 @@ class User(UserModel):
                 if check_password_hash(user.password, raw_password):
                     try:
                         # Update last login details
-                        user = db.session.query(User).filter_by(id=user.id).first()
+                        user = db.session.query(UserRepository).filter_by(id=user.id).first()
                         user.last_login = str(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
                         user.last_login_ip = str(user_ip)
                         db.session.commit()
                         return True
+
                     except Exception as e:
                         db.rollback()
                         app.logger.error(f"dB.validate_password(): Failed with error code '{e.args}'.")
                         return False
+
             else:
                 app.logger.error(f"dB.validate_password(): Called for user without password, user.id = '{user.id}'.")
                 return False
+
         return False
 
     @staticmethod
     def log_activity(user_id):
         with app.app_context():
             try:
-                user = db.session.query(User).filter_by(id=user_id).first()
+                user = db.session.query(UserRepository).filter_by(id=user_id).first()
                 user.last_login = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                 db.session.commit()
                 return True
+
             except Exception as e:
                 db.rollback()
                 app.logger.error(f"dB.log_activity(): Failed with error code '{e.args}'.")
@@ -468,7 +256,7 @@ class User(UserModel):
         with app.app_context():
 
             # For some reason we need to re-acquire the user within this context
-            user = db.session.query(User).filter_by(id=user.id).first()
+            user = db.session.query(UserRepository).filter_by(id=user.id).first()
             now = time.time()
 
             # Debug
@@ -511,7 +299,7 @@ class User(UserModel):
         with app.app_context():
 
             # For some reason we need to re-acquire the user within this context
-            user = db.session.query(User).filter_by(id=user.id).first()
+            user = db.session.query(UserRepository).filter_by(id=user.id).first()
             now = time.time()
 
             # Debug
@@ -540,6 +328,7 @@ class User(UserModel):
                 try:
                     db.session.commit()
                     return True
+
                 except Exception as e:
                     db.rollback()
                     app.logger.error(f"dB.validate_sms(): Failed with error code '{e.args}'.")
@@ -552,7 +341,7 @@ class User(UserModel):
     @staticmethod
     def create_new_reset_code(email):
         with app.app_context():
-            user = db.session.query(User).filter_by(email=email).first()
+            user = db.session.query(UserRepository).filter_by(email=email).first()
             if user:
                 try:
                     user.reset_code = random_code(NUM_DIGITS_CODES)
@@ -561,42 +350,19 @@ class User(UserModel):
                                      f"reset code '{user.reset_code}'.")
                     db.session.commit()
                     return True
+
                 except Exception as e:
                     db.rollback()
                     app.logger.error(f"dB.create_new_reset_code(): Failed with error code '{e.args}'.")
                     return False
             else:
                 app.logger.error(f"dB.create_new_reset_code(): Called with invalid email = '{email}'.")
-        return False
 
-    @staticmethod
-    def validate_reset_code(user_id, code):
-        with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
-            if user:
-                if user.reset_code != code:
-                    app.logger.debug(f"dB.validate_reset_code(): Invalid reset code for '{user.email}', "
-                                     f"code was '{code}', expecting '{user.reset_code}'.")
-                    return False
-                else:
-                    reset_timestamp = user.reset_code_timestamp
-                    now = time.time()
-                    age_hours = round((now - reset_timestamp) / 60 / 60, 1)
-                    if now - reset_timestamp > RESET_TIMEOUT_SECS:
-                        app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}', "
-                                         f"but it has timed out ({age_hours} hours old).")
-                        return False
-                    else:
-                        app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}' "
-                                         f"and in date ({age_hours} hours old).")
-                        return True
-            else:
-                app.logger.error(f"dB.validate_reset_code(): Called with invalid user_id = '{user_id}'.")
         return False
 
     def reset_password(self, email, password):
         with app.app_context():
-            user = db.session.query(User).filter_by(email=email).first()
+            user = db.session.query(UserRepository).filter_by(email=email).first()
             if user:
                 try:
                     app.logger.debug(f"dB.reset_password(): Resetting password for user '{email}'.")
@@ -604,69 +370,22 @@ class User(UserModel):
                     user.password = self.hash_password(password)
                     db.session.commit()
                     return True
+
                 except Exception as e:
                     db.rollback()
                     app.logger.error(f"dB.reset_password(): Failed with error code '{e.args}' with email = '{email}'.")
                     return False
+
             else:
                 app.logger.error(f"dB.reset_password(): Called with invalid email = '{email}'.")
-        return False
 
-    
-
-    @staticmethod
-    def block_user(user_id):
-        with app.app_context():
-            # For some reason we need to re-acquire the user within this context
-            user = db.session.query(User).filter_by(id=user_id).first()
-
-            # You can't block Admins
-            if user.admin():
-                app.logger.debug(f"dB.block_user(): Rejected attempt to block admin '{user.email}'.")
-                return False
-
-            # Extra protection in case someone finds a way around route protection
-            if user.email in PROTECTED_USERS:
-                app.logger.debug(f"dB.block_user(): Rejected attempt to block protected user '{user.email}'.")
-                return False
-
-            if user:
-                try:
-                    user.permissions = user.permissions | MASK_BLOCKED
-                    db.session.commit()
-                    return True
-                except Exception as e:
-                    db.rollback()
-                    app.logger.error(f"dB.block_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
-                    return False
-            else:
-                app.logger.error(f"dB.block_user(): Called with invalid user_id = '{user_id}'.")
-        return False
-
-    @staticmethod
-    def unblock_user(user_id):
-        with app.app_context():
-            # For some reason we need to re-acquire the user within this context
-            user = db.session.query(User).filter_by(id=user_id).first()
-            if user:
-                try:
-                    if user.permissions & MASK_BLOCKED > 0:
-                        user.permissions = user.permissions - MASK_BLOCKED
-                        db.session.commit()
-                    return True
-                except Exception as e:
-                    db.rollback()
-                    app.logger.error(f"dB.unblock_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
-                    return False
-            else:
-                app.logger.error(f"dB.unblock_user(): Called with invalid user_id = '{user_id}'.")
         return False
 
     @staticmethod
     def set_readwrite(user_id):
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
-            user = db.session.query(User).filter_by(id=user_id).first()
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
                 try:
                     if user.permissions & MASK_READWRITE == 0:
@@ -685,7 +404,7 @@ class User(UserModel):
     def set_readonly(user_id):
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
-            user = db.session.query(User).filter_by(id=user_id).first()
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
                 try:
                     if user.permissions & MASK_READWRITE > 0:
@@ -703,7 +422,7 @@ class User(UserModel):
     @staticmethod
     def make_admin(user_id):
         with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
                 try:
                     if user.permissions & MASK_ADMIN == 0:
@@ -721,7 +440,7 @@ class User(UserModel):
     @staticmethod
     def unmake_admin(user_id):
         with app.app_context():
-            user = db.session.query(User).filter_by(id=user_id).first()
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
                 if user.email in PROTECTED_USERS:
                     app.logger.debug(f"dB.unmake_admin(): Rejected attempt to unadmin protected user '{user.email}'.")
@@ -741,7 +460,7 @@ class User(UserModel):
 
     @staticmethod
     def set_phone_number(user_id, phone_number):
-        user = db.session.query(User).filter_by(id=user_id).first()
+        user = db.session.query(UserRepository).filter_by(id=user_id).first()
         if user:
             try:
                 user.phone_number = phone_number
@@ -757,7 +476,7 @@ class User(UserModel):
 
     @staticmethod
     def set_notifications(user_id, choices):
-        user = db.session.query(User).filter_by(id=user_id).first()
+        user = db.session.query(UserRepository).filter_by(id=user_id).first()
         if user:
             try:
                 user.notifications = choices
@@ -771,24 +490,192 @@ class User(UserModel):
             app.logger.error(f"dB.set_notifications(): Called with invalid user_id = '{user_id}'.")
             return False
 
-    
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Delete
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def delete_user(user_id: int) -> bool:
+        with app.app_context():
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
 
-    def combo_str(self):
-        return f"{self.name} ({self.id})"
+            # You can't delete Admins
+            if user.admin:
+                app.logger.debug(f"dB.delete_user: Rejected attempt to delete admin '{user.email}'.")
+                return False
+
+            # Extra protection in case someone finds a way around route protection
+            if user.email in PROTECTED_USERS:
+                app.logger.debug(f"dB.delete_user: Rejected attempt to delete protected user '{user.email}'.")
+                return False
+
+            if user:
+                try:
+                    # We no longer delete users, we invalidate them. This is because even though we have
+                    # auto-incrementing IDs, if the last entry is deleted, the next user to register gets the next ID,
+                    # which may have valid cookies stored from the previous owner!
+                    user.admin_notes = f"User '{user.name}' ({user.email}) deleted " \
+                                       f"{datetime.now().strftime('%d/%m/%Y %H:%M:%S')}"
+                    user.password = None
+                    user.email = f"{DELETED_NAME}_{user.id}"
+                    user.name = DELETED_NAME
+                    user.permissions = 0
+                    db.session.commit()
+                    return True
+        
+                except Exception as e:
+                    db.rollback()
+                    app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
+                    return False
+
+            else:
+                app.logger.error(f"dB.delete_user(): Called with invalid user_id = '{user_id}'.")
+        
+        return False
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Search
+    # ---------------------------------------------------------------------------------------------------------- #
+    @staticmethod
+    def all_users() -> list[UserModel]:
+        with app.app_context():
+            users = db.session.query(UserRepository).filter(UserRepository.name != DELETED_NAME).all()
+            return users
+
+    @staticmethod
+    def all_users_sorted() -> list[UserModel]:
+        with app.app_context():
+            users = db.session.query(UserRepository).order_by(func.lower(UserRepository.name)).filter(UserRepository.name != DELETED_NAME).all()
+            return users
+
+    @staticmethod
+    def all_admins() -> list[UserModel]:
+        with app.app_context():
+            admins = db.session.query(UserRepository).filter(UserRepository.permissions == MASK_ADMIN + MASK_VERIFIED).all()
+            return admins
+
+    @staticmethod
+    def all_non_admins() -> list[UserModel]:
+        with (app.app_context()):
+            non_admins = db.session.query(UserRepository).filter(UserRepository.permissions != MASK_ADMIN + MASK_VERIFIED) \
+                                        .filter(UserRepository.name != DELETED_NAME) \
+                                        .all()
+            return non_admins
+
+    @staticmethod
+    def find_user_from_id(user_id) -> UserModel | None:
+        with app.app_context():
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
+            return user
+
+    @staticmethod
+    def find_user_from_email(email: str) -> UserModel | None:
+        with app.app_context():
+            user = db.session.query(UserRepository).filter_by(email=email).first()
+            return user
+
+    @staticmethod
+    def find_id_from_email(email: str) -> int | None:
+        with app.app_context():
+            user = db.session.query(UserRepository).filter_by(email=email).first()
+            if user:
+                return user.id
+            else:
+                return None
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Other
+    # ---------------------------------------------------------------------------------------------------------- #
+
+    def has_mail(self):
+        if MessageRepository().all_unread_messages_to_email(self.email):
+            return True
+        else:
+            return False
+
+    def notification_choice(self, chosen_name):
+        # Handle unset as new column
+        if not self.notifications:
+            self.notifications = 0
+        # Loop through our set
+        for notification in NOTIFICATIONS:
+            name = notification['name']
+            mask = notification['mask']
+            if name == chosen_name:
+                return self.notifications & mask
+        return False
+
+    def social_url(self, social):
+        if not self.socials:
+            return ""
+        try:
+            return json.loads(self.socials)[social]
+        except KeyError:
+            return "n/a"
+
+    def check_name_in_use(self, name):
+        users = self.all_users()
+        for user in users:
+            if name.strip().lower() == user.name.strip().lower():
+                return True
+        return False
+
+    def display_name(self, email):
+        with app.app_context():
+            user = self.find_user_from_email(email)
+            if user:
+                return user.name
+            else:
+                return "unknown"
+
+    @staticmethod
+    def name_from_id(id):
+        with app.app_context():
+            user = db.session.query(UserRepository).filter_by(id=id).first()
+            return user.name
+
+    @staticmethod
+    def hash_password(raw_password):
+        return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
+
+    @staticmethod
+    def validate_reset_code(user_id, code):
+        with app.app_context():
+            user = db.session.query(UserRepository).filter_by(id=user_id).first()
+            if user:
+                if user.reset_code != code:
+                    app.logger.debug(f"dB.validate_reset_code(): Invalid reset code for '{user.email}', "
+                                     f"code was '{code}', expecting '{user.reset_code}'.")
+                    return False
+
+                else:
+                    reset_timestamp = user.reset_code_timestamp
+                    now = time.time()
+                    age_hours = round((now - reset_timestamp) / 60 / 60, 1)
+
+                    if now - reset_timestamp > RESET_TIMEOUT_SECS:
+                        app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}', "
+                                         f"but it has timed out ({age_hours} hours old).")
+                        return False
+
+                    else:
+                        app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}' "
+                                         f"and in date ({age_hours} hours old).")
+                        return True
+
+            else:
+                app.logger.error(f"dB.validate_reset_code(): Called with invalid user_id = '{user_id}'.")
+
+        return False
+
+    def gpx_download_code(self, gpx_id):
+        # Need something secret, that no one else would know, so hash their password hash
+        return hashlib.md5(f"{self.password}{gpx_id}".encode('utf-8')).hexdigest()
 
     def user_from_combo_string(self, combo_string):
         # Extract id from number in last set of brackets
         # E.g. "Fred (5)"
         user_id = combo_string.split('(')[-1].split(')')[0]
         return self.find_user_from_id(user_id)
-
-    def unsubscribe_code(self):
-        # Need something secret, that no one else would know, so hash their password hash
-        return hashlib.md5(f"{self.password}".encode('utf-8')).hexdigest()
-
-    def gpx_download_code(self, gpx_id):
-        # Need something secret, that no one else would know, so hash their password hash
-        return hashlib.md5(f"{self.password}{gpx_id}".encode('utf-8')).hexdigest()
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -799,7 +686,13 @@ class User(UserModel):
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-def random_code(num_digits):
+def random_code(num_digits: int) -> int:
+    """
+    Create a random authentication code which comprises num_digits digits.
+    NB The code will always have 1 to 9 as the first digit, never zero.
+    :param num_digits:              Number of digits in the code
+    :return:                        An integer
+    """
     # First digit can't be zero
     code = str(random.randint(1, 9))
     for _ in range(num_digits - 1):

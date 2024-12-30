@@ -88,7 +88,7 @@ def gravel_all():
     # Need different path for Admin
     if not current_user.is_authenticated:
         admin = False
-    elif current_user.admin():
+    elif current_user.admin:
         admin = True
     else:
         admin = False
@@ -155,7 +155,7 @@ def gravel_ldt():
     # Need different path for Admin
     if not current_user.is_authenticated:
         admin = False
-    elif current_user.admin():
+    elif current_user.admin:
         admin = True
     else:
         admin = False
@@ -238,7 +238,7 @@ def gravel_local():
     # Need different path for Admin
     if not current_user.is_authenticated:
         admin = False
-    elif current_user.admin():
+    elif current_user.admin:
         admin = True
     else:
         admin = False

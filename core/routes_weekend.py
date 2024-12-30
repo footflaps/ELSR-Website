@@ -17,7 +17,7 @@ from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLA
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import User
+from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.database.repositories.gpx_repository import GpxRepository, TYPE_ROAD, TYPE_GRAVEL
 from core.database.repositories.calendar_repository import CalendarRepository, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
@@ -470,7 +470,7 @@ def add_ride():
         cafe = CafeRepository().one_cafe(ride.cafe_id)
 
         # 3: Need to locate the owner of the ride
-        user = User().find_user_from_email(ride.email)
+        user = UserRepository().find_user_from_email(ride.email)
         if not user:
             # Should never happen, but...
             app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{ride_id}', "
@@ -481,14 +481,14 @@ def add_ride():
             return redirect(url_for('weekend', date=start_date_str))
 
         # Select form based on Admin status
-        form = create_ride_form(current_user.admin(), gpx.id)
+        form = create_ride_form(current_user.admin, gpx.id)
 
         # Date
         form.date.data = datetime.strptime(ride.date.strip(), '%d%m%Y')
 
         # Fill in Owner box (admin only)
-        if current_user.admin():
-            form.owner.data = user.combo_str()
+        if current_user.admin:
+            form.owner.data = user.combo_str
 
         # Ride leader
         form.leader.data = ride.leader
@@ -538,11 +538,11 @@ def add_ride():
         # ----------------------------------------------------------- #
         # Add event, so start with fresh form
         # ----------------------------------------------------------- #
-        if current_user.admin():
+        if current_user.admin:
             form = create_ride_form(True)
             if not ride and \
                     request.method == 'GET':
-                form.owner.data = current_user.combo_str()
+                form.owner.data = current_user.combo_str
         else:
             form = create_ride_form(False)
 
@@ -624,7 +624,7 @@ def add_ride():
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
         # 5: Check they aren't nominating someone else (only Admins can nominate another person to lead a ride)
-        if not current_user.admin():
+        if not current_user.admin:
             # Allow them to append eg "Simon" -> "Simon Bond" as some usernames are quite short
             if form.leader.data[0:len(current_user.name)] != current_user.name:
                 # Looks like they've nominated someone else
@@ -776,9 +776,9 @@ def add_ride():
         new_ride.gpx_id = gpx.id
 
         # Admin can allocate events to people
-        if current_user.admin():
+        if current_user.admin:
             # Get user
-            user = User().user_from_combo_string(form.owner.data)
+            user = UserRepository().user_from_combo_string(form.owner.data)
             if user:
                 new_ride.email = user.email
             else:
@@ -917,7 +917,7 @@ def delete_ride():
     # ----------------------------------------------------------- #
     # Restrict access to Admin or Author
     # ----------------------------------------------------------- #
-    if not current_user.admin() \
+    if not current_user.admin \
             and current_user.email != ride.email:
         # Failed authentication
         app.logger.debug(f"delete_ride(): Rejected request from '{current_user.email}' as no permissions"

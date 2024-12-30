@@ -115,7 +115,7 @@
 							
 								{% if current_user.is_authenticated: %}
 							
-									{% if not current_user.readwrite() %}
+									{% if not current_user.readwrite %}
 								
 										<!-- User is untrusted -->
 										{% for voter in social.attendees %}
@@ -206,7 +206,7 @@
 							{% endif %}
 							
 							<!-- Admin / Owner options -->
-							{% if current_user.admin() or current_user.email == social.email %}
+							{% if current_user.admin or current_user.email == social.email %}
 								
 								<!-- Delete social -->
 								<a data-toggle="modal" data-target="#deleteSocial{{ social.id }}">
