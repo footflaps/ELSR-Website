@@ -35,6 +35,7 @@ from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
 from core.database.repositories.calendar_repository import CalendarRepository
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
+from core.database.jinja.gpx_jinja import number_routes_passing_by
 
 
 # -------------------------------------------------------------------------------------------------------------- #

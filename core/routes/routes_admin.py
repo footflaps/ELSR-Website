@@ -30,6 +30,7 @@ from core.database.repositories.classified_repository import ClassifiedRepositor
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 
 from core.decorators.user_decorators import update_last_seen, login_required, admin_only
+from core.database.jinja.event_jinja import flag_event, good_event, toandfro_event
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -60,7 +61,7 @@ def get_file_sizes():
     if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
         db_dir = "/home/ben_freeman_eu/elsr_website/ELSR-Website/instance/"
     else:
-        db_dir = "../../instance/"
+        db_dir = "../instance/"
 
     for filename in os.listdir(db_dir):
         f = os.path.join(db_dir, filename)
