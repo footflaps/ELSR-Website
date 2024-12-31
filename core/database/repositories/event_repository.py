@@ -48,7 +48,7 @@ class EventRepository(EventModel):
                 return True
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.add_event(): Failed with error code '{e.args}'.")
                 return False
 
@@ -81,7 +81,7 @@ class EventRepository(EventModel):
                 # Return success
                 return True
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.log_event(): Failed with error code '{e.args}'.")
                 return False
 
@@ -107,7 +107,7 @@ class EventRepository(EventModel):
                 return True
 
         except Exception as e:
-            db.rollback()
+            db.session.rollback()
             app.logger.error(f"dB.delete_events_email_days(): Failed with error code '{e.args}'.")
             return False
 
@@ -125,7 +125,7 @@ class EventRepository(EventModel):
                 return True
 
         except Exception as e:
-            db.rollback()
+            db.session.rollback()
             app.logger.error(f"dB.delete_events_all_days(): Failed with error code '{e.args}'.")
             return False
 
@@ -140,7 +140,7 @@ class EventRepository(EventModel):
                 return True
 
         except Exception as e:
-            db.rollback()
+            db.session.rollback()
             app.logger.error(f"dB.delete_all_404s(): Failed with error code '{e.args}'.")
             return False
 
@@ -156,7 +156,7 @@ class EventRepository(EventModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.delete_event(): Failed with error code '{e.args}'.")
                     return False
         app.logger.error(f"dB.delete_event(): Failed to delete event.id = {event_id}, event not found.")

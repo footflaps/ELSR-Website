@@ -53,7 +53,7 @@ class GpxRepository(GpxModel):
                 return new_gpx
             
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"db_gpx: Failed to add GPX '{new_gpx.name}', "
                                  f"error code '{e.args}'.")
                 return None
@@ -75,7 +75,7 @@ class GpxRepository(GpxModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to update filename for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -102,7 +102,7 @@ class GpxRepository(GpxModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to update downloads for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -121,7 +121,7 @@ class GpxRepository(GpxModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to clear cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -163,7 +163,7 @@ class GpxRepository(GpxModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -195,7 +195,7 @@ class GpxRepository(GpxModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to update cafe list for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -216,7 +216,7 @@ class GpxRepository(GpxModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to update stats for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -234,7 +234,7 @@ class GpxRepository(GpxModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to publish gpx for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -251,7 +251,7 @@ class GpxRepository(GpxModel):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to hide gpx for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -272,7 +272,7 @@ class GpxRepository(GpxModel):
                     return True
                 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_gpx: Failed to delete GPX for gpx_id = '{gpx.id}', "
                                      f"error code '{e.args}'.")
                     return False

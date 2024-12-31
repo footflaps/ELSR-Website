@@ -51,7 +51,7 @@ class CafeRepository(CafeModel):
                 return new_cafe
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.add_cafe(): Failed to add cafe '{new_cafe.name}', error code was '{e.args}'.")
                 return None
 
@@ -71,7 +71,7 @@ class CafeRepository(CafeModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_cafe: Failed to delete Cafe for cafe_id = '{cafe_id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -99,7 +99,7 @@ class CafeRepository(CafeModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.update_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
 
@@ -117,7 +117,7 @@ class CafeRepository(CafeModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.update_photo(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
 
@@ -139,7 +139,7 @@ class CafeRepository(CafeModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.close_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
 
@@ -161,7 +161,7 @@ class CafeRepository(CafeModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.unclose_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
                     return False
 

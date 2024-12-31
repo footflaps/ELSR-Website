@@ -63,7 +63,7 @@ class MessageRepository(MessageModel):
                 return message
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.add_message(): Failed with error code '{e.args}'.")
                 return None
 
@@ -83,7 +83,7 @@ class MessageRepository(MessageModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.mark_as_read(): Failed with error code '{e.args}'.")
                     return False
 
@@ -102,7 +102,7 @@ class MessageRepository(MessageModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.mark_as_unread(): Failed with error code '{e.args}'.")
                     return False
 
@@ -122,7 +122,7 @@ class MessageRepository(MessageModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.delete(): Failed with error code '{e.args}'.")
                     return False
         return False

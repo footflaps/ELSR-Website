@@ -67,7 +67,7 @@ class CalendarRepository(CalendarModel):
                 return CalendarModel.query.filter_by(id=new_ride.id).first()
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"db_calendar: Failed to add ride '{new_ride}', "
                                  f"error code '{e.args}'.")
                 return None
@@ -87,7 +87,7 @@ class CalendarRepository(CalendarModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_calendar: Failed to set email sent for ride_id = '{ride.id}', "
                                      f"error code '{e.args}'.")
 
@@ -108,7 +108,7 @@ class CalendarRepository(CalendarModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_calendar: Failed to delete ride for ride_id = '{ride.id}', "
                                      f"error code '{e.args}'.")
 

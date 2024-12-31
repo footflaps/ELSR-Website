@@ -82,7 +82,7 @@ class ClassifiedRepository(ClassifiedModel):
                 return new_classified
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"db.add_classified(): Failed with error code '{e.args}'.")
                 return None
 
@@ -104,7 +104,7 @@ class ClassifiedRepository(ClassifiedModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_delete_classified: Failed to delete for classified_id = '{classified_id}', "
                                      f"error code '{e.args}'.")
                     return False

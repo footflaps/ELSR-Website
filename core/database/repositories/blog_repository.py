@@ -67,7 +67,7 @@ class BlogRepository(BlogModel):
                 return BlogModel.query.filter_by(id=new_blog.id).first()
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"db.add_blog(): Failed with error code '{e.args}'.")
                 return None
 
@@ -85,7 +85,7 @@ class BlogRepository(BlogModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_update_photo: Failed to update Blog for blog_id = '{blog_id}', "
                                      f"error code '{e.args}'.")
                     return False
@@ -106,7 +106,7 @@ class BlogRepository(BlogModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_delete_blog: Failed to delete Blog for blog_id = '{blog_id}', "
                                      f"error code '{e.args}'.")
                     return False

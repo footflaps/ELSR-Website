@@ -90,7 +90,7 @@ class UserRepository(UserModel):
                 return True
             
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.create_user(): Failed with error code '{e.args}'.")
                 return False
 
@@ -107,7 +107,7 @@ class UserRepository(UserModel):
                 return True
             
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.update_user(): Failed to update user '{user.id}', error code was '{e.args}'.")
                 return False
 
@@ -133,7 +133,7 @@ class UserRepository(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.block_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -154,7 +154,7 @@ class UserRepository(UserModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.unblock_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
 
@@ -178,7 +178,7 @@ class UserRepository(UserModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.create_new_verification(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
@@ -203,7 +203,7 @@ class UserRepository(UserModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.generate_sms_code(): Failed with error code '{e.args}' "
                                      f"for user_id = '{user_id}'.")
                     return False
@@ -227,7 +227,7 @@ class UserRepository(UserModel):
                         return True
 
                     except Exception as e:
-                        db.rollback()
+                        db.session.rollback()
                         app.logger.error(f"dB.validate_password(): Failed with error code '{e.args}'.")
                         return False
 
@@ -247,7 +247,7 @@ class UserRepository(UserModel):
                 return True
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.log_activity(): Failed with error code '{e.args}'.")
                 return False
 
@@ -286,7 +286,7 @@ class UserRepository(UserModel):
                     db.session.commit()
                     return True
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.validate_email(): Failed with error code '{e.args}'.")
                     return False
 
@@ -330,7 +330,7 @@ class UserRepository(UserModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.validate_sms(): Failed with error code '{e.args}'.")
                     return False
 
@@ -352,7 +352,7 @@ class UserRepository(UserModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.create_new_reset_code(): Failed with error code '{e.args}'.")
                     return False
             else:
@@ -372,7 +372,7 @@ class UserRepository(UserModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.reset_password(): Failed with error code '{e.args}' with email = '{email}'.")
                     return False
 
@@ -393,7 +393,7 @@ class UserRepository(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.set_readwrite(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -412,7 +412,7 @@ class UserRepository(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.set_readonly(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -430,7 +430,7 @@ class UserRepository(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.make_admin(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
             else:
@@ -451,7 +451,7 @@ class UserRepository(UserModel):
                         db.session.commit()
                     return True
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.unmake_admin(): Failed with error code '{e.args}' for user '{user.email}'.")
                     return False
             else:
@@ -467,7 +467,7 @@ class UserRepository(UserModel):
                 db.session.commit()
                 return True
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.set_phone_number(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                 return False
         else:
@@ -483,7 +483,7 @@ class UserRepository(UserModel):
                 db.session.commit()
                 return True
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.set_notifications(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                 return False
         else:
@@ -523,7 +523,7 @@ class UserRepository(UserModel):
                     return True
         
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
                     return False
 

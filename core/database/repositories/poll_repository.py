@@ -41,7 +41,7 @@ class PollRepository(PollModel):
                 return new_poll
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.add_poll(): Failed with error code '{e.args}'.")
                 print(f"dB.add_poll(): Failed with error code '{e.args}'.")
                 return None
@@ -64,7 +64,7 @@ class PollRepository(PollModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_poll: Failed to delete Poll for poll_id = '{poll_id}', "
                                      f"error code '{e.args}'.")
                     return False

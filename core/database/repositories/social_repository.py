@@ -48,7 +48,7 @@ class SocialRepository(SocialModel):
                 return new_social
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.add_social(): Failed with error code '{e.args}'.")
                 return None
 
@@ -74,7 +74,7 @@ class SocialRepository(SocialModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"db_social: Failed to delete Social for social_id = '{social_id}', "
                                      f"error code '{e.args}'.")
                     return False

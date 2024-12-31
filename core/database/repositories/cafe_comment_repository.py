@@ -33,7 +33,7 @@ class CafeCommentRepository(CafeCommentModel):
                 return True
 
             except Exception as e:
-                db.rollback()
+                db.session.rollback()
                 app.logger.error(f"dB.add_comment(): Failed to add comment, error code was '{e.args}'.")
                 return False
 
@@ -53,7 +53,7 @@ class CafeCommentRepository(CafeCommentModel):
                     return True
 
                 except Exception as e:
-                    db.rollback()
+                    db.session.rollback()
                     app.logger.error(f"dB.delete_comment(): Failed to delete comment, error code was '{e.args}'.")
                     return False
 
