@@ -216,9 +216,6 @@ class CafeRepository(CafeModel):
     # -------------------------------------------------------------------------------------------------------------- #
     # Properties
     # -------------------------------------------------------------------------------------------------------------- #
-    def combo_string(self) -> str:
-        return f"{self.name} ({self.id})"
-
     def cafe_list(self, cafes_passed):
         # Take the cafe_passed JSON string from the GPX database and from it, returns the details of the
         # Cafes which were referenced in the string (referenced by id).

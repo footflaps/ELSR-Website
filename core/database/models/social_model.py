@@ -17,6 +17,10 @@ class SocialModel(db.Model):
     __tablename__ = 'socials'
     __table_args__ = {'schema': 'elsr'}
 
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Define the table
+    # ---------------------------------------------------------------------------------------------------------- #
+
     id = db.Column(db.Integer, primary_key=True)
 
     # Organiser
@@ -48,6 +52,10 @@ class SocialModel(db.Model):
 
     # JSON string of emails of attendees
     attendees = db.Column(db.Text)
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Repr
+    # ---------------------------------------------------------------------------------------------------------- #
 
     def __repr__(self):
         return f'<Social "{self.destination}, on {self.date}">'

@@ -17,6 +17,10 @@ class PollModel(db.Model):
     __tablename__ = 'polls'
     __table_args__ = {'schema': 'elsr'}
 
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Define the table
+    # ---------------------------------------------------------------------------------------------------------- #
+
     id = db.Column(db.Integer, primary_key=True)
 
     # Who created the entry - will determine delete permissions
@@ -48,6 +52,10 @@ class PollModel(db.Model):
 
     # Open / closed
     status = db.Column(db.String(8))
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Repr
+    # ---------------------------------------------------------------------------------------------------------- #
 
     def __repr__(self):
         return f'<Poll "{self.name}, on {self.date}">'

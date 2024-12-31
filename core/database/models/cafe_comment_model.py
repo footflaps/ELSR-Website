@@ -17,6 +17,10 @@ class CafeCommentModel(db.Model):
     __tablename__ = 'cafe_comments'
     __table_args__ = {'schema': 'elsr'}
 
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Define the table
+    # ---------------------------------------------------------------------------------------------------------- #
+
     id = db.Column(db.Integer, primary_key=True)
 
     # This is the cafe.id it relates to
@@ -33,6 +37,10 @@ class CafeCommentModel(db.Model):
 
     # Actual comments itself
     body = db.Column(db.String(1000), unique=False)
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Repr
+    # ---------------------------------------------------------------------------------------------------------- #
 
     def __repr__(self):
         return f'<Cafe comment {self.body}>'

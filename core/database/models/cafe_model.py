@@ -17,6 +17,10 @@ class CafeModel(db.Model):
     __tablename__ = 'cafes'
     __table_args__ = {'schema': 'elsr'}
 
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Define the table
+    # ---------------------------------------------------------------------------------------------------------- #
+
     # Don't need a bind key as this is the default database
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
@@ -46,5 +50,17 @@ class CafeModel(db.Model):
     # This is not used
     updated_date = db.Column(db.String(250), nullable=True)
 
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Repr
+    # ---------------------------------------------------------------------------------------------------------- #
+
     def __repr__(self):
         return f'<Blog {self.title}>'
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Properties
+    # ---------------------------------------------------------------------------------------------------------- #
+
+    @property
+    def combo_string(self) -> str:
+        return f"{self.name} ({self.id})"

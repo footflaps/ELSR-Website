@@ -51,6 +51,10 @@ class ClassifiedModel(db.Model):
     # Status (for sale, under offer, sold, etc)
     status = db.Column(db.String(20))
 
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Repr
+    # ---------------------------------------------------------------------------------------------------------- #
+
     def __repr__(self):
         return f'<Classified "{self.title}, by {self.email}">'
 

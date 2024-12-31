@@ -17,6 +17,10 @@ class CalendarModel(db.Model):
     __tablename__ = 'calendar'
     __table_args__ = {'schema': 'elsr'}
 
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Define the table
+    # ---------------------------------------------------------------------------------------------------------- #
+
     id = db.Column(db.Integer, primary_key=True)
 
     # Who created the entry - will determine delete permissions
@@ -51,6 +55,10 @@ class CalendarModel(db.Model):
 
     # Column to denote whether we sent an email or not
     sent_email = db.Column(db.String(20))
+
+    # ---------------------------------------------------------------------------------------------------------- #
+    # Repr
+    # ---------------------------------------------------------------------------------------------------------- #
 
     def __repr__(self):
         return f'<Ride "{self.destination} , lead by {self.leader}">'

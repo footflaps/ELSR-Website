@@ -358,5 +358,3 @@ class GpxRepository(GpxModel):
 
         return passing_gpx
 
-    def combo_string(self):
-        return f"{self.name}, {self.length_km}km / {self.ascent_m}m ({self.id})"

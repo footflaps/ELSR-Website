@@ -82,7 +82,7 @@ def create_ride_form(admin: bool, gpx_id=None):
         cafe_choices = []
         cafes = CafeRepository().all_cafes_sorted()
         for cafe in cafes:
-            cafe_choices.append(cafe.combo_string())
+            cafe_choices.append(cafe.combo_string)
         cafe_choices.append(NEW_CAFE)
 
         # ----------------------------------------------------------- #
@@ -95,7 +95,7 @@ def create_ride_form(admin: bool, gpx_id=None):
             # Route must be public and double check we have an actual GPX file on tap....
             if (gpx.public and os.path.exists(filename)) \
                     or gpx.id == gpx_id:
-                gpx_choices.append(gpx.combo_string())
+                gpx_choices.append(gpx.combo_string)
 
         # ----------------------------------------------------------- #
         # Generate the list of users

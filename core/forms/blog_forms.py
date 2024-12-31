@@ -61,7 +61,7 @@ def create_blogs_form(admin: bool):
         cafe_choices = [NO_CAFE]
         cafes = CafeRepository().all_cafes_sorted()
         for cafe in cafes:
-            cafe_choices.append(cafe.combo_string())
+            cafe_choices.append(cafe.combo_string)
 
         # ----------------------------------------------------------- #
         # Generate the list of routes
@@ -73,7 +73,7 @@ def create_blogs_form(admin: bool):
             # Route must be public and double check we have an actual GPX file on tap....
             if gpx.public \
                     and os.path.exists(filename):
-                gpx_choices.append(gpx.combo_string())
+                gpx_choices.append(gpx.combo_string)
 
         # ----------------------------------------------------------- #
         # The form itself
