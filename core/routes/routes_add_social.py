@@ -167,7 +167,7 @@ def route_add_social():
         new_social.email = owner.email
         # Convert form date format '2023-06-23' to preferred format '23062023'
         new_social.date = form.date.data.strftime("%d%m%Y")
-        new_social.converted_date = form.date
+        new_social.converted_date = form.date.data
         new_social.start_time = form.start_time.data.strftime("%H%M")
         new_social.destination = form.destination.data
         new_social.details = form.details.data
