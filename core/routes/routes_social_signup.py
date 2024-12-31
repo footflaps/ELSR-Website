@@ -53,7 +53,7 @@ def social_can():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    social = SocialRepository().one_social_id(social_id)
+    social = SocialRepository().one_by_id(social_id)
     if not social:
         app.logger.debug(f"social_can(): Failed to locate Social with social_id = '{social_id}'.")
         EventRepository().log_event("social_can() Fail", f"Failed to Social with social_id = '{social_id}'.")
@@ -105,7 +105,7 @@ def social_can():
     # Back to poll page
     # ----------------------------------------------------------- #
 
-    return redirect(url_for(f'social', date=social.date, anchor=f"social_{social_id}"))
+    return redirect(url_for(f'display_socials', date=social.date, anchor=f"social_{social_id}"))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -133,7 +133,7 @@ def social_cant():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    social = SocialRepository().one_social_id(social_id)
+    social = SocialRepository().one_by_id(social_id)
     if not social:
         app.logger.debug(f"social_cant(): Failed to locate Social with social_id = '{social_id}'.")
         EventRepository().log_event("social_cant() Fail", f"Failed to Social with social_id = '{social_id}'.")
@@ -158,7 +158,7 @@ def social_cant():
         attendees = []
 
     # Their email should be in the list
-    if not current_user.email in attendees:
+    if current_user.email not in attendees:
         # Should never happen, but...
         app.logger.debug(f"social_cant(): Can't remove non existent vote!")
         EventRepository().log_event("social_cant() Fail", f"Can't remove non existent vote!")
@@ -185,4 +185,4 @@ def social_cant():
     # Back to poll page
     # ----------------------------------------------------------- #
 
-    return redirect(url_for(f'social', date=social.date, anchor=f"social_{social_id}"))
+    return redirect(url_for(f'display_socials', date=social.date, anchor=f"social_{social_id}"))

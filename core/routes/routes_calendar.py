@@ -234,7 +234,7 @@ def calendar():
                     day = event.converted_date.day
 
                     # Create Marker
-                    markup += f"<a href='{url_for('social', date=f'{datestr}')}'>" \
+                    markup += f"<a href='{url_for('display_socials', date=f'{datestr}')}'>" \
                               f"<i class='fas fa-solid fa-champagne-glasses fa-2xl'></i></a>"
 
             # ----------------------------------------------------------- #

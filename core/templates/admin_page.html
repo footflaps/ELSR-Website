@@ -1054,7 +1054,7 @@
 								<tr>
 									<td scope="row">{{ social.id }}</td>
 									<td scope="row">
-										<a href="{{ url_for('social', date=social.date) }}">
+										<a href="{{ url_for('display_socials', date=social.date) }}">
 											{{ beautify_date(social.date) }}
 										</a>
 									</td>

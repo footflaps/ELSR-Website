@@ -97,9 +97,9 @@ class SocialRepository(SocialModel):
             return socials
 
     @staticmethod
-    def one_social_id(social_id: id) -> SocialModel | None:
+    def one_by_id(id: int) -> SocialModel | None:
         with app.app_context():
-            social = SocialModel.query.filter_by(id=social_id).first()
+            social = SocialModel.query.filter_by(id=id).first()
             return social
 
     @staticmethod
