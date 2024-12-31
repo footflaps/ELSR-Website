@@ -1,10 +1,11 @@
-from flask import render_template, url_for, request, flash, redirect, abort
+from flask import render_template, url_for, request, flash, redirect, abort, Response
 from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime, time
 import json
 import os
 from threading import Thread
+from typing import Union, Dict
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -66,12 +67,141 @@ def split_start_string(start_time):
 # Extract start time and location from the form
 # -------------------------------------------------------------------------------------------------------------- #
 def create_start_string(form):
+    """
+
+    :param form:
+    :return:
+    """
     start_time = str(form.start_time.data).split(':')[:2]
     print(f"start_time = '{start_time}'")
     if form.start_location.data != MEETING_OTHER:
         return f"{start_time[0]}:{start_time[1]} from {form.start_location.data}"
     else:
         return f"{start_time[0]}:{start_time[1]} from {form.other_location.data.strip()}"
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Upload a GPX file
+# -------------------------------------------------------------------------------------------------------------- #
+def handle_gpx_upload(form, calendar_entry: CalendarModel) -> Dict[str, bool | GpxModel | Response]:
+    """
+    Handles GPX file validations and uploads.
+
+    :param form:                    The form containing GPX data.
+    :param calendar_entry:          The current calendar entry ORM.
+    :return:                        dict: Contains either success or error details.
+                                    Example:
+                                    {"success": True, "gpx": gpx_object}
+                                    {"success": False, "error": render_template(...)}
+    """
+    # ----------------------------------------------------------- #
+    # Can we find the GPX file in the request?
+    # ----------------------------------------------------------- #
+    if 'gpx_file' not in request.files:
+        # GPX file not found
+        app.logger.debug(f"handle_gpx_upload: Failed to find 'gpx_file' in request.files!")
+        EventRepository().log_event("New Ride Fail", "Failed to find 'gpx_file' in request.files!")
+        flash("Couldn't find the file.")
+        return {"success": False, "error": render_template("calendar_add_ride.html", year=current_year, form=form,
+                                                           ride=calendar_entry, live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)}
+
+    file = request.files['gpx_file']
+    app.logger.debug(f"handle_gpx_upload: About to upload '{file}'.")
+
+    # ----------------------------------------------------------- #
+    # Check if the file has a valid filename
+    # ----------------------------------------------------------- #
+    if file.filename == '':
+        app.logger.debug(f"handle_gpx_upload: No selected file!")
+        EventRepository().log_event("Add ride Fail", "No selected file!")
+        flash('No selected file')
+        return {"success": False, "error": render_template("calendar_add_ride.html", year=current_year, form=form,
+                                                           ride=calendar_entry, live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)}
+
+    if not file or not allowed_file(file.filename):
+        app.logger.debug(f"handle_gpx_upload: Invalid file '{file.filename}'!")
+        EventRepository().log_event("Add ride Fail", f"Invalid file '{file.filename}'!")
+        flash("That's not a GPX file!")
+        return {"success": False, "error": render_template("calendar_add_ride.html", year=current_year, form=form,
+                                                           ride=calendar_entry, live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)}
+
+    # ----------------------------------------------------------- #
+    # Create a new GPX object and populate necessary fields
+    # ----------------------------------------------------------- #
+    gpx = GpxModel()
+    gpx.name = form.destination.data.split('(')[0] if form.destination.data != NEW_CAFE else form.new_destination.data
+    gpx.email = current_user.email
+    gpx.cafes_passed = "[]"
+    gpx.ascent_m = 0
+    gpx.length_km = 0
+    gpx.filename = "tmp"
+    gpx.type = TYPE_GRAVEL if form.group.data == GRAVEL_CHOICE else TYPE_ROAD
+
+    # ----------------------------------------------------------- #
+    # Add GPX to database
+    # ----------------------------------------------------------- #
+    gpx = GpxRepository().add_gpx(gpx)
+    if not gpx:
+        app.logger.debug(f"handle_gpx_upload: Failed to add GPX to the database!")
+        EventRepository().log_event("Add ride Fail", "Failed to add GPX to the database!")
+        flash("Sorry, something went wrong!")
+        return {"success": False, "error": render_template("calendar_add_ride.html", year=current_year, form=form,
+                                                           ride=calendar_entry, live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)}
+
+    # ----------------------------------------------------------- #
+    # Determine where to store the file
+    # ----------------------------------------------------------- #
+    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
+    app.logger.debug(f"handle_gpx_upload: Filename will be = '{filename}'.")
+
+    # ----------------------------------------------------------- #
+    # Delete existing file if it exists
+    # ----------------------------------------------------------- #
+    if not delete_file_if_exists(filename):
+        flash("Sorry, something went wrong!")
+        return {"success": False, "error": render_template("calendar_add_ride.html", year=current_year, form=form,
+                                                           ride=calendar_entry, live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)}
+
+    # ----------------------------------------------------------- #
+    # Save the GPX file
+    # ----------------------------------------------------------- #
+    try:
+        file.save(filename)
+    except Exception as e:
+        app.logger.debug(f"handle_gpx_upload: Failed to save '{filename}', error: {e.args}.")
+        EventRepository().log_event("Add ride Fail", f"Failed to save '{filename}', error: {e.args}.")
+        flash("Sorry, something went wrong!")
+        return {"success": False, "error": render_template("calendar_add_ride.html", year=current_year, form=form,
+                                                           ride=calendar_entry, live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)}
+
+    # ----------------------------------------------------------- #
+    # Update filename in the GPX object
+    # ----------------------------------------------------------- #
+    if not GpxRepository().update_filename(gpx.id, filename):
+        app.logger.debug(f"handle_gpx_upload: Failed to update filename in the database for gpx_id='{gpx.id}'.")
+        EventRepository().log_event("Add ride Fail", f"Failed to update filename in the database for gpx_id='{gpx.id}'.")
+        flash("Sorry, something went wrong!")
+        return {"success": False, "error": render_template("calendar_add_ride.html", year=current_year, form=form,
+                                                           ride=calendar_entry, live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
+                                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)}
+
+    # ----------------------------------------------------------- #
+    # Clean up the file
+    # ----------------------------------------------------------- #
+    strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
+
+    # ----------------------------------------------------------- #
+    # Success
+    # ----------------------------------------------------------- #
+    app.logger.debug(f"handle_gpx_upload: Successfully handled upload for GPX ID = {gpx.id}.")
+    EventRepository().log_event("Add ride Success", f"New GPX uploaded: gpx_id={gpx.id}, name=({gpx.name}).")
+    return {"success": True, "gpx": gpx}
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -299,110 +429,10 @@ def add_ride():
         # Do we need to upload a GPX?
         # ----------------------------------------------------------- #
         if not gpx:
-            if 'gpx_file' not in request.files:
-                # Almost certain the form failed validation
-                app.logger.debug(f"add_ride(): Failed to find 'gpx_file' in request.files!")
-                EventRepository().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
-                flash("Couldn't find the file.")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
-                                       live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                                       MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
-            else:
-                # Get the filename
-                file = request.files['gpx_file']
-                app.logger.debug(f"add_ride(): About to upload '{file}'.")
-
-                # If the user does not select a file, the browser submits an
-                # empty file without a filename.
-                if file.filename == '':
-                    app.logger.debug(f"add_ride(): No selected file!")
-                    EventRepository().log_event(f"Add ride Fail", f"No selected file!")
-                    flash('No selected file')
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
-
-                if not file or \
-                        not allowed_file(file.filename):
-                    app.logger.debug(f"add_ride(): Invalid file '{file.filename}'!")
-                    EventRepository().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
-                    flash("That's not a GPX file!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
-
-                # Create a new GPX object
-                # We do this first as we need the id in order to create
-                # the filename for the GPX file when we upload it
-                gpx: GpxModel = GpxModel()
-                if form.destination.data != NEW_CAFE:
-                    # Existing cafe, so use name from combobox, but strip off cafe.id in brackets
-                    gpx.name = form.destination.data.split('(')[0]
-                else:
-                    # New cafe, so take name from new destination field
-                    gpx.name = form.new_destination.data
-                gpx.email = current_user.email
-                gpx.cafes_passed = "[]"
-                gpx.ascent_m = 0
-                gpx.length_km = 0
-                gpx.filename = "tmp"
-                # Fill in the GPX surface type
-                if form.group.data == GRAVEL_CHOICE:
-                    gpx.type = TYPE_GRAVEL
-                else:
-                    gpx.type = TYPE_ROAD
-
-                # Add to the dB
-                gpx: GpxModel = GpxRepository().add_gpx(gpx)
-                if gpx:
-                    # Success, added GPX to dB
-                    app.logger.debug(f"add_ride(): GPX added to dB, id = '{gpx.id}'.")
-                    EventRepository().log_event(f"Add ride Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
-                else:
-                    # Failed to create new dB entry
-                    app.logger.debug(f"add_ride(): Failed to add gpx to the dB!")
-                    EventRepository().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
-                    flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
-
-                # This is where we will store it
-                filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, f"gpx_{gpx.id}.gpx")
-                app.logger.debug(f"add_ride(): Filename will be = '{filename}'.")
-
-                # Make sure this doesn't already exist
-                if not delete_file_if_exists(filename):
-                    # Failed to delete existing file (func will generate error trace)
-                    flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
-
-                # Upload the GPX file
-                try:
-                    file.save(filename)
-                except Exception as e:
-                    app.logger.debug(f"add_ride(): Failed to upload/save '{filename}', error code was {e.args}.")
-                    EventRepository().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
-                    flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
-
-                # Update gpx object with filename
-                if not GpxRepository().update_filename(gpx.id, filename):
-                    app.logger.debug(f"add_ride(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
-                    EventRepository().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
-                    flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
-                                           live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                                           MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
-
-                # Strip all excess data from the file
-                strip_excess_info_from_gpx(filename, gpx.id, f"ELSR: {gpx.name}")
-                app.logger.debug(f"add_ride(): New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
-                EventRepository().log_event(f"Add ride Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
+            result = handle_gpx_upload(form, calendar_entry)
+            if not result["success"]:
+                return result["error"]              # Return the error directly from the helper function
+            gpx: GpxModel = result["gpx"]           # Retrieve the GPX object if the function succeeded
 
         # ----------------------------------------------------------- #
         # Is this a new ride?
@@ -411,7 +441,7 @@ def add_ride():
             calendar_entry: CalendarModel = CalendarRepository()
 
         # Convert form date format '2023-06-23' to preferred format '23062023'
-        start_date_str = form.date.data.strftime("%d%m%Y")
+        start_date_str: str = form.date.data.strftime("%d%m%Y")
         print(f"Got {start_date_str} from form as date..")
 
         # ----------------------------------------------------------- #
