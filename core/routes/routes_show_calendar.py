@@ -12,16 +12,17 @@ from core import app, current_year, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Import our three database classes and associated forms, decorators etc
+# Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES
 from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository
 from core.database.repositories.gpx_repository import GpxRepository
+from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+
 from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
                                   google_maps_api_key, count_map_loads
-from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.subs_dates import get_date_from_url
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user
@@ -34,7 +35,6 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 # How much calendar we populate relative to the focus date
 LOOK_BACK_MONTHS = 3
 LOOK_FORWARD_MONTHS = 6
-
 
 # ELSR Chaingang details
 CHAINGANG_DAY = "Thursday"
@@ -59,15 +59,26 @@ TTS_END_DATE = datetime(2025, 3, 20, 0, 00)
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-def get_calendar_start_month_year(target_date_str: str):
+# -------------------------------------------------------------------------------------------------------------- #
+# Extract year and month from date in search string
+# -------------------------------------------------------------------------------------------------------------- #
+def get_calendar_start_month_year(target_date_str: str) -> tuple[int, int]:
+    """
+    The calendar page can be called with a date in the search bar, which is passed to this function,
+    or with no date set, in which case we use today's date.
+    :param target_date_str:                     The date string from the search bar "DDMMYYYY"
+    :return:                                    A tuple of the month and year as ints.
+    """
     # Just use today's date for how we launch the calendar
     start_year = datetime.today().year
     start_month = datetime.today().month
 
     if target_date_str:
         try:
+            # NB We expect format "DDMMYYYY"
             try_year = int(target_date_str[4:8])
             try_month = int(target_date_str[2:4])
+
         except Exception:
             # If we get garbage, just use today
             flash(f"Invalid date string '{target_date_str}', was expecting 'DDMMYYYY'.")
@@ -83,7 +94,10 @@ def get_calendar_start_month_year(target_date_str: str):
     return start_month, start_year
 
 
-def get_date_range_look_around(date_str: str, look_back_months: int, look_forward_months: int):
+# -------------------------------------------------------------------------------------------------------------- #
+# Get start and finish date for calendar dates range from focus date
+# -------------------------------------------------------------------------------------------------------------- #
+def get_date_range_look_around(date_str: str, look_back_months: int, look_forward_months: int) -> tuple:
     """
     Calculate dates `LOOK_BACK_MONTHS` ago and `LOOK_FORWARD_MONTHS` ahead.
 
@@ -282,90 +296,3 @@ def calendar():
     return render_template("calendar.html", year=current_year, events=js_calendar_events, live_site=live_site(),
                            start_month=focus_month, start_year=focus_year)
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Group ride history
-# -------------------------------------------------------------------------------------------------------------- #
-
-@app.route('/ride_history/<request>', methods=['GET'])
-@logout_barred_user
-@update_last_seen
-def ride_history(request):
-    # ----------------------------------------------------------- #
-    # Sort out which group we are
-    # ----------------------------------------------------------- #
-    # GROUP_CHOICES = ["Decaff", "Espresso", "Doppio", "Mixed"]
-    group = None
-    for option in GROUP_CHOICES:
-        if request.lower() == option.lower():
-            group = option
-            break
-
-    if not group:
-        flash(f"Sorry, unknown group '{group}'!")
-        return abort(404)
-
-    # ----------------------------------------------------------- #
-    # Extract all the rides from the calendar
-    # ----------------------------------------------------------- #
-    rides = CalendarRepository().all_calender_group_in_past(group)
-
-    # ----------------------------------------------------------- #
-    # Extract details from the GPX and add to the ride objects
-    # ----------------------------------------------------------- #
-    # We need a set of GPX files later on
-    gpxes = []
-    # We need a set of cafe markers for the map
-    cafe_markers = []
-
-    for ride in rides:
-        gpx_id = ride.gpx_id
-        gpx = GpxRepository().one_gpx(gpx_id)
-        if gpx:
-            gpxes.append(gpx)
-            ride.length_km = gpx.length_km
-            ride.ascent_m = gpx.ascent_m
-
-            # Also add marker for the cafe (but only if we're showing the GPX)
-            cafe_id = ride.cafe_id
-            cafe = CafeRepository().one_cafe(cafe_id)
-            if cafe:
-                if len(gpxes) <= MAX_NUM_GPX_PER_GRAPH:
-                    if cafe.active:
-                        cafe_colour = OPEN_CAFE_COLOUR
-                    else:
-                        cafe_colour = CLOSED_CAFE_COLOUR
-                    cafe_markers.append({
-                        "position": {"lat": cafe.lat, "lng": cafe.lon},
-                        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-                        "color": cafe_colour,
-                    })
-        else:
-            ride.length_km = "n/a"
-            ride.ascent_m = "n/a"
-
-    # ----------------------------------------------------------- #
-    # Map for the possible routes
-    # ----------------------------------------------------------- #
-    # NB create_polyline_set enforces MAX_NUM_GPX_PER_GRAPH
-    polylines = create_polyline_set(gpxes)
-
-    # Warn if we skipped any
-    if len(gpxes) >= MAX_NUM_GPX_PER_GRAPH:
-        warning = f"NB: Only showing first {MAX_NUM_GPX_PER_GRAPH} routes on map."
-    else:
-        warning = None
-
-    # ----------------------------------------------------------- #
-    # Add to map counts
-    # ----------------------------------------------------------- #
-    if polylines['polylines']:
-        count_map_loads(1)
-
-    # ----------------------------------------------------------- #
-    # Render the page
-    # ----------------------------------------------------------- #
-    return render_template("calendar_group.html", year=current_year, group_name=group, rides=rides,
-                           GOOGLE_MAPS_API_KEY=google_maps_api_key(), warning=warning,
-                           MAP_BOUNDS=MAP_BOUNDS, gpxes=gpxes, cafes=cafe_markers, live_site=live_site(),
-                           polylines=polylines['polylines'], midlat=polylines['midlat'], midlon=polylines['midlon'])

@@ -28,14 +28,14 @@ from core.forms.calendar_forms import create_ride_form
 
 from core.database.jinja.calendar_jinja import start_time_string
 
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
+
 from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 from core.subs_dates import get_date_from_url
-
-from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -56,14 +56,18 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 # -------------------------------------------------------------------------------------------------------------- #
 # Work out which days we will display
 # -------------------------------------------------------------------------------------------------------------- #
-# The weekend page displays all the rides for the upcoming weekend. However, we may have been called with a date
-# for a weekend further in the future or in the past. The weekend may also be a BH (with a Friday, Monday or both
-# tagged on). If it is a BH Weekend, then we will also include the BH days in the WE page, but only if we have rides
-# scheduled on the BH days. So this function works out the set of dates which we will display in the WE page. NB It
-# doesn't actually check for official Bank Holidays, it just looks for rides scheduled on the Friday or Monday. If
-# the function is called with a mid-week day, eg a random Wednesday, it will just return the date for that day.
+def work_out_days(target_date_str) -> list[object]:
+    """
+    The weekend page displays all the rides for the upcoming weekend. However, we may have been called with a date
+    for a weekend further in the future or in the past. The weekend may also be a BH (with a Friday, Monday or both
+    tagged on). If it is a BH Weekend, then we will also include the BH days in the WE page, but only if we have rides
+    scheduled on the BH days. So this function works out the set of dates which we will display in the WE page. NB It
+    doesn't actually check for official Bank Holidays, it just looks for rides scheduled on the Friday or Monday. If
+    the function is called with a mid-week day, eg a random Wednesday, it will just return the date for that day.
 
-def work_out_days(target_date_str):
+    :param target_date_str:                     The date string requested in format "DDMMYYYY"
+    :return:
+    """
     # Step 1: Create a set of date strings eg ["23082023", "24082023" ]
     if target_date_str:
         # ----------------------------------------------------------- #
@@ -216,8 +220,7 @@ def split_start_string(start_time):
     location = " ".join(start_time.split(' ')[2:])
     # Return the two parts
     return {"time": time_obj,
-            "place": location
-            }
+            "place": location}
 
 
 # -------------------------------------------------------------------------------------------------------------- #

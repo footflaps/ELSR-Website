@@ -34,7 +34,7 @@ from core.routes.routes_admin import admin_page
 from core.routes.routes_admin_maps import enable_maps
 from core.routes.routes_blog import display_blog
 from core.routes.routes_cafes import cafe_list
-from core.routes.routes_calendar import calendar
+from core.routes.routes_show_calendar import calendar
 from core.routes.routes_classifieds import classifieds
 from core.routes.routes_errors import page_not_found
 from core.routes.routes_events import delete_event
@@ -54,6 +54,7 @@ from core.routes.routes_club_kit import club_kit
 from core.routes.routes_chaingang import chaingang
 from core.routes.routes_tim_williams import twr
 from core.routes.routes_elsr import contact
+from core.routes.routes_ride_history import ride_history
 
 
 # -------------------------------------------------------------------------------------------------------------- #
