@@ -57,14 +57,14 @@ class BlogRepository(BlogModel):
     # Create
     # ---------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def add_blog(new_blog):
+    def add_blog(new_blog: BlogModel) -> BlogModel | None:
         # Try and add to the dB
         with app.app_context():
             try:
                 db.session.add(new_blog)
                 db.session.commit()
-                # Return blog item
-                return BlogModel.query.filter_by(id=new_blog.id).first()
+                db.session.refresh(new_blog)
+                return new_blog
 
             except Exception as e:
                 db.session.rollback()
@@ -75,7 +75,7 @@ class BlogRepository(BlogModel):
     # Modify
     # ---------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def update_photo(blog_id: int, filename: str):
+    def update_photo(blog_id: int, filename: str) -> bool:
         with app.app_context():
             blog = BlogModel.query.filter_by(id=blog_id).first()
             if blog:
@@ -96,9 +96,9 @@ class BlogRepository(BlogModel):
     # Delete
     # ---------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def delete_blog(blog_id):
+    def delete_blog(id: int) -> bool:
         with app.app_context():
-            blog = BlogModel.query.filter_by(id=blog_id).first()
+            blog = BlogModel.query.filter_by(id=id).first()
             if blog:
                 try:
                     db.session.delete(blog)
@@ -107,7 +107,7 @@ class BlogRepository(BlogModel):
 
                 except Exception as e:
                     db.session.rollback()
-                    app.logger.error(f"db_delete_blog: Failed to delete Blog for blog_id = '{blog_id}', "
+                    app.logger.error(f"db_delete_blog: Failed to delete Blog for blog_id = '{id}', "
                                      f"error code '{e.args}'.")
                     return False
 
@@ -129,7 +129,7 @@ class BlogRepository(BlogModel):
             return blogs
 
     @staticmethod
-    def non_sticky(page: int, page_size: int):
+    def all_non_sticky(page: int, page_size: int):
         with app.app_context():
             print(f"Called with page = '{page}', page_size = '{page_size}'")
             # Get all the non-sticky blogs in time order
@@ -157,9 +157,9 @@ class BlogRepository(BlogModel):
             return math.ceil(num_rows / page_size)
 
     @staticmethod
-    def find_blog_from_id(blog_id):
+    def one_by_id(id: int) -> BlogModel | None:
         with app.app_context():
-            blog = BlogModel.query.filter_by(id=blog_id).first()
+            blog = BlogModel.query.filter_by(id=id).first()
             return blog
 
     @staticmethod

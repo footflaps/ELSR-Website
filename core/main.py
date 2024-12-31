@@ -47,7 +47,7 @@ from core.routes.routes_polling_voting import swap_vote
 from core.routes.routes_social_signup import social_cant
 from core.routes.routes_user_login_logout import login
 from core.routes.routes_user_register import register
-from core.routes.routes_users import user_page
+from core.routes.routes_user import user_page
 from core.routes.routes_weekend import weekend
 from core.routes.routes_social import display_socials
 from core.routes.routes_club_kit import club_kit
@@ -55,8 +55,9 @@ from core.routes.routes_chaingang import chaingang
 from core.routes.routes_tim_williams import twr
 from core.routes.routes_elsr import contact
 from core.routes.routes_ride_history import ride_history
-from core.routes.routes_add_ride_to_calendar import add_ride
+from core.routes.routes_calendar_add_ride import add_ride
 from core.routes.routes_social_add import route_add_social
+from core.routes.routes_blog_add import add_blog
 
 
 # -------------------------------------------------------------------------------------------------------------- #
