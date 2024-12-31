@@ -27,13 +27,24 @@ from core.database.models.blog_model import BlogModel
 
 
 # -------------------------------------------------------------------------------------------------------------- #
+# Import our Jinja helpers
+# -------------------------------------------------------------------------------------------------------------- #
+
+from core.database.jinja.cafe_jinja import get_cafe_name_from_id
+from core.database.jinja.calendar_jinja import start_time_string
+from core.database.jinja.event_jinja import good_event
+from core.database.jinja.gpx_jinja import number_routes_passing_by
+from core.database.jinja.user_jinja import get_user_id_from_email
+
+
+# -------------------------------------------------------------------------------------------------------------- #
 # Import the other route pages
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.routes.routes_admin import admin_page
 from core.routes.routes_admin_maps import enable_maps
 from core.routes.routes_blog import display_blog
-from core.routes.routes_cafes import cafe_list
+from core.routes.routes_cafe import cafe_list
 from core.routes.routes_calendar import calendar
 from core.routes.routes_classifieds import classifieds
 from core.routes.routes_errors import page_not_found
@@ -58,6 +69,7 @@ from core.routes.routes_ride_history import ride_history
 from core.routes.routes_calendar_add_ride import add_ride
 from core.routes.routes_social_add import route_add_social
 from core.routes.routes_blog_add import add_blog
+from core.routes.routes_cafe_add_delete import new_cafe
 
 
 # -------------------------------------------------------------------------------------------------------------- #

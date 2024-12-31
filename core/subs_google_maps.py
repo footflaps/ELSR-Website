@@ -212,7 +212,7 @@ def markers_for_cafes_native(cafes):
     for cafe_summary in cafes:
 
         # Need to look up current cafe open / closed status
-        if CafeRepository().one_cafe(cafe_summary["id"]).active:
+        if CafeRepository().one_by_id(cafe_summary["id"]).active:
             icon_colour = '#2196f3'
         else:
             icon_colour = '#ff0000'

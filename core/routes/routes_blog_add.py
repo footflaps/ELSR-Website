@@ -101,7 +101,7 @@ def add_blog():
         if blog.cafe_id == NO_CAFE:
             form.cafe.data = NO_CAFE
         else:
-            form.cafe.data = CafeRepository().one_cafe(blog.cafe_id).combo_string
+            form.cafe.data = CafeRepository().one_by_id(blog.cafe_id).combo_string
         if blog.gpx_index == NO_GPX:
             form.gpx.data = NO_GPX
         else:

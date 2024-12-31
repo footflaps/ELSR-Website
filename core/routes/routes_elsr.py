@@ -92,7 +92,7 @@ def home():
     # -------------------------------------------------------------------------------------------- #
 
     # Get the cafe
-    cafe = CafeRepository().one_cafe(BEAN_THEORY_INDEX)
+    cafe = CafeRepository().one_by_id(BEAN_THEORY_INDEX)
 
     # Create a GM marker
     cafe_marker = [{

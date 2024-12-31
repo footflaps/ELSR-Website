@@ -259,7 +259,7 @@ def add_ride():
             return redirect(url_for('weekend', date=start_date_str))
 
         # 2: Need to locate the target cafe for the ride (might be a new cafe so None is acceptable)
-        cafe = CafeRepository().one_cafe(calendar_entry.cafe_id)
+        cafe = CafeRepository().one_by_id(calendar_entry.cafe_id)
 
         # 3: Need to locate the owner of the ride
         user: UserModel = UserRepository().find_user_from_email(calendar_entry.email)
@@ -363,7 +363,7 @@ def add_ride():
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
             cafe_id: int = CafeRepository().cafe_id_from_combo_string(form.destination.data)
-            cafe: CafeModel | None = CafeRepository().one_cafe(cafe_id)
+            cafe: CafeModel | None = CafeRepository().one_by_id(cafe_id)
             if not cafe:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get cafe from '{form.destination.data}'.")

@@ -185,14 +185,14 @@ class CafeRepository(CafeModel):
 
     # Return a single cafe
     @staticmethod
-    def one_cafe(cafe_id: int) -> CafeModel | None:
+    def one_by_id(id: int) -> CafeModel | None:
         with app.app_context():
-            cafe = CafeModel.query.filter_by(id=cafe_id).first()
+            cafe = CafeModel.query.filter_by(id=id).first()
             # Will return nothing if id is invalid
             return cafe
 
     @staticmethod
-    def find_by_name(name: str) -> CafeModel | None:
+    def one_by_name(name: str) -> CafeModel | None:
         with app.app_context():
             cafe = CafeModel.query.filter_by(name=name).first()
             # Will return nothing if name is invalid
@@ -229,7 +229,7 @@ class CafeRepository(CafeModel):
 
         for cafe_json in cafes_json:
             cafe_id = cafe_json['cafe_id']
-            cafe = self.one_cafe(cafe_id)
+            cafe = self.one_by_id(cafe_id)
             if cafe:
                 cafe_summary = {
                     'id': cafe_id,

@@ -284,7 +284,7 @@ def weekend():
                 rides[day].append(ride)
 
                 # Look up cafe (which might not yet be in the db)
-                cafe = CafeRepository().one_cafe(ride.cafe_id)
+                cafe = CafeRepository().one_by_id(ride.cafe_id)
                 if cafe:
                     # Update destination (as cafe may have changed name)
                     ride.destination = cafe.name

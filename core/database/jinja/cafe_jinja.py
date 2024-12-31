@@ -14,7 +14,7 @@ app.jinja_env.globals.update(remove_html_tags=remove_html_tags)
 
 
 def get_cafe_name_from_id(cafe_id):
-    return CafeRepository().one_cafe(cafe_id).name
+    return CafeRepository().one_by_id(cafe_id).name
 
 
 # Add this to jinja's environment, so we can use it within html templates

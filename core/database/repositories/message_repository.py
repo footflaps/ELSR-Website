@@ -157,12 +157,8 @@ class MessageRepository(MessageModel):
     @staticmethod
     def all_unread_messages_to_email(email):
         with app.app_context():
-            messages = MessageModel.query.filter_by(to_email=email).all()
-            unread = []
-            for message in messages:
-                if not message.been_read:
-                    unread.append(message)
-            return unread
+            messages = MessageModel.query.filter_by(to_email=email).filter(MessageModel.status.op('&')(MASK_READ) == 0) .all()
+            return messages
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Other

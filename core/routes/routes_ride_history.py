@@ -75,7 +75,7 @@ def ride_history(request):
 
             # Also add marker for the cafe (but only if we're showing the GPX)
             cafe_id = ride.cafe_id
-            cafe = CafeRepository().one_cafe(cafe_id)
+            cafe = CafeRepository().one_by_id(cafe_id)
             if cafe:
                 if len(gpxes) <= MAX_NUM_GPX_PER_GRAPH:
                     if cafe.active:
