@@ -133,12 +133,12 @@ def gravel_ldt():
     # ----------------------------------------------------------- #
     # Grab the specific routes
     # ----------------------------------------------------------- #
-    gpxes = [GpxRepository().one_gpx(REBELLION_WAY_INDEX),
-             GpxRepository().one_gpx(PEDARS_WAY_INDEX),
-             GpxRepository().one_gpx(WOLF_WAY_INDEX),
-             GpxRepository().one_gpx(WOLF_CUB_INDEX),
-             GpxRepository().one_gpx(WOLF_WINTER_INDEX),
-             GpxRepository().one_gpx(WOLF_EAST_INDEX)]
+    gpxes = [GpxRepository().one_by_id(REBELLION_WAY_INDEX),
+             GpxRepository().one_by_id(PEDARS_WAY_INDEX),
+             GpxRepository().one_by_id(WOLF_WAY_INDEX),
+             GpxRepository().one_by_id(WOLF_CUB_INDEX),
+             GpxRepository().one_by_id(WOLF_WINTER_INDEX),
+             GpxRepository().one_by_id(WOLF_EAST_INDEX)]
 
     # ----------------------------------------------------------- #
     # Double check we have all the files present

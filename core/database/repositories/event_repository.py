@@ -53,7 +53,7 @@ class EventRepository(EventModel):
                 return False
 
     @staticmethod
-    def log_event(event_type: int, event_details: str) -> bool:
+    def log_event(event_type: str, event_details: str) -> bool:
         with app.app_context():
             # Can we get a user email address
             # If this is called from a Threaded task it won't necessarily have a valid

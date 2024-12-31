@@ -55,7 +55,7 @@ from core.routes.routes_chaingang import chaingang
 from core.routes.routes_tim_williams import twr
 from core.routes.routes_elsr import contact
 from core.routes.routes_ride_history import ride_history
-from core.routes.routes_add_rides import add_ride
+from core.routes.routes_add_ride_to_calendar import add_ride
 
 
 # -------------------------------------------------------------------------------------------------------------- #

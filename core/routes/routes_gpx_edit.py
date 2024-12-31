@@ -64,7 +64,7 @@ def edit_route():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"edit_route(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
         EventRepository().log_event("Edit GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -211,7 +211,7 @@ def gpx_cut_start():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
     index = int(index)
 
     if not gpx:
@@ -290,7 +290,7 @@ def gpx_cut_end():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
     index = int(index)
 
     if not gpx:
@@ -363,7 +363,7 @@ def publish_route():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
 
     if not gpx:
         app.logger.debug(f"publish_route(): Failed to locate GPX with gpx_id = '{gpx_id}'!")
@@ -460,7 +460,7 @@ def hide_route():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
 
     if not gpx:
         app.logger.debug(f"hide_route(): Failed to locate GPX with gpx_id = '{gpx_id}'.")

@@ -39,7 +39,7 @@ class GpxRepository(GpxModel):
     # Create
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def add_gpx(new_gpx: GpxModel) -> int | None:
+    def add_gpx(new_gpx: GpxModel) -> GpxModel | None:
 
         # Update some details
         new_gpx.date = date.today().strftime("%d%m%Y")
@@ -49,15 +49,14 @@ class GpxRepository(GpxModel):
             try:
                 db.session.add(new_gpx)
                 db.session.commit()
-                # Return new GPX id
-                # ToDo should return the model
-                return new_gpx.id
+                db.refresh(new_gpx)
+                return new_gpx
             
             except Exception as e:
                 db.rollback()
                 app.logger.error(f"db_gpx: Failed to add GPX '{new_gpx.name}', "
                                  f"error code '{e.args}'.")
-                return False
+                return None
             
     # -------------------------------------------------------------------------------------------------------------- #
     # Modify
@@ -315,9 +314,9 @@ class GpxRepository(GpxModel):
             return gpxes
 
     @staticmethod
-    def one_gpx(gpx_id: id) -> GpxModel | None:
+    def one_by_id(id: int) -> GpxModel | None:
         with app.app_context():
-            gpx = GpxModel.query.filter_by(id=gpx_id).first()
+            gpx = GpxModel.query.filter_by(id=id).first()
             return gpx
 
     # -------------------------------------------------------------------------------------------------------------- #

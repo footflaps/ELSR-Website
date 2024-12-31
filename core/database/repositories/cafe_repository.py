@@ -208,10 +208,12 @@ class CafeRepository(CafeModel):
     # Other
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def cafe_id_from_combo_string(combo_string: str) -> str:
+    def cafe_id_from_combo_string(combo_string: str) -> int | None:
         # Extract id from number in last set of brackets
-        cafe_id = combo_string.split('(')[-1].split(')')[0]
-        return cafe_id
+        try:
+            return int(combo_string.split('(')[-1].split(')')[0])
+        except Exception:
+            return None
 
     # -------------------------------------------------------------------------------------------------------------- #
     # Properties

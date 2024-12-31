@@ -67,7 +67,7 @@ def ride_history(request):
 
     for ride in rides:
         gpx_id = ride.gpx_id
-        gpx = GpxRepository().one_gpx(gpx_id)
+        gpx = GpxRepository().one_by_id(gpx_id)
         if gpx:
             gpxes.append(gpx)
             ride.length_km = gpx.length_km

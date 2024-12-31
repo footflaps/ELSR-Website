@@ -1,10 +1,11 @@
 from flask import render_template, url_for, request, flash, redirect, abort
 from flask_login import current_user
 from werkzeug import exceptions
-from datetime import datetime
+from datetime import datetime, time
 import json
 import os
 from threading import Thread
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -19,9 +20,12 @@ from core import app, current_year, delete_file_if_exists, live_site, GRAVEL_CHO
 from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository, TYPE_ROAD, TYPE_GRAVEL
-from core.database.repositories.calendar_repository import CalendarRepository, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
-                                                   MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES
+from core.database.repositories.calendar_repository import (CalendarModel, CalendarRepository, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER,
+                                                            MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES)
 from core.database.repositories.event_repository import EventRepository
+from core.database.models.user_model import UserModel
+from core.database.models.gpx_model import GpxModel
+from core.database.models.cafe_model import CafeModel
 
 from core.forms.calendar_forms import create_ride_form
 
@@ -31,6 +35,43 @@ from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.subs_gpx_edit import strip_excess_info_from_gpx
 from core.subs_email_sms import send_ride_notification_emails
 from core.subs_dates import get_date_from_url
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# Functions
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Split start string back into two parts
+# -------------------------------------------------------------------------------------------------------------- #
+def split_start_string(start_time):
+    # We expect the form "08:00 from Bean Theory Cafe" etc
+    # Get time as a string eg "08:24"
+    time_str = start_time.split(' ')[0]
+    # Convert to a time object
+    # Added [0:2] on the end to cut off 'am' which may be in database eg '08:00am'
+    time_obj = time(int(time_str.split(':')[0]), int(time_str.split(':')[1][0:2]))
+    # Get location as a string
+    location = " ".join(start_time.split(' ')[2:])
+    # Return the two parts
+    return {"time": time_obj,
+            "place": location}
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Extract start time and location from the form
+# -------------------------------------------------------------------------------------------------------------- #
+def create_start_string(form):
+    start_time = str(form.start_time.data).split(':')[:2]
+    print(f"start_time = '{start_time}'")
+    if form.start_location.data != MEETING_OTHER:
+        return f"{start_time[0]}:{start_time[1]} from {form.start_location.data}"
+    else:
+        return f"{start_time[0]}:{start_time[1]} from {form.other_location.data.strip()}"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -55,50 +96,49 @@ def add_ride():
     # Did we get passed a date or a ride_id? (Optional)
     # ----------------------------------------------------------- #
     start_date_str = get_date_from_url(return_none_if_empty=True)
-    ride_id = request.args.get('ride_id', None)
+    calendar_id = request.args.get('ride_id', None)
 
     # ----------------------------------------------------------- #
     # Validate ride_id
     # ----------------------------------------------------------- #
-    if ride_id:
-        ride = CalendarRepository().one_ride_id(ride_id)
-        if not ride:
-            app.logger.debug(f"add_ride(): Failed to locate ride, ride_id = '{ride_id}'.")
-            EventRepository().log_event("Edit Ride Fail", f"Failed to locate ride, ride_id = '{ride_id}'.")
+    if calendar_id:
+        calendar_entry: CalendarModel | None = CalendarRepository().one_by_id(id=calendar_id)
+        if not calendar_entry:
+            app.logger.debug(f"add_ride(): Failed to locate ride, ride_id = '{calendar_id}'.")
+            EventRepository().log_event("Edit Ride Fail", f"Failed to locate ride, ride_id = '{calendar_id}'.")
             return abort(404)
     else:
-        ride = None
+        calendar_entry: CalendarModel | None = None
 
     # ----------------------------------------------------------- #
     # Work out what we're doing (Add / Edit)
     # ----------------------------------------------------------- #
-    if ride_id \
-            and request.method == 'GET':
+    if calendar_id and request.method == 'GET':
         # ----------------------------------------------------------- #
         # Edit event, so pre-fill form from dB
         # ----------------------------------------------------------- #
         # 1: Need to locate the GPX track used by the ride
-        gpx = GpxRepository().one_gpx(ride.gpx_id)
+        gpx: GpxModel = GpxRepository().one_by_id(calendar_entry.gpx_id)
         if not gpx:
             # Should never happen, but...
-            app.logger.debug(f"add_ride(): Failed to locate gpx, ride_id  = '{ride_id}', "
-                             f"ride.gpx_id = '{ride.gpx_id}'.")
-            EventRepository().log_event("Edit Ride Fail", f"Failed to locate gpx, ride_id  = '{ride_id}', "
-                                                f"ride.gpx_id = '{ride.gpx_id}'.")
+            app.logger.debug(f"add_ride(): Failed to locate gpx, ride_id  = '{calendar_id}', "
+                             f"ride.gpx_id = '{calendar_entry.gpx_id}'.")
+            EventRepository().log_event("Edit Ride Fail", f"Failed to locate gpx, ride_id  = '{calendar_id}', "
+                                                          f"ride.gpx_id = '{calendar_entry.gpx_id}'.")
             flash("Sorry, something went wrong..")
             return redirect(url_for('weekend', date=start_date_str))
 
         # 2: Need to locate the target cafe for the ride (might be a new cafe so None is acceptable)
-        cafe = CafeRepository().one_cafe(ride.cafe_id)
+        cafe = CafeRepository().one_cafe(calendar_entry.cafe_id)
 
         # 3: Need to locate the owner of the ride
-        user = UserRepository().find_user_from_email(ride.email)
+        user: UserModel = UserRepository().find_user_from_email(calendar_entry.email)
         if not user:
             # Should never happen, but...
-            app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{ride_id}', "
-                             f"ride.email = '{ride.email}'.")
-            EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
-                                                f"ride.email = '{ride.email}'.")
+            app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{calendar_id}', "
+                             f"ride.email = '{calendar_entry.email}'.")
+            EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{calendar_id}', "
+                                                          f"ride.email = '{calendar_entry.email}'.")
             flash("Sorry, something went wrong..")
             return redirect(url_for('weekend', date=start_date_str))
 
@@ -106,17 +146,18 @@ def add_ride():
         form = create_ride_form(current_user.admin, gpx.id)
 
         # Date
-        form.date.data = datetime.strptime(ride.date.strip(), '%d%m%Y')
+        print(f"Setting date to {calendar_entry.date} #2")
+        form.date.data = datetime.strptime(calendar_entry.date.strip(), '%d%m%Y')
 
         # Fill in Owner box (admin only)
         if current_user.admin:
             form.owner.data = user.combo_str
 
         # Ride leader
-        form.leader.data = ride.leader
+        form.leader.data = calendar_entry.leader
 
         # Start time and location
-        start_details = split_start_string(ride.start_time)
+        start_details = split_start_string(calendar_entry.start_time)
         form.start_time.data = start_details['time']
         place = start_details['place']
         if place == MEETING_BEAN \
@@ -136,10 +177,10 @@ def add_ride():
         else:
             # Not in the database yet
             form.destination.data = NEW_CAFE
-            form.new_destination.data = ride.destination
+            form.new_destination.data = calendar_entry.destination
 
         # Pace / Group
-        form.group.data = ride.group
+        form.group.data = calendar_entry.group
 
         # Existing route
         form.gpx_name.data = gpx.combo_string
@@ -162,29 +203,26 @@ def add_ride():
         # ----------------------------------------------------------- #
         if current_user.admin:
             form = create_ride_form(True)
-            if not ride and \
-                    request.method == 'GET':
+            if not calendar_entry and request.method == 'GET':
                 form.owner.data = current_user.combo_str
         else:
             form = create_ride_form(False)
 
         # Pre-populate the data in the form, if we were passed one
-        if start_date_str:
+        if start_date_str and request.method == 'GET':
             start_date = datetime(int(start_date_str[4:8]), int(start_date_str[2:4]), int(start_date_str[0:2]), 0, 00)
+            print(f"Setting date to {start_date} #1")
             form.date.data = start_date
 
         # Assume the author is the group leader
-        if not ride and \
-                request.method == 'GET':
+        if not calendar_entry and request.method == 'GET':
             form.leader.data = current_user.name
 
     # Are we posting the completed form?
-    if request.method == 'POST' \
-            and form.validate_on_submit():
+    if request.method == 'POST' and form.validate_on_submit():
         # ----------------------------------------------------------- #
         # Handle form passing validation
         # ----------------------------------------------------------- #
-
         # Detect cancel button
         if form.cancel.data:
             # Abort now...
@@ -194,19 +232,19 @@ def add_ride():
         if form.destination.data != NEW_CAFE:
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
-            cafe_id = CafeRepository().cafe_id_from_combo_string(form.destination.data)
-            cafe = CafeRepository().one_cafe(cafe_id)
+            cafe_id: int = CafeRepository().cafe_id_from_combo_string(form.destination.data)
+            cafe: CafeModel | None = CafeRepository().one_cafe(cafe_id)
             if not cafe:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get cafe from '{form.destination.data}'.")
                 EventRepository().log_event("Add ride Fail", f"Failed to get cafe from '{form.destination.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the cafe choice.")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
         else:
             # New cafe, not yet in database
-            cafe = None
+            cafe: CafeModel | None = None
 
         # 2: Validate GPX (must be specified)
         if form.gpx_name.data == UPLOAD_ROUTE \
@@ -217,23 +255,23 @@ def add_ride():
         if form.gpx_name.data != UPLOAD_ROUTE:
             # Work out which GPX route they chose
             # eg "20: 'Mill End again', 107.6km / 838.0m"
-            gpx_id = GpxRepository().gpx_id_from_combo_string(form.gpx_name.data)
-            gpx = GpxRepository().one_gpx(gpx_id)
+            gpx_id: int = GpxRepository().gpx_id_from_combo_string(form.gpx_name.data)
+            gpx: GpxModel | None = GpxRepository().one_by_id(id=gpx_id)
             if not gpx:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get GPX from '{form.gpx_name.data}'.")
                 EventRepository().log_event("Add ride Fail", f"Failed to get GPX from '{form.gpx_name.data}'.")
                 flash("Sorry, something went wrong - couldn't understand the GPX choice.")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
         else:
             # They are uploading their own GPX file
-            gpx = None
+            gpx: GpxModel | None = None
 
         # 4: Check route passes cafe (if both from comboboxes)
         if gpx and cafe:
-            match = False
+            match: bool = False
             # gpx.cafes_passed is a json.dumps string, so need to convert back
             for cafe_passed in json.loads(gpx.cafes_passed):
                 if int(cafe_passed["cafe_id"]) == cafe.id:
@@ -241,7 +279,7 @@ def add_ride():
             if not match:
                 # Doesn't look like we pass that cafe!
                 flash(f"That GPX route doesn't pass {cafe.name}!")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -253,7 +291,7 @@ def add_ride():
                 flash("Only Admins can nominate someone else to lead a ride.")
                 # In case they've forgotten their username, reset it in the form
                 form.leader.data = current_user.name
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -266,7 +304,7 @@ def add_ride():
                 app.logger.debug(f"add_ride(): Failed to find 'gpx_file' in request.files!")
                 EventRepository().log_event(f"New Ride Fail", f"Failed to find 'gpx_file' in request.files!")
                 flash("Couldn't find the file.")
-                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                        live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
             else:
@@ -280,7 +318,7 @@ def add_ride():
                     app.logger.debug(f"add_ride(): No selected file!")
                     EventRepository().log_event(f"Add ride Fail", f"No selected file!")
                     flash('No selected file')
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                            MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -289,14 +327,14 @@ def add_ride():
                     app.logger.debug(f"add_ride(): Invalid file '{file.filename}'!")
                     EventRepository().log_event(f"Add ride Fail", f"Invalid file '{file.filename}'!")
                     flash("That's not a GPX file!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                            MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
                 # Create a new GPX object
                 # We do this first as we need the id in order to create
                 # the filename for the GPX file when we upload it
-                gpx = GpxRepository()
+                gpx: GpxModel = GpxModel()
                 if form.destination.data != NEW_CAFE:
                     # Existing cafe, so use name from combobox, but strip off cafe.id in brackets
                     gpx.name = form.destination.data.split('(')[0]
@@ -315,11 +353,9 @@ def add_ride():
                     gpx.type = TYPE_ROAD
 
                 # Add to the dB
-                new_id = gpx.add_gpx(gpx)
-                if new_id:
+                gpx: GpxModel = GpxRepository().add_gpx(gpx)
+                if gpx:
                     # Success, added GPX to dB
-                    # Have to re-get the GPX as it's changed since we created it
-                    gpx = GpxRepository().one_gpx(new_id)
                     app.logger.debug(f"add_ride(): GPX added to dB, id = '{gpx.id}'.")
                     EventRepository().log_event(f"Add ride Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
                 else:
@@ -327,7 +363,7 @@ def add_ride():
                     app.logger.debug(f"add_ride(): Failed to add gpx to the dB!")
                     EventRepository().log_event(f"Add ride Fail", f"Failed to add gpx to the dB!")
                     flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                            MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -339,7 +375,7 @@ def add_ride():
                 if not delete_file_if_exists(filename):
                     # Failed to delete existing file (func will generate error trace)
                     flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                            MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -350,7 +386,7 @@ def add_ride():
                     app.logger.debug(f"add_ride(): Failed to upload/save '{filename}', error code was {e.args}.")
                     EventRepository().log_event(f"Add ride Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                     flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                            MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -359,7 +395,7 @@ def add_ride():
                     app.logger.debug(f"add_ride(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     EventRepository().log_event(f"Add ride Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                     flash("Sorry, something went wrong!")
-                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+                    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                            live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                            MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -369,59 +405,66 @@ def add_ride():
                 EventRepository().log_event(f"Add ride Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
 
         # ----------------------------------------------------------- #
-        # We can now add / update the ride in the Calendar
+        # Is this a new ride?
         # ----------------------------------------------------------- #
-        if ride:
-            # Updating an existing ride
-            new_ride = ride
-        else:
-            # New event
-            new_ride = CalendarRepository()
+        if not calendar_entry:
+            calendar_entry: CalendarModel = CalendarRepository()
 
-        # Populate the calendar entry
         # Convert form date format '2023-06-23' to preferred format '23062023'
         start_date_str = form.date.data.strftime("%d%m%Y")
+        print(f"Got {start_date_str} from form as date..")
 
-        new_ride.date = start_date_str
-        new_ride.leader = form.leader.data
+        # ----------------------------------------------------------- #
+        # Populate the calendar entry
+        # ----------------------------------------------------------- #
+        # For now, we have two date formats
+        calendar_entry.date = start_date_str
+        calendar_entry.converted_date = form.date.data
+
         # Create our ride start string eg "8:00am from Bean Theory Cafe"
-        new_ride.start_time = create_start_string(form)
+        calendar_entry.start_time = create_start_string(form)
+
+        # Do we have a cafe specified?
         if cafe:
             # Existing cafe from db
-            new_ride.destination = cafe.name
-            new_ride.cafe_id = cafe.id
+            calendar_entry.destination = cafe.name
+            calendar_entry.cafe_id = cafe.id
         else:
             # New destination
-            new_ride.destination = form.new_destination.data
-            new_ride.cafe_id = None
-        new_ride.group = form.group.data
-        new_ride.gpx_id = gpx.id
+            calendar_entry.destination = form.new_destination.data
+            calendar_entry.cafe_id = None
+
+        calendar_entry.group = form.group.data
+        calendar_entry.gpx_id = gpx.id
+        calendar_entry.leader = form.leader.data
 
         # Admin can allocate events to people
         if current_user.admin:
             # Get user
-            user = UserRepository().user_from_combo_string(form.owner.data)
+            user: UserModel = UserRepository().user_from_combo_string(form.owner.data)
             if user:
-                new_ride.email = user.email
+                calendar_entry.email = user.email
             else:
                 # Should never happen, but...
-                app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{ride_id}', "
+                app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{calendar_id}', "
                                  f"form.owner.data = '{form.owner.data}'.")
-                EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{ride_id}', "
-                                                    f"form.owner.data = '{form.owner.data}'.")
+                EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{calendar_id}', "
+                                                              f"form.owner.data = '{form.owner.data}'.")
                 flash("Sorry, something went wrong..")
                 return redirect(url_for('weekend', date=start_date_str))
         else:
             # Not admin, so user owns the ride event
-            new_ride.email = current_user.email
+            calendar_entry.email = current_user.email
 
+        # ----------------------------------------------------------- #
         # Add to the dB
-        new_ride = CalendarRepository().add_ride(new_ride)
-        if new_ride:
+        # ----------------------------------------------------------- #
+        calendar_entry: CalendarModel | None = CalendarRepository().add_ride(calendar_entry)
+        if calendar_entry:
             # Success
             app.logger.debug(f"add_ride(): Successfully added new ride.")
             EventRepository().log_event("Add ride Pass", f"Successfully added new_ride.")
-            if ride:
+            if calendar_entry:
                 flash("Ride updated!")
             else:
                 flash("Ride added to Calendar!")
@@ -434,15 +477,16 @@ def add_ride():
                                         return_path=f"{url_for('weekend', date=start_date_str)}"))
             else:
                 # Send all the email notifications now as ride us public
-                Thread(target=send_ride_notification_emails, args=(new_ride, )).start()
+                Thread(target=send_ride_notification_emails, args=(calendar_entry,)).start()
                 # Go to Calendar page for this ride's date
                 return redirect(url_for('weekend', date=start_date_str))
         else:
             # Should never happen, but...
-            app.logger.debug(f"add_ride(): Failed to add ride from '{new_ride}'.")
-            EventRepository().log_event("Add ride Fail", f"Failed to add ride '{new_ride}'.")
+            # NB calendar_entry = None at this stage
+            app.logger.debug(f"add_ride(): Failed to add ride to calendar.")
+            EventRepository().log_event("Add ride Fail", f"Failed to add ride to calendar.")
             flash("Sorry, something went wrong.")
-            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride,
+            return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry,
                                    live_site=live_site(), DEFAULT_START_TIMES=DEFAULT_START_TIMES,
                                    MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -457,7 +501,7 @@ def add_ride():
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
-        return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site(),
+        return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry, live_site=live_site(),
                                DEFAULT_START_TIMES=DEFAULT_START_TIMES, MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE,
                                UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -465,7 +509,7 @@ def add_ride():
     # Handle GET
     # ----------------------------------------------------------- #
 
-    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=ride, live_site=live_site(),
+    return render_template("calendar_add_ride.html", year=current_year, form=form, ride=calendar_entry, live_site=live_site(),
                            DEFAULT_START_TIMES=DEFAULT_START_TIMES, MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE,
                            UPLOAD_ROUTE=UPLOAD_ROUTE)
 
@@ -521,7 +565,7 @@ def delete_ride():
     # ----------------------------------------------------------- #
     # Check the ride_id is valid
     # ----------------------------------------------------------- #
-    ride = CalendarRepository().one_ride_id(ride_id)
+    ride = CalendarRepository().one_by_id(ride_id)
     if not ride:
         app.logger.debug(f"delete_ride(): Failed to locate ride with cafe_id = '{ride_id}'.")
         EventRepository().log_event("Delete Ride Fail", f"Failed to locate ride with cafe_id = '{ride_id}'.")
@@ -545,7 +589,7 @@ def delete_ride():
         app.logger.debug(f"delete_ride(): Rejected request from '{current_user.email}' as no permissions"
                          f" for ride_id = '{ride_id}'.")
         EventRepository().log_event("Delete Ride Fail", f"Rejected request from user '{current_user.email}' as no "
-                                              f"permissions for ride_id = '{ride_id}'.")
+                                                        f"permissions for ride_id = '{ride_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #

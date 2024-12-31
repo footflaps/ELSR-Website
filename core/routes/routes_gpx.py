@@ -16,6 +16,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
+from core.database.models.gpx_model import GpxModel
 from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_repository import CafeRepository
@@ -131,7 +132,7 @@ def gpx_details(gpx_id):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
 
     if not gpx:
         app.logger.debug(f"gpx_details(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -328,11 +329,9 @@ def new_route():
             gpx.public = False
 
             # Add to the dB
-            new_id = gpx.add_gpx(gpx)
-            if new_id:
+            gpx: GpxModel | None = gpx.add_gpx(gpx)
+            if gpx:
                 # Success, added GPX to dB
-                # Have to re-get the GPX as it's changed since we created it
-                gpx = GpxRepository().one_gpx(new_id)
                 app.logger.debug(f"new_route(): GPX added to dB, id = '{gpx.id}'.")
                 EventRepository().log_event(f"New GPX Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
             else:
@@ -443,7 +442,7 @@ def route_delete():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
 
     if not gpx:
         app.logger.debug(f"route_delete(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -541,7 +540,7 @@ def flag_gpx():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"flag_gpx(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         EventRepository().log_event("Flag GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
@@ -591,7 +590,7 @@ def route_download(gpx_id):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"route_download(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         EventRepository().log_event("GPX Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -680,7 +679,7 @@ def gpx_download2():
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"gpx_download2(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         EventRepository().log_event("gpx_download2 Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")

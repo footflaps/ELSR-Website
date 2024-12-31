@@ -205,7 +205,7 @@ def add_blog():
         if blog.gpx_index == NO_GPX:
             form.gpx.data = NO_GPX
         else:
-            form.gpx.data = GpxRepository().one_gpx(blog.gpx_index).combo_string()
+            form.gpx.data = GpxRepository().one_by_id(blog.gpx_index).combo_string()
         form.details.data = blog.details
 
         if blog.private:

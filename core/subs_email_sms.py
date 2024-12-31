@@ -365,7 +365,7 @@ def send_ride_notification_emails(ride: CalendarRepository()):
     # ----------------------------------------------------------- #
     # Make sure the GPX exists
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(ride.gpx_id)
+    gpx = GpxRepository().one_by_id(ride.gpx_id)
     if not gpx:
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Can't find GPX, ride.id = '{ride.id}', "
@@ -451,7 +451,7 @@ def send_one_ride_notification_email(user: UserRepository(), ride: CalendarRepos
     # ----------------------------------------------------------- #
     # Get GPX / Direction
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(ride.gpx_id)
+    gpx = GpxRepository().one_by_id(ride.gpx_id)
     direction = "n/a"
     if gpx:
         if gpx.direction == "CW":

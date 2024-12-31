@@ -1,40 +1,31 @@
-from flask import render_template, url_for, request, flash, redirect, abort
-from flask_login import current_user
-from werkzeug import exceptions
+from flask import render_template, url_for, flash, abort
 from bbc_feeds import weather
-from datetime import datetime, timedelta, time
-import json
+from datetime import datetime, timedelta
 import os
-from threading import Thread
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, delete_file_if_exists, live_site, GLOBAL_FLASH, GRAVEL_CHOICE
+from core import app, current_year, live_site, GLOBAL_FLASH
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.database.repositories.gpx_repository import GpxRepository, TYPE_ROAD, TYPE_GRAVEL
-from core.database.repositories.calendar_repository import CalendarRepository, NEW_CAFE, UPLOAD_ROUTE, MEETING_OTHER, \
-                                                   MEETING_BEAN, MEETING_COFFEE_VANS, DEFAULT_START_TIMES
+from core.database.repositories.gpx_repository import GpxRepository
+from core.database.repositories.calendar_repository import CalendarRepository, DEFAULT_START_TIMES
 from core.database.repositories.event_repository import EventRepository
-
-from core.forms.calendar_forms import create_ride_form
 
 from core.database.jinja.calendar_jinja import start_time_string
 
-from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
+from core.decorators.user_decorators import update_last_seen, logout_barred_user
 
 from core.subs_google_maps import create_polyline_set, ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
-from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
+from core.subs_gpx import GPX_UPLOAD_FOLDER_ABS
 from core.subs_graphjs import get_elevation_data_set, get_destination_cafe_height
-from core.subs_gpx_edit import strip_excess_info_from_gpx
-from core.subs_email_sms import send_ride_notification_emails
 from core.subs_dates import get_date_from_url
 
 
@@ -195,35 +186,6 @@ def work_out_days(target_date_str) -> list[object]:
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Extract start time and location from the form
-# -------------------------------------------------------------------------------------------------------------- #
-def create_start_string(form):
-    start_time = str(form.start_time.data).split(':')[:2]
-    print(f"start_time = '{start_time}'")
-    if form.start_location.data != MEETING_OTHER:
-        return f"{start_time[0]}:{start_time[1]} from {form.start_location.data}"
-    else:
-        return f"{start_time[0]}:{start_time[1]} from {form.other_location.data.strip()}"
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Split start string back into two parts
-# -------------------------------------------------------------------------------------------------------------- #
-def split_start_string(start_time):
-    # We expect the form "08:00 from Bean Theory Cafe" etc
-    # Get time as a string eg "08:24"
-    time_str = start_time.split(' ')[0]
-    # Convert to a time object
-    # Added [0:2] on the end to cut off 'am' which may be in database eg '08:00am'
-    time_obj = time(int(time_str.split(':')[0]), int(time_str.split(':')[1][0:2]))
-    # Get location as a string
-    location = " ".join(start_time.split(' ')[2:])
-    # Return the two parts
-    return {"time": time_obj,
-            "place": location}
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 # html routes
@@ -290,7 +252,7 @@ def weekend():
         # Loop over each ride
         for ride in tmp_rides:
             # Look up the GPX object referenced in the ride object
-            gpx = GpxRepository().one_gpx(ride.gpx_id)
+            gpx = GpxRepository().one_by_id(ride.gpx_id)
 
             # NB It could have been deleted, so check it still exists
             if gpx:

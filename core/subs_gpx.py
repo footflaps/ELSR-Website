@@ -129,7 +129,7 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_gpx(gpx_id)
+    gpx = GpxRepository().one_by_id(gpx_id)
 
     # Make sure gpx_id is valid
     if not gpx:
@@ -207,7 +207,7 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # send_email is either 'False' for no, or set to an int (ride_id) for yes
     if type(send_email) == int:
         # We have a ride_id index into the calendar
-        ride = CalendarRepository().one_ride_id(send_email)
+        ride = CalendarRepository().one_by_id(send_email)
         # Check that worked
         if not ride:
             # Should never happen, but...

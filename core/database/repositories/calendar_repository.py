@@ -173,9 +173,9 @@ class CalendarRepository(CalendarModel):
 
     # Look up event by ID
     @staticmethod
-    def one_ride_id(ride_id):
+    def one_by_id(id):
         with app.app_context():
-            ride = CalendarModel.query.filter_by(id=ride_id).first()
+            ride = CalendarModel.query.filter_by(id=id).first()
             # Will return nothing if id is invalid
             return ride
 
