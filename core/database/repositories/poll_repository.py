@@ -37,7 +37,7 @@ class PollRepository(PollModel):
             try:
                 db.session.add(new_poll)
                 db.session.commit()
-                db.refresh(new_poll)
+                db.session.refresh(new_poll)
                 return new_poll
 
             except Exception as e:

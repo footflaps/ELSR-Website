@@ -59,7 +59,7 @@ class MessageRepository(MessageModel):
                 # Update db
                 db.session.add(message)
                 db.session.commit()
-                db.refresh(message)
+                db.session.refresh(message)
                 return message
 
             except Exception as e:

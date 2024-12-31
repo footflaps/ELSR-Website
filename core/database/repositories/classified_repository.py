@@ -77,7 +77,7 @@ class ClassifiedRepository(ClassifiedModel):
             try:
                 db.session.add(new_classified)
                 db.session.commit()
-                db.refresh(new_classified)
+                db.session.refresh(new_classified)
                 # Return blog item
                 return new_classified
 

@@ -47,7 +47,7 @@ class CafeRepository(CafeModel):
             try:
                 db.session.add(new_cafe)
                 db.session.commit()
-                db.refresh(new_cafe)
+                db.session.refresh(new_cafe)
                 return new_cafe
 
             except Exception as e:

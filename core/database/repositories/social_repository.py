@@ -44,7 +44,7 @@ class SocialRepository(SocialModel):
             try:
                 db.session.add(new_social)
                 db.session.commit()
-                db.refresh(new_social)
+                db.session.refresh(new_social)
                 return new_social
 
             except Exception as e:

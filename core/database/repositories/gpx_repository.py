@@ -49,7 +49,7 @@ class GpxRepository(GpxModel):
             try:
                 db.session.add(new_gpx)
                 db.session.commit()
-                db.refresh(new_gpx)
+                db.session.refresh(new_gpx)
                 return new_gpx
             
             except Exception as e:
