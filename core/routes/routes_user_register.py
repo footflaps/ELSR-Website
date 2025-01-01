@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort, session
+from flask import render_template, redirect, url_for, flash, request, abort, session, Response
 from flask_login import login_user, current_user
 from werkzeug import exceptions
 from threading import Thread
@@ -48,7 +48,7 @@ DEFAULT_EVENT_DAYS = 7
 
 @app.route('/register', methods=['GET', 'POST'])
 @update_last_seen
-def register():
+def register() -> Response:
     # Need a form
     form = CreateUserForm()
 
@@ -132,7 +132,7 @@ def register():
 
 @app.route('/validate_email', methods=['GET', 'POST'])
 @update_last_seen
-def validate_email():
+def validate_email() -> Response:
     # We support two entry modes to this page
     #  1. They click on a link in their email and it makes a request with code and email fulfilled
     #  2. They go to this page and enter the details manually via the form
@@ -293,7 +293,7 @@ def validate_email():
 
 @app.route('/twofa_login', methods=['GET', 'POST'])
 @update_last_seen
-def twofa_login():
+def twofa_login() -> Response:
     # We support two entry modes to this page
     #  1. They click on a link in their email and it makes a request with code and email fulfilled
     #  2. They go to this page and enter the details manually via the form
@@ -394,7 +394,7 @@ def twofa_login():
 @logout_barred_user
 @login_required
 @update_last_seen
-def add_phone_number():
+def add_phone_number() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -500,7 +500,7 @@ def add_phone_number():
 @logout_barred_user
 @login_required
 @update_last_seen
-def mobile_verify():
+def mobile_verify() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

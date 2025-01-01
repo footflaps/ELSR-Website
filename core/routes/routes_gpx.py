@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory
+from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory, Response
 from flask_login import current_user
 from werkzeug import exceptions
 import os
@@ -73,7 +73,7 @@ def download_count(gpx):
 
 @app.route('/routes', methods=['GET'])
 @update_last_seen
-def gpx_list():
+def gpx_list() -> Response:
     # Grab all our routes
     gpxes = GpxRepository().all_gpxes()
 
@@ -111,7 +111,7 @@ def gpx_list():
 
 @app.route('/gpx_top10', methods=['GET'])
 @update_last_seen
-def gpx_top10():
+def gpx_top10() -> Response:
     # Grab all our gpxes
     gpxes = GpxRepository().all_gpxes_sorted_downloads()
 
@@ -129,7 +129,7 @@ def gpx_top10():
 
 @app.route('/route/<int:gpx_id>', methods=['GET'])
 @update_last_seen
-def gpx_details(gpx_id):
+def gpx_details(gpx_id) -> Response:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -274,7 +274,7 @@ def gpx_details(gpx_id):
 @login_required
 @update_last_seen
 @rw_required
-def new_route():
+def new_route() -> Response:
     # ----------------------------------------------------------- #
     # Need a form for uploading
     # ----------------------------------------------------------- #
@@ -402,7 +402,7 @@ def new_route():
 @login_required
 @update_last_seen
 @rw_required
-def route_delete():
+def route_delete() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -512,7 +512,7 @@ def route_delete():
 @login_required
 @update_last_seen
 @rw_required
-def flag_gpx():
+def flag_gpx() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -587,7 +587,7 @@ def flag_gpx():
 @logout_barred_user
 @login_required
 @update_last_seen
-def route_download(gpx_id):
+def route_download(gpx_id) -> Response:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -653,7 +653,7 @@ def route_download(gpx_id):
 @app.route('/gpx_download2', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def gpx_download2():
+def gpx_download2() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

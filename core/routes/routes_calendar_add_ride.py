@@ -131,7 +131,7 @@ def handle_gpx_upload(form, calendar_entry: CalendarModel) -> Dict[str, bool | G
     # ----------------------------------------------------------- #
     # Create a new GPX object and populate necessary fields
     # ----------------------------------------------------------- #
-    gpx = GpxModel()
+    gpx: GpxModel = GpxModel()
     gpx.name = form.destination.data.split('(')[0] if form.destination.data != NEW_CAFE else form.new_destination.data
     gpx.email = current_user.email
     gpx.cafes_passed = "[]"
@@ -221,7 +221,7 @@ def handle_gpx_upload(form, calendar_entry: CalendarModel) -> Dict[str, bool | G
 @login_required
 @update_last_seen
 @rw_required
-def add_ride():
+def add_ride() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a date or a ride_id? (Optional)
     # ----------------------------------------------------------- #
@@ -553,7 +553,7 @@ def add_ride():
 @login_required
 @update_last_seen
 @rw_required
-def delete_ride():
+def delete_ride() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

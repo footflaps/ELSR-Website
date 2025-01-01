@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort
+from flask import render_template, flash, abort, Response
 import os
 import requests as requests2
 from bs4 import BeautifulSoup
@@ -26,7 +26,6 @@ from core.database.repositories.cafe_repository import OPEN_CAFE_COLOUR
 from core.subs_graphjs import get_elevation_data
 from core.subs_google_maps import polyline_json, google_maps_api_key, MAP_BOUNDS, count_map_loads
 from core.database.repositories.event_repository import EventRepository
-from core.database.jinja.message_jinja import admin_has_mail
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -82,7 +81,7 @@ def get_chaingang_top10():
 
 @app.route('/chaingang', methods=['GET'])
 @update_last_seen
-def chaingang():
+def chaingang() -> Response:
     # -------------------------------------------------------------------------------------------- #
     # Show chaingang route
     # -------------------------------------------------------------------------------------------- #

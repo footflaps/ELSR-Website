@@ -153,7 +153,7 @@ CLASSIFIED_BODY = "Dear [USER], \n\n" \
 # Send Blog notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_blog_notification_emails(blog: Blog()):
+def send_blog_notification_emails(blog: Blog):
     # ----------------------------------------------------------- #
     # Make sure social exists
     # ----------------------------------------------------------- #
@@ -176,7 +176,7 @@ def send_blog_notification_emails(blog: Blog()):
                 send_one_blog_notification_email(user, blog)
 
 
-def send_one_blog_notification_email(user: UserRepository(), blog: Blog()):
+def send_one_blog_notification_email(user: UserRepository, blog: Blog):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -254,7 +254,7 @@ def send_one_blog_notification_email(user: UserRepository(), blog: Blog()):
 # Send Social notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_social_notification_emails(social: SocialRepository()):
+def send_social_notification_emails(social: SocialRepository):
     # ----------------------------------------------------------- #
     # Make sure social exists
     # ----------------------------------------------------------- #
@@ -274,7 +274,7 @@ def send_social_notification_emails(social: SocialRepository()):
             send_one_social_notification_email(user, social)
 
 
-def send_one_social_notification_email(user: UserRepository(), social: SocialRepository()):
+def send_one_social_notification_email(user: UserRepository, social: SocialRepository):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -352,7 +352,7 @@ def send_one_social_notification_email(user: UserRepository(), social: SocialRep
 # Send ride notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_ride_notification_emails(ride: CalendarRepository()):
+def send_ride_notification_emails(ride: CalendarRepository):
     # ----------------------------------------------------------- #
     # Make sure ride exists
     # ----------------------------------------------------------- #
@@ -419,7 +419,7 @@ def send_ride_notification_emails(ride: CalendarRepository()):
                 send_one_ride_notification_email(user, ride)
 
 
-def send_one_ride_notification_email(user: UserRepository(), ride: CalendarRepository()):
+def send_one_ride_notification_email(user: UserRepository, ride: CalendarRepository):
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -545,7 +545,7 @@ def send_one_ride_notification_email(user: UserRepository(), ride: CalendarRepos
 # Send email notification for message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_message_notification_email(message: MessageRepository(), user: UserRepository()):
+def send_message_notification_email(message: MessageRepository, user: UserRepository):
     # ----------------------------------------------------------- #
     # Make sure user and message exist
     # ----------------------------------------------------------- #

@@ -1,4 +1,4 @@
-from flask import url_for, request, flash, redirect, abort
+from flask import url_for, request, flash, redirect, abort, Response
 from flask_login import current_user
 import json
 
@@ -36,7 +36,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @update_last_seen
 @login_required
 @rw_required
-def social_can():
+def social_can() -> Response:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
@@ -116,7 +116,7 @@ def social_can():
 @update_last_seen
 @login_required
 @rw_required
-def social_cant():
+def social_cant() -> Response:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #

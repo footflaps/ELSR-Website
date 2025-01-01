@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort, redirect, url_for
+from flask import render_template, request, flash, abort, redirect, url_for, Response
 from flask_login import current_user
 from werkzeug import exceptions
 from datetime import date, datetime, timedelta
@@ -56,7 +56,7 @@ FIRST_PAGE = 0
 @logout_barred_user
 @login_required
 @rw_required
-def add_blog():
+def add_blog() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
@@ -263,7 +263,7 @@ def add_blog():
 @update_last_seen
 @logout_barred_user
 @login_required
-def delete_blog():
+def delete_blog() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id?
     # ----------------------------------------------------------- #

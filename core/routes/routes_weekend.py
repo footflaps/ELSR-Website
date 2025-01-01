@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, abort
+from flask import render_template, url_for, flash, abort, Response
 from bbc_feeds import weather
 from datetime import datetime, timedelta
 import os
@@ -47,7 +47,7 @@ CAMBRIDGE_BBC_WEATHER_CODE = 2653941
 # -------------------------------------------------------------------------------------------------------------- #
 # Work out which days we will display
 # -------------------------------------------------------------------------------------------------------------- #
-def work_out_days(target_date_str) -> list[object]:
+def work_out_days(target_date_str) -> list[object] | None:
     """
     The weekend page displays all the rides for the upcoming weekend. However, we may have been called with a date
     for a weekend further in the future or in the past. The weekend may also be a BH (with a Friday, Monday or both
@@ -70,7 +70,7 @@ def work_out_days(target_date_str) -> list[object]:
                                    int(target_date_str[2:4]),
                                    int(target_date_str[0:2]),
                                    0, 00)
-        except:
+        except Exception:
             # Flag back fail
             return None
 
@@ -145,7 +145,7 @@ def work_out_days(target_date_str) -> list[object]:
         friday_date_str = friday_date.strftime("%d%m%Y")
         # Do we have any rides in the dB
         if CalendarRepository().all_calendar_date(friday_date_str):
-            # We a ride on the Friday, so pre-pend Friday
+            # We have a ride on the Friday, so pre-pend Friday
             days.insert(0, "Friday")
             dates_short["Friday"] = friday_date_str
 
@@ -158,7 +158,7 @@ def work_out_days(target_date_str) -> list[object]:
         monday_date_str = monday_date.strftime("%d%m%Y")
         # Do we have any rides in the dB
         if CalendarRepository().all_calendar_date(monday_date_str):
-            # We a ride on the Friday, so append Monday
+            # We have a ride on the Monday, so append Monday
             days.append("Monday")
             dates_short["Monday"] = monday_date_str
 
@@ -200,7 +200,7 @@ def work_out_days(target_date_str) -> list[object]:
 @app.route('/weekend', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def weekend():
+def weekend() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a date? (Optional)
     # ----------------------------------------------------------- #

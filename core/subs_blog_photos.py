@@ -105,7 +105,7 @@ def update_blog_photo(form, blog):
         flash("Invalid file type for image!")
 
 
-def delete_blog_photos(blog: Blog()):
+def delete_blog_photos(blog: Blog) -> None:
     # Check it has an id!
     if not blog.id:
         app.logger.debug(f"delete_blog_photos(): Passed blog object with no id!")

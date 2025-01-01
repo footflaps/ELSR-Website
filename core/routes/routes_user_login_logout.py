@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
+from flask import render_template, redirect, url_for, flash, request, abort, session, make_response, Response
 from flask_login import login_user, current_user, logout_user
 from threading import Thread
 import os
@@ -60,7 +60,7 @@ def same_origin(current_uri, compare_uri):
 
 @app.route('/login', methods=['GET', 'POST'])
 @update_last_seen
-def login():
+def login() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
@@ -203,7 +203,7 @@ def login():
 
 @app.route('/logout')
 @update_last_seen
-def logout():
+def logout() -> Response:
     # Have to log the event before we log out, so we still have their email address
     app.logger.debug(f"logout(): Logging user '{current_user.email}' out now...")
     EventRepository().log_event("Logout", f"User '{current_user.email}' logged out.")
@@ -230,7 +230,7 @@ def logout():
 
 @app.route('/reset', methods=['GET', 'POST'])
 @update_last_seen
-def reset_password():
+def reset_password() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

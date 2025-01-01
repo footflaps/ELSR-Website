@@ -34,6 +34,7 @@ from core.database.jinja.cafe_jinja import get_cafe_name_from_id
 from core.database.jinja.calendar_jinja import start_time_string
 from core.database.jinja.event_jinja import good_event
 from core.database.jinja.user_jinja import get_user_id_from_email
+from core.database.jinja.message_jinja import admin_has_mail
 
 
 # -------------------------------------------------------------------------------------------------------------- #

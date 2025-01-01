@@ -22,34 +22,34 @@ class ClassifiedModel(db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
 
     # Unique index number
-    id = db.Column(db.Integer, primary_key=True)
+    id: int = db.Column(db.Integer, primary_key=True)
 
     # Owner
-    email = db.Column(db.String(50))
+    email: str = db.Column(db.String(50))
 
     # Date (as string)
-    date = db.Column(db.String(20))
+    date: str = db.Column(db.String(20))
 
     # Title
-    title = db.Column(db.String(100))
+    title: str = db.Column(db.String(100))
 
     # Type (Buy or Sell)
-    buy_sell = db.Column(db.String(10))
+    buy_sell: str = db.Column(db.String(10))
 
     # Category
-    category = db.Column(db.String(20))
+    category: str = db.Column(db.String(20))
 
     # CSV of filenames (no path)
-    image_filenames = db.Column(db.Text)
+    image_filenames: str = db.Column(db.Text)
 
     # Price
-    price = db.Column(db.String(20))
+    price: str = db.Column(db.String(20))
 
     # Details
-    details = db.Column(db.Text)
+    details: str = db.Column(db.Text)
 
     # Status (for sale, under offer, sold, etc)
-    status = db.Column(db.String(20))
+    status: str = db.Column(db.String(20))
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Repr

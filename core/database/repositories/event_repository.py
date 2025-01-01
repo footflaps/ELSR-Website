@@ -159,6 +159,7 @@ class EventRepository(EventModel):
                     db.session.rollback()
                     app.logger.error(f"dB.delete_event(): Failed with error code '{e.args}'.")
                     return False
+
         app.logger.error(f"dB.delete_event(): Failed to delete event.id = {event_id}, event not found.")
         return False
 

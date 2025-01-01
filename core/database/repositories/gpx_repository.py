@@ -63,7 +63,7 @@ class GpxRepository(GpxModel):
     # Modify
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def update_filename(gpx_id: id, filename: str) -> bool:
+    def update_filename(gpx_id: int, filename: str) -> bool:
         with app.app_context():
             gpx = GpxModel.query.filter_by(id=gpx_id).first()
             if gpx:
@@ -204,7 +204,7 @@ class GpxRepository(GpxModel):
         return False
 
     @staticmethod
-    def update_stats(gpx_id: id, length_km: float, ascent_m: float) -> bool:
+    def update_stats(gpx_id: int, length_km: float, ascent_m: float) -> bool:
         with app.app_context():
             gpx = GpxModel.query.filter_by(id=gpx_id).first()
             if gpx:
@@ -225,7 +225,7 @@ class GpxRepository(GpxModel):
             return False
 
     @staticmethod
-    def publish(gpx_id: id) -> bool:
+    def publish(gpx_id: int) -> bool:
         with app.app_context():
             gpx = GpxModel.query.filter_by(id=gpx_id).first()
             if gpx:
@@ -262,7 +262,7 @@ class GpxRepository(GpxModel):
     # Delete
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def delete_gpx(gpx_id: id) -> bool:
+    def delete_gpx(gpx_id: int) -> bool:
         with app.app_context():
             gpx = GpxModel.query.filter_by(id=gpx_id).first()
             if gpx:
@@ -329,10 +329,12 @@ class GpxRepository(GpxModel):
     # Other
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def gpx_id_from_combo_string(combo_string):
+    def gpx_id_from_combo_string(combo_string: str) -> int | None:
         # Extract id from number in last set of brackets
-        gpx_id = combo_string.split('(')[-1].split(')')[0]
-        return gpx_id
+        try:
+            return int(combo_string.split('(')[-1].split(')')[0])
+        except Exception:
+            return None
 
     # -------------------------------------------------------------------------------------------------------------- #
     # Class method
@@ -344,7 +346,7 @@ class GpxRepository(GpxModel):
         JSON field.
         :param cafe_id:                     Index of the cafe in question.
         :param user:                        User's ORM (used to work out permissions)
-        :return:
+        :return:                            List of GPXes which pass this cafe (but with gpx.cafes_passed modified).
         """
         # We return a list of GPXes which pass this cafe
         passing_gpx = []

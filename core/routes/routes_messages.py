@@ -1,4 +1,4 @@
-from flask import redirect, url_for, flash, request, abort
+from flask import redirect, url_for, flash, request, abort, Response
 from flask_login import current_user
 from werkzeug import exceptions
 from threading import Thread
@@ -39,7 +39,7 @@ from core.decorators.user_decorators import admin_only, update_last_seen, logout
 @logout_barred_user
 @login_required
 @update_last_seen
-def mark_read():
+def mark_read() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -110,7 +110,7 @@ def mark_read():
 @logout_barred_user
 @login_required
 @update_last_seen
-def mark_unread():
+def mark_unread() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -182,7 +182,7 @@ def mark_unread():
 @logout_barred_user
 @login_required
 @update_last_seen
-def delete_message():
+def delete_message() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -256,7 +256,7 @@ def delete_message():
 @logout_barred_user
 @login_required
 @update_last_seen
-def reply_message():
+def reply_message() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -361,7 +361,7 @@ def reply_message():
 @logout_barred_user
 @login_required
 @update_last_seen
-def message_admin():
+def message_admin() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -446,7 +446,7 @@ def message_admin():
 @login_required
 @admin_only
 @update_last_seen
-def message_user():
+def message_user() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, flash, redirect, abort, send_from_directory
+from flask import render_template, url_for, request, flash, redirect, abort, send_from_directory, Response
 from flask_login import current_user
 from ics import Calendar as icsCalendar, Event as icsEvent
 import os
@@ -39,7 +39,7 @@ from core.subs_dates import get_date_from_url
 @app.route("/social", methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def display_socials():
+def display_socials() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a date? (optional)
     # ----------------------------------------------------------- #
@@ -104,7 +104,7 @@ def display_socials():
 @logout_barred_user
 @login_required
 @update_last_seen
-def download_ics():
+def download_ics() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a social_id?
     # ----------------------------------------------------------- #

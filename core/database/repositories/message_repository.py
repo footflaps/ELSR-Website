@@ -112,7 +112,7 @@ class MessageRepository(MessageModel):
     # Delete
     # ---------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def delete(id):
+    def delete(id: int) -> bool:
         with app.app_context():
             message = MessageModel.query.filter_by(id=id).first()
             if message:
@@ -125,37 +125,38 @@ class MessageRepository(MessageModel):
                     db.session.rollback()
                     app.logger.error(f"dB.delete(): Failed with error code '{e.args}'.")
                     return False
+
         return False
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Search
     # ---------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def all_messages():
+    def all_messages() -> list[MessageModel]:
         with app.app_context():
             messages = MessageModel.query.all()
             return messages
 
     @staticmethod
-    def find_messages_by_id(id):
+    def find_messages_by_id(id: int) -> MessageModel | None:
         with app.app_context():
             message = MessageModel.query.filter_by(id=id).first()
             return message
 
     @staticmethod
-    def all_messages_to_email(email):
+    def all_messages_to_email(email: str) -> list[MessageModel]:
         with app.app_context():
             messages = MessageModel.query.filter_by(to_email=email).all()
             return messages
 
     @staticmethod
-    def all_messages_from_email(email):
+    def all_messages_from_email(email: str) -> list[MessageModel]:
         with app.app_context():
             messages = MessageModel.query.filter_by(from_email=email).all()
             return messages
 
     @staticmethod
-    def all_unread_messages_to_email(email):
+    def all_unread_messages_to_email(email: str) -> list[MessageModel]:
         with app.app_context():
             messages = MessageModel.query.filter_by(to_email=email).filter(MessageModel.status.op('&')(MASK_READ) == 0) .all()
             return messages

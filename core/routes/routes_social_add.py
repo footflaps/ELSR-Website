@@ -1,18 +1,15 @@
-from flask import render_template, url_for, request, flash, redirect, abort, send_from_directory
+from flask import render_template, url_for, request, flash, redirect, abort, Response
 from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime
-from ics import Calendar as icsCalendar, Event as icsEvent
-import os
 from threading import Thread
-import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site, ICS_DIRECTORY
+from core import app, current_year, live_site
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -46,7 +43,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @login_required
 @update_last_seen
 @rw_required
-def route_add_social():
+def route_add_social() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a social_id? (Optional)
     # ----------------------------------------------------------- #
@@ -234,7 +231,7 @@ def route_add_social():
 @login_required
 @update_last_seen
 @rw_required
-def delete_social():
+def delete_social() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a social_id?
     # ----------------------------------------------------------- #

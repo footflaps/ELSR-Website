@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort
+from flask import render_template, redirect, url_for, flash, request, abort, Response
 from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime
@@ -140,7 +140,7 @@ def get_free_space():
 @login_required
 @admin_only
 @update_last_seen
-def admin_page():
+def admin_page() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
@@ -313,7 +313,7 @@ def admin_page():
 @login_required
 @admin_only
 @update_last_seen
-def make_admin():
+def make_admin() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -415,7 +415,7 @@ def make_admin():
 @login_required
 @admin_only
 @update_last_seen
-def unmake_admin():
+def unmake_admin() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -504,7 +504,7 @@ def unmake_admin():
 @login_required
 @admin_only
 @update_last_seen
-def block_user():
+def block_user() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -595,7 +595,7 @@ def block_user():
 @login_required
 @admin_only
 @update_last_seen
-def unblock_user():
+def unblock_user() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -687,7 +687,7 @@ def unblock_user():
 @login_required
 @admin_only
 @update_last_seen
-def user_readwrite():
+def user_readwrite() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -779,7 +779,7 @@ def user_readwrite():
 @login_required
 @admin_only
 @update_last_seen
-def user_readonly():
+def user_readonly() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -872,7 +872,7 @@ def user_readonly():
 @login_required
 @admin_only
 @update_last_seen
-def reverify_user():
+def reverify_user() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -920,7 +920,7 @@ def reverify_user():
 @login_required
 @admin_only
 @update_last_seen
-def password_reset_user():
+def password_reset_user() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -968,7 +968,7 @@ def password_reset_user():
 @login_required
 @admin_only
 @update_last_seen
-def test_sms():
+def test_sms() -> Response:
     # ----------------------------------------------------------- #
     # Send SMS
     # ----------------------------------------------------------- #

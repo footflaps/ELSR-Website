@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, abort
+from flask import render_template, url_for, flash, Response
 from datetime import datetime, date
 import calendar as cal
 from dateutil.relativedelta import relativedelta
@@ -15,14 +15,10 @@ from core import app, current_year, live_site
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES
+from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.social_repository import SocialRepository
 from core.database.repositories.blog_repository import BlogRepository
-from core.database.repositories.gpx_repository import GpxRepository
-from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 
-from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, MAP_BOUNDS, \
-                                  google_maps_api_key, count_map_loads
 from core.subs_dates import get_date_from_url
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user
@@ -139,7 +135,7 @@ def get_date_range_look_around(date_str: str, look_back_months: int, look_forwar
 @app.route('/calendar', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def calendar():
+def calendar() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a date? (Optional)
     # ----------------------------------------------------------- #

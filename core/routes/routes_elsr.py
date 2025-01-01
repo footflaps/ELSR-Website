@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, send_from_directory, url_for, redirect
+from flask import render_template, request, flash, send_from_directory, url_for, redirect, Response
 from flask_login import current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, EmailField, SubmitField
@@ -54,7 +54,7 @@ class ContactForm(FlaskForm):
 # robots.txt
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/robots.txt')
-def static_from_root():
+def static_from_root() -> Response:
     # ----------------------------------------------------------- #
     # Send link to download the file
     # ----------------------------------------------------------- #
@@ -68,7 +68,7 @@ def static_from_root():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/', methods=['GET'])
 @update_last_seen
-def welcome():
+def welcome() -> Response:
     # -------------------------------------------------------------------------------------------- #
     # Decide where to send them
     # -------------------------------------------------------------------------------------------- #
@@ -86,7 +86,7 @@ def welcome():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/home', methods=['GET'])
 @update_last_seen
-def home():
+def home() -> Response:
     # -------------------------------------------------------------------------------------------- #
     # Show Current Meeting Place
     # -------------------------------------------------------------------------------------------- #
@@ -118,7 +118,7 @@ def home():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/about", methods=['GET'])
 @update_last_seen
-def about():
+def about() -> Response:
     return render_template("main_about.html", year=current_year, live_site=live_site())
 
 
@@ -127,7 +127,7 @@ def about():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/gdpr", methods=['GET'])
 @update_last_seen
-def gdpr():
+def gdpr() -> Response:
     # ----------------------------------------------------------- #
     # List of all admins
     # ----------------------------------------------------------- #
@@ -141,7 +141,7 @@ def gdpr():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/contact", methods=['GET', 'POST'])
 @update_last_seen
-def contact():
+def contact() -> Response:
     # Need a form
     form = ContactForm()
 
@@ -179,7 +179,7 @@ def contact():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/plan", methods=['GET'])
 @update_last_seen
-def plan():
+def plan() -> Response:
     return render_template("main_plan_a_ride.html", year=current_year, live_site=live_site())
 
 
@@ -188,7 +188,7 @@ def plan():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/gpx_guide", methods=['GET'])
 @update_last_seen
-def gpx_guide():
+def gpx_guide() -> Response:
     return render_template("main_download_howto.html", year=current_year, live_site=live_site())
 
 
@@ -197,6 +197,6 @@ def gpx_guide():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/uncut", methods=['GET'])
 @update_last_seen
-def uncut():
+def uncut() -> Response:
     return render_template("uncut_steerertubes.html", year=current_year, live_site=live_site())
 

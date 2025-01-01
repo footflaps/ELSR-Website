@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort
+from flask import render_template, redirect, url_for, flash, request, abort, Response
 from flask_login import current_user
 from datetime import date
 from werkzeug import exceptions
@@ -64,7 +64,7 @@ ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 @app.route('/cafes', methods=['GET'])
 @update_last_seen
 @logout_barred_user
-def cafe_list():
+def cafe_list() -> Response:
     # ----------------------------------------------------------- #
     # Get all known cafes
     # ----------------------------------------------------------- #
@@ -112,7 +112,7 @@ def cafe_list():
 
 @app.route('/cafe_top10', methods=['GET'])
 @update_last_seen
-def cafe_top10():
+def cafe_top10() -> Response:
     # ----------------------------------------------------------- #
     # Get all the rides
     # ----------------------------------------------------------- #
@@ -163,7 +163,7 @@ def cafe_top10():
 @app.route("/cafe/<int:cafe_id>", methods=['GET', 'POST'])
 @update_last_seen
 @logout_barred_user
-def cafe_details(cafe_id):
+def cafe_details(cafe_id) -> Response:
     anchor = request.args.get('anchor', None)
 
     # ----------------------------------------------------------- #
@@ -325,7 +325,7 @@ def cafe_details(cafe_id):
 @login_required
 @update_last_seen
 @rw_required
-def close_cafe():
+def close_cafe() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -395,7 +395,7 @@ def close_cafe():
 @login_required
 @update_last_seen
 @rw_required
-def unclose_cafe():
+def unclose_cafe() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -457,7 +457,7 @@ def unclose_cafe():
 @login_required
 @update_last_seen
 @rw_required
-def flag_cafe():
+def flag_cafe() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

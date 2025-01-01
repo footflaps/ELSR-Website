@@ -151,7 +151,7 @@ class BlogRepository(BlogModel):
             return blogs.all()
 
     @staticmethod
-    def number_pages(page_size):
+    def number_pages(page_size: int) -> int:
         with app.app_context():
             num_rows = BlogModel.query.filter_by(sticky=False).count()
             return math.ceil(num_rows / page_size)
@@ -163,13 +163,13 @@ class BlogRepository(BlogModel):
             return blog
 
     @staticmethod
-    def all_by_email(email):
+    def all_by_email(email) -> list[BlogModel]:
         with app.app_context():
             blogs = BlogModel.query.filter_by(email=email).all()
             return blogs
 
     @staticmethod
-    def all_by_date(date):
+    def all_by_date(date) -> list[BlogModel]:
         # Need to convert calendar date string to date_unix
         try:
             date_obj = datetime(int(date[4:8]), int(date[2:4]), int(date[0:2]), 0, 00)

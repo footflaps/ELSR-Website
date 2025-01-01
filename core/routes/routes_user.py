@@ -6,7 +6,7 @@
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-from flask import render_template, redirect, url_for, flash, request, abort, session, make_response
+from flask import render_template, redirect, url_for, flash, request, abort, session, make_response, Response
 from flask_login import current_user, logout_user
 from werkzeug import exceptions
 from urllib.parse import urlparse
@@ -165,7 +165,7 @@ def validate_socials(user, form):
 @app.route('/user_page', methods=['GET', 'POST'])
 @login_required
 @update_last_seen
-def user_page():
+def user_page() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -394,7 +394,7 @@ def user_page():
 @logout_barred_user
 @login_required
 @update_last_seen
-def delete_user():
+def delete_user() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -511,7 +511,7 @@ def delete_user():
 @logout_barred_user
 @login_required
 @update_last_seen
-def set_notifications():
+def set_notifications() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -577,7 +577,7 @@ def set_notifications():
 @app.route('/unsubscribe_all', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def unsubscribe_all():
+def unsubscribe_all() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -639,7 +639,7 @@ def unsubscribe_all():
 @app.route('/who_are_we', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def who_are_we():
+def who_are_we() -> Response:
     return render_template("under_construction.html", year=current_year, live_site=live_site())
 
     # ----------------------------------------------------------- #
@@ -669,7 +669,7 @@ def who_are_we():
 @logout_barred_user
 @login_required
 @update_last_seen
-def emergency():
+def emergency() -> Response:
     # ----------------------------------------------------------- #
     # Validate user
     # ----------------------------------------------------------- #

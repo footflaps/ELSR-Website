@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort, redirect, url_for, send_from_directory
+from flask import render_template, request, flash, abort, redirect, url_for, send_from_directory, Response
 from flask_login import current_user
 from werkzeug import exceptions
 import os
@@ -54,7 +54,7 @@ FIRST_PAGE = 0
 
 @app.route("/blog", methods=['GET'])
 @update_last_seen
-def display_blog():
+def display_blog() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
@@ -161,7 +161,7 @@ def display_blog():
 @update_last_seen
 @logout_barred_user
 @login_required
-def blog_ics():
+def blog_ics() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id?
     # ----------------------------------------------------------- #

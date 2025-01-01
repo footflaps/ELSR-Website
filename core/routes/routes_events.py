@@ -1,4 +1,4 @@
-from flask import request, abort, flash, redirect, url_for
+from flask import request, abort, flash, redirect, url_for, Response
 from flask_login import current_user
 from werkzeug import exceptions
 
@@ -37,7 +37,7 @@ from core.decorators.user_decorators import admin_only, update_last_seen, login_
 @login_required
 @admin_only
 @update_last_seen
-def delete_event():
+def delete_event() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -103,7 +103,7 @@ def delete_event():
 @login_required
 @admin_only
 @update_last_seen
-def delete_events():
+def delete_events() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -214,7 +214,7 @@ def delete_events():
 @login_required
 @admin_only
 @update_last_seen
-def delete_404s():
+def delete_404s() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

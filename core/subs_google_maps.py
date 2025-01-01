@@ -420,12 +420,12 @@ def set_disable_maps():
 # -------------------------------------------------------------------------------------------------------------- #
 # Return map limit for the day
 # -------------------------------------------------------------------------------------------------------------- #
-def map_limit_by_day(day: str):
+def map_limit_by_day(day: str) -> int:
 
     print(f"map_limit_by_day: maps_boost = {maps_boost}")
 
     # This is the baseline number
-    limit = MAP_LIMITS_BY_DAY[day]
+    limit: int = MAP_LIMITS_BY_DAY[day]
     print(f"Default limit is '{limit}'")
     print(maps_boost)
 

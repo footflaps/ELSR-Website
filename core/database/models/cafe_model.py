@@ -21,37 +21,36 @@ class CafeModel(db.Model):
     # Define the table
     # ---------------------------------------------------------------------------------------------------------- #
 
-    # Don't need a bind key as this is the default database
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(250), unique=True, nullable=False)
+    id: int = db.Column(db.Integer, primary_key=True)
+    name: str = db.Column(db.String(250), unique=True, nullable=False)
 
     # Allow cafes to be disabled (e.g. if they close) without removing from dB
-    active = db.Column(db.Boolean, nullable=True)
+    active: bool = db.Column(db.Boolean, nullable=True)
 
     # Need lat and lon for map locations
-    lat = db.Column(db.Float, nullable=False)
-    lon = db.Column(db.Float, nullable=False)
+    lat: float = db.Column(db.Float, nullable=False)
+    lon: float = db.Column(db.Float, nullable=False)
 
     # Optional website link and image url, which they can upload
-    image_name = db.Column(db.String(250), nullable=True)
-    website_url = db.Column(db.String(250), nullable=True)
+    image_name: str = db.Column(db.String(250), nullable=True)
+    website_url: str = db.Column(db.String(250), nullable=True)
 
     # Stick all the details in one text block
-    details = db.Column(db.String(2000), nullable=True)
-    summary = db.Column(db.String(100), nullable=True)
-    rating = db.Column(db.String(100), nullable=True)
+    details: str = db.Column(db.String(2000), nullable=True)
+    summary: str = db.Column(db.String(100), nullable=True)
+    rating: str = db.Column(db.String(100), nullable=True)
 
     # Who and when
-    added_email = db.Column(db.String(250), nullable=False)
+    added_email: str = db.Column(db.String(250), nullable=False)
 
     # Added date in format "11112023"
-    added_date = db.Column(db.String(250), nullable=False)
+    added_date: str = db.Column(db.String(250), nullable=False)
 
     # This is not used
-    updated_date = db.Column(db.String(250), nullable=True)
+    updated_date: str = db.Column(db.String(250), nullable=True)
 
     # Num routes passing cafe
-    num_routes_passing = db.Column(db.Integer, nullable=True)
+    num_routes_passing: int = db.Column(db.Integer, nullable=True)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Repr

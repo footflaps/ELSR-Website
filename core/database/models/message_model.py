@@ -30,21 +30,21 @@ class MessageModel(db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
 
     # Unique reference in dB
-    id = db.Column(db.Integer, primary_key=True)
+    id: int = db.Column(db.Integer, primary_key=True)
 
     # Contents of the message
-    from_email = db.Column(db.String(250), unique=False)
-    to_email = db.Column(db.String(250), unique=False)
+    from_email: str = db.Column(db.String(250), unique=False)
+    to_email: str = db.Column(db.String(250), unique=False)
 
     # Dates stored as "11112023"
-    sent_date = db.Column(db.String(250), unique=False)
-    read_date = db.Column(db.String(250), unique=False)
+    sent_date: str = db.Column(db.String(250), unique=False)
+    read_date: str = db.Column(db.String(250), unique=False)
 
     # Actual message itself
-    body = db.Column(db.String(1000), unique=False)
+    body: str = db.Column(db.String(1000), unique=False)
 
     # See above for details of how this works
-    status = db.Column(db.Integer, unique=False)
+    status: int = db.Column(db.Integer, unique=False)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Repr

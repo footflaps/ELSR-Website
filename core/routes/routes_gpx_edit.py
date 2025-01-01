@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort
+from flask import render_template, redirect, url_for, flash, request, abort, Response
 from flask_login import current_user
 import os
 from threading import Thread
@@ -44,7 +44,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @login_required
 @update_last_seen
 @rw_required
-def edit_route():
+def edit_route() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -186,7 +186,7 @@ def edit_route():
 @login_required
 @update_last_seen
 @rw_required
-def gpx_cut_start():
+def gpx_cut_start() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -265,7 +265,7 @@ def gpx_cut_start():
 @login_required
 @update_last_seen
 @rw_required
-def gpx_cut_end():
+def gpx_cut_end() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -343,7 +343,7 @@ def gpx_cut_end():
 @login_required
 @update_last_seen
 @rw_required
-def publish_route():
+def publish_route() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -440,7 +440,7 @@ def publish_route():
 @login_required
 @update_last_seen
 @rw_required
-def hide_route():
+def hide_route() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

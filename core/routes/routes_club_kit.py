@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, abort
+from flask import render_template, request, flash, abort, Response
 from flask_login import current_user
 import json
 
@@ -31,7 +31,7 @@ from core.forms.user_forms import ClothingSizesForm
 @app.route("/club_kit", methods=['GET', 'POST'])
 @app.route("/team_kit", methods=['GET', 'POST'])
 @update_last_seen
-def club_kit():
+def club_kit() -> Response:
     # Need a form
     form = ClothingSizesForm()
 
@@ -100,7 +100,6 @@ def club_kit():
     # ----------------------------------------------------------- #
     #   GET - Render page
     # ----------------------------------------------------------- #
-
     return render_template("main_club_kit.html", year=current_year, live_site=live_site(), form=form)
 
 
@@ -111,10 +110,9 @@ def club_kit():
 @app.route("/club_kit_v1", methods=['GET', 'POST'])
 @app.route("/team_kit_v1", methods=['GET', 'POST'])
 @update_last_seen
-def club_kit_v1():
+def club_kit_v1() -> Response:
 
     # ----------------------------------------------------------- #
     #   Render page
     # ----------------------------------------------------------- #
-
     return render_template("main_club_kit_v1.html", year=current_year, live_site=live_site())

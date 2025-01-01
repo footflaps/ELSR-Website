@@ -1,4 +1,4 @@
-from flask import render_template, flash
+from flask import render_template, flash, Response
 from flask_login import current_user
 import gpxpy
 import gpxpy.gpx
@@ -53,7 +53,7 @@ LOCAL_MAX_KM = 10
 
 @app.route('/gravel', methods=['GET'])
 @update_last_seen
-def gravel():
+def gravel() -> Response:
 
     # ----------------------------------------------------------- #
     # Render page
@@ -67,7 +67,7 @@ def gravel():
 
 @app.route('/gravel/all', methods=['GET'])
 @update_last_seen
-def gravel_all():
+def gravel_all() -> Response:
     # ----------------------------------------------------------- #
     # Grab all our routes
     # ----------------------------------------------------------- #
@@ -129,7 +129,7 @@ def gravel_all():
 
 @app.route('/gravel/ldt', methods=['GET'])
 @update_last_seen
-def gravel_ldt():
+def gravel_ldt() -> Response:
     # ----------------------------------------------------------- #
     # Grab the specific routes
     # ----------------------------------------------------------- #
@@ -196,7 +196,7 @@ def gravel_ldt():
 
 @app.route('/gravel/local', methods=['GET'])
 @update_last_seen
-def gravel_local():
+def gravel_local() -> Response:
     # ----------------------------------------------------------- #
     # Start with all gravel
     # ----------------------------------------------------------- #

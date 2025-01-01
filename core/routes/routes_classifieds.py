@@ -1,5 +1,5 @@
-from flask import render_template, request, flash, abort, redirect, url_for
-from flask_login import  current_user
+from flask import render_template, request, flash, abort, redirect, url_for, Response
+from flask_login import current_user
 from werkzeug import exceptions
 import os
 from datetime import date
@@ -45,7 +45,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 
 @app.route("/classifieds", methods=['GET'])
 @update_last_seen
-def classifieds():
+def classifieds() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #
@@ -100,7 +100,7 @@ def classifieds():
 @logout_barred_user
 @login_required
 @rw_required
-def add_sell():
+def add_sell() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #
@@ -279,7 +279,7 @@ def add_sell():
 @logout_barred_user
 @login_required
 @rw_required
-def delete_classified():
+def delete_classified() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id?
     # ----------------------------------------------------------- #
@@ -377,7 +377,7 @@ def delete_classified():
 @update_last_seen
 @logout_barred_user
 @login_required
-def message_seller():
+def message_seller() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #

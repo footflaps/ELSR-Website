@@ -1,4 +1,4 @@
-from flask import redirect, url_for, flash, request, abort
+from flask import redirect, url_for, flash, request, abort, Response
 from flask_login import current_user
 from werkzeug import exceptions
 
@@ -37,7 +37,7 @@ from core.decorators.user_decorators import admin_only, update_last_seen, login_
 @login_required
 @admin_only
 @update_last_seen
-def enable_maps():
+def enable_maps() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -103,7 +103,7 @@ def enable_maps():
 @login_required
 @admin_only
 @update_last_seen
-def disable_maps():
+def disable_maps() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -169,7 +169,7 @@ def disable_maps():
 @login_required
 @admin_only
 @update_last_seen
-def boost_maps():
+def boost_maps() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

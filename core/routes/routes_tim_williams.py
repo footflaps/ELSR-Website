@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, Response
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -36,7 +36,7 @@ from core.subs_google_maps import google_maps_api_key, MAP_BOUNDS, count_map_loa
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/twr', methods=['GET'])
 @update_last_seen
-def twr():
+def twr() -> Response:
     # -------------------------------------------------------------------------------------------- #
     # Show The Bench
     # -------------------------------------------------------------------------------------------- #
@@ -59,7 +59,7 @@ def twr():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/turbo_training', methods=['GET'])
 @update_last_seen
-def turbo_training():
+def turbo_training() -> Response:
 
     # Render page
     return render_template("main_turbo_training.html", year=current_year, live_site=live_site())
@@ -70,7 +70,7 @@ def turbo_training():
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/mallorca_2024', methods=['GET'])
 @update_last_seen
-def mallorca_2024():
+def mallorca_2024() -> Response:
 
     # Render page
     return render_template("main_mallorca_2024.html", year=current_year, live_site=live_site())

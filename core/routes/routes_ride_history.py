@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, abort
+from flask import render_template, url_for, flash, abort, Response
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -37,7 +37,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @app.route('/ride_history/<request>', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def ride_history(request):
+def ride_history(request) -> Response:
     # ----------------------------------------------------------- #
     # Sort out which group we are
     # ----------------------------------------------------------- #

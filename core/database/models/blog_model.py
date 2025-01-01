@@ -1,3 +1,5 @@
+from datetime import date
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -22,40 +24,40 @@ class BlogModel(db.Model):
     # ---------------------------------------------------------------------------------------------------------- #
 
     # Unique index number
-    id = db.Column(db.Integer, primary_key=True)
+    id: int = db.Column(db.Integer, primary_key=True)
 
     # Who created the entry - will determine delete permissions etc
-    email = db.Column(db.String(50))
+    email: str = db.Column(db.String(50))
 
     # Use a unix date to make sorting by date simple
-    date_unix = db.Column(db.Integer)
+    date_unix: int = db.Column(db.Integer)
 
     # New date column using a proper SQL Date field
-    converted_date = db.Column(db.Date)
+    converted_date: date = db.Column(db.Date)
 
     # Title
-    title = db.Column(db.String(50))
+    title: str = db.Column(db.String(50))
 
     # Filename (no path) for the image
-    image_filename = db.Column(db.String(30))
+    image_filename: str = db.Column(db.String(30))
 
     # Privacy
-    private = db.Column(db.Boolean)
+    private: bool = db.Column(db.Boolean)
 
     # Add a cafe index
-    cafe_id = db.Column(db.Integer)
+    cafe_id: int = db.Column(db.Integer)
 
     # Add a gpx index
-    gpx_index = db.Column(db.Integer)
+    gpx_index: int = db.Column(db.Integer)
 
     # Category
-    category = db.Column(db.String(30))
+    category: str = db.Column(db.String(30))
 
     # Sticky
-    sticky = db.Column(db.Boolean)
+    sticky: bool = db.Column(db.Boolean)
 
     # Details
-    details = db.Column(db.Text)
+    details: str = db.Column(db.Text)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Repr

@@ -1,4 +1,4 @@
-from flask import url_for, request, flash, redirect, abort
+from flask import url_for, request, flash, redirect, abort, Response
 from flask_login import current_user
 import json
 
@@ -36,7 +36,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @update_last_seen
 @login_required
 @rw_required
-def remove_vote():
+def remove_vote() -> Response:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
@@ -139,7 +139,7 @@ def remove_vote():
 @update_last_seen
 @login_required
 @rw_required
-def add_vote():
+def add_vote() -> Response:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
@@ -246,7 +246,7 @@ def add_vote():
 @update_last_seen
 @login_required
 @rw_required
-def swap_vote():
+def swap_vote() -> Response:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #

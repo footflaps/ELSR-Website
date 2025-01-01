@@ -1,4 +1,4 @@
-from flask import render_template, url_for, request, flash, redirect, abort
+from flask import render_template, url_for, request, flash, redirect, abort, Response
 from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime
@@ -87,7 +87,7 @@ app.jinja_env.globals.update(is_in_list=is_in_list)
 @app.route('/polls', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def poll_list():
+def poll_list() -> Response:
     # ----------------------------------------------------------- #
     # Grab all the polls
     # ----------------------------------------------------------- #
@@ -131,7 +131,7 @@ def poll_list():
 @app.route('/poll/<poll_id>', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def poll_details(poll_id):
+def poll_details(poll_id) -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed an anchor?
     # ----------------------------------------------------------- #
@@ -226,7 +226,7 @@ def poll_details(poll_id):
 @update_last_seen
 @login_required
 @rw_required
-def add_poll():
+def add_poll() -> Response:
     # ----------------------------------------------------------- #
     # Get poll_id from form (if one was posted)
     # ----------------------------------------------------------- #
@@ -388,7 +388,7 @@ def add_poll():
 @update_last_seen
 @login_required
 @rw_required
-def edit_poll():
+def edit_poll() -> Response:
     # ----------------------------------------------------------- #
     # Get poll_id from form (if one was posted)
     # ----------------------------------------------------------- #
@@ -576,7 +576,7 @@ def edit_poll():
 @update_last_seen
 @login_required
 @rw_required
-def delete_poll():
+def delete_poll() -> Response:
     # ----------------------------------------------------------- #
     # Did we get passed a poll_id?
     # ----------------------------------------------------------- #

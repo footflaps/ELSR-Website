@@ -112,7 +112,7 @@ class UserRepository(UserModel):
                 return False
 
     @staticmethod
-    def block_user(user_id):
+    def block_user(user_id: int) -> bool:
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
@@ -142,7 +142,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def unblock_user(user_id):
+    def unblock_user(user_id: int) -> bool:
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
@@ -164,7 +164,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def create_new_verification(user_id):
+    def create_new_verification(user_id: int) -> bool:
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
@@ -189,7 +189,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def generate_sms_code(user_id):
+    def generate_sms_code(user_id: int) -> bool:
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
@@ -214,7 +214,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def validate_password(user, raw_password, user_ip):
+    def validate_password(user, raw_password: str, user_ip: str) -> bool:
         with app.app_context():
             if user.password:
                 if check_password_hash(user.password, raw_password):
@@ -238,7 +238,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def log_activity(user_id):
+    def log_activity(user_id: str) -> bool:
         with app.app_context():
             try:
                 user = db.session.query(UserRepository).filter_by(id=user_id).first()
@@ -252,7 +252,7 @@ class UserRepository(UserModel):
                 return False
 
     @staticmethod
-    def validate_email(user, code):
+    def validate_email(user: UserModel, code: str) -> bool:
         with app.app_context():
 
             # For some reason we need to re-acquire the user within this context
@@ -295,7 +295,7 @@ class UserRepository(UserModel):
                 return False
 
     @staticmethod
-    def validate_sms(user, code):
+    def validate_sms(user: UserModel, code: str) -> bool:
         with app.app_context():
 
             # For some reason we need to re-acquire the user within this context
@@ -339,7 +339,7 @@ class UserRepository(UserModel):
                 return False
 
     @staticmethod
-    def create_new_reset_code(email):
+    def create_new_reset_code(email: str) -> bool:
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(email=email).first()
             if user:
@@ -360,7 +360,7 @@ class UserRepository(UserModel):
 
         return False
 
-    def reset_password(self, email, password):
+    def reset_password(self, email: str, password: str) -> bool:
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(email=email).first()
             if user:
@@ -382,7 +382,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def set_readwrite(user_id):
+    def set_readwrite(user_id: int) -> bool:
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
@@ -401,7 +401,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def set_readonly(user_id):
+    def set_readonly(user_id: int) -> bool:
         with app.app_context():
             # For some reason we need to re-acquire the user within this context
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
@@ -420,7 +420,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def make_admin(user_id):
+    def make_admin(user_id: int) -> bool:
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
@@ -438,7 +438,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def unmake_admin(user_id):
+    def unmake_admin(user_id: int) -> bool:
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
             if user:
@@ -459,7 +459,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def set_phone_number(user_id, phone_number):
+    def set_phone_number(user_id: int, phone_number: str) -> bool:
         user = db.session.query(UserRepository).filter_by(id=user_id).first()
         if user:
             try:
@@ -475,7 +475,7 @@ class UserRepository(UserModel):
             return False
 
     @staticmethod
-    def set_notifications(user_id, choices):
+    def set_notifications(user_id: int, choices: int) -> bool:
         user = db.session.query(UserRepository).filter_by(id=user_id).first()
         if user:
             try:
@@ -498,17 +498,17 @@ class UserRepository(UserModel):
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
 
-            # You can't delete Admins
-            if user.admin:
-                app.logger.debug(f"dB.delete_user: Rejected attempt to delete admin '{user.email}'.")
-                return False
-
-            # Extra protection in case someone finds a way around route protection
-            if user.email in PROTECTED_USERS:
-                app.logger.debug(f"dB.delete_user: Rejected attempt to delete protected user '{user.email}'.")
-                return False
-
             if user:
+                # You can't delete Admins
+                if user.admin:
+                    app.logger.debug(f"dB.delete_user: Rejected attempt to delete admin '{user.email}'.")
+                    return False
+
+                # Extra protection in case someone finds a way around route protection
+                if user.email in PROTECTED_USERS:
+                    app.logger.debug(f"dB.delete_user: Rejected attempt to delete protected user '{user.email}'.")
+                    return False
+
                 try:
                     # We no longer delete users, we invalidate them. This is because even though we have
                     # auto-incrementing IDs, if the last entry is deleted, the next user to register gets the next ID,
@@ -521,7 +521,7 @@ class UserRepository(UserModel):
                     user.permissions = 0
                     db.session.commit()
                     return True
-        
+
                 except Exception as e:
                     db.session.rollback()
                     app.logger.error(f"dB.delete_user(): Failed with error code '{e.args}' for user_id = '{user_id}'.")
@@ -562,7 +562,7 @@ class UserRepository(UserModel):
             return non_admins
 
     @staticmethod
-    def find_user_from_id(user_id) -> UserModel | None:
+    def find_user_from_id(user_id: int) -> UserModel | None:
         with app.app_context():
             user = db.session.query(UserRepository).filter_by(id=user_id).first()
             return user
@@ -592,7 +592,7 @@ class UserRepository(UserModel):
         else:
             return False
 
-    def notification_choice(self, chosen_name):
+    def notification_choice(self, chosen_name: str) -> int | bool:
         # Handle unset as new column
         if not self.notifications:
             self.notifications = 0

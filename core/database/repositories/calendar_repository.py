@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import time
 
 
@@ -52,10 +52,10 @@ class CalendarRepository(CalendarModel):
     # Create
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def add_ride(new_ride):
+    def add_ride(new_ride: CalendarModel) -> CalendarModel | None:
         # Add unix time
-        date_obj = datetime(int(new_ride.date[4:8]), int(new_ride.date[2:4]), int(new_ride.date[0:2]), 0, 00)
-        date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
+        date_obj: date = datetime(int(new_ride.date[4:8]), int(new_ride.date[2:4]), int(new_ride.date[0:2]), 0, 00)
+        date_unix: int = int(datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2)))
         new_ride.unix_date = date_unix
 
         # Try and add to dB
@@ -76,7 +76,7 @@ class CalendarRepository(CalendarModel):
     # Modify
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def mark_email_sent(ride_id):
+    def mark_email_sent(ride_id: int) -> bool:
         with app.app_context():
             ride = CalendarModel.query.filter_by(id=ride_id).first()
             if ride:
@@ -97,7 +97,7 @@ class CalendarRepository(CalendarModel):
     # Delete
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def delete_ride(ride_id):
+    def delete_ride(ride_id: int) -> bool:
         with app.app_context():
             ride = CalendarModel.query.filter_by(id=ride_id).first()
             if ride:
@@ -118,14 +118,14 @@ class CalendarRepository(CalendarModel):
     # Search
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def all_calendar():
+    def all_calendar() -> list[CalendarModel]:
         with app.app_context():
             rides = CalendarModel.query.all()
             return rides
 
     # Return all events from a given user
     @staticmethod
-    def all_calendar_email(email):
+    def all_calendar_email(email: str) -> list[CalendarModel]:
         with app.app_context():
             rides = CalendarModel.query.filter_by(email=email).all()
             # Will return nothing if email is invalid
@@ -133,7 +133,7 @@ class CalendarRepository(CalendarModel):
 
     # Return all events for a specific day
     @staticmethod
-    def all_calendar_date(ride_date: str):
+    def all_calendar_date(ride_date: str) -> list[CalendarModel]:
         with app.app_context():
             rides = []
             # We want them ordered by group so they are ordered on the webpage
@@ -162,7 +162,7 @@ class CalendarRepository(CalendarModel):
                 return None
 
     @staticmethod
-    def all_calender_group_in_past(group: str):
+    def all_calender_group_in_past(group: str) -> list[CalendarModel]:
         # Get current Unix Epoch time, plus a bit (6 hours)
         # This is because we add 2 hours to Unix Epoch timestamps to get round GMT/BST problem
         now = time.time() + 60 * 60 * 6
@@ -173,14 +173,14 @@ class CalendarRepository(CalendarModel):
 
     # Look up event by ID
     @staticmethod
-    def one_by_id(id):
+    def one_by_id(id: int) -> CalendarModel | None:
         with app.app_context():
             ride = CalendarModel.query.filter_by(id=id).first()
             # Will return nothing if id is invalid
             return ride
 
     @staticmethod
-    def all_rides_gpx_id(gpx_id):
+    def all_rides_gpx_id(gpx_id: str) -> list[CalendarModel]:
         with app.app_context():
             rides = CalendarModel.query.filter_by(gpx_id=gpx_id).all()
             # Will return nothing if id is invalid

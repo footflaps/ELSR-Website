@@ -208,7 +208,7 @@ class CafeRepository(CafeModel):
     # -------------------------------------------------------------------------------------------------------------- #
     # Properties
     # -------------------------------------------------------------------------------------------------------------- #
-    def cafe_list(self, cafes_passed):
+    def cafe_list(self, cafes_passed: str) -> list[dict]:
         # Take the cafe_passed JSON string from the GPX database and from it, returns the details of the
         # Cafes which were referenced in the string (referenced by id).
 
@@ -218,8 +218,8 @@ class CafeRepository(CafeModel):
         cafe_list = []
 
         for cafe_json in cafes_json:
-            cafe_id = cafe_json['cafe_id']
-            cafe = self.one_by_id(cafe_id)
+            cafe_id: int = cafe_json['cafe_id']
+            cafe: CafeModel | None = self.one_by_id(cafe_id)
             if cafe:
                 cafe_summary = {
                     'id': cafe_id,
@@ -233,4 +233,3 @@ class CafeRepository(CafeModel):
                 cafe_list.append(cafe_summary)
 
         return sorted(cafe_list, key=lambda x: x['range_km'])
-

@@ -21,16 +21,16 @@ class EventModel(db.Model):
     # Define the table
     # ---------------------------------------------------------------------------------------------------------- #
 
-    id = db.Column(db.Integer, primary_key=True)
+    id: int = db.Column(db.Integer, primary_key=True)
 
-    email = db.Column(db.String(50))
+    email: str = db.Column(db.String(50))
 
     # Use Unix epoch time (rounded to an Int)
-    date = db.Column(db.Integer)
+    date: int = db.Column(db.Integer)
 
-    type = db.Column(db.String(50))
+    type: str = db.Column(db.String(50))
 
-    details = db.Column(db.String(500))
+    details: str = db.Column(db.String(500))
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Repr

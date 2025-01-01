@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort
+from flask import render_template, redirect, url_for, flash, request, abort, Response
 from flask_login import current_user
 from werkzeug import exceptions
 import mpu
@@ -60,7 +60,7 @@ ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 @login_required
 @update_last_seen
 @rw_required
-def new_cafe():
+def new_cafe() -> Response:
     # Need a form for the new cafe
     form = CreateCafeForm()
 
@@ -198,7 +198,7 @@ def new_cafe():
 @login_required
 @update_last_seen
 @rw_required
-def edit_cafe():
+def edit_cafe() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -365,7 +365,7 @@ def edit_cafe():
 @login_required
 @update_last_seen
 @rw_required
-def delete_comment():
+def delete_comment() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -472,7 +472,7 @@ def delete_comment():
 @login_required
 @update_last_seen
 @rw_required
-def delete_cafe():
+def delete_cafe() -> Response:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

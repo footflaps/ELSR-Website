@@ -1,4 +1,4 @@
-from flask import render_template, request, flash
+from flask import render_template, request, flash, Response
 from flask_wtf.csrf import CSRFError
 
 
@@ -29,7 +29,7 @@ from core.database.repositories.event_repository import EventRepository
 # ------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/error", methods=['GET'])
-def error():
+def error() -> Response:
     test = 1 / 0
     return render_template("uncut_steerertubes.html", year=current_year, live_site=live_site())
 
@@ -38,7 +38,7 @@ def error():
 # CSRF Error
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(CSRFError)
-def csrf_error(e):
+def csrf_error(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -59,7 +59,7 @@ def csrf_error(e):
 # 400: Bad Request
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(400)
-def bad_request(e):
+def bad_request(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -78,7 +78,7 @@ def bad_request(e):
 # 401: Unauthorized
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(401)
-def unauthorized(e):
+def unauthorized(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -98,7 +98,7 @@ def unauthorized(e):
 # 403: Forbidden
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(403)
-def forbidden(e):
+def forbidden(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -117,7 +117,7 @@ def forbidden(e):
 # 403: Forbidden - not readwrite
 # ------------------------------------------------------------------------------------------------------------- #
 @app.route('/403rw', methods=['GET'])
-def not_rw():
+def not_rw() -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -136,7 +136,7 @@ def not_rw():
 # 403: Forbidden - not logged in
 # ------------------------------------------------------------------------------------------------------------- #
 @app.route('/403login', methods=['GET'])
-def not_logged_in():
+def not_logged_in() -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -156,7 +156,7 @@ def not_logged_in():
 # 404: Not Found
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(404)
-def page_not_found(e):
+def page_not_found(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -175,7 +175,7 @@ def page_not_found(e):
 # 405: Method Not Allowed
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(405)
-def method_not_allowed(e):
+def method_not_allowed(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -194,7 +194,7 @@ def method_not_allowed(e):
 # 413: Request Entity Too Large
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(413)
-def file_too_large(e):
+def file_too_large(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -214,7 +214,7 @@ def file_too_large(e):
 # 500: Internal server error
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(500)
-def internal_server_error(e):
+def internal_server_error(e) -> Response:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
