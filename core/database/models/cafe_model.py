@@ -25,7 +25,7 @@ class CafeModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(250), unique=True, nullable=False)
 
-    # Allow cafes to be disabled (eg if they close) without removing from dB
+    # Allow cafes to be disabled (e.g. if they close) without removing from dB
     active = db.Column(db.Boolean, nullable=True)
 
     # Need lat and lon for map locations
@@ -49,6 +49,9 @@ class CafeModel(db.Model):
 
     # This is not used
     updated_date = db.Column(db.String(250), nullable=True)
+
+    # Num routes passing cafe
+    num_routes_passing = db.Column(db.Integer, nullable=True)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Repr

@@ -4,7 +4,6 @@ from datetime import date
 from werkzeug import exceptions
 import os
 from threading import Thread
-import time
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -72,13 +71,12 @@ def cafe_list():
     cafes = CafeRepository().all_cafes()
 
     # ----------------------------------------------------------- #
-    # Map of all cafes
-    # ----------------------------------------------------------- #
-
     # Create a list of markers
+    # ----------------------------------------------------------- #
     cafe_markers = []
 
     for cafe in cafes:
+        # Different colour icon for OPEN / CLOSED
         if cafe.active:
             colour = OPEN_CAFE_COLOUR
         else:
@@ -89,7 +87,12 @@ def cafe_list():
             "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
             "color": colour,
         }
+
         cafe_markers.append(marker)
+
+    # ----------------------------------------------------------- #
+    # Prep map
+    # ----------------------------------------------------------- #
 
     # Map will launch centered here
     map_coords = {"lat": ELSR_LAT, "lng": ELSR_LON}
@@ -98,7 +101,6 @@ def cafe_list():
     count_map_loads(1)
 
     # Render in main index template
-    print("Serving page now...")
     return render_template("cafe_list.html", year=current_year, cafes=cafes, GOOGLE_MAPS_API_KEY=google_maps_api_key(),
                            cafe_markers=cafe_markers, map_coords=map_coords, ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            live_site=live_site())
@@ -143,7 +145,7 @@ def cafe_top10():
             cafes.append({"name": cafe.name,
                           "id": cafe.id,
                           "visits": data,
-                          "routes": len(GpxRepository().find_all_gpx_for_cafe(cafe.id, current_user)),
+                          "routes": len(GpxRepository().find_all_gpx_passing_cafe(cafe.id, current_user)),
                           "rating": cafe.rating,
                           })
         if len(cafes) >= 10:
@@ -186,7 +188,7 @@ def cafe_details(cafe_id):
     comments = CafeCommentRepository().all_comments_by_cafe_id(cafe_id)
 
     # Get all GPX routes which pass this cafe and that can be seen by current_user
-    gpxes = GpxRepository().find_all_gpx_for_cafe(cafe_id, current_user)
+    gpxes = GpxRepository().find_all_gpx_passing_cafe(cafe_id, current_user)
 
     # -------------------------------------------------------------------------------------------- #
     # Map for where the cafe is

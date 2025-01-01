@@ -285,7 +285,7 @@
 									</a>
 								</td>
 								<td scope="row">{{ cafe.rating }}</td>
-	                            <td scope="row">{{ number_routes_passing_by(cafe.id, current_user) }}</td>
+	                            <td scope="row">{{ cafe.number_routes_passing }}</td>
 								{% if not mobile %}
 									<td scope="row">{{ cafe.summary }}</td>
 								{% endif %}

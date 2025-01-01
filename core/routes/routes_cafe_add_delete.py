@@ -1,6 +1,5 @@
 from flask import render_template, redirect, url_for, flash, request, abort
 from flask_login import current_user
-from datetime import date
 from werkzeug import exceptions
 import mpu
 import os
@@ -11,8 +10,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO_GROUP, DECAFF_GROUP, MIXED_GROUP, \
-                 delete_file_if_exists
+from core import app, current_year, live_site, delete_file_if_exists
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -20,22 +18,17 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.user_repository import UserRepository
-from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.forms.cafe_forms import CreateCafeForm
+from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
-from core.forms.cafe_comment_forms import CreateCafeCommentForm
-from core.subs_gpx import check_new_cafe_with_all_gpxes, remove_cafe_from_all_gpxes
-from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
-                                  google_maps_api_key, count_map_loads
-from core.database.repositories.gpx_repository import GpxRepository
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
-from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
-from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
-from core.database.repositories.calendar_repository import CalendarRepository
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
-from core.database.jinja.gpx_jinja import number_routes_passing_by
+
+from core.forms.cafe_forms import CreateCafeForm
+
+from core.subs_gpx import check_new_cafe_with_all_gpxes, remove_cafe_from_all_gpxes
+from core.subs_google_maps import ELSR_HOME, MAP_BOUNDS, google_maps_api_key, count_map_loads
+from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -303,7 +296,7 @@ def edit_cafe():
         # ----------------------------------------------------------- #
         # Update details
         # ----------------------------------------------------------- #
-        if CafeRepository().update_cafe(cafe_id, updated_cafe):
+        if CafeRepository().update_cafe(cafe=updated_cafe):
             # Flash back a message
             app.logger.debug(f"edit_cafe(): Successfully updated the cafe, cafe_id = '{cafe_id}'.")
             EventRepository().log_event("Edit Cafe Success", f"Cafe updated '{updated_cafe.name}', cafe_id = '{cafe_id}'.")

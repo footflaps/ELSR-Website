@@ -15,7 +15,8 @@ from core import app, GPX_UPLOAD_FOLDER_ABS
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.gpx_repository import GpxRepository, GPX_ALLOWED_EXTENSIONS
+from core.database.models.cafe_model import CafeModel
+from core.database.repositories.gpx_repository import GpxModel, GpxRepository, GPX_ALLOWED_EXTENSIONS
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
@@ -52,13 +53,24 @@ def allowed_file(filename):
 # Update all GPXes with a new cafe
 # -------------------------------------------------------------------------------------------------------------- #
 
-def check_new_cafe_with_all_gpxes(cafe):
+def check_new_cafe_with_all_gpxes(cafe: CafeModel):
+    """
+    Called when we add a new cafe to the database. We need to update all GPXModel.cafes_passed JSON strings
+    to reference this new cafe if they pass nearby.
+    :param cafe:                    Cafe ORM for new cafe
+    :return:                        n/a
+    """
     app.logger.debug(f"check_new_cafe_with_all_gpxes(): Called with '{cafe.name}'.")
 
     # Get all the routes
-    gpxes = GpxRepository().all_gpxes()
+    gpxes: list[GpxModel] = GpxRepository().all_gpxes()
 
+    # Keep a count of how many routes pass this cafe
+    routes_passing: int = 0
+
+    # ----------------------------------------------------------- #
     # Loop over each GPX file
+    # ----------------------------------------------------------- #
     for gpx in gpxes:
 
         # Use absolute path for filename
@@ -69,12 +81,17 @@ def check_new_cafe_with_all_gpxes(cafe):
 
             # Open the file
             with open(filename, 'r') as file_ref:
-                gpx_file = gpxpy.parse(file_ref)
+                try:
+                    gpx_file = gpxpy.parse(file_ref)
+                except Exception as e:
+                    print(f"Error parsing GPX file '{filename}': {e}")
+                    gpx_file = None
 
+            if gpx_file:
                 # Max distance
-                min_km = 100
-                dist_km = 0
-                min_km_dist = 100
+                min_dist_to_cafe_km: float = 100
+                dist_along_route_km: float = 0
+                saved_dist_along_route_km: float = 1000
 
                 for track in gpx_file.tracks:
                     for segment in track.segments:
@@ -85,31 +102,50 @@ def check_new_cafe_with_all_gpxes(cafe):
                         for point in segment.points:
 
                             # How far along the route we are
-                            dist_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
+                            dist_along_route_km += mpu.haversine_distance((last_lat, last_lon), (point.latitude, point.longitude))
 
                             # How far is the cafe from the GPX file
-                            range_km = mpu.haversine_distance((cafe.lat, cafe.lon), (point.latitude, point.longitude))
+                            dist_to_cafe_km = mpu.haversine_distance((cafe.lat, cafe.lon), (point.latitude, point.longitude))
 
-                            if range_km < min_km:
-                                min_km = range_km
-                                min_km_dist = dist_km
+                            if dist_to_cafe_km < min_dist_to_cafe_km:
+                                min_dist_to_cafe_km = dist_to_cafe_km
+                                saved_dist_along_route_km = dist_along_route_km
 
                             last_lat = point.latitude
                             last_lon = point.longitude
 
-            # Close enough?
-            if min_km <= MIN_DIST_TO_CAFE_KM:
-                app.logger.debug(f"-- Closest to cafe {cafe.name} was {round(min_km, 1)} km"
-                                 f" at {round(min_km_dist, 1)} km along the route. Total length was {round(dist_km, 1)} km")
-                GpxRepository().update_cafe_list(gpx.id, cafe.id, round(min_km, 1), round(min_km_dist, 1))
-            else:
-                GpxRepository().remove_cafe_list(gpx.id, cafe.id)
+                # ----------------------------------------------------------- #
+                # Close enough?
+                # ----------------------------------------------------------- #
+                if min_dist_to_cafe_km <= MIN_DIST_TO_CAFE_KM:
+                    app.logger.debug(f"-- Closest to cafe {cafe.name} was {round(min_dist_to_cafe_km, 1)} km"
+                                     f" at {round(saved_dist_along_route_km, 1)} km along the route. Total length was {round(dist_along_route_km, 1)} km")
+                    GpxRepository().update_cafe_list(gpx_id=gpx.id,
+                                                     cafe_id=cafe.id,
+                                                     dist_to_cafe_km=round(min_dist_to_cafe_km, 1),
+                                                     dist_along_route_km=round(saved_dist_along_route_km, 1))
+                    routes_passing += 1
+                else:
+                    # Just in case they edited the route and now it doesn't pass this cafe
+                    GpxRepository().remove_cafe_from_cafes_passed(gpx_id=gpx.id, cafe_id=cafe.id)
+
+    # ----------------------------------------------------------- #
+    # Update cafe
+    # ----------------------------------------------------------- #
+    cafe.num_routes_passing = routes_passing
+    CafeRepository().update_cafe(cafe=cafe)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Remove a cafe from all GPX files
 # -------------------------------------------------------------------------------------------------------------- #
-def remove_cafe_from_all_gpxes(cafe_id):
+def remove_cafe_from_all_gpxes(cafe_id: int):
+    """
+    Used when we delete a cafe from the database. We need to remove reference to that cafe from the
+    GPXModel.cafes_passed JSON string.
+    :param cafe_id:                         ID of the cafe we are deleting
+    :return:                                n/a
+    """
     app.logger.debug(f"remove_cafe_from_all_gpxes(): Called with cafe_id = '{cafe_id}'.")
 
     # Get all the routes
@@ -118,7 +154,7 @@ def remove_cafe_from_all_gpxes(cafe_id):
     # Loop over each GPX file
     for gpx in gpxes:
         # Remove this entry
-        GpxRepository().remove_cafe_list(gpx.id, cafe_id)
+        GpxRepository().remove_cafe_from_cafes_passed(gpx_id=gpx.id, cafe_id=cafe_id)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -205,7 +241,7 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # Have we been asked to send a ride email notification?
     # ----------------------------------------------------------- #
     # send_email is either 'False' for no, or set to an int (ride_id) for yes
-    if type(send_email) == int:
+    if type(send_email) is int:
         # We have a ride_id index into the calendar
         ride = CalendarRepository().one_by_id(send_email)
         # Check that worked
@@ -218,8 +254,9 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
         send_ride_notification_emails(ride)
 
 
-
-
-
-
-
+# print("Analysing all GPX and all cafes for closeness to each other.")
+# with app.app_context():
+#     cafes = CafeRepository.all_cafes()
+#     for cafe in cafes:
+#         print(f"Checking cafe '{cafe.name}'")
+#         check_new_cafe_with_all_gpxes(cafe)

@@ -1,6 +1,7 @@
 from datetime import date
 import json
-from sqlalchemy import func
+from sqlalchemy import func, cast, Integer
+from sqlalchemy.dialects.postgresql import JSON
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -129,30 +130,30 @@ class GpxRepository(GpxModel):
         return False
 
     @staticmethod
-    def update_cafe_list(gpx_id: int, cafe_id: int, dist_km: float, range_km: float):
+    def update_cafe_list(gpx_id: int, cafe_id: int, dist_to_cafe_km: float, dist_along_route_km: float):
         with app.app_context():
             gpx = GpxModel.query.filter_by(id=gpx_id).first()
             if gpx:
                 try:
                     # Get the list of cafes passed
                     # eg [  {"cafe_id": 1, "dist_km": 0.1, "range_km": 70},
-                    #       {"cafe_id": 2, "dist_km": 0.2, "range_km":30}
+                    #       {"cafe_id": 2, "dist_km": 0.2, "range_km": 30}
                     #    ]
                     cafes_json = json.loads(gpx.cafes_passed)
                     updated = False
 
                     for cafe in cafes_json:
                         if cafe['cafe_id'] == cafe_id:
-                            cafe['dist_km'] = round(dist_km, 1)
-                            cafe['range_km'] = round(range_km, 1)
+                            cafe['dist_km'] = round(dist_to_cafe_km, 1)
+                            cafe['range_km'] = round(dist_along_route_km, 1)
                             updated = True
 
                     if not updated:
                         # Tag on the end
                         cafes_json.append({
                             "cafe_id":  cafe_id,
-                            "dist_km":  round(dist_km, 1),
-                            "range_km": round(range_km, 1)
+                            "dist_km":  round(dist_to_cafe_km, 1),
+                            "range_km": round(dist_along_route_km, 1)
                         })
 
                     # Push back to gpx
@@ -171,7 +172,7 @@ class GpxRepository(GpxModel):
         return False
 
     @staticmethod
-    def remove_cafe_list(gpx_id: int, cafe_id: int) -> bool:
+    def remove_cafe_from_cafes_passed(gpx_id: int, cafe_id: int) -> bool:
         with app.app_context():
             gpx = GpxModel.query.filter_by(id=gpx_id).first()
             if gpx:
@@ -291,8 +292,10 @@ class GpxRepository(GpxModel):
     @staticmethod
     def all_gpxes_sorted_downloads() -> list[GpxModel]:
         with app.app_context():
-            gpxes = GpxModel.query.filter_by(valid=1).order_by(func.json_array_length(GpxRepository.downloads).desc()).\
-                    limit(10).all()
+            gpxes = GpxModel.query.filter_by(public=True) \
+                                  .order_by(func.json_array_length(GpxRepository.downloads).desc()) \
+                                  .limit(10) \
+                                  .all()
             return gpxes
 
     @staticmethod
@@ -329,12 +332,20 @@ class GpxRepository(GpxModel):
         return gpx_id
 
     # -------------------------------------------------------------------------------------------------------------- #
-    # Properties
+    # Class method
     # -------------------------------------------------------------------------------------------------------------- #
-    def find_all_gpx_for_cafe(self, cafe_id: int, user: UserModel) -> list[GpxModel]:
+    @classmethod
+    def find_all_gpx_passing_cafe(cls, cafe_id: int, user: UserModel) -> list[GpxModel]:
+        """
+        Scan all the GPX files and see how many pass this cafe based on the GPXModel.cafes_passed
+        JSON field.
+        :param cafe_id:                     Index of the cafe in question.
+        :param user:                        User's ORM (used to work out permissions)
+        :return:
+        """
         # We return a list of GPXes which pass this cafe
         passing_gpx = []
-        for gpx in self.all_gpxes():
+        for gpx in cls.all_gpxes():
 
             # Tortuous logic as current_user won't have '.email' until authenticated....
             if gpx.public:

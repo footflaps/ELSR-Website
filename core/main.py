@@ -33,7 +33,6 @@ from core.database.models.blog_model import BlogModel
 from core.database.jinja.cafe_jinja import get_cafe_name_from_id
 from core.database.jinja.calendar_jinja import start_time_string
 from core.database.jinja.event_jinja import good_event
-from core.database.jinja.gpx_jinja import number_routes_passing_by
 from core.database.jinja.user_jinja import get_user_id_from_email
 
 

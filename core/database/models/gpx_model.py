@@ -1,3 +1,5 @@
+from sqlalchemy.dialects.postgresql import JSONB
+
 # -------------------------------------------------------------------------------------------------------------- #
 # Import db object from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
@@ -50,10 +52,10 @@ class GpxModel(db.Model):
     # Is the GPX public
     public = db.Column(db.Boolean, nullable=False)
 
-    # Type (road / offroad)
+    # Type (road / off-road)
     type = db.Column(db.String(20))
 
-    # Details (really just for offroad routes)
+    # Details (really just for off-road routes)
     details = db.Column(db.Text)
 
     # Number times downloaded

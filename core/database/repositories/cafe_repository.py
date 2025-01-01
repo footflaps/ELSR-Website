@@ -83,28 +83,18 @@ class CafeRepository(CafeModel):
     # -------------------------------------------------------------------------------------------------------------- #
     # Update an existing cafe
     @staticmethod
-    def update_cafe(cafe_id: int, updated_cafe: CafeModel) -> bool:
+    def update_cafe(cafe: CafeModel) -> CafeModel | None:
         with app.app_context():
-            cafe = CafeModel.query.filter_by(id=cafe_id).first()
-            if cafe:
-                cafe.name = updated_cafe.name
-                cafe.lat = updated_cafe.lat
-                cafe.lon = updated_cafe.lon
-                cafe.website_url = updated_cafe.website_url
-                cafe.details = updated_cafe.details
-                cafe.summary = updated_cafe.summary
-                cafe.rating = updated_cafe.rating
-                try:
-                    db.session.commit()
-                    return True
+            try:
+                db.session.add(cafe)
+                db.session.commit()
+                db.session.refresh(cafe)
+                return cafe
 
-                except Exception as e:
-                    db.session.rollback()
-                    app.logger.error(f"dB.update_cafe(): Failed with cafe '{cafe.name}', error code was '{e.args}'.")
-                    return False
-
-        app.logger.error(f"dB.update_cafe(): Failed to with cafe '{cafe.name}', invalid cafe_id='{cafe_id}'.")
-        return False
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"dB.update_cafe(): Failed to add update '{cafe.name}', error code was '{e.args}'.")
+                return None
 
     @staticmethod
     def update_photo(cafe_id: int, filename: str) -> bool:
