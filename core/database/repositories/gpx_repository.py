@@ -292,10 +292,13 @@ class GpxRepository(GpxModel):
     @staticmethod
     def all_gpxes_sorted_downloads() -> list[GpxModel]:
         with app.app_context():
-            gpxes = GpxModel.query.filter_by(public=True) \
-                                  .order_by(func.json_array_length(GpxRepository.downloads).desc()) \
-                                  .limit(10) \
-                                  .all()
+            gpxes = GpxModel.query.filter(
+                (GpxModel.public == True) &
+                (func.json_typeof(cast(GpxModel.downloads, JSON)) == 'array')  # Ensure downloads is a JSON array
+            ) \
+                .order_by(func.json_array_length(cast(GpxModel.downloads, JSON)).desc()) \
+                .limit(10) \
+                .all()
             return gpxes
 
     @staticmethod
