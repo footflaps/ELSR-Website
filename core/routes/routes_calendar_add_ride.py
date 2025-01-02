@@ -238,7 +238,7 @@ def add_ride() -> Response | str:
             EventRepository().log_event("Edit Ride Fail", f"Failed to locate ride, ride_id = '{calendar_id}'.")
             return abort(404)
     else:
-        calendar_entry: CalendarModel | None = None
+        calendar_entry = None
 
     # ----------------------------------------------------------- #
     # Work out what we're doing (Add / Edit)
@@ -363,7 +363,7 @@ def add_ride() -> Response | str:
             # Work out which cafe they selected in the drop down
             # eg "Goat and Grass (was curious goat) (46)"
             cafe_id: int = CafeRepository().cafe_id_from_combo_string(form.destination.data)
-            cafe: CafeModel | None = CafeRepository().one_by_id(cafe_id)
+            cafe = CafeRepository().one_by_id(cafe_id)
             if not cafe:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get cafe from '{form.destination.data}'.")
@@ -374,7 +374,7 @@ def add_ride() -> Response | str:
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
         else:
             # New cafe, not yet in database
-            cafe: CafeModel | None = None
+            cafe = None
 
         # 2: Validate GPX (must be specified)
         if form.gpx_name.data == UPLOAD_ROUTE \
@@ -386,7 +386,7 @@ def add_ride() -> Response | str:
             # Work out which GPX route they chose
             # eg "20: 'Mill End again', 107.6km / 838.0m"
             gpx_id: int = GpxRepository().gpx_id_from_combo_string(form.gpx_name.data)
-            gpx: GpxModel | None = GpxRepository().one_by_id(id=gpx_id)
+            gpx = GpxRepository().one_by_id(id=gpx_id)
             if not gpx:
                 # Should never happen, but....
                 app.logger.debug(f"add_ride(): Failed to get GPX from '{form.gpx_name.data}'.")
@@ -397,7 +397,7 @@ def add_ride() -> Response | str:
                                        MEETING_OTHER=MEETING_OTHER, NEW_CAFE=NEW_CAFE, UPLOAD_ROUTE=UPLOAD_ROUTE)
         else:
             # They are uploading their own GPX file
-            gpx: GpxModel | None = None
+            gpx = None
 
         # 4: Check route passes cafe (if both from comboboxes)
         if gpx and cafe:
@@ -433,16 +433,16 @@ def add_ride() -> Response | str:
             if not result["success"]:
                 # Return the error directly from the helper function
                 return result["error"]              # type: ignore
-            gpx: GpxModel = result["gpx"]           # Retrieve the GPX object if the function succeeded
+            gpx = result["gpx"]           # Retrieve the GPX object if the function succeeded
 
         # ----------------------------------------------------------- #
         # Is this a new ride?
         # ----------------------------------------------------------- #
         if not calendar_entry:
-            calendar_entry: CalendarModel = CalendarRepository()
+            calendar_entry = CalendarRepository()
 
         # Convert form date format '2023-06-23' to preferred format '23062023'
-        start_date_str: str = form.date.data.strftime("%d%m%Y")
+        start_date_str = form.date.data.strftime("%d%m%Y")
         print(f"Got {start_date_str} from form as date..")
 
         # ----------------------------------------------------------- #
@@ -472,7 +472,7 @@ def add_ride() -> Response | str:
         # Admin can allocate events to people
         if current_user.admin:
             # Get user
-            user: UserModel = UserRepository().user_from_combo_string(form.owner.data)
+            user = UserRepository().user_from_combo_string(form.owner.data)
             if user:
                 calendar_entry.email = user.email
             else:
@@ -490,7 +490,7 @@ def add_ride() -> Response | str:
         # ----------------------------------------------------------- #
         # Add to the dB
         # ----------------------------------------------------------- #
-        calendar_entry: CalendarModel | None = CalendarRepository().add_ride(calendar_entry)
+        calendar_entry = CalendarRepository().add_ride(calendar_entry)
         if calendar_entry:
             # Success
             app.logger.debug(f"add_ride(): Successfully added new ride.")

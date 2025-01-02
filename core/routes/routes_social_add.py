@@ -61,7 +61,7 @@ def route_add_social() -> Response | str:
             return abort(404)
 
         # Look up the social by id
-        social: SocialModel | None = SocialRepository().one_by_id(id=int(social_id))
+        social = SocialRepository().one_by_id(id=int(social_id))
 
         # Handle failure...
         if not social:
@@ -89,7 +89,7 @@ def route_add_social() -> Response | str:
                                                       f"social_id = '{social_id}', social.email = '{social.email}'.")
                 flash("Failed to locate owner, so defaulting to current_user")
                 # Default to current user
-                owner: UserModel = current_user
+                owner = current_user
 
             # We are editing an existing event, so pre-fill details
             form.date.data = datetime.strptime(social.date.strip(), '%d%m%Y')
@@ -143,7 +143,7 @@ def route_add_social() -> Response | str:
             new_social: SocialModel = social
         else:
             # New social
-            new_social: SocialModel = SocialModel()
+            new_social = SocialModel()
 
         # Get owner
         if current_user.admin:
@@ -182,7 +182,7 @@ def route_add_social() -> Response | str:
         # ----------------------------------------------------------- #
         # Add to the db
         # ----------------------------------------------------------- #
-        new_social: SocialModel | None = SocialRepository().add_social(new_social)
+        new_social = SocialRepository().add_social(new_social)
         if new_social:
             # Success
             app.logger.debug(f"add_social(): Successfully added new social.")

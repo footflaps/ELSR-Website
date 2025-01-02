@@ -173,7 +173,7 @@ class BlogRepository(BlogModel):
         # Need to convert calendar date string to date_unix
         try:
             date_obj = datetime(int(date[4:8]), int(date[2:4]), int(date[0:2]), 0, 00)
-            date_unix = datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2))
+            date_unix: int = int(datetime.timestamp(datetime.combine(date_obj, datetime.min.time()) + timedelta(hours=2)))
         except Exception as e:
             app.logger.error(f"all_by_date(): Failed to convert date = '{date}', error code '{e.args}'.")
             return []

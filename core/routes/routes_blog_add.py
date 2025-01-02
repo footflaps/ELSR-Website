@@ -60,7 +60,7 @@ def add_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
-    blog_id: str = request.args.get('blog_id', None)
+    blog_id: str | None = request.args.get('blog_id', None)
 
     # ----------------------------------------------------------- #
     # Validate blog_id
@@ -86,7 +86,7 @@ def add_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Work out what we're doing (Add / Edit)
     # ----------------------------------------------------------- #
-    if blog_id and request.method == 'GET':
+    if blog and blog_id and request.method == 'GET':
 
         # ----------------------------------------------------------- #
         # Edit event, so pre-fill form from dB
@@ -160,7 +160,7 @@ def add_blog() -> Response | str:
             new_blog: BlogModel = blog
         else:
             # New post
-            new_blog: BlogModel = Blog()
+            new_blog = Blog()
 
         # ----------------------------------------------------------- #
         # Populate new_blog from form
@@ -174,7 +174,7 @@ def add_blog() -> Response | str:
 
         # Convert to Unix time
         # We add two hours to get round the day changing due to BST / GMT and converting back and forth
-        new_blog.date_unix = datetime.timestamp(datetime.combine(formdate, datetime.min.time()) + timedelta(hours=2))
+        new_blog.date_unix = int(datetime.timestamp(datetime.combine(formdate, datetime.min.time()) + timedelta(hours=2)))
         new_blog.converted_date = form.date.data
 
         # 2. The rest

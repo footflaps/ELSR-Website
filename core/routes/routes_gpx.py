@@ -330,7 +330,7 @@ def new_route() -> Response | str:
             gpx.public = False
 
             # Add to the dB
-            gpx: GpxModel | None = gpx.add_gpx(gpx)
+            gpx = gpx.add_gpx(gpx)
             if gpx:
                 # Success, added GPX to dB
                 app.logger.debug(f"new_route(): GPX added to dB, id = '{gpx.id}'.")
