@@ -39,7 +39,7 @@ from core.decorators.user_decorators import admin_only, update_last_seen, logout
 @logout_barred_user
 @login_required
 @update_last_seen
-def mark_read() -> Response:
+def mark_read() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -95,11 +95,11 @@ def mark_read() -> Response:
     # We could have come from either the Admin page or the User page, both of which should pass us "return_path"
     if return_path and \
             return_path != "None":
-        return redirect(return_path)
+        return redirect(return_path)  # type: ignore
     else:
         # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
-        return redirect(url_for("user_page", user_id=user_id))
+        return redirect(url_for("user_page", user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -110,7 +110,7 @@ def mark_read() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def mark_unread() -> Response:
+def mark_unread() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -167,11 +167,11 @@ def mark_unread() -> Response:
     if return_path and \
             return_path != "None":
         # Go back to specific page
-        return redirect(return_path)
+        return redirect(return_path)  # type: ignore
     else:
         # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
-        return redirect(url_for("user_page", user_id=user_id))
+        return redirect(url_for("user_page", user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -182,7 +182,7 @@ def mark_unread() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def delete_message() -> Response:
+def delete_message() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -241,11 +241,11 @@ def delete_message() -> Response:
     if return_path and \
             return_path != "None":
         # Go back to specific page
-        return redirect(return_path)
+        return redirect(return_path)  # type: ignore
     else:
         # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
-        return redirect(url_for("user_page", user_id=user_id))
+        return redirect(url_for("user_page", user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -256,7 +256,7 @@ def delete_message() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def reply_message() -> Response:
+def reply_message() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -346,11 +346,11 @@ def reply_message() -> Response:
     if return_path and \
             return_path != "None":
         # Go back to specific page
-        return redirect(return_path)
+        return redirect(return_path)  # type: ignore
     else:
         # Should never get here, but default to user page if we didn't get "return_path"
         user_id = current_user.id
-        return redirect(url_for("user_page", user_id=user_id))
+        return redirect(url_for("user_page", user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -361,7 +361,7 @@ def reply_message() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def message_admin() -> Response:
+def message_admin() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -435,7 +435,7 @@ def message_admin() -> Response:
     Thread(target=alert_admin_via_sms, args=(user, body,)).start()
 
     # Back to user page
-    return redirect(url_for("user_page", user_id=user_id))
+    return redirect(url_for("user_page", user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -446,7 +446,7 @@ def message_admin() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def message_user() -> Response:
+def message_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -505,4 +505,4 @@ def message_user() -> Response:
         flash("Sorry, something went wrong")
 
     # Back to user page
-    return redirect(url_for("user_page", user_id=user_id))
+    return redirect(url_for("user_page", user_id=user_id))  # type: ignore

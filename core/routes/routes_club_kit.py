@@ -31,7 +31,7 @@ from core.forms.user_forms import ClothingSizesForm
 @app.route("/club_kit", methods=['GET', 'POST'])
 @app.route("/team_kit", methods=['GET', 'POST'])
 @update_last_seen
-def club_kit() -> Response:
+def club_kit() -> Response | str:
     # Need a form
     form = ClothingSizesForm()
 
@@ -110,7 +110,7 @@ def club_kit() -> Response:
 @app.route("/club_kit_v1", methods=['GET', 'POST'])
 @app.route("/team_kit_v1", methods=['GET', 'POST'])
 @update_last_seen
-def club_kit_v1() -> Response:
+def club_kit_v1() -> Response | str:
 
     # ----------------------------------------------------------- #
     #   Render page

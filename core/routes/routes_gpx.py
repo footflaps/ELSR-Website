@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory, Response
+from flask import render_template, redirect, url_for, flash, request, abort, send_from_directory, Response, make_response
 from flask_login import current_user
 from werkzeug import exceptions
 import os
@@ -73,7 +73,7 @@ def download_count(gpx):
 
 @app.route('/routes', methods=['GET'])
 @update_last_seen
-def gpx_list() -> Response:
+def gpx_list() -> Response | str:
     # Grab all our routes
     gpxes = GpxRepository().all_gpxes()
 
@@ -111,7 +111,7 @@ def gpx_list() -> Response:
 
 @app.route('/gpx_top10', methods=['GET'])
 @update_last_seen
-def gpx_top10() -> Response:
+def gpx_top10() -> Response | str:
     # Grab all our gpxes
     gpxes = GpxRepository().all_gpxes_sorted_downloads()
 
@@ -129,7 +129,7 @@ def gpx_top10() -> Response:
 
 @app.route('/route/<int:gpx_id>', methods=['GET'])
 @update_last_seen
-def gpx_details(gpx_id) -> Response:
+def gpx_details(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -151,7 +151,7 @@ def gpx_details(gpx_id) -> Response:
             not current_user.is_authenticated:
         app.logger.debug(f"gpx_details(): Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         EventRepository().log_event("One GPX Fail", f"Refusing permission for non logged in user and hidden route '{gpx_id}'.")
-        return redirect(url_for('not_logged_in'))
+        return redirect(url_for('not_logged_in'))   # type: ignore
 
     elif not gpx.public and \
             current_user.email != gpx.email and \
@@ -274,7 +274,7 @@ def gpx_details(gpx_id) -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def new_route() -> Response:
+def new_route() -> Response | str:
     # ----------------------------------------------------------- #
     # Need a form for uploading
     # ----------------------------------------------------------- #
@@ -375,7 +375,7 @@ def new_route() -> Response:
             # Forward to edit route as that's the next step
             app.logger.debug(f"new_route(): New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
             EventRepository().log_event(f"New GPX Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
-            return redirect(url_for('edit_route', gpx_id=gpx.id))
+            return redirect(url_for('edit_route', gpx_id=gpx.id))   # type: ignore
 
     elif request.method == 'POST':
 
@@ -402,7 +402,7 @@ def new_route() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def route_delete() -> Response:
+def route_delete() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -471,7 +471,7 @@ def route_delete() -> Response:
         EventRepository().log_event("GPX Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to route detail page
-        return redirect(url_for('gpx_details', gpx_id=gpx_id))
+        return redirect(url_for('gpx_details', gpx_id=gpx_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete #1: Remove from dB
@@ -486,7 +486,7 @@ def route_delete() -> Response:
         EventRepository().log_event("GPX Delete Fail", f"Gpx().delete_gpx(gpx.id) failed for gpx.id = '{gpx.id}'.")
         flash("Sorry, something went wrong!")
         # Back to GPX list page
-        return redirect(url_for('gpx_list'))
+        return redirect(url_for('gpx_list'))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete #2: Remove GPX file itself
@@ -501,7 +501,7 @@ def route_delete() -> Response:
                                              f"error code was {e.args}, gpx_id = {gpx_id}!")
 
     # Back to GPX list page
-    return redirect(url_for('gpx_list'))
+    return redirect(url_for('gpx_list'))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -512,7 +512,7 @@ def route_delete() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def flag_gpx() -> Response:
+def flag_gpx() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -576,7 +576,7 @@ def flag_gpx() -> Response:
     Thread(target=alert_admin_via_sms, args=(user, f"GPX '{gpx.name}', Reason: '{reason}'",)).start()
 
     # Back to GPX details page
-    return redirect(url_for('gpx_details', gpx_id=gpx_id))
+    return redirect(url_for('gpx_details', gpx_id=gpx_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -587,7 +587,7 @@ def flag_gpx() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def route_download(gpx_id) -> Response:
+def route_download(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -653,7 +653,7 @@ def route_download(gpx_id) -> Response:
 @app.route('/gpx_download2', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def gpx_download2() -> Response:
+def gpx_download2() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #

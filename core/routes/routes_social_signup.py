@@ -1,4 +1,4 @@
-from flask import url_for, request, flash, redirect, abort, Response
+from flask import url_for, request, flash, redirect, abort, Response, make_response
 from flask_login import current_user
 import json
 
@@ -15,7 +15,7 @@ from core import app
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.social_repository import SocialRepository
+from core.database.repositories.social_repository import SocialModel, SocialRepository
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
@@ -36,24 +36,30 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @update_last_seen
 @login_required
 @rw_required
-def social_can() -> Response:
+def social_can() -> Response | str:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
-    social_id = request.args.get('social_id', None)
+    social_id_str: str | None = request.args.get('social_id', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
     # ----------------------------------------------------------- #
-    if not social_id:
+    if not social_id_str:
         app.logger.debug(f"social_can(): Missing social_id!")
         EventRepository().log_event("social_can() Fail", f"Missing social_id!")
         return abort(404)
+    else:
+        try:
+            social_id: int = int(social_id_str)
+        except Exception:
+            flash(f"Invalid social_id '{social_id_str}', was expecting an integer.")
+            return abort(404)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    social = SocialRepository().one_by_id(social_id)
+    social: SocialModel | None = SocialRepository().one_by_id(social_id)
     if not social:
         app.logger.debug(f"social_can(): Failed to locate Social with social_id = '{social_id}'.")
         EventRepository().log_event("social_can() Fail", f"Failed to Social with social_id = '{social_id}'.")
@@ -105,7 +111,7 @@ def social_can() -> Response:
     # Back to poll page
     # ----------------------------------------------------------- #
 
-    return redirect(url_for(f'display_socials', date=social.date, anchor=f"social_{social_id}"))
+    return make_response(redirect(url_for(f'display_socials', date=social.date, anchor=f"social_{social_id}")))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -116,24 +122,30 @@ def social_can() -> Response:
 @update_last_seen
 @login_required
 @rw_required
-def social_cant() -> Response:
+def social_cant() -> Response | str:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
-    social_id = request.args.get('social_id', None)
+    social_id_str: str | None = request.args.get('social_id', None)
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
     # ----------------------------------------------------------- #
-    if not social_id:
+    if not social_id_str:
         app.logger.debug(f"social_cant(): Missing social_id!")
         EventRepository().log_event("social_cant() Fail", f"Missing social_id!")
         return abort(404)
+    else:
+        try:
+            social_id: int = int(social_id_str)
+        except Exception:
+            flash(f"Invalid social_id '{social_id_str}', was expecting an integer.")
+            return abort(404)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    social = SocialRepository().one_by_id(social_id)
+    social: SocialModel | None = SocialRepository().one_by_id(social_id)
     if not social:
         app.logger.debug(f"social_cant(): Failed to locate Social with social_id = '{social_id}'.")
         EventRepository().log_event("social_cant() Fail", f"Failed to Social with social_id = '{social_id}'.")
@@ -185,4 +197,4 @@ def social_cant() -> Response:
     # Back to poll page
     # ----------------------------------------------------------- #
 
-    return redirect(url_for(f'display_socials', date=social.date, anchor=f"social_{social_id}"))
+    return make_response(redirect(url_for(f'display_socials', date=social.date, anchor=f"social_{social_id}")))  # type: ignore

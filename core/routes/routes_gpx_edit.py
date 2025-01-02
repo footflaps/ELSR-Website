@@ -44,7 +44,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @login_required
 @update_last_seen
 @rw_required
-def edit_route() -> Response:
+def edit_route() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -80,7 +80,7 @@ def edit_route() -> Response:
         app.logger.debug(f"edit_route(): Failed to locate GPX file for gpx_id = '{gpx_id}'.")
         EventRepository().log_event("Edit GPX Fail", f"Failed to locate GPX file for gpx_id = '{gpx_id}'.")
         flash(f"We seem to have lost the GPX file for route #{gpx_id} ({gpx.name})!")
-        return redirect(url_for('gpx_list'))
+        return redirect(url_for('gpx_list'))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Restrict access to Admin and Author
@@ -186,7 +186,7 @@ def edit_route() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def gpx_cut_start() -> Response:
+def gpx_cut_start() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -253,7 +253,7 @@ def gpx_cut_start() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to the edit page
-    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
+    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -265,7 +265,7 @@ def gpx_cut_start() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def gpx_cut_end() -> Response:
+def gpx_cut_end() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -331,7 +331,7 @@ def gpx_cut_end() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to the edit page
-    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
+    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -343,7 +343,7 @@ def gpx_cut_end() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def publish_route() -> Response:
+def publish_route() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -401,7 +401,7 @@ def publish_route() -> Response:
         app.logger.debug(f"publish_route(): Failed clear cafe list gpx.id = '{gpx.id}'.")
         EventRepository().log_event("Publish GPX Fail", f"Failed clear cafe list, gpx_id = '{gpx_id}'.")
         flash("Sorry, something went wrong!")
-        return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
+        return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Is this GPX associated with any rides?
@@ -425,10 +425,10 @@ def publish_route() -> Response:
     if return_path and \
             return_path != "None":
         # Go back to specific page
-        return redirect(return_path)
+        return redirect(return_path)   # type: ignore
     else:
         # Redirect back to the details page as the route is now public, ie any editing is over
-        return redirect(url_for('gpx_details', gpx_id=gpx_id))
+        return redirect(url_for('gpx_details', gpx_id=gpx_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -440,7 +440,7 @@ def publish_route() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def hide_route() -> Response:
+def hide_route() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -495,4 +495,4 @@ def hide_route() -> Response:
         flash("Sorry, something went wrong!")
 
     # Redirect back to the edit page as that's probably what they want to do next
-    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))
+    return redirect(url_for('edit_route', gpx_id=gpx_id, return_path=return_path))  # type: ignore

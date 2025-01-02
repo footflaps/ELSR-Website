@@ -10,7 +10,6 @@ from flask import render_template, redirect, url_for, flash, request, abort, ses
 from flask_login import current_user, logout_user
 from werkzeug import exceptions
 from urllib.parse import urlparse
-import os
 import re
 from datetime import datetime
 import json
@@ -165,7 +164,7 @@ def validate_socials(user, form):
 @app.route('/user_page', methods=['GET', 'POST'])
 @login_required
 @update_last_seen
-def user_page() -> Response:
+def user_page() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -351,17 +350,17 @@ def user_page() -> Response:
                 app.logger.debug(f"user_page(): Updated user, user_id = '{user_id}'.")
                 EventRepository().log_event("User Page Success", f"Updated user, user_id = '{user_id}'.")
                 flash("User has been updated!")
-                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
+                return redirect(url_for('user_page', user_id=user_id, anchor="account"))  # type: ignore
             else:
                 # Should never get here, but..
                 app.logger.debug(f"user_page(): Failed to update user, user_id = '{user_id}'.")
                 EventRepository().log_event("User Page Fail", f"Failed to update user, user_id = '{user_id}'.")
                 flash("Sorry, something went wrong!")
-                return redirect(url_for('user_page', user_id=user_id, anchor="account"))
+                return redirect(url_for('user_page', user_id=user_id, anchor="account"))  # type: ignore
         else:
             # They didn't change anything
             flash("Nothing was changed!")
-            return redirect(url_for('user_page', user_id=user_id, anchor="account"))
+            return redirect(url_for('user_page', user_id=user_id, anchor="account"))  # type: ignore
 
     elif request.method == 'POST':
         # ----------------------------------------------------------- #
@@ -394,7 +393,7 @@ def user_page() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def delete_user() -> Response:
+def delete_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -457,14 +456,14 @@ def delete_user() -> Response:
             app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{user.id}'!")
             EventRepository().log_event("Delete User Fail", f"Delete failed, incorrect password for user_id = '{user.id}'!")
             flash(f"Incorrect password for {user.name}.")
-            return redirect(url_for('user_page', user_id=user_id))
+            return redirect(url_for('user_page', user_id=user_id))  # type: ignore
     else:
         # Validate against current_user's (admins) password
         if not user.validate_password(current_user, password, user_ip):
             app.logger.debug(f"delete_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
             EventRepository().log_event("Delete User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
             flash(f"Incorrect password for {current_user.name}.")
-            return redirect(url_for('user_page', user_id=user_id))
+            return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete the user
@@ -477,7 +476,7 @@ def delete_user() -> Response:
         if current_user.admin \
                 and int(current_user.id) != int(user_id):
             # Admin deleting someone, so back to admin
-            return redirect(url_for('admin_page'))
+            return redirect(url_for('admin_page'))  # type: ignore
 
         # ----------------------------------------------------------- #
         # User deleting themselves, so try and clean up
@@ -500,7 +499,7 @@ def delete_user() -> Response:
         app.logger.debug(f"delete_user(): User().delete_user() failed for user_id = '{user_id}'.")
         EventRepository().log_event("Delete User Fail", f"User().delete_user() failed for user_id = '{user_id}'.")
         flash("Sorry, something went wrong.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -511,7 +510,7 @@ def delete_user() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def set_notifications() -> Response:
+def set_notifications() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -567,7 +566,7 @@ def set_notifications() -> Response:
         flash("Sorry, something went wrong.")
 
     # Back to user page
-    return redirect(url_for('user_page', anchor="notifications", user_id=user_id))
+    return redirect(url_for('user_page', anchor="notifications", user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -577,7 +576,7 @@ def set_notifications() -> Response:
 @app.route('/unsubscribe_all', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def unsubscribe_all() -> Response:
+def unsubscribe_all() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -626,10 +625,10 @@ def unsubscribe_all() -> Response:
         # Better check this so as not to forward to a user page they don't have permission to see
         if current_user.id == user.id:
             # Back to their user page
-            return redirect(url_for('user_page', user_id=user.id))
+            return redirect(url_for('user_page', user_id=user.id))  # type: ignore
 
     # Revert to home page
-    return redirect(url_for('home'))
+    return redirect(url_for('home'))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -639,7 +638,7 @@ def unsubscribe_all() -> Response:
 @app.route('/who_are_we', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def who_are_we() -> Response:
+def who_are_we() -> Response | str:
     return render_template("under_construction.html", year=current_year, live_site=live_site())
 
     # ----------------------------------------------------------- #
@@ -669,7 +668,7 @@ def who_are_we() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def emergency() -> Response:
+def emergency() -> Response | str:
     # ----------------------------------------------------------- #
     # Validate user
     # ----------------------------------------------------------- #

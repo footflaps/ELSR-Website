@@ -37,7 +37,7 @@ from core.decorators.user_decorators import admin_only, update_last_seen, login_
 @login_required
 @admin_only
 @update_last_seen
-def delete_event() -> Response:
+def delete_event() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -86,13 +86,13 @@ def delete_event() -> Response:
     if url_for("user_page") in request.referrer:
         # Tell user page to jump straight to the event table using 'anchor'
         # NB user_page must have a valid user_id
-        return redirect(url_for("user_page", user_id=user_id, anchor="eventLog"))
+        return redirect(url_for("user_page", user_id=user_id, anchor="eventLog"))  # type: ignore
     elif url_for("admin_page") in request.referrer:
         # Tell admin page to jump straight to the event table using 'anchor'
-        return redirect(url_for("admin_page", anchor="eventLog"))
+        return redirect(url_for("admin_page", anchor="eventLog"))  # type: ignore
     else:
         # Should never get here, but just in case, go to admin page
-        return redirect(url_for("admin_page", anchor="eventLog"))
+        return redirect(url_for("admin_page", anchor="eventLog"))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -103,7 +103,7 @@ def delete_event() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def delete_events() -> Response:
+def delete_events() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -161,10 +161,10 @@ def delete_events() -> Response:
         flash(f"Incorrect password for {current_user.name}.")
         if user_id == "admin":
             # Back to Admin page
-            return redirect(url_for('admin_page', anchor="eventLog"))
+            return redirect(url_for('admin_page', anchor="eventLog"))  # type: ignore
         else:
             # Back to user page
-            return redirect(url_for('user_page', user_id=user_id))
+            return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete events
@@ -197,13 +197,13 @@ def delete_events() -> Response:
     if url_for("user_page") in request.referrer:
         # Tell user page to jump straight to the event table using 'anchor'
         # NB user_page must have a valid user_id
-        return redirect(url_for("user_page", user_id=user_id, anchor="eventLog"))
+        return redirect(url_for("user_page", user_id=user_id, anchor="eventLog"))  # type: ignore
     elif url_for("admin_page") in request.referrer:
         # Tell admin page to jump straight to the event table using 'anchor'
-        return redirect(url_for("admin_page", anchor="eventLog"))
+        return redirect(url_for("admin_page", anchor="eventLog"))  # type: ignore
     else:
         # Should never get here, but just in case go to Admin page
-        return redirect(url_for("admin_page", anchor="eventLog"))
+        return redirect(url_for("admin_page", anchor="eventLog"))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -214,7 +214,7 @@ def delete_events() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def delete_404s() -> Response:
+def delete_404s() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -259,7 +259,7 @@ def delete_404s() -> Response:
         EventRepository().log_event("Delete Events Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
         # Back to Admin page
-        return redirect(url_for('admin_page', anchor="eventLog"))
+        return redirect(url_for('admin_page', anchor="eventLog"))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete 404 events
@@ -272,5 +272,5 @@ def delete_404s() -> Response:
         EventRepository().log_event("Delete 404s Fail", f"Event().delete_all_404s() failed.")
 
     # Back to Admin page
-    return redirect(url_for("admin_page", anchor="eventLog"))
+    return redirect(url_for("admin_page", anchor="eventLog"))  # type: ignore
 

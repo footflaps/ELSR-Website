@@ -135,7 +135,7 @@ def get_date_range_look_around(date_str: str, look_back_months: int, look_forwar
 @app.route('/calendar', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def calendar() -> Response:
+def calendar() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a date? (Optional)
     # ----------------------------------------------------------- #

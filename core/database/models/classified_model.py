@@ -13,7 +13,7 @@ from core import db
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class ClassifiedModel(db.Model):
+class ClassifiedModel(db.Model):  # type: ignore
     __tablename__ = 'classifieds'
     __table_args__ = {'schema': 'elsr'}
 

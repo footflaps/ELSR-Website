@@ -5,7 +5,7 @@ from datetime import datetime, time
 import json
 import os
 from threading import Thread
-from typing import Union, Dict
+from typing import Dict
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -221,7 +221,7 @@ def handle_gpx_upload(form, calendar_entry: CalendarModel) -> Dict[str, bool | G
 @login_required
 @update_last_seen
 @rw_required
-def add_ride() -> Response:
+def add_ride() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a date or a ride_id? (Optional)
     # ----------------------------------------------------------- #
@@ -256,7 +256,7 @@ def add_ride() -> Response:
             EventRepository().log_event("Edit Ride Fail", f"Failed to locate gpx, ride_id  = '{calendar_id}', "
                                                           f"ride.gpx_id = '{calendar_entry.gpx_id}'.")
             flash("Sorry, something went wrong..")
-            return redirect(url_for('weekend', date=start_date_str))
+            return redirect(url_for('weekend', date=start_date_str))  # type: ignore
 
         # 2: Need to locate the target cafe for the ride (might be a new cafe so None is acceptable)
         cafe = CafeRepository().one_by_id(calendar_entry.cafe_id)
@@ -270,7 +270,7 @@ def add_ride() -> Response:
             EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{calendar_id}', "
                                                           f"ride.email = '{calendar_entry.email}'.")
             flash("Sorry, something went wrong..")
-            return redirect(url_for('weekend', date=start_date_str))
+            return redirect(url_for('weekend', date=start_date_str))  # type: ignore
 
         # Select form based on Admin status
         form = create_ride_form(current_user.admin, gpx.id)
@@ -356,7 +356,7 @@ def add_ride() -> Response:
         # Detect cancel button
         if form.cancel.data:
             # Abort now...
-            return redirect(url_for('weekend', date=start_date_str))
+            return redirect(url_for('weekend', date=start_date_str))  # type: ignore
 
         # 1: Check we can find cafe in the dB
         if form.destination.data != NEW_CAFE:
@@ -431,7 +431,8 @@ def add_ride() -> Response:
         if not gpx:
             result = handle_gpx_upload(form, calendar_entry)
             if not result["success"]:
-                return result["error"]              # Return the error directly from the helper function
+                # Return the error directly from the helper function
+                return result["error"]              # type: ignore
             gpx: GpxModel = result["gpx"]           # Retrieve the GPX object if the function succeeded
 
         # ----------------------------------------------------------- #
@@ -481,7 +482,7 @@ def add_ride() -> Response:
                 EventRepository().log_event("Edit Ride Fail", f"Failed to locate user, ride_id  = '{calendar_id}', "
                                                               f"form.owner.data = '{form.owner.data}'.")
                 flash("Sorry, something went wrong..")
-                return redirect(url_for('weekend', date=start_date_str))
+                return redirect(url_for('weekend', date=start_date_str))  # type: ignore
         else:
             # Not admin, so user owns the ride event
             calendar_entry.email = current_user.email
@@ -504,12 +505,12 @@ def add_ride() -> Response:
                 # Forward them to the edit_route page to edit it and make it public
                 flash("You need to edit your route and make it public before it can be added to the calendar!")
                 return redirect(url_for('edit_route', gpx_id=gpx.id,
-                                        return_path=f"{url_for('weekend', date=start_date_str)}"))
+                                        return_path=f"{url_for('weekend', date=start_date_str)}"))  # type: ignore
             else:
                 # Send all the email notifications now as ride us public
                 Thread(target=send_ride_notification_emails, args=(calendar_entry,)).start()
                 # Go to Calendar page for this ride's date
-                return redirect(url_for('weekend', date=start_date_str))
+                return redirect(url_for('weekend', date=start_date_str))  # type: ignore
         else:
             # Should never happen, but...
             # NB calendar_entry = None at this stage
@@ -527,7 +528,7 @@ def add_ride() -> Response:
 
         # Detect cancel button
         if form.cancel.data:
-            return redirect(url_for('weekend', date=start_date_str))
+            return redirect(url_for('weekend', date=start_date_str))  # type: ignore
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
@@ -553,7 +554,7 @@ def add_ride() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def delete_ride() -> Response:
+def delete_ride() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -608,7 +609,7 @@ def delete_ride() -> Response:
         app.logger.debug(f"make_admin(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("Make Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
-        return redirect(url_for('weekend', date=date))
+        return redirect(url_for('weekend', date=date))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Restrict access to Admin or Author
@@ -637,4 +638,4 @@ def delete_ride() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to weekend ride summary page for the day in question
-    return redirect(url_for('weekend', date=date))
+    return redirect(url_for('weekend', date=date))  # type: ignore

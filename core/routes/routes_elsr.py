@@ -25,7 +25,7 @@ from core.decorators.user_decorators import update_last_seen
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
+from core.database.repositories.cafe_repository import CafeModel, CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
 from core.database.repositories.user_repository import UserRepository
 from core.subs_google_maps import google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
 from core.subs_email_sms import contact_form_email
@@ -54,7 +54,7 @@ class ContactForm(FlaskForm):
 # robots.txt
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/robots.txt')
-def static_from_root() -> Response:
+def static_from_root() -> Response | str:
     # ----------------------------------------------------------- #
     # Send link to download the file
     # ----------------------------------------------------------- #
@@ -68,17 +68,17 @@ def static_from_root() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/', methods=['GET'])
 @update_last_seen
-def welcome() -> Response:
+def welcome() -> Response | str:
     # -------------------------------------------------------------------------------------------- #
     # Decide where to send them
     # -------------------------------------------------------------------------------------------- #
 
     if current_user.is_authenticated:
         # Logged in users see the blog
-        return redirect(url_for('display_blog'))
+        return redirect(url_for('display_blog'))  # type: ignore
     else:
         # New users see home
-        return redirect(url_for('home'))
+        return redirect(url_for('home'))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -86,20 +86,23 @@ def welcome() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/home', methods=['GET'])
 @update_last_seen
-def home() -> Response:
+def home() -> Response | str:
     # -------------------------------------------------------------------------------------------- #
     # Show Current Meeting Place
     # -------------------------------------------------------------------------------------------- #
 
     # Get the cafe
-    cafe = CafeRepository().one_by_id(BEAN_THEORY_INDEX)
+    cafe: CafeModel | None = CafeRepository().one_by_id(BEAN_THEORY_INDEX)
 
-    # Create a GM marker
-    cafe_marker = [{
-        "position": {"lat": cafe.lat, "lng": cafe.lon},
-        "title": f'<a href="{url_for("cafe_details", cafe_id=BEAN_THEORY_INDEX)}">{cafe.name}</a>',
-        "color": OPEN_CAFE_COLOUR,
-    }]
+    if cafe:
+        # Create a GM marker
+        cafe_marker = [{
+            "position": {"lat": cafe.lat, "lng": cafe.lon},
+            "title": f'<a href="{url_for("cafe_details", cafe_id=BEAN_THEORY_INDEX)}">{cafe.name}</a>',
+            "color": OPEN_CAFE_COLOUR,
+        }]
+    else:
+        cafe_marker = []
 
     # Increment map counts
     count_map_loads(1)
@@ -118,7 +121,7 @@ def home() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/about", methods=['GET'])
 @update_last_seen
-def about() -> Response:
+def about() -> Response | str:
     return render_template("main_about.html", year=current_year, live_site=live_site())
 
 
@@ -127,7 +130,7 @@ def about() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/gdpr", methods=['GET'])
 @update_last_seen
-def gdpr() -> Response:
+def gdpr() -> Response | str:
     # ----------------------------------------------------------- #
     # List of all admins
     # ----------------------------------------------------------- #
@@ -141,7 +144,7 @@ def gdpr() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/contact", methods=['GET', 'POST'])
 @update_last_seen
-def contact() -> Response:
+def contact() -> Response | str:
     # Need a form
     form = ContactForm()
 
@@ -179,7 +182,7 @@ def contact() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/plan", methods=['GET'])
 @update_last_seen
-def plan() -> Response:
+def plan() -> Response | str:
     return render_template("main_plan_a_ride.html", year=current_year, live_site=live_site())
 
 
@@ -188,7 +191,7 @@ def plan() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/gpx_guide", methods=['GET'])
 @update_last_seen
-def gpx_guide() -> Response:
+def gpx_guide() -> Response | str:
     return render_template("main_download_howto.html", year=current_year, live_site=live_site())
 
 
@@ -197,6 +200,5 @@ def gpx_guide() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route("/uncut", methods=['GET'])
 @update_last_seen
-def uncut() -> Response:
+def uncut() -> Response | str:
     return render_template("uncut_steerertubes.html", year=current_year, live_site=live_site())
-

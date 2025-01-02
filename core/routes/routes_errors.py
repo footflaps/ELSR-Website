@@ -1,4 +1,4 @@
-from flask import render_template, request, flash, Response
+from flask import render_template, make_response, request, flash, Response
 from flask_wtf.csrf import CSRFError
 
 
@@ -29,16 +29,16 @@ from core.database.repositories.event_repository import EventRepository
 # ------------------------------------------------------------------------------------------------------------- #
 
 @app.route("/error", methods=['GET'])
-def error() -> Response:
+def error() -> Response | str:
     test = 1 / 0
-    return render_template("uncut_steerertubes.html", year=current_year, live_site=live_site())
+    return make_response(render_template("uncut_steerertubes.html", year=current_year, live_site=live_site()))
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # CSRF Error
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(CSRFError)
-def csrf_error(e) -> Response:
+def csrf_error(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -52,14 +52,14 @@ def csrf_error(e) -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 400 status explicitly
-    return render_template('400.html', year=current_year, live_site=live_site()), 400
+    return make_response(render_template('400.html', year=current_year, live_site=live_site()), 400)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 400: Bad Request
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(400)
-def bad_request(e) -> Response:
+def bad_request(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -71,14 +71,14 @@ def bad_request(e) -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 400 status explicitly
-    return render_template('400.html', year=current_year, live_site=live_site()), 400
+    return make_response(render_template('400.html', year=current_year, live_site=live_site()), 400)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 401: Unauthorized
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(401)
-def unauthorized(e) -> Response:
+def unauthorized(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -91,14 +91,14 @@ def unauthorized(e) -> Response:
 
     # note that we set the 401 status explicitly
     # NB Don't have a 401 page, just re-use 403
-    return render_template('403.html', year=current_year, live_site=live_site()), 401
+    return make_response(render_template('403.html', year=current_year, live_site=live_site()), 401)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 403: Forbidden
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(403)
-def forbidden(e) -> Response:
+def forbidden(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -110,14 +110,14 @@ def forbidden(e) -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
-    return render_template('403.html', year=current_year, live_site=live_site()), 403
+    return make_response(render_template('403.html', year=current_year, live_site=live_site()), 403)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 403: Forbidden - not readwrite
 # ------------------------------------------------------------------------------------------------------------- #
 @app.route('/403rw', methods=['GET'])
-def not_rw() -> Response:
+def not_rw() -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -129,14 +129,14 @@ def not_rw() -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
-    return render_template('403rw.html', year=current_year, live_site=live_site()), 403
+    return make_response(render_template('403rw.html', year=current_year, live_site=live_site()), 403)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 403: Forbidden - not logged in
 # ------------------------------------------------------------------------------------------------------------- #
 @app.route('/403login', methods=['GET'])
-def not_logged_in() -> Response:
+def not_logged_in() -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -148,15 +148,14 @@ def not_logged_in() -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
-    return render_template('403login.html', year=current_year, live_site=live_site()), 403
-
+    return make_response(render_template('403login.html', year=current_year, live_site=live_site()), 403)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 404: Not Found
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(404)
-def page_not_found(e) -> Response:
+def page_not_found(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -168,14 +167,14 @@ def page_not_found(e) -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 404 status explicitly
-    return render_template('404.html', year=current_year, live_site=live_site()), 404
+    return make_response(render_template('404.html', year=current_year, live_site=live_site()), 404)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 405: Method Not Allowed
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(405)
-def method_not_allowed(e) -> Response:
+def method_not_allowed(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -187,14 +186,14 @@ def method_not_allowed(e) -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 405 status explicitly
-    return render_template('403.html', year=current_year, live_site=live_site()), 405
+    return make_response(render_template('403.html', year=current_year, live_site=live_site()), 405)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 413: Request Entity Too Large
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(413)
-def file_too_large(e) -> Response:
+def file_too_large(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -207,14 +206,14 @@ def file_too_large(e) -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 413 status explicitly
-    return render_template('400.html', year=current_year, live_site=live_site()), 413
+    return make_response(render_template('400.html', year=current_year, live_site=live_site()), 413)
 
 
 # ------------------------------------------------------------------------------------------------------------- #
 # 500: Internal server error
 # ------------------------------------------------------------------------------------------------------------- #
 @app.errorhandler(500)
-def internal_server_error(e) -> Response:
+def internal_server_error(e) -> Response | str:
     # What page were they looking for?
     requested_route = request.path
     users_ip = user_ip()
@@ -226,7 +225,7 @@ def internal_server_error(e) -> Response:
                              f"'{request.referrer}', '{users_ip}'.")
 
     # now you're handling non-HTTP exceptions only
-    return render_template("500.html", year=current_year, live_site=live_site(), e=e), 500
+    return make_response(render_template("500.html", year=current_year, live_site=live_site(), e=e), 500)
 
 
 # Have to register 500 with app to overrule the default built in 500 page

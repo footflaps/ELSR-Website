@@ -81,7 +81,7 @@ def get_chaingang_top10():
 
 @app.route('/chaingang', methods=['GET'])
 @update_last_seen
-def chaingang() -> Response:
+def chaingang() -> Response | str:
     # -------------------------------------------------------------------------------------------- #
     # Show chaingang route
     # -------------------------------------------------------------------------------------------- #

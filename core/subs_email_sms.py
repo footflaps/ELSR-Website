@@ -1,6 +1,5 @@
 from flask import url_for
 import smtplib
-import os
 from requests.auth import HTTPBasicAuth
 from twilio.rest import Client
 import requests

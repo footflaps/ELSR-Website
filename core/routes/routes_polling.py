@@ -87,7 +87,7 @@ app.jinja_env.globals.update(is_in_list=is_in_list)
 @app.route('/polls', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def poll_list() -> Response:
+def poll_list() -> Response | str:
     # ----------------------------------------------------------- #
     # Grab all the polls
     # ----------------------------------------------------------- #
@@ -131,7 +131,7 @@ def poll_list() -> Response:
 @app.route('/poll/<poll_id>', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def poll_details(poll_id) -> Response:
+def poll_details(poll_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed an anchor?
     # ----------------------------------------------------------- #
@@ -154,13 +154,13 @@ def poll_details(poll_id) -> Response:
             app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
             EventRepository().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You must be logged in to see private polls.")
-            return redirect(url_for("not_logged_in"))
+            return redirect(url_for("not_logged_in"))  # type: ignore
         elif not current_user.readwrite:
             app.logger.debug(f"poll_details(): Private poll with poll_id = '{poll_id}'.")
             EventRepository().log_event("One Poll Fail", f"Private poll with poll_id = '{poll_id}'.")
             flash("You don't have permission to see private polls.")
             flash("Please contact an Admin via your user page.")
-            return redirect(url_for("not_rw"))
+            return redirect(url_for("not_rw"))  # type: ignore
 
     # ----------------------------------------------------------- #
     #   Check poll hasn't timed out
@@ -226,7 +226,7 @@ def poll_details(poll_id) -> Response:
 @update_last_seen
 @login_required
 @rw_required
-def add_poll() -> Response:
+def add_poll() -> Response | str:
     # ----------------------------------------------------------- #
     # Get poll_id from form (if one was posted)
     # ----------------------------------------------------------- #
@@ -306,7 +306,7 @@ def add_poll() -> Response:
         # Detect cancel
         if form.cancel.data:
             # Back to list of polls
-            return redirect(url_for('poll_list'))
+            return redirect(url_for('poll_list'))  # type: ignore
 
         # Save form details in the db
         if not poll:
@@ -344,7 +344,7 @@ def add_poll() -> Response:
         if form.submit.data:
             # Back to list of polls
             flash("Poll has been published!")
-            return redirect(url_for('poll_list'))
+            return redirect(url_for('poll_list'))  # type: ignore
         else:
             # They're still editing
             flash("Please verify that the poll looks ok!")
@@ -358,7 +358,7 @@ def add_poll() -> Response:
         # Detect user cancel
         if form.cancel.data:
             # Back to list of polls
-            return redirect(url_for('poll_list'))
+            return redirect(url_for('poll_list'))  # type: ignore
         else:
             # Give them a hint
             flash("Form not filled in properly, see below!")
@@ -388,7 +388,7 @@ def add_poll() -> Response:
 @update_last_seen
 @login_required
 @rw_required
-def edit_poll() -> Response:
+def edit_poll() -> Response | str:
     # ----------------------------------------------------------- #
     # Get poll_id from form (if one was posted)
     # ----------------------------------------------------------- #
@@ -461,7 +461,7 @@ def edit_poll() -> Response:
             EventRepository().log_event("edit_poll Fail", f"Incorrect password for user_id = '{user.id}'!")
             flash(f"Incorrect password for user {user.name}!")
             # Go back to polls page
-            return redirect(url_for('poll_details', poll_id=poll_id))
+            return redirect(url_for('poll_details', poll_id=poll_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Need a form
@@ -505,7 +505,7 @@ def edit_poll() -> Response:
         # Detect cancel
         if form.cancel.data:
             # Back to list of polls
-            return redirect(url_for('poll_details', poll_id=poll_id))
+            return redirect(url_for('poll_details', poll_id=poll_id))  # type: ignore
 
         print(f"Form submitted pol_id = '{poll_id}'")
 
@@ -535,7 +535,7 @@ def edit_poll() -> Response:
         if form.submit.data:
             # Back to list of polls
             flash("Poll has been published!")
-            return redirect(url_for('poll_list'))
+            return redirect(url_for('poll_list'))  # type: ignore
         else:
             # They're still editing
             flash("Please verify that the poll looks ok!")
@@ -548,7 +548,7 @@ def edit_poll() -> Response:
         # Detect user cancel
         if form.cancel.data:
             # Back to list of polls
-            return redirect(url_for('poll_details', poll_id=poll_id))
+            return redirect(url_for('poll_details', poll_id=poll_id))  # type: ignore
         else:
             # Give them a hint
             flash("Form not filled in properly, see below!")
@@ -576,7 +576,7 @@ def edit_poll() -> Response:
 @update_last_seen
 @login_required
 @rw_required
-def delete_poll() -> Response:
+def delete_poll() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a poll_id?
     # ----------------------------------------------------------- #
@@ -644,7 +644,7 @@ def delete_poll() -> Response:
         EventRepository().log_event("Poll Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to polls page
-        return redirect(url_for('poll_list'))
+        return redirect(url_for('poll_list'))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete Poll
@@ -659,4 +659,4 @@ def delete_poll() -> Response:
         flash("Sorry, something went wrong.")
 
     # Back to list of all polls
-    return redirect(url_for('poll_list'))
+    return redirect(url_for('poll_list'))  # type: ignore

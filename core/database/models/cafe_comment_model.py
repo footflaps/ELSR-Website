@@ -13,7 +13,7 @@ from core import db
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class CafeCommentModel(db.Model):
+class CafeCommentModel(db.Model):  # type: ignore
     __tablename__ = 'cafe_comments'
     __table_args__ = {'schema': 'elsr'}
 

@@ -14,7 +14,7 @@ from core import app
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.event_repository import EventRepository
 from core.subs_google_maps import maps_enabled, set_enable_maps, set_disable_maps, boost_map_limit
 
@@ -37,12 +37,12 @@ from core.decorators.user_decorators import admin_only, update_last_seen, login_
 @login_required
 @admin_only
 @update_last_seen
-def enable_maps() -> Response:
+def enable_maps() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
     try:
-        password = request.form['password']
+        password: str | None = request.form['password']
     except exceptions.BadRequestKeyError:
         password = None
 
@@ -54,14 +54,14 @@ def enable_maps() -> Response:
     # Get user's IP
     # ----------------------------------------------------------- #
     if request.headers.getlist("X-Forwarded-For"):
-        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+        user_ip: str | None = request.headers.getlist("X-Forwarded-For")[0]
     else:
         user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     #  Need user
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(current_user.id)
+    user: UserModel | None = UserRepository().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"enable_maps(): Invalid user current_user.id = '{current_user.id}'!")
         EventRepository().log_event("Enable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
@@ -74,7 +74,7 @@ def enable_maps() -> Response:
         app.logger.debug(f"enable_maps(): Incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("Enable Maps Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
-        return redirect(url_for('admin_page', user_id=current_user.id))
+        return redirect(url_for('admin_page', user_id=current_user.id))  # type: ignore
 
     # ----------------------------------------------------------- #
     #  Enable Maps
@@ -92,7 +92,7 @@ def enable_maps() -> Response:
         flash("Sorry, something went wrong")
 
     # Back to user page
-    return redirect(url_for('admin_page', user_id=current_user.id))
+    return redirect(url_for('admin_page', user_id=current_user.id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -103,12 +103,12 @@ def enable_maps() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def disable_maps() -> Response:
+def disable_maps() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
     try:
-        password = request.form['password']
+        password: str | None = request.form['password']
     except exceptions.BadRequestKeyError:
         password = None
 
@@ -120,14 +120,14 @@ def disable_maps() -> Response:
     # Get user's IP
     # ----------------------------------------------------------- #
     if request.headers.getlist("X-Forwarded-For"):
-        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+        user_ip: str | None = request.headers.getlist("X-Forwarded-For")[0]
     else:
         user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     #  Need user
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(current_user.id)
+    user: UserModel | None = UserRepository().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"disable_maps(): Invalid user current_user.id = '{current_user.id}'!")
         EventRepository().log_event("Disable Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
@@ -140,7 +140,7 @@ def disable_maps() -> Response:
         app.logger.debug(f"disable_maps(): Incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("Disable Maps Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
-        return redirect(url_for('admin_page', user_id=current_user.id))
+        return url_for('admin_page', user_id=current_user.id)
 
     # ----------------------------------------------------------- #
     #  Disable Maps
@@ -158,7 +158,7 @@ def disable_maps() -> Response:
         flash("Sorry, something went wrong")
 
     # Back to user page
-    return redirect(url_for('admin_page', user_id=current_user.id))
+    return redirect(url_for('admin_page', user_id=current_user.id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -169,7 +169,7 @@ def disable_maps() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def boost_maps() -> Response:
+def boost_maps() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -186,14 +186,14 @@ def boost_maps() -> Response:
     # Get user's IP
     # ----------------------------------------------------------- #
     if request.headers.getlist("X-Forwarded-For"):
-        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+        user_ip: str | None = request.headers.getlist("X-Forwarded-For")[0]
     else:
         user_ip = request.remote_addr
 
     # ----------------------------------------------------------- #
     #  Need user
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(current_user.id)
+    user: UserModel | None = UserRepository().find_user_from_id(current_user.id)
     if not user:
         app.logger.debug(f"boost_maps(): Invalid user current_user.id = '{current_user.id}'!")
         EventRepository().log_event("Boost Maps Fail", f"Invalid user current_user.id = '{current_user.id}'.")
@@ -206,7 +206,7 @@ def boost_maps() -> Response:
         app.logger.debug(f"boost_maps(): Incorrect password for '{current_user.email}'!")
         EventRepository().log_event("Boost Maps Fail", f"Incorrect password for '{current_user.email}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
-        return redirect(url_for('admin_page', user_id=current_user.id))
+        return redirect(url_for('admin_page', user_id=current_user.id))  # type: ignore
 
     # ----------------------------------------------------------- #
     #  Boost Maps
@@ -219,5 +219,4 @@ def boost_maps() -> Response:
     flash("Maps boost has been applied")
 
     # Back to user page
-    return redirect(url_for('admin_page', user_id=current_user.id))
-
+    return redirect(url_for('admin_page', user_id=current_user.id))  # type: ignore

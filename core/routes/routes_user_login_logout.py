@@ -1,7 +1,6 @@
 from flask import render_template, redirect, url_for, flash, request, abort, session, make_response, Response
 from flask_login import login_user, current_user, logout_user
 from threading import Thread
-import os
 from urllib.parse import urlparse
 
 
@@ -60,7 +59,7 @@ def same_origin(current_uri, compare_uri):
 
 @app.route('/login', methods=['GET', 'POST'])
 @update_last_seen
-def login() -> Response:
+def login() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
@@ -127,14 +126,14 @@ def login() -> Response:
             Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
             # Tell user to expect an email
             flash("If your email address is registered, a new verification code has been sent.")
-            return redirect(url_for('validate_email'))
+            return redirect(url_for('validate_email'))  # type: ignore
 
         # Test 4: Is the user validated?
         if not user.verified:
             app.logger.debug(f"login(): Failed, Email not verified yet '{email}'.")
             EventRepository().log_event("Login Fail", f"Email not verified yet '{email}'.")
             flash("That email address has not been verified yet!")
-            return redirect(url_for('validate_email'))
+            return redirect(url_for('validate_email'))  # type: ignore
 
         # Test 5: Is the user barred?
         if user.blocked:
@@ -154,7 +153,7 @@ def login() -> Response:
                 flash(f"2FA code has been sent to '{user.phone_number}'.")
                 user = UserRepository().find_user_from_id(user.id)
                 send_2fa_sms(user)
-                return redirect(url_for('twofa_login'))
+                return redirect(url_for('twofa_login'))  # type: ignore
 
             else:
                 # Non Admin, so we can login now
@@ -167,7 +166,7 @@ def login() -> Response:
 
                 # Return back to cached page
                 app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
-                return redirect(session['url'])
+                return redirect(session['url'])  # type: ignore
 
         else:
             # Login failed
@@ -203,7 +202,7 @@ def login() -> Response:
 
 @app.route('/logout')
 @update_last_seen
-def logout() -> Response:
+def logout() -> Response | str:
     # Have to log the event before we log out, so we still have their email address
     app.logger.debug(f"logout(): Logging user '{current_user.email}' out now...")
     EventRepository().log_event("Logout", f"User '{current_user.email}' logged out.")
@@ -230,7 +229,7 @@ def logout() -> Response:
 
 @app.route('/reset', methods=['GET', 'POST'])
 @update_last_seen
-def reset_password() -> Response:
+def reset_password() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -280,7 +279,7 @@ def reset_password() -> Response:
             EventRepository().log_event("Reset Success", f"Form route, Password has been reset, email = '{email}'.")
             flash("Password has been reset, please login!")
             # Forward to login page
-            return redirect(url_for('login', email=email))
+            return redirect(url_for('login', email=email))  # type: ignore
         else:
             # Should never happen, but...
             app.logger.debug(f"reset_password(): User().reset_password() failed! email = '{email}'.")

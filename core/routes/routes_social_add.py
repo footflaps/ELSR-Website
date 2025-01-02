@@ -20,7 +20,7 @@ from core.database.repositories.social_repository import SocialModel, SocialRepo
                                                          SOCIAL_FORM_PUBLIC, SOCIAL_DB_PUBLIC, SIGN_UP_YES, SIGN_UP_NO
 from core.forms.social_forms import create_social_form
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.subs_email_sms import send_social_notification_emails
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
@@ -43,7 +43,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @login_required
 @update_last_seen
 @rw_required
-def route_add_social() -> Response:
+def route_add_social() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a social_id? (Optional)
     # ----------------------------------------------------------- #
@@ -133,7 +133,7 @@ def route_add_social() -> Response:
 
         # Detect cancel button
         if form.cancel.data:
-            return redirect(url_for('calendar'))
+            return redirect(url_for('calendar'))  # type: ignore
 
         # ----------------------------------------------------------- #
         # We can now create / update the social object
@@ -193,7 +193,7 @@ def route_add_social() -> Response:
                 flash("Social added to Calendar!")
                 Thread(target=send_social_notification_emails, args=(new_social,)).start()
             # Back to socials page showing the new social
-            return redirect(url_for('display_socials', date=new_social.date))
+            return redirect(url_for('display_socials', date=new_social.date))  # type: ignore
 
         else:
             # Should never happen, but...
@@ -211,7 +211,7 @@ def route_add_social() -> Response:
 
         # Detect cancel button
         if form.cancel.data:
-            return redirect(url_for('calendar'))
+            return redirect(url_for('calendar'))  # type: ignore
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
@@ -231,7 +231,7 @@ def route_add_social() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def delete_social() -> Response:
+def delete_social() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a social_id?
     # ----------------------------------------------------------- #
@@ -299,7 +299,7 @@ def delete_social() -> Response:
         EventRepository().log_event("Social Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
-        return redirect(url_for('display_socials'))
+        return redirect(url_for('display_socials'))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete social
@@ -313,4 +313,4 @@ def delete_social() -> Response:
         EventRepository().log_event("Delete Social Fail", f"Failed to delete social, social_id = '{social_id}'.")
         flash("Sorry, something went wrong.")
 
-    return redirect(url_for('display_socials'))
+    return redirect(url_for('display_socials'))  # type: ignore

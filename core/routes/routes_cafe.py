@@ -5,13 +5,11 @@ from werkzeug import exceptions
 import os
 from threading import Thread
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO_GROUP, DECAFF_GROUP, MIXED_GROUP
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our classes etc
@@ -24,28 +22,27 @@ from core.database.repositories.cafe_comment_repository import CafeCommentReposi
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.calendar_repository import CalendarRepository
+from core.database.repositories.calendar_repository import CalendarModel, CalendarRepository
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 from core.forms.cafe_comment_forms import CreateCafeCommentForm
 
-from core.subs_google_maps import create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS, \
-                                  google_maps_api_key, count_map_loads
+from core.subs_google_maps import (create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS,
+                                   google_maps_api_key, count_map_loads)
 from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
-
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used to verify sensible cafe coordinates
 # -------------------------------------------------------------------------------------------------------------- #
 
 # We only allow cafes within a sensible range to Cambridge
-ELSR_LAT = 52.203316
-ELSR_LON = 0.131689
-ELSR_MAX_KM = 100
+ELSR_LAT: float = 52.203316
+ELSR_LON: float = 0.131689
+ELSR_MAX_KM: float = 100
 
 # Update routes for the cafe if it has moved by at least 100m
-ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
+ELSR_UPDATE_GPX_MIN_DISTANCE_KM: float = 0.1
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -64,28 +61,28 @@ ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 @app.route('/cafes', methods=['GET'])
 @update_last_seen
 @logout_barred_user
-def cafe_list() -> Response:
+def cafe_list() -> Response | str:
     # ----------------------------------------------------------- #
     # Get all known cafes
     # ----------------------------------------------------------- #
-    cafes = CafeRepository().all_cafes()
+    cafes: list[CafeModel] = CafeRepository().all_cafes()
 
     # ----------------------------------------------------------- #
     # Create a list of markers
     # ----------------------------------------------------------- #
-    cafe_markers = []
+    cafe_markers: list = []
 
     for cafe in cafes:
         # Different colour icon for OPEN / CLOSED
         if cafe.active:
-            colour = OPEN_CAFE_COLOUR
+            colour: str = OPEN_CAFE_COLOUR
         else:
             colour = CLOSED_CAFE_COLOUR
 
-        marker = {
+        marker: dict = {
             "position": {"lat": cafe.lat, "lng": cafe.lon},
-            "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-            "color": colour,
+            "title":    f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+            "color":    colour,
         }
 
         cafe_markers.append(marker)
@@ -95,7 +92,7 @@ def cafe_list() -> Response:
     # ----------------------------------------------------------- #
 
     # Map will launch centered here
-    map_coords = {"lat": ELSR_LAT, "lng": ELSR_LON}
+    map_coords: dict[str, float] = {"lat": ELSR_LAT, "lng": ELSR_LON}
 
     # Keep count of Google Map Loads
     count_map_loads(1)
@@ -112,14 +109,14 @@ def cafe_list() -> Response:
 
 @app.route('/cafe_top10', methods=['GET'])
 @update_last_seen
-def cafe_top10() -> Response:
+def cafe_top10() -> Response | str:
     # ----------------------------------------------------------- #
     # Get all the rides
     # ----------------------------------------------------------- #
-    rides = CalendarRepository().all_calendar()
+    rides: list[CalendarModel] = CalendarRepository().all_calendar()
 
     # This is our cafe list
-    cafes = {}
+    cafes: dict = {}
 
     # Filter by Doppio, Espresso, Decaff and Mixed
     for ride in rides:
@@ -128,32 +125,32 @@ def cafe_top10() -> Response:
                 or ride.group == DECAFF_GROUP \
                 or ride.group == MIXED_GROUP:
             # Grab the cafe ID (if set)
-            cafe_id = ride.cafe_id
+            cafe_id: int = ride.cafe_id
             if ride.cafe_id:
-                if not cafe_id in cafes:
+                if cafe_id not in cafes:
                     cafes[cafe_id] = 1
                 else:
                     cafes[cafe_id] += 1
     # Sort dictionary
-    sorted_cafes = dict(reversed(sorted(cafes.items(), key=lambda item: item[1])))
+    sorted_cafes: dict = dict(reversed(sorted(cafes.items(), key=lambda item: item[1])))
 
     # Build list for jinja
-    cafes = []
+    cafes_jinja: list = []
     for index, data in sorted_cafes.items():
         cafe = CafeRepository().one_by_id(index)
         if cafe:
-            cafes.append({"name": cafe.name,
-                          "id": cafe.id,
-                          "visits": data,
-                          "routes": len(GpxRepository().find_all_gpx_passing_cafe(cafe.id, current_user)),
-                          "rating": cafe.rating,
-                          })
-        if len(cafes) >= 10:
+            cafes_jinja.append({"name":   cafe.name,
+                                "id":     cafe.id,
+                                "visits": data,
+                                "routes": len(GpxRepository().find_all_gpx_passing_cafe(cafe.id, current_user)),
+                                "rating": cafe.rating,
+                                })
+        if len(cafes_jinja) >= 10:
             break
 
     # Render template
-    return render_template("cafe_top10.html", year=current_year, mobile=is_mobile(), live_site=live_site(),
-                           cafes=cafes)
+    return render_template("cafe_top10.html", year=current_year, mobile=is_mobile(), live_site=live_site(),  # type: ignore
+                           cafes=cafes_jinja)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -163,7 +160,7 @@ def cafe_top10() -> Response:
 @app.route("/cafe/<int:cafe_id>", methods=['GET', 'POST'])
 @update_last_seen
 @logout_barred_user
-def cafe_details(cafe_id) -> Response:
+def cafe_details(cafe_id) -> Response | str:
     anchor = request.args.get('anchor', None)
 
     # ----------------------------------------------------------- #
@@ -202,8 +199,8 @@ def cafe_details(cafe_id) -> Response:
     # Need cafe markers as weird Google proprietary JSON string
     cafe_markers = [{
         "position": {"lat": cafe.lat, "lng": cafe.lon},
-        "title": f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
-        "color": cafe_colour,
+        "title":    f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+        "color":    cafe_colour,
     }]
 
     # Map will launch centered here
@@ -234,7 +231,7 @@ def cafe_details(cafe_id) -> Response:
             app.logger.debug(f"cafe_details(): Couldn't locate user, current_user.id = '{current_user.id}'.")
             EventRepository().log_event("Cafe Comment Fail", f"Couldn't locate user, current_user.id = '{current_user.id}'.")
             flash("Sorry, something went wrong.")
-            return redirect(url_for('cafe_details', cafe_id=cafe.id))
+            return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
 
         # ----------------------------------------------------------- #
         # Permission check for POST
@@ -244,7 +241,7 @@ def cafe_details(cafe_id) -> Response:
             app.logger.debug(f"cafe_details(): User doesn't have write permissions user.id = '{user.id}'.")
             EventRepository().log_event("Cafe Comment Fail", f"User doesn't have write permissions user.id = '{user.id}'.")
             flash("Sorry, you do not have write permissions.")
-            return redirect(url_for('cafe_details', cafe_id=cafe.id))
+            return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
 
         # New comment
         new_comment = CafeCommentRepository(
@@ -267,7 +264,7 @@ def cafe_details(cafe_id) -> Response:
 
         # We can't reset form, so to show the post completed, we have to redirect
         # back to the start of ourselves.
-        return redirect(url_for('cafe_details', cafe_id=cafe.id))
+        return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
 
     elif request.method == 'POST':
 
@@ -325,7 +322,7 @@ def cafe_details(cafe_id) -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def close_cafe() -> Response:
+def close_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -365,7 +362,7 @@ def close_cafe() -> Response:
         app.logger.debug(f"close_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
         EventRepository().log_event("Close Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions"
-                                             f" for cafe.id = '{cafe.id}'.")
+                                                       f" for cafe.id = '{cafe.id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -383,7 +380,7 @@ def close_cafe() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
-    return redirect(url_for('cafe_details', cafe_id=cafe_id))
+    return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -395,7 +392,7 @@ def close_cafe() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def unclose_cafe() -> Response:
+def unclose_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -445,7 +442,7 @@ def unclose_cafe() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
-    return redirect(url_for('cafe_details', cafe_id=cafe_id))
+    return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -457,7 +454,7 @@ def unclose_cafe() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def flag_cafe() -> Response:
+def flag_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -521,7 +518,7 @@ def flag_cafe() -> Response:
         # Should never get here, but....
         app.logger.debug(f"flag_cafe(): Message().add_message failed, cafe_id = '{cafe_id}'.")
         EventRepository().log_event("Flag Cafe Fail",
-                          f"Message().add_message failed, cafe_id = '{cafe_id}', reason = '{reason}'.")
+                                    f"Message().add_message failed, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Sorry, something went wrong.")
 
     # ----------------------------------------------------------- #
@@ -532,6 +529,4 @@ def flag_cafe() -> Response:
     Thread(target=alert_admin_via_sms, args=(user, f"Cafe '{cafe.name}', Reason: '{reason}'",)).start()
 
     # Back to cafe details page
-    return redirect(url_for('cafe_details', cafe_id=cafe_id))
-
-
+    return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore

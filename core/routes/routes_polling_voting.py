@@ -36,7 +36,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @update_last_seen
 @login_required
 @rw_required
-def remove_vote() -> Response:
+def remove_vote() -> Response | str:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
@@ -128,7 +128,7 @@ def remove_vote() -> Response:
     # Back to poll page
     # ----------------------------------------------------------- #
 
-    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
+    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -139,7 +139,7 @@ def remove_vote() -> Response:
 @update_last_seen
 @login_required
 @rw_required
-def add_vote() -> Response:
+def add_vote() -> Response | str:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
@@ -235,7 +235,7 @@ def add_vote() -> Response:
     # Back to poll page
     # ----------------------------------------------------------- #
 
-    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
+    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -246,7 +246,7 @@ def add_vote() -> Response:
 @update_last_seen
 @login_required
 @rw_required
-def swap_vote() -> Response:
+def swap_vote() -> Response | str:
     # ----------------------------------------------------------- #
     # Get params
     # ----------------------------------------------------------- #
@@ -353,5 +353,5 @@ def swap_vote() -> Response:
     # ----------------------------------------------------------- #
     # Back to poll page
     # ----------------------------------------------------------- #
-    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))
+    return redirect(url_for(f'poll_details', poll_id=poll_id, anchor='votes'))  # type: ignore
 

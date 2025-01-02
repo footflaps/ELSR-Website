@@ -54,7 +54,7 @@ FIRST_PAGE = 0
 
 @app.route("/blog", methods=['GET'])
 @update_last_seen
-def display_blog() -> Response:
+def display_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
@@ -161,7 +161,7 @@ def display_blog() -> Response:
 @update_last_seen
 @logout_barred_user
 @login_required
-def blog_ics() -> Response:
+def blog_ics() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id?
     # ----------------------------------------------------------- #

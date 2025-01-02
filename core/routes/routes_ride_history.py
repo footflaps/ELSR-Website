@@ -37,7 +37,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 @app.route('/ride_history/<request>', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def ride_history(request) -> Response:
+def ride_history(request) -> Response | str:
     # ----------------------------------------------------------- #
     # Sort out which group we are
     # ----------------------------------------------------------- #

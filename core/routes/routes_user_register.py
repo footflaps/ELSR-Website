@@ -2,7 +2,6 @@ from flask import render_template, redirect, url_for, flash, request, abort, ses
 from flask_login import login_user, current_user
 from werkzeug import exceptions
 from threading import Thread
-import os
 import re
 
 
@@ -48,7 +47,7 @@ DEFAULT_EVENT_DAYS = 7
 
 @app.route('/register', methods=['GET', 'POST'])
 @update_last_seen
-def register() -> Response:
+def register() -> Response | str:
     # Need a form
     form = CreateUserForm()
 
@@ -70,14 +69,14 @@ def register() -> Response:
                 app.logger.debug(f"register(): Duplicate email '{new_user.email}'.")
                 EventRepository().log_event("Register Fail", f"Duplicate email '{new_user.email}'.")
                 flash("You've already signed up with that email, log in instead!")
-                return redirect(url_for('login', email=new_user.email))
+                return redirect(url_for('login', email=new_user.email))  # type: ignore
 
             else:
                 # Email is registered, but unvalidated
                 app.logger.debug(f"register(): Already signed up '{new_user.email}'.")
                 EventRepository().log_event("Register Fail", f"Already signed up '{new_user.email}'.")
                 flash("You've already signed up with that email, verify your email to login!")
-                return redirect(url_for('validate_email'))
+                return redirect(url_for('validate_email'))  # type: ignore
 
         # We have a reserved name
         if new_user.name == DELETED_NAME:
@@ -106,7 +105,7 @@ def register() -> Response:
             flash("Please validate your email address with the code you have been sent.")
             # User threading as sending an email can take a while and we want a snappy website
             Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
-            return redirect(url_for('validate_email'))
+            return redirect(url_for('validate_email'))  # type: ignore
 
         else:
             # User already exists probably
@@ -132,7 +131,7 @@ def register() -> Response:
 
 @app.route('/validate_email', methods=['GET', 'POST'])
 @update_last_seen
-def validate_email() -> Response:
+def validate_email() -> Response | str:
     # We support two entry modes to this page
     #  1. They click on a link in their email and it makes a request with code and email fulfilled
     #  2. They go to this page and enter the details manually via the form
@@ -197,7 +196,7 @@ def validate_email() -> Response:
             # ----------------------------------------------------------- #
             # Forward to login page
             # ----------------------------------------------------------- #
-            return redirect(url_for('login', email=email))
+            return redirect(url_for('login', email=email))  # type: ignore
 
         # Fall through to form below
 
@@ -227,7 +226,7 @@ def validate_email() -> Response:
                 app.logger.debug(f"validate_email(): Form, user '{user.email}' is already validated.")
                 EventRepository().log_event("Validate Fail", f"Form, user '{user.email}' is already validated.")
                 flash("Email has already been verified! Log in with your password.")
-                return redirect(url_for('login', email=new_user.email))
+                return redirect(url_for('login', email=new_user.email))  # type: ignore
 
             # Check email exists in db
             if UserRepository().validate_email(user, code):
@@ -267,7 +266,7 @@ def validate_email() -> Response:
                 # ----------------------------------------------------------- #
                 # Forward to login page
                 # ----------------------------------------------------------- #
-                return redirect(url_for('login', email=new_user.email))
+                return redirect(url_for('login', email=new_user.email))  # type: ignore
 
             else:
                 # Wrong code entered, or it's expired
@@ -293,7 +292,7 @@ def validate_email() -> Response:
 
 @app.route('/twofa_login', methods=['GET', 'POST'])
 @update_last_seen
-def twofa_login() -> Response:
+def twofa_login() -> Response | str:
     # We support two entry modes to this page
     #  1. They click on a link in their email and it makes a request with code and email fulfilled
     #  2. They go to this page and enter the details manually via the form
@@ -333,7 +332,7 @@ def twofa_login() -> Response:
 
             # Return back to cached page
             app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
-            return redirect(session['url'])
+            return redirect(session['url'])  # type: ignore
 
         # Fall through to form below
 
@@ -368,7 +367,7 @@ def twofa_login() -> Response:
 
                 # Return back to cached page
                 app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
-                return redirect(session['url'])
+                return redirect(session['url'])  # type: ignore
 
             else:
                 # Wrong code entered, or it's expired
@@ -394,7 +393,7 @@ def twofa_login() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def add_phone_number() -> Response:
+def add_phone_number() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -438,13 +437,13 @@ def add_phone_number() -> Response:
     # Check for UK code
     if phone_number[0:3] != "+44":
         flash("Phone number must start with '+44'!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # Strip any non digits (inc leading '+')
     phone_number = re.sub('[^0-9]', '', phone_number)
     if len(phone_number) != 12:
         flash("Phone number must be 12 digis long eg '+44 1234 123456'!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # Add back leading '+'
     phone_number = "+" + phone_number
@@ -475,7 +474,7 @@ def add_phone_number() -> Response:
             app.logger.debug(f"add_phone_number(): SMS code sent, user_id='{user_id}'.")
             EventRepository().log_event("Add Phone Pass", f"SMS code sent, user_id='{user_id}'.")
             flash(f"A verification code has been sent to '{phone_number}'.")
-            return redirect(url_for('mobile_verify', user_id=user_id))
+            return redirect(url_for('mobile_verify', user_id=user_id))  # type: ignore
 
         else:
             # Should never get here, but...
@@ -489,7 +488,7 @@ def add_phone_number() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
+    return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -500,7 +499,7 @@ def add_phone_number() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def mobile_verify() -> Response:
+def mobile_verify() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -544,7 +543,7 @@ def mobile_verify() -> Response:
             EventRepository().log_event("Verify Mobile Pass", f"Mobile verified for user_id = '{user_id}'.")
 
             # Return back to user page
-            return redirect(url_for('user_page', user_id=user_id))
+            return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
         else:
             # Incorrect code...

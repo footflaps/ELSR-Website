@@ -36,7 +36,7 @@ from core.subs_google_maps import google_maps_api_key, MAP_BOUNDS, count_map_loa
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/twr', methods=['GET'])
 @update_last_seen
-def twr() -> Response:
+def twr() -> Response | str:
     # -------------------------------------------------------------------------------------------- #
     # Show The Bench
     # -------------------------------------------------------------------------------------------- #
@@ -59,7 +59,7 @@ def twr() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/turbo_training', methods=['GET'])
 @update_last_seen
-def turbo_training() -> Response:
+def turbo_training() -> Response | str:
 
     # Render page
     return render_template("main_turbo_training.html", year=current_year, live_site=live_site())
@@ -70,7 +70,7 @@ def turbo_training() -> Response:
 # -------------------------------------------------------------------------------------------------------------- #
 @app.route('/mallorca_2024', methods=['GET'])
 @update_last_seen
-def mallorca_2024() -> Response:
+def mallorca_2024() -> Response | str:
 
     # Render page
     return render_template("main_mallorca_2024.html", year=current_year, live_site=live_site())

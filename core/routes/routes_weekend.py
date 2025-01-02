@@ -14,9 +14,9 @@ from core import app, current_year, live_site, GLOBAL_FLASH
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.database.repositories.gpx_repository import GpxRepository
-from core.database.repositories.calendar_repository import CalendarRepository, DEFAULT_START_TIMES
+from core.database.repositories.cafe_repository import CafeModel, CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
+from core.database.repositories.gpx_repository import GpxModel, GpxRepository
+from core.database.repositories.calendar_repository import CalendarModel, CalendarRepository, DEFAULT_START_TIMES
 from core.database.repositories.event_repository import EventRepository
 
 from core.database.jinja.calendar_jinja import start_time_string
@@ -75,7 +75,7 @@ def work_out_days(target_date_str) -> list[object] | None:
             return None
 
         # Get the day of week
-        day_str = target_date.strftime("%A")
+        day_str: str = target_date.strftime("%A")
 
         # If it's a Sat or Sunday, we'll show the full WE
         if day_str == "Saturday":
@@ -171,7 +171,7 @@ def work_out_days(target_date_str) -> list[object] | None:
     #   "Saturday": "Saturday 25 August 2023",
     #   "Sunday":   "Sunday 26 August 2023",
     # }
-    dates_long = {}
+    dates_long: dict[str, str] = {}
 
     for day in days:
         # Convert string to datetime object
@@ -200,16 +200,16 @@ def work_out_days(target_date_str) -> list[object] | None:
 @app.route('/weekend', methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def weekend() -> Response:
+def weekend() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a date? (Optional)
     # ----------------------------------------------------------- #
-    target_date_str = get_date_from_url(return_none_if_empty=True)
+    target_date_str: str | None = get_date_from_url(return_none_if_empty=True)
 
     # ----------------------------------------------------------- #
     # Workout which weekend we're displaying
     # ----------------------------------------------------------- #
-    tmp = work_out_days(target_date_str)
+    tmp: list | None = work_out_days(target_date_str)
 
     # The above returns None if the date was garbage
     if not tmp:
@@ -228,19 +228,19 @@ def weekend() -> Response:
     # ----------------------------------------------------------- #
 
     # We will populate these dictionaries for each day
-    rides = {}
-    gpxes = {}
-    cafe_coords = {}
-    cafes = {}
-    start_details = {}
+    rides: dict = {}
+    gpxes: dict = {}
+    cafe_coords: dict = {}
+    cafes: dict = {}
+    start_details: dict = {}
 
     # We will flash a warning if we find a private GPX in any of the weekend's routes
-    private_gpx = False
+    private_gpx: bool = False
 
     # Populate everything for each day eg loop over ['Saturday', 'Sunday']
     for day in days:
         # Get a set of rides for this day from the calendar indexed by short dates eg '01022024'
-        tmp_rides = CalendarRepository().all_calendar_date(dates_short[day])
+        tmp_rides: list[CalendarModel] = CalendarRepository().all_calendar_date(dates_short[day])
 
         # Create empty sets for all the data jinja will need to populate each day
         rides[day] = []
@@ -252,7 +252,7 @@ def weekend() -> Response:
         # Loop over each ride
         for ride in tmp_rides:
             # Look up the GPX object referenced in the ride object
-            gpx = GpxRepository().one_by_id(ride.gpx_id)
+            gpx: GpxModel | None = GpxRepository().one_by_id(ride.gpx_id)
 
             # NB It could have been deleted, so check it still exists
             if gpx:
@@ -284,14 +284,14 @@ def weekend() -> Response:
                 rides[day].append(ride)
 
                 # Look up cafe (which might not yet be in the db)
-                cafe = CafeRepository().one_by_id(ride.cafe_id)
+                cafe: CafeModel | None = CafeRepository().one_by_id(ride.cafe_id)
                 if cafe:
                     # Update destination (as cafe may have changed name)
                     ride.destination = cafe.name
 
                     # Create a marker for Google Maps for this cafe
                     if cafe.active:
-                        color = OPEN_CAFE_COLOUR
+                        color: str = OPEN_CAFE_COLOUR
                     else:
                         flash(f"Cafe '{cafe.name}' has been flagged as Closed!")
                         color = CLOSED_CAFE_COLOUR
@@ -307,7 +307,7 @@ def weekend() -> Response:
 
                 # Double check we can find the GPX file
                 # NB have seen once where it was stuck as a tmp file - wonder if I updated the website mid edit?
-                filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+                filename: str = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
                 if os.path.exists(filename):
                     ride.missing_gpx = False
                 else:
@@ -381,4 +381,3 @@ def weekend() -> Response:
                            rides=rides, start_details=start_details, weather_data=weather_data,
                            polylines=polylines, cafe_coords=cafe_coords, live_site=live_site(),
                            elevation_data=elevation_data, elevation_cafes=elevation_cafes, anchor=target_date_str)
-

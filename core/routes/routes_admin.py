@@ -140,7 +140,7 @@ def get_free_space():
 @login_required
 @admin_only
 @update_last_seen
-def admin_page() -> Response:
+def admin_page() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
@@ -313,7 +313,7 @@ def admin_page() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def make_admin() -> Response:
+def make_admin() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -366,7 +366,7 @@ def make_admin() -> Response:
         app.logger.debug(f"make_admin(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("Make Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Restrict access - only Super Admin can do this
@@ -387,7 +387,7 @@ def make_admin() -> Response:
         EventRepository().log_event(f"Make Admin Fail", f"Rejected request to made user_id = '{user_id}' "
                                               f"admin as doesn't have 2FA.")
         # Back to calling page
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Make admin
@@ -404,7 +404,7 @@ def make_admin() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to calling page
-    return redirect(url_for('user_page', user_id=user_id))
+    return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -415,7 +415,7 @@ def make_admin() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def unmake_admin() -> Response:
+def unmake_admin() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -467,7 +467,7 @@ def unmake_admin() -> Response:
         app.logger.debug(f"unmake_admin(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("unMake Admin Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Restrict access - only Super Admin can do this
@@ -493,7 +493,7 @@ def unmake_admin() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to calling page
-    return redirect(url_for('user_page', user_id=user_id))
+    return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -504,7 +504,7 @@ def unmake_admin() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def block_user() -> Response:
+def block_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -554,7 +554,7 @@ def block_user() -> Response:
         app.logger.debug(f"block_user(): Block failed, incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("Block User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Can't block yourself nor an admin
@@ -563,12 +563,12 @@ def block_user() -> Response:
         app.logger.debug(f"block_user(): Block failed, admin can't block themselves, user_id = '{current_user.id}'.")
         EventRepository().log_event("Block User Fail", f"Admin can't block themselves, user_id = '{current_user.id}'.")
         flash(f"You can't block yourself!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
     if user.admin:
         app.logger.debug(f"block_user(): Block failed, can't block Admin, user_id = '{current_user.id}'.")
         EventRepository().log_event("Block User Fail", f"Can't block Admin, user_id = '{current_user.id}'.")
         flash(f"You can't block an Admin!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Block user
@@ -584,7 +584,7 @@ def block_user() -> Response:
         flash("Sorry, something went wrong...")
 
     # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
+    return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -595,7 +595,7 @@ def block_user() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def unblock_user() -> Response:
+def unblock_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -645,7 +645,7 @@ def unblock_user() -> Response:
         app.logger.debug(f"unblock_user(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("unBlock User Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for {current_user.name}.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Can't block yourself nor an admin
@@ -655,12 +655,12 @@ def unblock_user() -> Response:
             f"block_user(): ubBlock failed, admin can't unblock themselves, user_id = '{current_user.id}'.")
         EventRepository().log_event("unBlock User Fail", f"Admin can't unblock themselves, user_id = '{current_user.id}'.")
         flash(f"You can't unblock yourself!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
     if user.admin:
         app.logger.debug(f"unblock_user(): unBlock failed, can't block Admin, user_id = '{current_user.id}'.")
         EventRepository().log_event("unBlock User Fail", f"Can't unblock Admin, user_id = '{current_user.id}'.")
         flash(f"You can't unblock an Admin!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Unblock user
@@ -676,7 +676,7 @@ def unblock_user() -> Response:
         flash("Sorry, something went wrong...")
 
     # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
+    return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -687,7 +687,7 @@ def unblock_user() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def user_readwrite() -> Response:
+def user_readwrite() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -737,12 +737,12 @@ def user_readwrite() -> Response:
         app.logger.debug(f"user_readwrite(): ubBlock failed, admin can't unblock themselves, user_id = '{user_id}'.")
         EventRepository().log_event("ReadWrite Fail", f"Admin can't unblock themselves, user_id = '{user_id}'.")
         flash(f"You can't unblock yourself!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
     if user.admin:
         app.logger.debug(f"user_readwrite(): unBlock failed, can't block Admin, user_id = '{user_id}'.")
         EventRepository().log_event("ReadWrite Fail", f"Can't unblock Admin, user_id = '{user_id}'.")
         flash(f"You can't unblock an Admin!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     #  Validate against current_user's (admins) password
@@ -751,7 +751,7 @@ def user_readwrite() -> Response:
         app.logger.debug(f"user_readwrite(): Incorrect password for user_id = '{current_user.id}'!")
         EventRepository().log_event("ReadWrite Fail", f"Incorrect password for user_id = '{current_user.id}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Set Read Write permission
@@ -762,13 +762,13 @@ def user_readwrite() -> Response:
         flash(f"User '{user.name}' now has Write permissions.")
         message = MessageRepository().send_readwrite_message(user.email)
         Thread(target=send_message_notification_email, args=(message, user,)).start()
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
     else:
         # Should never get here, but...
         app.logger.debug(f"user_readwrite(): User().set_readwrite() failed for user.email = '{user.email}'.")
         EventRepository().log_event("ReadWrite Fail", f"User().set_readwrite() failed for user.email = '{user.email}'.")
         flash("Sorry, something went wrong.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -779,7 +779,7 @@ def user_readwrite() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def user_readonly() -> Response:
+def user_readonly() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -829,13 +829,13 @@ def user_readonly() -> Response:
         app.logger.debug(f"user_readonly(): ubBlock failed, admin can't unblock themselves, '{current_user.email}'.")
         EventRepository().log_event("ReadOnly Fail", f"Admin can't unblock themselves, '{current_user.email}'.")
         flash(f"You can't unblock yourself!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
     if user.admin:
         app.logger.debug(f"user_readonly(): unBlock failed, can't block Admin, "
                          f"'{current_user.email}' blocking '{user.email}'.")
         EventRepository().log_event("ReadOnly Fail", f"Can't unblock Admin, '{current_user.email}' blocking '{user.email}'.")
         flash(f"You can't unblock an Admin!")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     #  Validate against current_user's (admins) password
@@ -844,7 +844,7 @@ def user_readonly() -> Response:
         app.logger.debug(f"user_readonly(): Incorrect password for '{current_user.email}'!")
         EventRepository().log_event("ReadOnly Fail", f"Incorrect password for '{current_user.email}'!")
         flash(f"Incorrect password for '{current_user.name}'.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Set Read Only permission
@@ -855,13 +855,13 @@ def user_readonly() -> Response:
         flash(f"User '{user.name}' is now Read ONLY.")
         message = MessageRepository().send_readonly_message(user.email)
         Thread(target=send_message_notification_email, args=(message, user,)).start()
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
     else:
         # Should never get here, but...
         app.logger.debug(f"user_readonly(): User().set_readonly() failed for user.email = '{user.email}'.")
         EventRepository().log_event("ReadOnly Fail", f"User().set_readonly() failed for user.email = '{user.email}'.")
         flash("Sorry, something went wrong.")
-        return redirect(url_for('user_page', user_id=user_id))
+        return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -872,7 +872,7 @@ def user_readonly() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def reverify_user() -> Response:
+def reverify_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -909,7 +909,7 @@ def reverify_user() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
+    return redirect(url_for('user_page', user_id=user_id))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -920,7 +920,7 @@ def reverify_user() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def password_reset_user() -> Response:
+def password_reset_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -957,7 +957,7 @@ def password_reset_user() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to user page
-    return redirect(url_for('user_page', user_id=user_id))
+    return redirect(url_for('user_page', user_id=user_id))   # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -968,7 +968,7 @@ def password_reset_user() -> Response:
 @login_required
 @admin_only
 @update_last_seen
-def test_sms() -> Response:
+def test_sms() -> Response | str:
     # ----------------------------------------------------------- #
     # Send SMS
     # ----------------------------------------------------------- #
@@ -976,5 +976,5 @@ def test_sms() -> Response:
     flash(f"An SMS has been sent to '{current_user.phone_number}'")
 
     # Back to user page
-    return redirect(url_for('user_page', user_id=current_user.id))
+    return redirect(url_for('user_page', user_id=current_user.id))  # type: ignore
 

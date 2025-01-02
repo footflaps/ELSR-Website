@@ -53,7 +53,7 @@ LOCAL_MAX_KM = 10
 
 @app.route('/gravel', methods=['GET'])
 @update_last_seen
-def gravel() -> Response:
+def gravel() -> Response | str:
 
     # ----------------------------------------------------------- #
     # Render page
@@ -67,7 +67,7 @@ def gravel() -> Response:
 
 @app.route('/gravel/all', methods=['GET'])
 @update_last_seen
-def gravel_all() -> Response:
+def gravel_all() -> Response | str:
     # ----------------------------------------------------------- #
     # Grab all our routes
     # ----------------------------------------------------------- #
@@ -129,7 +129,7 @@ def gravel_all() -> Response:
 
 @app.route('/gravel/ldt', methods=['GET'])
 @update_last_seen
-def gravel_ldt() -> Response:
+def gravel_ldt() -> Response | str:
     # ----------------------------------------------------------- #
     # Grab the specific routes
     # ----------------------------------------------------------- #
@@ -196,7 +196,7 @@ def gravel_ldt() -> Response:
 
 @app.route('/gravel/local', methods=['GET'])
 @update_last_seen
-def gravel_local() -> Response:
+def gravel_local() -> Response | str:
     # ----------------------------------------------------------- #
     # Start with all gravel
     # ----------------------------------------------------------- #

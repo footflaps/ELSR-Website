@@ -56,7 +56,7 @@ FIRST_PAGE = 0
 @logout_barred_user
 @login_required
 @rw_required
-def add_blog() -> Response:
+def add_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
@@ -139,7 +139,7 @@ def add_blog() -> Response:
         # ----------------------------------------------------------- #
         # Detect cancel button
         if form.cancel.data:
-            return redirect(url_for('display_blog'))
+            return redirect(url_for('display_blog'))  # type: ignore
 
         # ----------------------------------------------------------- #
         # Validate contents
@@ -234,7 +234,7 @@ def add_blog() -> Response:
                 Thread(target=alert_admin_via_sms, args=(user, "New blog post alert, please check it's OK!",)).start()
 
         # Point them at their blog entry
-        return redirect(url_for('display_blog', blog_id=new_blog.id))
+        return redirect(url_for('display_blog', blog_id=new_blog.id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Handle POST (but form validation failed)
@@ -243,7 +243,7 @@ def add_blog() -> Response:
 
         # Detect cancel button
         if form.cancel.data:
-            return redirect(url_for('display_blog'))
+            return redirect(url_for('display_blog'))  # type: ignore
 
         # This traps a post, but where the form verification failed.
         flash("Something was missing, see comments below:")
@@ -263,7 +263,7 @@ def add_blog() -> Response:
 @update_last_seen
 @logout_barred_user
 @login_required
-def delete_blog() -> Response:
+def delete_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id?
     # ----------------------------------------------------------- #
@@ -344,7 +344,7 @@ def delete_blog() -> Response:
         app.logger.debug(f"delete_blog(): Reason was blank, blog_id = '{blog_id}'.")
         EventRepository().log_event("Delete Blog Fail", f"Reason was blank, blog_id = '{blog_id}'.")
         flash("You must give a reason to delete a blog post!")
-        return redirect(url_for('display_blog', blog_id=blog_id))
+        return redirect(url_for('display_blog', blog_id=blog_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     #  Validate password
@@ -358,7 +358,7 @@ def delete_blog() -> Response:
         EventRepository().log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to blogs page
-        return redirect(url_for('display_blog'))
+        return redirect(url_for('display_blog'))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete blog photos first
@@ -397,6 +397,6 @@ def delete_blog() -> Response:
         EventRepository().log_event("Delete Blog Fail", f"Failed to delete Blog, blog_id = '{blog_id}'.")
         flash("Sorry, something went wrong.")
 
-    return redirect(url_for('display_blog'))
+    return redirect(url_for('display_blog'))  # type: ignore
 
 

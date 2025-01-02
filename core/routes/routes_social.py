@@ -39,7 +39,7 @@ from core.subs_dates import get_date_from_url
 @app.route("/social", methods=['GET'])
 @logout_barred_user
 @update_last_seen
-def display_socials() -> Response:
+def display_socials() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a date? (optional)
     # ----------------------------------------------------------- #
@@ -104,7 +104,7 @@ def display_socials() -> Response:
 @logout_barred_user
 @login_required
 @update_last_seen
-def download_ics() -> Response:
+def download_ics() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a social_id?
     # ----------------------------------------------------------- #
@@ -138,7 +138,7 @@ def download_ics() -> Response:
         EventRepository().log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
                                                  f"social_id = '{social_id}' as Private.")
         flash("Private events are for regular riders only!")
-        return redirect(url_for("not_rw"))
+        return redirect(url_for("not_rw"))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Create ics file

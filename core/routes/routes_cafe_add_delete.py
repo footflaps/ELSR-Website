@@ -60,7 +60,7 @@ ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 @login_required
 @update_last_seen
 @rw_required
-def new_cafe() -> Response:
+def new_cafe() -> Response | str:
     # Need a form for the new cafe
     form = CreateCafeForm()
 
@@ -173,7 +173,7 @@ def new_cafe() -> Response:
         Thread(target=check_new_cafe_with_all_gpxes, args=(cafe,)).start()
 
         # Back to Cafe details page
-        return redirect(url_for('cafe_details', cafe_id=cafe.id))
+        return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
 
     else:
 
@@ -198,7 +198,7 @@ def new_cafe() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def edit_cafe() -> Response:
+def edit_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -333,7 +333,7 @@ def edit_cafe() -> Response:
             app.logger.debug(f"edit_cafe(): Cafe has only moved {round(dist_km, 1)} km, so no need to update GPXes.")
 
         # Back to cafe details page
-        return redirect(url_for('cafe_details', cafe_id=cafe_id))
+        return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Handle GET
@@ -365,7 +365,7 @@ def edit_cafe() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def delete_comment() -> Response:
+def delete_comment() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -443,7 +443,7 @@ def delete_comment() -> Response:
         EventRepository().log_event("Delete Comment Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to route detail page
-        return redirect(url_for('cafe_details', cafe_id=cafe_id))
+        return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete comment
@@ -460,7 +460,7 @@ def delete_comment() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
-    return redirect(url_for('cafe_details', cafe_id=cafe_id, anchor="comments"))
+    return redirect(url_for('cafe_details', cafe_id=cafe_id, anchor="comments"))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -472,7 +472,7 @@ def delete_comment() -> Response:
 @login_required
 @update_last_seen
 @rw_required
-def delete_cafe() -> Response:
+def delete_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
@@ -539,7 +539,7 @@ def delete_cafe() -> Response:
         EventRepository().log_event("Delete Cafe Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
-        return redirect(url_for('cafe_details', cafe_id=cafe_id))
+        return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     #  Delete any comments
@@ -581,5 +581,5 @@ def delete_cafe() -> Response:
         flash("Sorry, something went wrong!")
 
     # Back to cafe list page
-    return redirect(url_for('cafe_list'))
+    return redirect(url_for('cafe_list'))  # type: ignore
 

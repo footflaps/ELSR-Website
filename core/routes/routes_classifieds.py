@@ -45,7 +45,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 
 @app.route("/classifieds", methods=['GET'])
 @update_last_seen
-def classifieds() -> Response:
+def classifieds() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #
@@ -100,7 +100,7 @@ def classifieds() -> Response:
 @logout_barred_user
 @login_required
 @rw_required
-def add_sell() -> Response:
+def add_sell() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #
@@ -180,7 +180,7 @@ def add_sell() -> Response:
 
             # Detect cancel button
             if form.cancel.data:
-                return redirect(url_for('classifieds'))
+                return redirect(url_for('classifieds'))  # type: ignore
 
             # ----------------------------------------------------------- #
             # Create new Classified object for the db
@@ -254,7 +254,7 @@ def add_sell() -> Response:
                 flash("Your Classified post has been updated!")
 
             # Show them their completed post
-            return redirect(url_for('classifieds', classified_id=new_classified.id))
+            return redirect(url_for('classifieds', classified_id=new_classified.id))  # type: ignore
 
         else:
             # ----------------------------------------------------------- #
@@ -262,7 +262,7 @@ def add_sell() -> Response:
             # ----------------------------------------------------------- #
             # Detect cancel button
             if form.cancel.data:
-                return redirect(url_for('classifieds'))
+                return redirect(url_for('classifieds'))  # type: ignore
 
             # This traps a post, but where the form verification failed.
             flash("Something was missing, see comments below:")
@@ -279,7 +279,7 @@ def add_sell() -> Response:
 @logout_barred_user
 @login_required
 @rw_required
-def delete_classified() -> Response:
+def delete_classified() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id?
     # ----------------------------------------------------------- #
@@ -348,7 +348,7 @@ def delete_classified() -> Response:
         EventRepository().log_event("Delete Classified Fail", f"Incorrect password for classified_id = '{classified_id}!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
-        return redirect(url_for('classifieds'))
+        return redirect(url_for('classifieds'))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Delete Classified photos first
@@ -367,7 +367,7 @@ def delete_classified() -> Response:
         EventRepository().log_event("Delete Classified Fail", f"Failed to delete, classified_id = '{classified_id}.")
         flash("Sorry, something went wrong.")
 
-    return redirect(url_for('classifieds'))
+    return redirect(url_for('classifieds'))  # type: ignore
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -377,7 +377,7 @@ def delete_classified() -> Response:
 @update_last_seen
 @logout_barred_user
 @login_required
-def message_seller() -> Response:
+def message_seller() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #
@@ -415,7 +415,7 @@ def message_seller() -> Response:
             user_email == "" or \
             user_message == "":
         flash("You must have a name, email and message!")
-        return redirect(url_for('classifieds', classified_id=classified_id))
+        return redirect(url_for('classifieds', classified_id=classified_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     # Send an email
@@ -426,5 +426,5 @@ def message_seller() -> Response:
     # ----------------------------------------------------------- #
     # Back to Classified
     # ----------------------------------------------------------- #
-    return redirect(url_for('classifieds', classified_id=classified_id))
+    return redirect(url_for('classifieds', classified_id=classified_id))  # type: ignore
 
