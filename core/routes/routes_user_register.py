@@ -326,6 +326,11 @@ def twofa_login() -> Response | str:
             login_user(user, remember=True)
             flash(f"Welcome back {user.name}!")
 
+            try:
+                session['url']
+            except Exception:
+                session['url'] = url_for('display_blog')
+
             # Log event after they've logged in, so current_user can have an email address
             app.logger.debug(f"twofa_login(): User logged in for '{email}'.")
             EventRepository().log_event("Login", f"User logged in via 2FA, forwarding user '{user.email}' to '{session['url']}'.")
@@ -359,6 +364,11 @@ def twofa_login() -> Response | str:
                 # Success, 2FA complete!
                 login_user(user, remember=True)
                 flash(f"Welcome back {user.name}!")
+
+                try:
+                    session['url']
+                except Exception:
+                    session['url'] = url_for('display_blog')
 
                 # Log event after they've logged in, so current_user can have an email address
                 app.logger.debug(f"twofa_login(): User logged in for '{email}'.")
