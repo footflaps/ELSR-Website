@@ -18,7 +18,7 @@
 				<div class="page-heading">
 					<h1>You are a very naughty boy!</h1>
 					<span class="subheading">You don't have permission to access that page.</span>
-					{% if not current_user.is_authenticated: %}
+					{% if not current_user.is_authenticated %}
 						<span class="subheading">Maybe login and try again.</span>
 					{% else %}
 						<span class="subheading">If all else fails, try logging out, then back in again.</span>

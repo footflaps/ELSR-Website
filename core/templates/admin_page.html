@@ -540,7 +540,7 @@
 					</thead>
 				
 					<tbody>
-						{% for user in admins: %}
+						{% for user in admins %}
 							{% if user.admin %}
 							<tr>
 								<th scope="row">{{ user.id }}</th>
@@ -636,7 +636,7 @@
 					</thead>
 					
 					<tbody>
-						{% for user in trusted_users: %}
+						{% for user in trusted_users %}
 							
 							<!--
 								Colour code according to status
@@ -756,7 +756,7 @@
 					</thead>
 					
 					<tbody>
-						{% for user in untrusted_users: %}
+						{% for user in untrusted_users %}
 							
 							<!--
 								Colour code according to status
@@ -915,7 +915,7 @@
 				<h2 class="post-title float-left">There are {{rides|length}} rides:</h2>
 			{% endif %}
 			
-			{% if rides | count > 0: %}
+			{% if rides | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseRideList"
@@ -928,7 +928,7 @@
 		</div>
 	</div>
 	
-	{% if rides | count > 0: %}
+	{% if rides | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseRideList">
@@ -952,7 +952,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for ride in rides: %}
+							{% for ride in rides %}
 								
 								<tr>
 									<td scope="row">{{ ride.id }}</td>
@@ -1013,7 +1013,7 @@
 				<h2 class="post-title float-left">There are {{ socials|length }} social events:</h2>
 			{% endif %}
 			
-			{% if socials | count > 0: %}
+			{% if socials | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseSocialList"
@@ -1026,7 +1026,7 @@
 		</div>
 	</div>
 	
-	{% if socials | count > 0: %}
+	{% if socials | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseSocialList">
@@ -1049,7 +1049,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for social in socials: %}
+							{% for social in socials %}
 								
 								<tr>
 									<td scope="row">{{ social.id }}</td>
@@ -1110,7 +1110,7 @@
 				<h2 class="post-title float-left">There are {{ blogs|length }} blog posts:</h2>
 			{% endif %}
 			
-			{% if blogs | count > 0: %}
+			{% if blogs | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseBlogList"
@@ -1123,7 +1123,7 @@
 		</div>
 	</div>
 	
-	{% if blogs | count > 0: %}
+	{% if blogs | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseBlogList">
@@ -1147,7 +1147,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for blog in blogs: %}
+							{% for blog in blogs %}
 								
 								<tr>
 									<td scope="row">{{ blog.id }}</td>
@@ -1197,7 +1197,7 @@
 				<h2 class="post-title float-left">There are {{ classifieds|length }} classified posts:</h2>
 			{% endif %}
 			
-			{% if classifieds | count > 0: %}
+			{% if classifieds | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseClassifiedList"
@@ -1210,7 +1210,7 @@
 		</div>
 	</div>
 	
-	{% if classifieds | count > 0: %}
+	{% if classifieds | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseClassifiedList">
@@ -1235,7 +1235,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for classified in classifieds: %}
+							{% for classified in classifieds %}
 								
 								<tr>
 									<td scope="row">{{ classified.id }}</td>
@@ -1288,7 +1288,7 @@
 				<h2 class="post-title float-left">There are {{ comments|length }} cafe comments:</h2>
 			{% endif %}
 			
-			{% if comments | count > 0: %}
+			{% if comments | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseCommentsList"
@@ -1301,7 +1301,7 @@
 		</div>
 	</div>
 	
-	{% if classifieds | count > 0: %}
+	{% if classifieds | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseCommentsList">
@@ -1323,7 +1323,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for comment in comments: %}
+							{% for comment in comments %}
 								
 								<tr>
 									<td scope="row">{{ comment.id }}</td>
@@ -1472,7 +1472,7 @@
 					</thead>
 					
 					<tbody>
-						{% for event in events: %}
+						{% for event in events %}
 							{% if not mobile or event.type != "404" %}
 							
 								{% if flag_event(event.type) %}
@@ -1506,7 +1506,7 @@
 			
 				</table>
 			
-				{% if not events: %}
+				{% if not events %}
 					<h4>No events over the last {{ days }} days</h4>
 				{% endif %}
 			
@@ -1562,7 +1562,7 @@
 	                </thead>
 			
 					<tbody>
-						{% for file in  files: %}
+						{% for file in  files %}
 							
 							<!-- Colour code row by file size -->
 							{% if file.size > 1000 %}

@@ -118,7 +118,7 @@
 							
 							{% if poll.status == POLL_OPEN %}
 							
-								{% if current_user.is_authenticated: %}
+								{% if current_user.is_authenticated %}
 									
 									{% if not current_user.readwrite %}
 							
@@ -174,7 +174,7 @@
 						<!-- Show existing voters as row of Gravatars -->
 						<div class="my-3">
 							
-							{% if current_user.is_authenticated: %}
+							{% if current_user.is_authenticated %}
 							
 								{% if not current_user.readwrite %}
 							

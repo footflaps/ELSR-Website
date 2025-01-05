@@ -74,13 +74,13 @@
 					</thead>
 				
 					<tbody>
-						{% for poll in polls: %}
+						{% for poll in polls %}
 							<tr>
 								<td scope="row">{{ poll.id }}</td>
 								<!-- Poll name and hyperlink -->
 								<td>
 									{% if poll.privacy == "Private" %}
-										{% if not current_user.is_authenticated: %}
+										{% if not current_user.is_authenticated %}
 											<!-- Not logged in -->
 											{{ poll.name }}
 											<i class="fa-solid fa-user-lock"></i>
@@ -130,8 +130,8 @@
 <!--                                           Add a poll                                           -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if current_user.is_authenticated: %}
-	{% if current_user.readwrite: %}
+{% if current_user.is_authenticated %}
+	{% if current_user.readwrite %}
 		<div class="container">
 			<div class="row">
 				<div class="col-lg-8 col-md-10 mx-auto">

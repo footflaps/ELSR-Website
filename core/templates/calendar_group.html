@@ -200,7 +200,7 @@
 				</thead>
 			
 				<tbody>
-					{% for ride in rides: %}
+					{% for ride in rides %}
 						<tr>
 							<td scope="row">{{ loop.index }}</td>
 							<td scope="row">{{ ride.date }}</td>
@@ -242,7 +242,7 @@
 					<!-- Live Maps -->
 					<div id="gpx_map" style="height: 500px"></div>
 					
-					{% if warning: %}
+					{% if warning %}
 						<h4 class="my-3">{{ warning }}</h4>
 					{% endif %}
 				

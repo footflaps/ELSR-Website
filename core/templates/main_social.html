@@ -113,7 +113,7 @@
 								<hr>
 								<h4>Attendees:</h4>
 							
-								{% if current_user.is_authenticated: %}
+								{% if current_user.is_authenticated %}
 							
 									{% if not current_user.readwrite %}
 								
@@ -287,7 +287,7 @@
 </div>
 
 <!-- Logged in users can add social evenst -->
-{% if current_user.is_authenticated: %}
+{% if current_user.is_authenticated %}
 
 	<div class="container">
 		<div class="row mt-3">

@@ -252,7 +252,7 @@
 						{% for ride in rides[day] %}
 						
 							<!-- If GPX file is missing only show to Admins so they can delete it -->
-							{% if ride.missing_gpx and not current_user.is_authenticated: %}
+							{% if ride.missing_gpx and not current_user.is_authenticated %}
 						
 							{% elif ride.missing_gpx and not (current_user.admin or current_user.email == ride.email) %}
 						
@@ -295,7 +295,7 @@
 									{% endif %}
 									
 									<!-- Download button -->
-						            {% if current_user.is_authenticated: %}
+						            {% if current_user.is_authenticated %}
 										{% if ride.public and not ride.missing_gpx %}
 							                <a href="{{ url_for('route_download', gpx_id=ride.gpx_id) }}">
 						                        <button class="btn btn-sm btn-primary">
@@ -305,7 +305,7 @@
 									{% endif %}
 									
 									<!-- Admins and author can edit / delete the rides -->
-									{% if current_user.is_authenticated: %}
+									{% if current_user.is_authenticated %}
 										{% if current_user.admin or current_user.email == ride.email %}
 											
 											<!-- Edit route -->
@@ -443,7 +443,7 @@
 					<!--------------------------------------------------------------------------------------------->
 					<!--                               Remind people to log in                                   -->
 					<!--------------------------------------------------------------------------------------------->
-					{% if not current_user.is_authenticated: %}
+					{% if not current_user.is_authenticated %}
 					
 						<a href="{{ url_for('login') }}">
 							<div class="float-left" style="color: red">
@@ -472,7 +472,7 @@
 					{% endif %}
 				
 				{% else %}
-					{% if current_user.is_authenticated: %}
+					{% if current_user.is_authenticated %}
 						{% if current_user.readwrite %}
 							<!-- Add ride button -->
 							<a href="{{ url_for('add_ride', date=dates_short[day]) }}">

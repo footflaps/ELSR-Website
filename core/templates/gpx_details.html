@@ -164,7 +164,7 @@
 <!--               Owner / Admin control panel - Show before if not public                          -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if not current_user.is_authenticated: %}
+{% if not current_user.is_authenticated %}
 
 	<!--
 		Tortuous logic as if current_user isn't logged in they won't have inherited .email etc.
@@ -219,7 +219,7 @@
                 <h2 style="text-align:left;float:left;">Route Summary</h2>
 	            
 	            <!-- Download button -->
-	            {% if current_user.is_authenticated: %}
+	            {% if current_user.is_authenticated %}
 	                <a href="{{ url_for('route_download', gpx_id=gpx.id) }}">
                         <button class="btn btn-primary " style="text-align:right;float:right;">
                                 Download GPX</button>
@@ -260,6 +260,7 @@
 <!---------------------------------------------------------------------------------------------------->
 
 {% if gpx.details %}
+
 	<div class="container">
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto">
@@ -290,10 +291,14 @@
 			
 			<h2 class="mt-2"> Cafe options</h2>
 			<ul>
-				{% for cafe in cafe_list: %}
-				<li> <a href="{{ url_for('cafe_details', cafe_id=cafe['id']) }}">
-					<b>{{ cafe['name'] }}</b> </a> is {{ cafe['dist_km'] }} km away at {{ cafe['range_km'] }} km along the route
-                </li>
+				{% for cafe in cafe_list %}
+
+                    <li>
+                        <a href="{{ url_for('cafe_details', cafe_id=cafe['id']) }}">
+                            <b>{{ cafe['name'] }}</b>
+                        </a>
+                        is {{ cafe['dist_km'] }} km away at {{ cafe['range_km'] }} km along the route
+                    </li>
 				
 				{% endfor %}
 			</ul>
@@ -444,14 +449,14 @@
 <!--                     Owner / Admin control panel - Show after if public                         -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if not current_user.is_authenticated: %}
+{% if not current_user.is_authenticated %}
 
 	<!--
 		Tortuous logic as if current_user isn't logged in they won't have inherited .email etc.
 		So, have to test for that first and handle that separately.
 	-->
 
-{% elif (current_user.email == gpx.email or current_user.admin) and gpx.public: %}
+{% elif (current_user.email == gpx.email or current_user.admin) and gpx.public %}
 	
 	<!-- Logged in and either admin or owner and route is public -->
 
@@ -474,7 +479,7 @@
 							<a class="btn btn-primary float-left mb-2" href="{{ url_for('edit_route', gpx_id=gpx.id) }}">Edit Route</a>
 							
 							<!-- (un)Publish button -->
-		                   {% if not gpx.public: %}
+		                   {% if not gpx.public %}
 					
 								<!-- Mini form to publish route -->
 								<form action="{{ url_for('publish_route', gpx_id=gpx.id) }}"
@@ -483,7 +488,7 @@
 									<button type="submit" class="btn btn-primary float-left mx-3 mb-2">Publish Route</button>
 								</form>
 			
-							{% else: %}
+							{% else %}
 
 								<!-- Mini form to hide route -->
 		                        {% if not rides %}
@@ -530,7 +535,7 @@
 		<div class="row">
 			<div class="col-lg-8 col-md-10 mx-auto mt-3">
 				
-				{% if current_user.is_authenticated: %}
+				{% if current_user.is_authenticated %}
                     {% if current_user.readwrite %}
 				
 						<!----------------------------->
@@ -544,7 +549,7 @@
 				{% endif %}
 				
 				 <!-- Download button -->
-	            {% if current_user.is_authenticated: %}
+	            {% if current_user.is_authenticated %}
 	                <a href="{{ url_for('route_download', gpx_id=gpx.id) }}">
                         <button class="btn btn-primary float-right" style="text-align:right;float:right;">
                                 Download GPX</button>

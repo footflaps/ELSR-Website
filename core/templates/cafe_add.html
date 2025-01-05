@@ -15,7 +15,7 @@
 <!--                                       Page Header                                              -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if cafe.image_name: %}
+{% if cafe.image_name %}
 
 	<!-- Cafe specific photo -->
 	<header class="masthead"
@@ -36,9 +36,9 @@
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<div class="page-heading">
 					
-					{% if cafe: %}
+					{% if cafe %}
 						<h1>Edit Cafe Details</h1>
-					{% else: %}
+					{% else %}
 						<h1>Add a new cafe</h1>
 					{% endif %}
 					

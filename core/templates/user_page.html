@@ -294,14 +294,14 @@
 			{% if mobile %}
 				<h2 class="post-title float-left">{{ cafes|length }} cafes:</h2>
 			{% else %}
-				{% if user.id == current_user.id: %}
+				{% if user.id == current_user.id %}
 					<h2 class="post-title float-left">You have {{ cafes|length }} cafes:</h2>
 				{% else %}
 					<h2 class="post-title float-left">{{ user.name }} has {{ cafes|length }} cafes:</h2>
 				{% endif %}
 			{% endif %}
 			
-			{% if cafes | count > 0: %}
+			{% if cafes | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseCafeList"
@@ -314,7 +314,7 @@
 		</div>
 	</div>
 
-	{% if cafes | count > 0: %}
+	{% if cafes | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of cafes -->
 		<div class="collapse" id="collapseCafeList">
@@ -339,7 +339,7 @@
 				
 						<!-- Table rows -->
 						<tbody>
-							{% for cafe in cafes: %}
+							{% for cafe in cafes %}
 								
 								{% if cafe.active %}
 									<tr>
@@ -401,14 +401,14 @@
 			{% if mobile %}
 				<h2 class="post-title float-left">{{ gpxes|length }} routes:</h2>
 			{% else %}
-				{% if user.id == current_user.id: %}
+				{% if user.id == current_user.id %}
 					<h2 class="post-title float-left">You have {{ gpxes|length }} routes:</h2>
 				{% else %}
 					<h2 class="post-title float-left">{{ user.name }} has {{ gpxes|length }} routes:</h2>
 				{% endif %}
 			{% endif %}
 			
-			{% if gpxes | count > 0: %}
+			{% if gpxes | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseGPXList"
@@ -421,7 +421,7 @@
 		</div>
 	</div>
 	
-	{% if gpxes | count > 0: %}
+	{% if gpxes | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of routes -->
 		<div class="collapse" id="collapseGPXList">
@@ -446,14 +446,14 @@
 		                </thead>
 				
 						<tbody>
-							{% for gpx in gpxes: %}
+							{% for gpx in gpxes %}
 								
-								{% if not gpx.public: %}
+								{% if not gpx.public %}
 									<!-- We have hidden rows for non public routes -->
 									<tr class="table-warning">
 									{% set ns.hidden = "NB Routes in yellow have not been made public yet by their owner and are only visible to Admins
 						                                and the owner. Only the owner can publish the route and make it public." %}
-								{% else: %}
+								{% else %}
 									<tr>
 								{% endif %}
 									
@@ -504,14 +504,14 @@
 			{% if mobile %}
 				<h2 class="post-title float-left">{{ cafe_comments|length }} comments:</h2>
 			{% else %}
-				{% if user.id == current_user.id: %}
+				{% if user.id == current_user.id %}
 					<h2 class="post-title float-left">You have {{ cafe_comments|length }} comments:</h2>
 				{% else %}
 					<h2 class="post-title float-left">{{ user.name }} has {{ cafe_comments|length }} comments:</h2>
 				{% endif %}
 			{% endif %}
 			
-			{% if cafe_comments | count > 0: %}
+			{% if cafe_comments | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseCommentList"
@@ -524,7 +524,7 @@
 		</div>
 	</div>
 	
-	{% if cafe_comments | count > 0: %}
+	{% if cafe_comments | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of comments -->
 		<div class="collapse" id="collapseCommentList">
@@ -548,7 +548,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for comment in cafe_comments: %}
+							{% for comment in cafe_comments %}
 								
 								<tr>
 									<td scope="row">{{ loop.index }}</td>
@@ -597,14 +597,14 @@
 			{% if mobile %}
 				<h2 class="post-title float-left">{{ rides|length }} rides:</h2>
 			{% else %}
-				{% if user.id == current_user.id: %}
+				{% if user.id == current_user.id %}
 					<h2 class="post-title float-left">You have {{ rides|length }} rides:</h2>
 				{% else %}
 					<h2 class="post-title float-left">{{ user.name }} has {{ rides|length }} rides:</h2>
 				{% endif %}
 			{% endif %}
 			
-			{% if rides | count > 0: %}
+			{% if rides | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseRideList"
@@ -617,7 +617,7 @@
 		</div>
 	</div>
 	
-	{% if rides | count > 0: %}
+	{% if rides | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseRideList">
@@ -639,7 +639,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for ride in rides: %}
+							{% for ride in rides %}
 								
 								<tr>
 									<td scope="row">{{ loop.index }}</td>
@@ -700,7 +700,7 @@
 				<h2 class="post-title float-left">{{ user.name }} has {{ socials|length }} social events:</h2>
 			{% endif %}
 			
-			{% if socials | count > 0: %}
+			{% if socials | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseSocialList"
@@ -713,7 +713,7 @@
 		</div>
 	</div>
 	
-	{% if socials | count > 0: %}
+	{% if socials | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseSocialList">
@@ -736,7 +736,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for social in socials: %}
+							{% for social in socials %}
 								
 								<tr>
 									<td scope="row">{{ loop.index }}</td>
@@ -793,7 +793,7 @@
 				<h2 class="post-title float-left">{{ user.name }} has {{ blogs|length }} blog posts:</h2>
 			{% endif %}
 			
-			{% if blogs | count > 0: %}
+			{% if blogs | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseBlogList"
@@ -806,7 +806,7 @@
 		</div>
 	</div>
 	
-	{% if blogs | count > 0: %}
+	{% if blogs | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseBlogList">
@@ -829,7 +829,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for blog in blogs: %}
+							{% for blog in blogs %}
 								
 								<tr>
 									<td scope="row">{{ loop.index }}</td>
@@ -880,7 +880,7 @@
 				<h2 class="post-title float-left">{{ user.name }} has {{ classifieds|length }} classified posts:</h2>
 			{% endif %}
 			
-			{% if classifieds | count > 0: %}
+			{% if classifieds | count > 0 %}
 			
 				<!-- Button to expose hidden table -->
 				<a class="btn btn-primary float-right"  data-toggle="collapse" href="#collapseClassifiedList"
@@ -893,7 +893,7 @@
 		</div>
 	</div>
 	
-	{% if classifieds | count > 0: %}
+	{% if classifieds | count > 0 %}
 	
 		<!-- Collapsed / Hidden table of rides in Calendar -->
 		<div class="collapse" id="collapseClassifiedList">
@@ -917,7 +917,7 @@
 		                </thead>
 				
 						<tbody>
-							{% for classified in classifieds: %}
+							{% for classified in classifieds %}
 								
 								<tr>
 									<td scope="row">{{ loop.index }}</td>
@@ -1059,7 +1059,7 @@
 						</thead>
 						
 						<tbody>
-							{% for event in events|reverse: %}
+							{% for event in events|reverse %}
 							
 								{% if flag_event(event.type) %}
 									<tr class="table-danger">
@@ -1399,7 +1399,7 @@
 						</table>
 		                
 		                <div>
-			                {% if current_user.id == user.id : %}
+			                {% if current_user.id == user.id  %}
 							    
 			                    <!-- Contact an admin -->
 								<a data-toggle="modal" data-target="#contactAdminModal">
@@ -1463,7 +1463,7 @@
 		                        <a data-toggle="modal" data-target="#unBlockUserModal">
 									<button type="button" class="btn btn-danger mr-2 my-2" >unBan User</button>
 		                        </a>
-							{% else: %}
+							{% else %}
 		                        <a data-toggle="modal" data-target="#blockUserModal">
 									<button type="button" class="btn btn-danger mr-2 my-2" >Ban User</button>
 		                        </a>
@@ -1474,7 +1474,7 @@
 		                        <a data-toggle="modal" data-target="#removeWriteUserModal">
 									<button type="button" class="btn btn-warning mr-2 my-2" >Read only</button>
 		                        </a>
-							{% else: %}
+							{% else %}
 		                        <a data-toggle="modal" data-target="#allowWriteUserModal">
 									<button type="button" class="btn btn-primary mr-2 my-2" >Read Write</button>
 		                        </a>

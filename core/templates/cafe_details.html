@@ -34,7 +34,7 @@
 <!--                                       Page Header                                              -->
 <!---------------------------------------------------------------------------------------------------->
 
-{% if cafe.image_name: %}
+{% if cafe.image_name %}
 
 	<!-- Specific cafe photo -->
 	<header class="masthead"
@@ -159,7 +159,7 @@
 	                <div class="clearfix">
 			
 			
-						{% if cafe.website_url: %}
+						{% if cafe.website_url %}
 						<!-- Website link -->
 						<a href="{{cafe.website_url}}"
 						   rel="noopener noreferrer"
@@ -181,7 +181,7 @@
 						</p>
 						
 						<!-- Edit or Flag post button -->
-		                {% if not current_user.is_authenticated: %}
+		                {% if not current_user.is_authenticated %}
 		                
 		                    <!-- Tortuous logic as unauthenticated user won't have .admin attribute etc -->
 		                
@@ -228,7 +228,7 @@
 							</div>
 						
 						
-						{% elif current_user.is_authenticated: %}
+						{% elif current_user.is_authenticated %}
 		                    {% if current_user.readwrite %}
 						
 								<!----------------------------->
@@ -282,7 +282,7 @@
 					<!-- Live Maps -->
 					<div id="gpx_map" style="height: 500px"></div>
 				
-					{% if warning: %}
+					{% if warning %}
 						<h4 class="my-3">{{ warning }}</h4>
 					{% endif %}
 				
@@ -361,7 +361,7 @@
 	                    </thead>
 				
 						<tbody>
-							{% for gpx in gpxes: %}
+							{% for gpx in gpxes %}
 								{% if gpx.public %}
 									<tr>
 								{% else %}
@@ -410,7 +410,7 @@
 <a name="comments"></a>
 <div class="container">
 	
-	{% if not comments: %}
+	{% if not comments %}
 	
 		<!-- No Comments, so add comment button here -->
 		<div class="row">
@@ -418,7 +418,7 @@
 				
 				<h2 class="float-left">No Comments</h2>
 				
-				{% if current_user.is_authenticated: %}
+				{% if current_user.is_authenticated %}
 					{% if current_user.readwrite %}
 						<a class="btn btn-primary float-right" data-toggle="collapse" href="#collapseComment" role="button"
 					       aria-expanded="false" aria-controls="collapseExample">
@@ -439,7 +439,7 @@
 			</div>
 		</div>
 	
-		{% for comment in comments: %}
+		{% for comment in comments %}
 		
 			<!-- Row per comment -->
 			<div class="row my-3">
@@ -470,10 +470,10 @@
 					<div>
 						<span class="date sub-text">{{ get_user_name(comment.email) }},  {{ beautify_date(comment.date) }}
 						 
-							{% if not current_user.is_authenticated: %}
+							{% if not current_user.is_authenticated %}
 						    
 		                    {% elif current_user.admin or
-			                            ( current_user.email == comment.email and current_user.readwrite ): %}
+			                            ( current_user.email == comment.email and current_user.readwrite ) %}
 		                        <!-- Show a delete button if they are the author or admin -->
 		                        
 		                        <!--
@@ -561,7 +561,7 @@
 
 <div class="container">
 
-	{% if current_user.is_authenticated and comments: %}
+	{% if current_user.is_authenticated and comments %}
 		{% if current_user.readwrite %}
 			<!-- Button to expose hidden options -->
 			<div class="row">

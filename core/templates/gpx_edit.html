@@ -271,7 +271,7 @@
 			
 			<div class="clearfix">
 				
-				{% if not gpx.public: %}
+				{% if not gpx.public %}
 				
 					<!-- Mini form to publish route -->
 					<form action="{{ url_for('publish_route', gpx_id=gpx.id, return_path=return_path) }}"
