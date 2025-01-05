@@ -210,7 +210,7 @@ class CafeRepository(CafeModel):
     # Properties
     # -------------------------------------------------------------------------------------------------------------- #
     @staticmethod
-    def cafes_passed_by_gpx(cafes_passed: str) -> list[dict]:
+    def cafes_passed_by_gpx(cafes_passed: str) -> list[dict[str, Any]]:
         """
         Convert the cafes_passed JSON string from the GPX database into a list of dictionaries for jinja to use in the gpx_details.html template.
         :param cafes_passed:                This is the string from gpx.cafes_passed which is a JSON string, comprising
@@ -226,21 +226,26 @@ class CafeRepository(CafeModel):
                                             'range_km':     The range of the café in kilometers, which can be a float or `None` if no data is available.
                                             'status':       The active status of the café, typically a boolean (`True` or `False`).
         """
-
-        cafes_json: list[dict] = json.loads(cafes_passed)
+        # ----------------------------------------------------------- #
+        # Get a list of IDs
+        # ----------------------------------------------------------- #
+        cafes_json: list[dict[str, Any]] = json.loads(cafes_passed)
         cafe_ids: list[int] = [dct["cafe_id"] for dct in cafes_json]
 
-        # Get all cafes:
+        # ----------------------------------------------------------- #
+        # Get all cafes from those IDs
+        # ----------------------------------------------------------- #
         if cafe_ids:
             with app.app_context():
                 cafes: list[CafeModel] = CafeModel.query.filter(CafeModel.id.in_(cafe_ids)).all()  # type: ignore
 
-        # We will return this
-        cafe_list: list[dict] = []
-
+        # ----------------------------------------------------------- #
+        # Build our return list of cafe info
+        # ----------------------------------------------------------- #
+        cafe_list: list[dict[str, Any]] = []
         for cafe in cafes:
             cafe_json: dict[str, Any] | None = next((dct for dct in cafes_json if dct["cafe_id"] == cafe.id), None)
-            cafe_summary: dict = {
+            cafe_summary: dict[str, Any] = {
                 'id': cafe.id,
                 'name': cafe.name,
                 'lat': cafe.lat,
