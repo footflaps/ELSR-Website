@@ -16,9 +16,8 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.models.gpx_model import GpxModel
 from core.database.repositories.user_repository import UserRepository
-from core.database.repositories.gpx_repository import GpxRepository
+from core.database.repositories.gpx_repository import GpxModel, GpxRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
@@ -74,33 +73,47 @@ def download_count(gpx):
 @app.route('/routes', methods=['GET'])
 @update_last_seen
 def gpx_list() -> Response | str:
+    # ----------------------------------------------------------- #
     # Grab all our routes
-    gpxes = GpxRepository().all_gpxes()
+    # ----------------------------------------------------------- #
+    gpxes: list[GpxModel] = GpxRepository().all_gpxes()
+
+    # ----------------------------------------------------------- #
+    # Grab all our users
+    # ----------------------------------------------------------- #
+    users: list[UserRepository] = UserRepository.all_users()
 
     # Double check we have all the files present
-    missing_files = []
+    missing_files: list[int] = []
 
+    # ----------------------------------------------------------- #
+    # Look through GPXes looking for missing files and converting users
+    # ----------------------------------------------------------- #
     for gpx in gpxes:
+
+        gpx.user_name = next((user.name for user in users if user.email == gpx.email), "Unkown")
+
         # Absolute path name
         filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
-
         # Check the file is actually there, before we try and parse it etc
         if not os.path.exists(filename):
             missing_files.append(gpx.id)
 
     # Need different path for Admin
     if not current_user.is_authenticated:
-        admin = False
+        admin: bool = False
     elif current_user.admin:
         admin = True
     else:
         admin = False
 
+    # ----------------------------------------------------------- #
+    # Render page
+    # ----------------------------------------------------------- #
     if admin:
         for missing in missing_files:
             flash(f"We are missing the GPX file for route {missing}!")
 
-    # Render in gpx_list template
     return render_template("gpx_list.html", year=current_year, gpxes=gpxes, mobile=is_mobile(), live_site=live_site(),
                            missing_files=missing_files)
 
