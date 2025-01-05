@@ -1,9 +1,7 @@
 from flask import render_template, request, flash, abort, redirect, url_for, send_from_directory, Response
 from flask_login import current_user
-from werkzeug import exceptions
 import os
-from datetime import date, datetime, timedelta
-from threading import Thread
+from datetime import date, datetime
 from ics import Calendar as icsCalendar, Event as icsEvent
 
 
@@ -18,16 +16,8 @@ from core import app, current_year, live_site, BLOG_IMAGE_FOLDER, ICS_DIRECTORY
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository, SUPER_ADMIN_USER_ID
-from core.database.repositories.blog_repository import (BlogRepository as Blog, Privacy, Sticky,
-                                                        NO_CAFE, NO_GPX, Category)
-from core.forms.blog_forms import create_blogs_form
+from core.database.repositories.blog_repository import BlogModel, BlogRepository as Blog, Privacy, NO_CAFE, NO_GPX, Category
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.cafe_repository import CafeRepository
-from core.database.repositories.gpx_repository import GpxRepository
-from core.subs_blog_photos import update_blog_photo, delete_blog_photos
-from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
@@ -58,25 +48,31 @@ def display_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
-    blog_id = request.args.get('blog_id', None)
-    page = request.args.get('page', None)
+    blog_str: str | None = request.args.get('blog_id', None)
+    page_str: str | None = request.args.get('page', None)
 
     # ----------------------------------------------------------- #
     # Validate page
     # ----------------------------------------------------------- #
-    if page:
+    page: int | None = None
+    if page_str:
         # Must be integer (get string back from html)
         try:
-            page = int(page)
-        except:
-            # Handle being passed garbage
-            page = None
+            page = int(page_str)
+        except Exception:
+            pass
 
     # ----------------------------------------------------------- #
     # Validate blog_id
     # ----------------------------------------------------------- #
-    if blog_id:
-        blog = Blog().one_by_id(blog_id)
+    if blog_str:
+        try:
+            blog_id: int = int(blog_str)
+        except Exception:
+            flash(f"Invalid blog ID '{blog_str}' - must be an integer.")
+            return abort(404)
+
+        blog: BlogModel | None = Blog().one_by_id(blog_id)
         if not blog:
             app.logger.debug(f"blog(): Failed to locate blog, blog_id = '{blog_id}'.")
             EventRepository().log_event("Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
@@ -111,7 +107,7 @@ def display_blog() -> Response | str:
     # Did they request a specific blog post?
     if blog:
         # Just this one
-        blogs = [blog]
+        blogs: list[BlogModel] = [blog]
         # Tell jinja to ignore pagination
         page = None
     elif page:
@@ -131,7 +127,7 @@ def display_blog() -> Response | str:
         blogs = blogs + Blog().all_non_sticky(page, PAGE_SIZE)
 
     # jinja will need to know how many pages there are...
-    num_pages = Blog().number_pages(PAGE_SIZE)
+    num_pages: int = Blog().number_pages(PAGE_SIZE)
 
     # ----------------------------------------------------------- #
     # Add some extra things for jinja
