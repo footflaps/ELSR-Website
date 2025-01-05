@@ -1,5 +1,6 @@
 from datetime import date
 import json
+from typing import Any
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -208,28 +209,46 @@ class CafeRepository(CafeModel):
     # -------------------------------------------------------------------------------------------------------------- #
     # Properties
     # -------------------------------------------------------------------------------------------------------------- #
-    def cafe_list(self, cafes_passed: str) -> list[dict]:
-        # Take the cafe_passed JSON string from the GPX database and from it, returns the details of the
-        # Cafes which were referenced in the string (referenced by id).
+    @staticmethod
+    def cafes_passed_by_gpx(cafes_passed: str) -> list[dict]:
+        """
+        Convert the cafes_passed JSON string from the GPX database into a list of dictionaries for jinja to use in the gpx_details.html template.
+        :param cafes_passed:                This is the string from gpx.cafes_passed which is a JSON string, comprising
+                                            a list of dictionaries of the form:
+                                            {"cafe_id": int, "dist_km": float, "range_km": float}
+        :return:                            Return a sorted list of dictionaries for jinja to use to display cafe details.
+                                            The list if sorted by range and the dictionary format is:
+                                            'id':           An identifier for the café, typically an integer.
+                                            'name':         The name of the café, typically a string.
+                                            'lat':          Latitude coordinate of the café, typically a float.
+                                            'lon':          Longitude coordinate of the café, typically a float.
+                                            'dist_km':      The distance of the café in kilometers, which can be a float or `None` if no data is available.
+                                            'range_km':     The range of the café in kilometers, which can be a float or `None` if no data is available.
+                                            'status':       The active status of the café, typically a boolean (`True` or `False`).
+        """
 
-        cafes_json = json.loads(cafes_passed)
+        cafes_json: list[dict] = json.loads(cafes_passed)
+        cafe_ids: list[int] = [dct["cafe_id"] for dct in cafes_json]
+
+        # Get all cafes:
+        if cafe_ids:
+            with app.app_context():
+                cafes: list[CafeModel] = CafeModel.query.filter(CafeModel.id.in_(cafe_ids)).all()  # type: ignore
 
         # We will return this
-        cafe_list = []
+        cafe_list: list[dict] = []
 
-        for cafe_json in cafes_json:
-            cafe_id: int = cafe_json['cafe_id']
-            cafe: CafeModel | None = self.one_by_id(cafe_id)
-            if cafe:
-                cafe_summary = {
-                    'id': cafe_id,
-                    'name': cafe.name,
-                    'lat': cafe.lat,
-                    'lon': cafe.lon,
-                    'dist_km': cafe_json['dist_km'],
-                    'range_km': cafe_json['range_km'],
-                    'status': cafe.active,
-                }
-                cafe_list.append(cafe_summary)
+        for cafe in cafes:
+            cafe_json: dict[str, Any] | None = next((dct for dct in cafes_json if cafe["cafe_id"] == cafe.id), None)
+            cafe_summary: dict = {
+                'id': cafe.id,
+                'name': cafe.name,
+                'lat': cafe.lat,
+                'lon': cafe.lon,
+                'dist_km': cafe_json['dist_km'] if cafe_json else None,
+                'range_km': cafe_json['range_km'] if cafe_json else None,
+                'status': cafe.active,
+            }
+            cafe_list.append(cafe_summary)
 
         return sorted(cafe_list, key=lambda x: x['range_km'])

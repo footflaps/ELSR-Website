@@ -134,7 +134,6 @@ def gpx_details(gpx_id) -> Response | str:
     # Check params are valid
     # ----------------------------------------------------------- #
     gpx = GpxRepository().one_by_id(gpx_id)
-
     if not gpx:
         app.logger.debug(f"gpx_details(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
         EventRepository().log_event("One GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -166,7 +165,7 @@ def gpx_details(gpx_id) -> Response | str:
     # Get info for webpage
     # ----------------------------------------------------------- #
     author = UserRepository().find_user_from_email(gpx.email).name
-    cafe_list = CafeRepository().cafe_list(gpx.cafes_passed)
+    cafe_list = CafeRepository().cafes_passed_by_gpx(gpx.cafes_passed)
 
     # ----------------------------------------------------------- #
     # Double check GPX file actually exists
