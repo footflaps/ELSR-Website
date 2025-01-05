@@ -197,27 +197,27 @@
 			
 				<li class="my-2">
 					<i class="fa-solid fa-cog fa-spin fa-xl"></i>
-					<a href="{{ url_for('ride_history', request='Doppio') }}"> &nbsp
+					<a href="{{ url_for('ride_history', group='Doppio') }}"> &nbsp
 						<strong>Doppio</strong> Ride History
 					</a>
 				</li>
 			
 				<li class="my-2">
-					<a href="{{ url_for('ride_history', request='Espresso') }}">
+					<a href="{{ url_for('ride_history', group='Espresso') }}">
 						<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 5s;"></i> &nbsp
 						<strong>Espresso</strong> Ride History
 					</a>
 				</li>
 			
 				<li class="my-2">
-					<a href="{{ url_for('ride_history', request='Decaff') }}">
+					<a href="{{ url_for('ride_history', group='Decaff') }}">
 						<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 10s;"> </i> &nbsp;
 						<strong>Decaff</strong> Ride History
 					</a>
 				</li>
 			
 				<li class="my-2">
-					<a href="{{ url_for('ride_history', request='Mixed') }}">
+					<a href="{{ url_for('ride_history', group='Mixed') }}">
 						<i class="fa-solid fa-cog fa-spin fa-xl" style="--fa-animation-duration: 8s;"> </i> &nbsp;
 						<strong>Mixed</strong> Ride History (Sunday Rides)
 					</a>

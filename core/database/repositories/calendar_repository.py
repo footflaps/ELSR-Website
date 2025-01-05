@@ -162,13 +162,13 @@ class CalendarRepository(CalendarModel):
                 return None
 
     @staticmethod
-    def all_calender_group_in_past(group: str) -> list[CalendarModel]:
+    def last_20_by_group(group: str) -> list[CalendarModel]:
         # Get current Unix Epoch time, plus a bit (6 hours)
         # This is because we add 2 hours to Unix Epoch timestamps to get round GMT/BST problem
         now = time.time() + 60 * 60 * 6
         with app.app_context():
             rides = CalendarModel.query.filter_by(group=group). \
-                filter(CalendarRepository.unix_date < now).order_by(CalendarRepository.unix_date.desc()).all()
+                filter(CalendarModel.unix_date < now).order_by(CalendarModel.unix_date.desc()).limit(20).all()
             return rides
 
     # Look up event by ID
