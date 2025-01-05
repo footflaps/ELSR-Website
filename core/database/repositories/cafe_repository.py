@@ -256,4 +256,7 @@ class CafeRepository(CafeModel):
             }
             cafe_list.append(cafe_summary)
 
+        # ----------------------------------------------------------- #
+        # Sort by range
+        # ----------------------------------------------------------- #
         return sorted(cafe_list, key=lambda x: x['range_km'])
