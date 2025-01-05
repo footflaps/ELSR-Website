@@ -28,7 +28,7 @@ ALL_DAYS = 365 * 10
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class EventRepository(EventModel):
+class EventRepository:
 
     # -------------------------------------------------------------------------------------------------------------- #
     # Create
@@ -67,7 +67,7 @@ class EventRepository(EventModel):
                 user_email = "background"
 
             # Create a new event
-            event = EventRepository(
+            event = EventModel(
                 email=user_email,
                 type=event_type,
                 details=event_details,

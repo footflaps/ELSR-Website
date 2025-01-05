@@ -47,7 +47,7 @@ DEL_IMAGE = ["Keep",
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class ClassifiedRepository(ClassifiedModel):
+class ClassifiedRepository:
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Create
@@ -78,7 +78,7 @@ class ClassifiedRepository(ClassifiedModel):
     @staticmethod
     def delete_classified(classified_id: int) -> bool:
         with app.app_context():
-            classified = ClassifiedRepository.query.filter_by(id=classified_id).first()
+            classified = ClassifiedModel.query.filter_by(id=classified_id).first()
             if classified:
                 try:
                     db.session.delete(classified)
@@ -99,25 +99,25 @@ class ClassifiedRepository(ClassifiedModel):
     @staticmethod
     def all() -> list[ClassifiedModel]:
         with app.app_context():
-            classifieds = ClassifiedRepository.query.order_by(ClassifiedRepository.id.desc()).all()
+            classifieds = ClassifiedModel.query.order_by(ClassifiedModel.id.desc()).all()
             return classifieds
 
     @staticmethod
     def all_by_email(email: str) -> list[ClassifiedModel]:
         with app.app_context():
-            classifieds = ClassifiedRepository.query.filter_by(email=email).all()
+            classifieds = ClassifiedModel.query.filter_by(email=email).all()
             return classifieds
 
     @staticmethod
     def find_by_id(classified_id: int) -> ClassifiedModel | None:
         with app.app_context():
-            classified = ClassifiedRepository.query.filter_by(id=classified_id).first()
+            classified = ClassifiedModel.query.filter_by(id=classified_id).first()
             return classified
 
     @staticmethod
     def number_photos(classified_id: int) -> int | None:
         with app.app_context():
-            classified = ClassifiedRepository.query.filter_by(id=classified_id).first()
+            classified = ClassifiedModel.query.filter_by(id=classified_id).first()
             if classified:
                 filenames = classified.image_filenames.split(',')
                 num_photos = 0
@@ -130,21 +130,3 @@ class ClassifiedRepository(ClassifiedModel):
                 app.logger.error(f"dB.number_photos(): Called with invalid classified_id = '{classified_id}'.")
                 return None
 
-    # ---------------------------------------------------------------------------------------------------------- #
-    # Properties
-    # ---------------------------------------------------------------------------------------------------------- #
-    def next_photo_index(self) -> str | None:
-        if self.image_filenames:
-            for filename in [f"class_{self.id}_1.jpg",
-                             f"class_{self.id}_2.jpg",
-                             f"class_{self.id}_3.jpg",
-                             f"class_{self.id}_4.jpg",
-                             f"class_{self.id}_5.jpg"]:
-                if filename not in self.image_filenames:
-                    return filename
-
-            return None
-
-        else:
-            # Nothing yet, so
-            return f"class_{self.id}_1.jpg"
