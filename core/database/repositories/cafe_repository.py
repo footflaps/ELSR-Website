@@ -239,7 +239,7 @@ class CafeRepository(CafeModel):
         cafe_list: list[dict] = []
 
         for cafe in cafes:
-            cafe_json: dict[str, Any] | None = next((dct for dct in cafes_json if cafe["cafe_id"] == cafe.id), None)
+            cafe_json: dict[str, Any] | None = next((dct for dct in cafes_json if dct["cafe_id"] == cafe.id), None)
             cafe_summary: dict = {
                 'id': cafe.id,
                 'name': cafe.name,
