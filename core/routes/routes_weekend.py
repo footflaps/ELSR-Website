@@ -231,7 +231,7 @@ def weekend() -> Response | str:
     rides: dict = {}
     gpxes: dict = {}
     cafe_coords: dict = {}
-    cafes: dict = {}
+    cafes: dict[str, list[CafeModel]] = {}
     start_details: dict = {}
 
     # We will flash a warning if we find a private GPX in any of the weekend's routes
@@ -303,7 +303,7 @@ def weekend() -> Response | str:
                     cafes[day].append(cafe)
                 else:
                     # Just add a blank cafe object
-                    cafes[day].append(CafeRepository())
+                    cafes[day].append(CafeModel())
 
                 # Double check we can find the GPX file
                 # NB have seen once where it was stuck as a tmp file - wonder if I updated the website mid edit?
