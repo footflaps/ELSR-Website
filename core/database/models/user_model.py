@@ -1,5 +1,7 @@
 from flask_login import UserMixin
 import hashlib
+from typing import Any
+import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -35,7 +37,7 @@ SOCIAL_NOTIFICATION = "When someone posts a social"
 BLOG_NOTIFICATION = "When someone posts a blog entry"
 
 
-NOTIFICATIONS = [
+NOTIFICATIONS: list[dict[str, Any]] = [
         {"name": MESSAGE_NOTIFICATION,
          "mask": 2},
         {"name": GROUP_NOTIFICATIONS[2],
@@ -133,14 +135,14 @@ class UserModel(UserMixin, db.Model):   # type: ignore
     # ---------------------------------------------------------------------------------------------------------- #
 
     @property
-    def admin(self):
+    def admin(self) -> bool:
         if self.permissions & MASK_ADMIN > 0:
             return True
         else:
             return False
 
     @property
-    def verified(self):
+    def verified(self) -> bool:
         if self.permissions & MASK_VERIFIED > 0 or \
            self.permissions & MASK_ADMIN > 0:
             return True
@@ -148,14 +150,14 @@ class UserModel(UserMixin, db.Model):   # type: ignore
             return False
 
     @property
-    def blocked(self):
+    def blocked(self) -> bool:
         if self.permissions & MASK_BLOCKED > 0:
             return True
         else:
             return False
 
     @property
-    def readwrite(self):
+    def readwrite(self) -> bool:
         if self.permissions & MASK_READWRITE > 0 or \
            self.permissions & MASK_ADMIN > 0:
             return True
@@ -163,21 +165,21 @@ class UserModel(UserMixin, db.Model):   # type: ignore
             return False
 
     @property
-    def can_see_emergency_contacts(self):
+    def can_see_emergency_contacts(self) -> bool:
         # For now, we just use Admin, but will probably expand this to other members
         return self.admin
 
     @property
-    def combo_str(self):
+    def combo_str(self) -> str:
         return f"{self.name} ({self.id})"
 
     @property
-    def unsubscribe_code(self):
+    def unsubscribe_code(self) -> str:
         # Need something secret, that no one else would know, so hash their password hash
         return hashlib.md5(f"{self.password}".encode('utf-8')).hexdigest()
 
     @property
-    def has_valid_phone_number(self):
+    def has_valid_phone_number(self) -> bool:
         if not self.phone_number:
             return False
         # Check for UK code
@@ -190,7 +192,7 @@ class UserModel(UserMixin, db.Model):   # type: ignore
         return True
 
     @property
-    def has_unvalidated_phone_number(self):
+    def has_unvalidated_phone_number(self) -> bool:
         if not self.phone_number:
             return False
         # Check for UK code
@@ -203,18 +205,35 @@ class UserModel(UserMixin, db.Model):   # type: ignore
         return True
 
     @property
-    def notification_choices_set(self):
+    def notification_choices_set(self) -> list[dict[str, Any]]:
         # Handle unset as new column
         if not self.notifications:
             self.notifications = 0
         # Return this
-        user_choices = []
+        user_choices: list[dict[str, Any]] = []
         # Loop through our set
         for notification in NOTIFICATIONS:
-            name = notification['name']
-            mask = notification['mask']
+            name: str = notification['name']
+            mask: int = notification['mask']
             user_choices.append({
                 "name": name,
-                "status": self.notifications & mask > 0
+                "status": bool(self.notifications & mask > 0)
             })
         return user_choices
+
+    def gpx_download_code(self, gpx_id: int) -> str:
+        # Need something secret, that no one else would know, so hash their password hash
+        return hashlib.md5(f"{self.password}{gpx_id}".encode('utf-8')).hexdigest()
+
+    def social_url(self, social: str) -> str:
+        """
+        Extract the specific social URL for a  given 'social' category eg 'facebook'
+        :param social:              The social category to extract eg 'facebook'
+        :return:                    The URL eg "facebook.com/my_username"
+        """
+        if not self.socials:
+            return "n/a"
+        try:
+            return json.loads(self.socials)[social]
+        except KeyError:
+            return "n/a"

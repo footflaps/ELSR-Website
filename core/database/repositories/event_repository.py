@@ -100,7 +100,7 @@ class EventRepository:
 
         try:
             with app.app_context():
-                events = EventModel.query.filter_by(email=email).filter(EventRepository.date > timestamp).all()
+                events = EventModel.query.filter_by(email=email).filter(EventModel.date > timestamp).all()
                 for event in events:
                     db.session.delete(event)
                 db.session.commit()
@@ -118,7 +118,7 @@ class EventRepository:
         timestamp = time.time() - SECONDS_IN_DAY * int(days)
         try:
             with app.app_context():
-                events = db.session.query(EventRepository).filter(EventRepository.date > timestamp).all()
+                events = db.session.query(EventModel).filter(EventModel.date > timestamp).all()
                 for event in events:
                     db.session.delete(event)
                 db.session.commit()
@@ -133,7 +133,7 @@ class EventRepository:
     def delete_all_404s() -> bool:
         try:
             with app.app_context():
-                events = db.session.query(EventRepository).filter_by(type="404").all()
+                events = db.session.query(EventModel).filter_by(type="404").all()
                 for event in events:
                     db.session.delete(event)
                 db.session.commit()
@@ -147,7 +147,7 @@ class EventRepository:
     @staticmethod
     def delete_event(event_id: int) -> bool:
         with app.app_context():
-            event = db.session.query(EventRepository).filter_by(id=event_id).first()
+            event = db.session.query(EventModel).filter_by(id=event_id).first()
 
             if event:
                 try:
@@ -184,7 +184,7 @@ class EventRepository:
             days = ALL_DAYS
         timestamp = time.time() - SECONDS_IN_DAY * int(days)
         with app.app_context():
-            events = EventModel.query.filter(EventRepository.date > timestamp).all()
+            events = EventModel.query.filter(EventModel.date > timestamp).all()
             return events
 
     @staticmethod
@@ -200,5 +200,5 @@ class EventRepository:
             days = ALL_DAYS
         timestamp = time.time() - SECONDS_IN_DAY * int(days)
         with app.app_context():
-            events = EventModel.query.filter(EventRepository.date > timestamp).filter_by(email=email).all()
+            events = EventModel.query.filter(EventModel.date > timestamp).filter_by(email=email).all()
             return events

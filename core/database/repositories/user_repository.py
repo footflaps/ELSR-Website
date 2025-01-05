@@ -582,6 +582,16 @@ class UserRepository(UserModel):
             else:
                 return None
 
+    @classmethod
+    def user_from_combo_string(cls, combo_string: str) -> UserModel | None:
+        # Extract id from number in last set of brackets
+        # E.g. "Fred (5)"
+        try:
+            user_id = int(combo_string.split('(')[-1].split(')')[0])
+        except Exception:
+            return None
+        return cls.find_user_from_id(user_id)
+
     # ---------------------------------------------------------------------------------------------------------- #
     # Other
     # ---------------------------------------------------------------------------------------------------------- #
@@ -604,13 +614,6 @@ class UserRepository(UserModel):
                 return self.notifications & mask
         return False
 
-    def social_url(self, social):
-        if not self.socials:
-            return ""
-        try:
-            return json.loads(self.socials)[social]
-        except KeyError:
-            return "n/a"
 
     def check_name_in_use(self, name):
         users = self.all_users()
@@ -667,15 +670,7 @@ class UserRepository(UserModel):
 
         return False
 
-    def gpx_download_code(self, gpx_id):
-        # Need something secret, that no one else would know, so hash their password hash
-        return hashlib.md5(f"{self.password}{gpx_id}".encode('utf-8')).hexdigest()
 
-    def user_from_combo_string(self, combo_string):
-        # Extract id from number in last set of brackets
-        # E.g. "Fred (5)"
-        user_id = combo_string.split('(')[-1].split(')')[0]
-        return self.find_user_from_id(user_id)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
