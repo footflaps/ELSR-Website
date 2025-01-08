@@ -439,7 +439,7 @@ def add_ride() -> Response | str:
         # Is this a new ride?
         # ----------------------------------------------------------- #
         if not calendar_entry:
-            calendar_entry = CalendarRepository()
+            calendar_entry = CalendarModel()
 
         # Convert form date format '2023-06-23' to preferred format '23062023'
         start_date_str = form.date.data.strftime("%d%m%Y")
