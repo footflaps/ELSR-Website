@@ -66,7 +66,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         except Exception as e:
             app.logger.debug(f"update_existing_gpx(): Failed to delete existing file '{tmp_filename}', "
                              f"error code was '{e.args}'.")
-            EventRepository().log_event("GPX Fail",
+            EventRepository.log_event("GPX Fail",
                               f"Failed to delete existing file '{tmp_filename}', error code was '{e.args}'.")
             return False
 
@@ -77,7 +77,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         with open(tmp_filename, 'w') as file_ref2:
             file_ref2.write(gpx_file.to_xml())
     except Exception as e:
-        EventRepository().log_event("GPX Fail", f"Failed to write file '{tmp_filename}', error code was '{e.args}'.")
+        EventRepository.log_event("GPX Fail", f"Failed to write file '{tmp_filename}', error code was '{e.args}'.")
         app.logger.debug(f"update_existing_file: Failed to write file '{tmp_filename}', error code was '{e.args}'.")
         return False
 
@@ -89,7 +89,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
         # We need this as remove seems to keep the file locked for a short period
         sleep(0.5)
     except Exception as e:
-        EventRepository().log_event("GPX Fail", f"Failed to delete existing file '{old_filename}', error code was '{e.args}'.")
+        EventRepository.log_event("GPX Fail", f"Failed to delete existing file '{old_filename}', error code was '{e.args}'.")
         app.logger.debug(f"update_existing_file: Failed to delete existing file '{old_filename}', "
                          f"error code was '{e.args}'.")
         return False
@@ -100,7 +100,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
     try:
         os.rename(tmp_filename, old_filename)
     except Exception as e:
-        EventRepository().log_event("GPX Fail", f"Failed to rename existing file '{tmp_filename}', error code was '{e.args}'.")
+        EventRepository.log_event("GPX Fail", f"Failed to rename existing file '{tmp_filename}', error code was '{e.args}'.")
         app.logger.debug(f"update_existing_file: Failed to rename existing file '{tmp_filename}', "
                          f"error code was '{e.args}'.")
         return False
@@ -114,7 +114,7 @@ def update_existing_gpx(gpx_file, gpx_filename):
 # -------------------------------------------------------------------------------------------------------------- #
 
 def cut_start_gpx(gpx_filename, start_count):
-    EventRepository().log_event("GPX cut Start", f"Called with gpx_filename='{gpx_filename}', start_count='{start_count}'.")
+    EventRepository.log_event("GPX cut Start", f"Called with gpx_filename='{gpx_filename}', start_count='{start_count}'.")
     app.logger.debug(f"cut_start_gpx: Called with gpx_filename='{gpx_filename}', start_count='{start_count}'.")
 
     # ----------------------------------------------------------- #
@@ -145,7 +145,7 @@ def cut_start_gpx(gpx_filename, start_count):
     # Overwrite the existing file with the new file
     # ----------------------------------------------------------- #
     update_existing_gpx(gpx_file, gpx_filename)
-    EventRepository().log_event("GPX cut Start", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
+    EventRepository.log_event("GPX cut Start", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
     app.logger.debug(f"cut_start_gpx: Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'")
 
 
@@ -153,7 +153,7 @@ def cut_start_gpx(gpx_filename, start_count):
 # Crop the end of the GPX file
 # -------------------------------------------------------------------------------------------------------------- #
 def cut_end_gpx(gpx_filename, end_count):
-    EventRepository().log_event("GPX cut End", f"Called with gpx_filename='{gpx_filename}', end_count='{end_count}'.")
+    EventRepository.log_event("GPX cut End", f"Called with gpx_filename='{gpx_filename}', end_count='{end_count}'.")
     app.logger.debug(f"cut_end_gpx: Called with gpx_filename='{gpx_filename}', end_count='{end_count}'.")
 
     # ----------------------------------------------------------- #
@@ -187,7 +187,7 @@ def cut_end_gpx(gpx_filename, end_count):
     # Overwrite the existing file with the new file in 4 steps
     # ----------------------------------------------------------- #
     update_existing_gpx(gpx_file, gpx_filename)
-    EventRepository().log_event("GPX cut End", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'.")
+    EventRepository.log_event("GPX cut End", f"Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'.")
     app.logger.debug(f"cut_end_gpx: Length was {count_before}, now {count_after}. gpx_filename = '{gpx_filename}'.")
 
 
@@ -347,12 +347,12 @@ def strip_excess_info_from_gpx(gpx_filename, gpx_id, route_name):
     # ----------------------------------------------------------- #
     # Update stats in the dB
     # ----------------------------------------------------------- #
-    GpxRepository().update_stats(gpx_id, total_length_km, total_ascent_m)
+    GpxRepository.update_stats(gpx_id, total_length_km, total_ascent_m)
 
     # ----------------------------------------------------------- #
     # Overwrite the existing file
     # ----------------------------------------------------------- #
     update_existing_gpx(new_gpx_file, gpx_filename)
-    EventRepository().log_event("Clean GPX", f"Culled from {num_points_before} to {num_points_after} points.")
+    EventRepository.log_event("Clean GPX", f"Culled from {num_points_before} to {num_points_after} points.")
     app.logger.debug(f"strip_excess_info_from_gpx(): Culled from {num_points_before} to {num_points_after} points.")
 

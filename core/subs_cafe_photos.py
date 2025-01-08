@@ -74,15 +74,15 @@ def update_cafe_photo(form, cafe):
             form.cafe_photo.data.save(filename)
 
             # Update cafe object with filename
-            if CafeRepository().update_photo(cafe.id, f"{os.path.basename(filename)}"):
+            if CafeRepository.update_photo(cafe.id, f"{os.path.basename(filename)}"):
                 # Uploaded OK
                 app.logger.debug(f"update_cafe_photo(): Successfully uploaded the photo.")
-                EventRepository().log_event("Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
+                EventRepository.log_event("Cafe Pass", f"Cafe photo updated. cafe.id = '{cafe.id}'.")
                 flash("Cafe photo has been uploaded.")
             else:
                 # Failed to upload eg invalid path
                 app.logger.debug(f"update_cafe_photo(): Failed to upload the photo '{filename}' for cafe '{cafe.id}'.")
-                EventRepository().log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
+                EventRepository.log_event("Add Cafe Fail", f"Couldn't upload file '{filename}' for cafe '{cafe.id}'.")
                 flash(f"Sorry, failed to upload the file '{filename}!")
 
             # Shrink image if too large
@@ -96,7 +96,7 @@ def update_cafe_photo(form, cafe):
     else:
         # allowed_file() failed.
         app.logger.debug(f"update_cafe_photo(): Invalid file type for image.")
-        EventRepository().log_event("Cafe Fail", f"Invalid image filename '{os.path.basename(form.cafe_photo.data.filename)}',"
+        EventRepository.log_event("Cafe Fail", f"Invalid image filename '{os.path.basename(form.cafe_photo.data.filename)}',"
                                        f"permitted file types are '{IMAGE_ALLOWED_EXTENSIONS}'.")
         flash("Invalid file type for image!")
 

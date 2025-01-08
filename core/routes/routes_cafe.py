@@ -16,7 +16,7 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.models.cafe_model import CafeModel
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 from core.database.repositories.gpx_repository import GpxRepository
@@ -67,7 +67,7 @@ def cafe_list() -> Response | str:
     # ----------------------------------------------------------- #
     # Get all known cafes
     # ----------------------------------------------------------- #
-    cafes: list[CafeModel] = CafeRepository().all_cafes()
+    cafes: list[CafeModel] = CafeRepository.all_cafes()
 
     # ----------------------------------------------------------- #
     # Create a list of markers
@@ -115,7 +115,7 @@ def cafe_top10() -> Response | str:
     # ----------------------------------------------------------- #
     # Get all the rides
     # ----------------------------------------------------------- #
-    rides: list[CalendarModel] = CalendarRepository().all_calendar()
+    rides: list[CalendarModel] = CalendarRepository.all_calendar()
 
     # This is our cafe list
     cafes: dict = {}
@@ -139,12 +139,12 @@ def cafe_top10() -> Response | str:
     # Build list for jinja
     cafes_jinja: list = []
     for index, data in sorted_cafes.items():
-        cafe = CafeRepository().one_by_id(index)
+        cafe = CafeRepository.one_by_id(index)
         if cafe:
             cafes_jinja.append({"name":   cafe.name,
                                 "id":     cafe.id,
                                 "visits": data,
-                                "routes": len(GpxRepository().find_all_gpx_passing_cafe(cafe.id, current_user)),
+                                "routes": len(GpxRepository.find_all_gpx_passing_cafe(cafe.id, current_user)),
                                 "rating": cafe.rating,
                                 })
         if len(cafes_jinja) >= 10:
@@ -168,12 +168,12 @@ def cafe_details(cafe_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = CafeRepository().one_by_id(cafe_id)
+    cafe = CafeRepository.one_by_id(cafe_id)
 
     # Check id is valid
     if not cafe:
         app.logger.debug(f"cafe_details(): Failed to locate cafe with cafe.id = '{cafe_id}'.")
-        EventRepository().log_event("Cafe Fail", f"Failed to locate cafe with cafe.id = '{cafe_id}'.")
+        EventRepository.log_event("Cafe Fail", f"Failed to locate cafe with cafe.id = '{cafe_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -184,10 +184,10 @@ def cafe_details(cafe_id) -> Response | str:
     form = CreateCafeCommentForm()
 
     # Get any exiting comments for this cafe
-    comments = CafeCommentRepository().all_comments_by_cafe_id(cafe_id)
+    comments = CafeCommentRepository.all_comments_by_cafe_id(cafe_id)
 
     # Get all GPX routes which pass this cafe and that can be seen by current_user
-    gpxes = GpxRepository().find_all_gpx_passing_cafe(cafe_id, current_user)
+    gpxes = GpxRepository.find_all_gpx_passing_cafe(cafe_id, current_user)
 
     # -------------------------------------------------------------------------------------------- #
     # Map for where the cafe is
@@ -227,11 +227,11 @@ def cafe_details(cafe_id) -> Response | str:
         # ----------------------------------------------------------- #
 
         # Who is trying to post
-        user = UserRepository().one_by_id(current_user.id)
+        user: UserModel | None = UserRepository.one_by_id(current_user.id)
         if not user:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): Couldn't locate user, current_user.id = '{current_user.id}'.")
-            EventRepository().log_event("Cafe Comment Fail", f"Couldn't locate user, current_user.id = '{current_user.id}'.")
+            EventRepository.log_event("Cafe Comment Fail", f"Couldn't locate user, current_user.id = '{current_user.id}'.")
             flash("Sorry, something went wrong.")
             return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
 
@@ -241,7 +241,7 @@ def cafe_details(cafe_id) -> Response | str:
         if not user.readwrite:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): User doesn't have write permissions user.id = '{user.id}'.")
-            EventRepository().log_event("Cafe Comment Fail", f"User doesn't have write permissions user.id = '{user.id}'.")
+            EventRepository.log_event("Cafe Comment Fail", f"User doesn't have write permissions user.id = '{user.id}'.")
             flash("Sorry, you do not have write permissions.")
             return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
 
@@ -255,14 +255,14 @@ def cafe_details(cafe_id) -> Response | str:
         )
 
         # Add to the dB
-        if CafeCommentRepository().add_comment(new_comment):
+        if CafeCommentRepository.add_comment(new_comment):
             # Success!
             app.logger.debug(f"cafe_details(): Comment posted successfully cafe.id = '{cafe.id}'.")
-            EventRepository().log_event("Cafe Comment Success", f"Comment posted successfully cafe.id = '{cafe.id}'.")
+            EventRepository.log_event("Cafe Comment Success", f"Comment posted successfully cafe.id = '{cafe.id}'.")
         else:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): Comment post failed cafe.id = '{cafe.id}'.")
-            EventRepository().log_event("Cafe Comment Fail", f"Comment post failed.")
+            EventRepository.log_event("Cafe Comment Fail", f"Comment post failed.")
 
         # We can't reset form, so to show the post completed, we have to redirect
         # back to the start of ourselves.
@@ -339,20 +339,20 @@ def close_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     if not cafe_id:
         app.logger.debug(f"close_cafe(): Missing cafe_id!")
-        EventRepository().log_event("Close Cafe Fail", f"Missing cafe_id")
+        EventRepository.log_event("Close Cafe Fail", f"Missing cafe_id")
         return abort(400)
     elif not details:
         app.logger.debug(f"close_cafe(): Missing details!")
-        EventRepository().log_event("Close Cafe Fail", f"Missing details")
+        EventRepository.log_event("Close Cafe Fail", f"Missing details")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = CafeRepository().one_by_id(cafe_id)
+    cafe = CafeRepository.one_by_id(cafe_id)
     if not cafe:
         app.logger.debug(f"close_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        EventRepository().log_event("Close Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
+        EventRepository.log_event("Close Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -363,22 +363,22 @@ def close_cafe() -> Response | str:
         # Failed authentication
         app.logger.debug(f"close_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
-        EventRepository().log_event("Close Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions"
+        EventRepository.log_event("Close Cafe Fail", f"Rejected request from '{current_user.email}' as no permissions"
                                                        f" for cafe.id = '{cafe.id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Close the cafe
     # ----------------------------------------------------------- #
-    if CafeRepository().close_cafe(cafe.id, details):
+    if CafeRepository.close_cafe(cafe.id, details):
         # Success
         app.logger.debug(f"close_cafe(): Successfully closed the cafe, cafe.id = '{cafe.id}'.")
-        EventRepository().log_event("Close Cafe Success", f"Cafe marked as closed. cafe.id = '{cafe.id}'.")
+        EventRepository.log_event("Close Cafe Success", f"Cafe marked as closed. cafe.id = '{cafe.id}'.")
         flash("Cafe marked as closed.")
     else:
         # Should never get here, but....
         app.logger.debug(f"close_cafe(): Cafe().close_cafe() failed with cafe.id = '{cafe.id}'.")
-        EventRepository().log_event("Close Cafe Fail", f"Cafe().close_cafe() failed with cafe.id = '{cafe.id}'.")
+        EventRepository.log_event("Close Cafe Fail", f"Cafe().close_cafe() failed with cafe.id = '{cafe.id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
@@ -405,17 +405,17 @@ def unclose_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     if not cafe_id:
         app.logger.debug(f"unclose_cafe(): Missing cafe_id!")
-        EventRepository().log_event("unClose Cafe Fail", f"Missing cafe_id")
+        EventRepository.log_event("unClose Cafe Fail", f"Missing cafe_id")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = CafeRepository().one_by_id(cafe_id)
+    cafe = CafeRepository.one_by_id(cafe_id)
 
     if not cafe:
         app.logger.debug(f"unclose_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        EventRepository().log_event("unClose Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
+        EventRepository.log_event("unClose Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -426,21 +426,21 @@ def unclose_cafe() -> Response | str:
         # Failed authentication
         app.logger.debug(f"unclose_cafe(): Rejected request from '{current_user.email}' as no permissions"
                          f" for cafe.id = '{cafe.id}'.")
-        EventRepository().log_event("unClose Cafe Fail", f"Rejected request as no permissions. cafe_id = '{cafe_id}'")
+        EventRepository.log_event("unClose Cafe Fail", f"Rejected request as no permissions. cafe_id = '{cafe_id}'")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Open the cafe
     # ----------------------------------------------------------- #
-    if CafeRepository().unclose_cafe(cafe.id):
+    if CafeRepository.unclose_cafe(cafe.id):
         # Success!
         app.logger.debug(f"unclose_cafe(): Successfully unclosed cafe with cafe_id = '{cafe_id}'.")
-        EventRepository().log_event("unClose Cafe Success", f"Successfully unclosed the cafe. cafe_id = '{cafe_id}'")
+        EventRepository.log_event("unClose Cafe Success", f"Successfully unclosed the cafe. cafe_id = '{cafe_id}'")
         flash("Cafe marked as open.")
     else:
         # Should never get here, but....
         app.logger.debug(f"unclose_cafe(): Cafe().unclose_cafe() failed with cafe_id = '{cafe_id}'.")
-        EventRepository().log_event("unClose Cafe Fail", f"Something went wrong. cafe_id = '{cafe_id}'")
+        EventRepository.log_event("unClose Cafe Fail", f"Something went wrong. cafe_id = '{cafe_id}'")
         flash("Sorry, something went wrong!")
 
     # Back to cafe details page
@@ -483,20 +483,20 @@ def flag_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     if not reason:
         app.logger.debug(f"flag_cafe(): Missing reason!")
-        EventRepository().log_event("Flag Cafe Fail", f"Missing reason!")
+        EventRepository.log_event("Flag Cafe Fail", f"Missing reason!")
         return abort(400)
     elif not cafe_id:
         app.logger.debug(f"flag_cafe(): Missing cafe_id!")
-        EventRepository().log_event("Flag Cafe Fail", f"Missing cafe_id!")
+        EventRepository.log_event("Flag Cafe Fail", f"Missing cafe_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe: CafeModel | None = CafeRepository().one_by_id(int(cafe_id))
+    cafe: CafeModel | None = CafeRepository.one_by_id(int(cafe_id))
     if not cafe:
         app.logger.debug(f"flag_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
-        EventRepository().log_event("Flag Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
+        EventRepository.log_event("Flag Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -508,18 +508,18 @@ def flag_cafe() -> Response | str:
         body=f"Cafe Objection to '{cafe.name}' (id={cafe.id}). Reason: {reason}"
     )
     # Send it
-    message = MessageRepository().add_message(message)
+    message = MessageRepository.add_message(message)
     # Either get back the message or None
     if message:
         # Success
         Thread(target=send_message_notification_email, args=(message, ADMIN_EMAIL,)).start()
         app.logger.debug(f"flag_cafe(): Flagged cafe, cafe_id = '{cafe_id}'.")
-        EventRepository().log_event("Flag Cafe Success", f"Flagged cafe, cafe_id = '{cafe_id}', reason = '{reason}'.")
+        EventRepository.log_event("Flag Cafe Success", f"Flagged cafe, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Your message has been forwarded to an admin.")
     else:
         # Should never get here, but....
         app.logger.debug(f"flag_cafe(): Message().add_message failed, cafe_id = '{cafe_id}'.")
-        EventRepository().log_event("Flag Cafe Fail",
+        EventRepository.log_event("Flag Cafe Fail",
                                     f"Message().add_message failed, cafe_id = '{cafe_id}', reason = '{reason}'.")
         flash("Sorry, something went wrong.")
 
@@ -527,7 +527,7 @@ def flag_cafe() -> Response | str:
     # Alert admin via SMS
     # ----------------------------------------------------------- #
     # Threading won't have access to current_user, so need to acquire persistent user to pass on
-    user = UserRepository().one_by_id(current_user.id)
+    user: UserModel | None = UserRepository.one_by_id(current_user.id)
     Thread(target=alert_admin_via_sms, args=(user, f"Cafe '{cafe.name}', Reason: '{reason}'",)).start()
 
     # Back to cafe details page

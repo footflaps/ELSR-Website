@@ -144,7 +144,7 @@ def work_out_days(target_date_str) -> list[object] | None:
                                int(dates_short["Saturday"][0:2]), 0, 00) - timedelta(days=1)
         friday_date_str = friday_date.strftime("%d%m%Y")
         # Do we have any rides in the dB
-        if CalendarRepository().all_calendar_date(friday_date_str):
+        if CalendarRepository.all_calendar_date(friday_date_str):
             # We have a ride on the Friday, so pre-pend Friday
             days.insert(0, "Friday")
             dates_short["Friday"] = friday_date_str
@@ -157,7 +157,7 @@ def work_out_days(target_date_str) -> list[object] | None:
                                int(dates_short["Sunday"][0:2]), 0, 00) + timedelta(days=1)
         monday_date_str = monday_date.strftime("%d%m%Y")
         # Do we have any rides in the dB
-        if CalendarRepository().all_calendar_date(monday_date_str):
+        if CalendarRepository.all_calendar_date(monday_date_str):
             # We have a ride on the Monday, so append Monday
             days.append("Monday")
             dates_short["Monday"] = monday_date_str
@@ -215,7 +215,7 @@ def weekend() -> Response | str:
     if not tmp:
         # Fed invalid date
         app.logger.debug(f"weekend(): Failed to understand target_date_str = '{target_date_str}'.")
-        EventRepository().log_event("Weekend Fail", f"Failed to understand target_date_str = '{target_date_str}'.")
+        EventRepository.log_event("Weekend Fail", f"Failed to understand target_date_str = '{target_date_str}'.")
         return abort(404)
     else:
         # Get what we actually wanted from work_out_days()
@@ -240,7 +240,7 @@ def weekend() -> Response | str:
     # Populate everything for each day eg loop over ['Saturday', 'Sunday']
     for day in days:
         # Get a set of rides for this day from the calendar indexed by short dates eg '01022024'
-        tmp_rides: list[CalendarModel] = CalendarRepository().all_calendar_date(dates_short[day])
+        tmp_rides: list[CalendarModel] = CalendarRepository.all_calendar_date(dates_short[day])
 
         # Create empty sets for all the data jinja will need to populate each day
         rides[day] = []
@@ -252,7 +252,7 @@ def weekend() -> Response | str:
         # Loop over each ride
         for ride in tmp_rides:
             # Look up the GPX object referenced in the ride object
-            gpx: GpxModel | None = GpxRepository().one_by_id(ride.gpx_id)
+            gpx: GpxModel | None = GpxRepository.one_by_id(ride.gpx_id)
 
             # NB It could have been deleted, so check it still exists
             if gpx:
@@ -284,7 +284,7 @@ def weekend() -> Response | str:
                 rides[day].append(ride)
 
                 # Look up cafe (which might not yet be in the db)
-                cafe: CafeModel | None = CafeRepository().one_by_id(ride.cafe_id)
+                cafe: CafeModel | None = CafeRepository.one_by_id(ride.cafe_id)
                 if cafe:
                     # Update destination (as cafe may have changed name)
                     ride.destination = cafe.name
@@ -314,7 +314,7 @@ def weekend() -> Response | str:
                     # Flag missing GPX file (will only be shown to Admins)
                     ride.missing_gpx = True
                     app.logger.debug(f"weekend(): Failed to locate GPX file, ride_id = '{ride.id}'.")
-                    EventRepository().log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
+                    EventRepository.log_event("Weekend Fail", f"Failed to locate GPX file, ride_id = '{ride.id}'.")
                     flash(
                         f"Looks like GPX file for ride '{ride.destination}' "
                         f"(ride.id = {ride.id}, leader = '{ride.leader}') has been deleted!")
@@ -322,7 +322,7 @@ def weekend() -> Response | str:
             else:
                 # Missing GPX row in the table
                 app.logger.debug(f"weekend(): Failed to locate GPX entry, ride_id = '{ride.id}'.")
-                EventRepository().log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
+                EventRepository.log_event("Weekend Fail", f"Failed to locate GPX entry, ride_id = '{ride.id}'.")
                 flash(f"Looks like GPX route for ride {ride.id} has been deleted (Saturday)!")
 
     # ----------------------------------------------------------- #

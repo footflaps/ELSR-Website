@@ -164,13 +164,13 @@ def calendar() -> Response | str:
     # ----------------------------------------------------------- #
     # Get all calendar, blog and social events over this period
     # ----------------------------------------------------------- #
-    ride_events = CalendarRepository().all_by_date_range(start_date_str, end_date_str)
+    ride_events = CalendarRepository.all_by_date_range(start_date_str, end_date_str)
     print(f"We got {len(ride_events)} calendar events")
 
-    blog_events = BlogRepository().all_by_date_range(start_date_str, end_date_str)
+    blog_events = BlogRepository.all_by_date_range(start_date_str, end_date_str)
     print(f"We got {len(blog_events)} blog events")
 
-    social_events = SocialRepository().all_by_date_range(start_date_str, end_date_str)
+    social_events = SocialRepository.all_by_date_range(start_date_str, end_date_str)
     print(f"We got {len(social_events)} social events")
 
     # Highlight today in the calendar

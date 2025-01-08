@@ -13,7 +13,7 @@ from datetime import datetime
 from core import GPX_UPLOAD_FOLDER_ABS
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.calendar_repository import MEETING_OTHER, NEW_CAFE, UPLOAD_ROUTE, GROUP_CHOICES, MEETING_CHOICES
 
 
@@ -80,7 +80,7 @@ def create_ride_form(admin: bool, gpx_id=None):
         # Generate the list of cafes
         # ----------------------------------------------------------- #
         cafe_choices = []
-        cafes = CafeRepository().all_cafes_sorted()
+        cafes = CafeRepository.all_cafes_sorted()
         for cafe in cafes:
             cafe_choices.append(cafe.combo_string)
         cafe_choices.append(NEW_CAFE)
@@ -89,7 +89,7 @@ def create_ride_form(admin: bool, gpx_id=None):
         # Generate the list of routes
         # ----------------------------------------------------------- #
         gpx_choices = [UPLOAD_ROUTE]
-        gpxes = GpxRepository().all_gpxes_sorted()
+        gpxes = GpxRepository.all_gpxes_sorted()
         for gpx in gpxes:
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
             # Route must be public and double check we have an actual GPX file on tap....
@@ -100,7 +100,7 @@ def create_ride_form(admin: bool, gpx_id=None):
         # ----------------------------------------------------------- #
         # Generate the list of users
         # ----------------------------------------------------------- #
-        users = UserRepository().all_users_sorted()
+        users = UserRepository.all_users_sorted()
         all_users = []
         for user in users:
             all_users.append(user.combo_str)

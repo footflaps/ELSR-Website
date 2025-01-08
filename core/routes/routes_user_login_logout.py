@@ -15,7 +15,7 @@ from core import app, current_year, live_site, admin_email_address
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.event_repository import EventRepository
 from core.forms.user_forms import LoginUserForm, ResetPasswordForm
 from core.subs_email import send_reset_email, send_verification_email
@@ -90,12 +90,12 @@ def login() -> Response | str:
             user_ip = request.remote_addr
 
         # See if user exists by looking up their email address
-        user = UserRepository().one_by_email(email)
+        user: UserModel | None = UserRepository.one_by_email(email)
 
         # Test 1: Does the user exist?
         if not user:
             app.logger.debug(f"login(): email not recognised '{email}'.")
-            EventRepository().log_event("Login Fail", f"Email not recognised '{email}'")
+            EventRepository.log_event("Login Fail", f"Email not recognised '{email}'")
             flash("Email address is not recognised!")
             return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
@@ -103,11 +103,11 @@ def login() -> Response | str:
         if form.forgot.data:
             # Don't check return status as we don't want to give anything away
             app.logger.debug(f"login(): Recovery email requested for '{email}'.")
-            EventRepository().log_event("Login Fail", f"Recovery email requested for '{email}'.")
+            EventRepository.log_event("Login Fail", f"Recovery email requested for '{email}'.")
             # Generate a new code
-            UserRepository().create_new_reset_code(email)
+            UserRepository.create_new_reset_code(email)
             # Find the user to get the details
-            user = UserRepository().one_by_email(email)
+            user: UserModel | None = UserRepository.one_by_email(email)
             # Send an email
             Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()
             # Tell user to expect an email
@@ -117,11 +117,11 @@ def login() -> Response | str:
         # Test 3: Do they want a new verification code?
         if form.verify.data:
             app.logger.debug(f"login(): Reset email requested for '{email}'.")
-            EventRepository().log_event("Login Fail", f"Reset email requested for '{email}'.")
+            EventRepository.log_event("Login Fail", f"Reset email requested for '{email}'.")
             # Generate a new code
-            UserRepository().create_new_verification(user.id)
+            UserRepository.create_new_verification(user.id)
             # Find the user to get the details
-            user = UserRepository().one_by_email(email)
+            user: UserModel | None = UserRepository.one_by_email(email)
             # Send an email
             Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
             # Tell user to expect an email
@@ -131,27 +131,27 @@ def login() -> Response | str:
         # Test 4: Is the user validated?
         if not user.verified:
             app.logger.debug(f"login(): Failed, Email not verified yet '{email}'.")
-            EventRepository().log_event("Login Fail", f"Email not verified yet '{email}'.")
+            EventRepository.log_event("Login Fail", f"Email not verified yet '{email}'.")
             flash("That email address has not been verified yet!")
             return redirect(url_for('validate_email'))  # type: ignore
 
         # Test 5: Is the user barred?
         if user.blocked:
             app.logger.debug(f"login(): Failed, Email has been blocked '{email}'.")
-            EventRepository().log_event("Login Fail", f"Email has been blocked '{email}'.")
+            EventRepository.log_event("Login Fail", f"Email has been blocked '{email}'.")
             flash("That email address has been temporarily blocked!")
             flash(f"Contact '{admin_email_address}' to discuss.")
             return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
         # Test 6: Check password
-        if UserRepository().validate_password(user, password, user_ip):
+        if UserRepository.validate_password(user, password, user_ip):
             # Admins require 2FA and we'll offer it to anyone with a phone number validated
             if user.admin or \
                     user.has_valid_phone_number:
                 # Admins must use 2FA via SMS
-                UserRepository().generate_sms_code(user.id)
+                UserRepository.generate_sms_code(user.id)
                 flash(f"2FA code has been sent to '{user.phone_number}'.")
-                user = UserRepository().one_by_id(user.id)
+                user: UserModel | None = UserRepository.one_by_id(user.id)
                 send_2fa_sms(user)
                 return redirect(url_for('twofa_login'))  # type: ignore
 
@@ -162,7 +162,7 @@ def login() -> Response | str:
                 # Log event after they've logged in
                 flash(f"Welcome back {user.name}!")
                 app.logger.debug(f"login(): User logged in for '{email}'.")
-                EventRepository().log_event("Login", f"User logged in, forwarding user '{email}' to '{session['url']}'.")
+                EventRepository.log_event("Login", f"User logged in, forwarding user '{email}' to '{session['url']}'.")
 
                 # Return back to cached page
                 app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
@@ -171,7 +171,7 @@ def login() -> Response | str:
         else:
             # Login failed
             app.logger.debug(f"login(): Failed, Wrong password for '{email}'.")
-            EventRepository().log_event("Login Fail", f"Wrong password for '{email}'")
+            EventRepository.log_event("Login Fail", f"Wrong password for '{email}'")
             flash("Password did not match!")
             return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
 
@@ -205,7 +205,7 @@ def login() -> Response | str:
 def logout() -> Response | str:
     # Have to log the event before we log out, so we still have their email address
     app.logger.debug(f"logout(): Logging user '{current_user.email}' out now...")
-    EventRepository().log_event("Logout", f"User '{current_user.email}' logged out.")
+    EventRepository.log_event("Logout", f"User '{current_user.email}' logged out.")
     flash("You have been logged out!")
 
     # Logout the user
@@ -242,14 +242,14 @@ def reset_password() -> Response | str:
     # Only validate if we were actually sent them
     if email and code:
         email = email.strip('"').strip("'")
-        user = UserRepository().one_by_email(email)
+        user: UserModel | None = UserRepository.one_by_email(email)
         if not user:
             app.logger.debug(f"reset_password(): URL route, invalid email = '{email}'.")
-            EventRepository().log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
+            EventRepository.log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
             abort(404)
-        if not UserRepository().validate_reset_code(user.id, int(code)):
+        if not UserRepository.validate_reset_code(user.id, int(code)):
             app.logger.debug(f"reset_password(): URL route, invalid email = '{code}', for user = '{user.email}'.")
-            EventRepository().log_event("Reset Fail", f"URL route, invalid email = '{code}', for user = '{user.email}'.")
+            EventRepository.log_event("Reset Fail", f"URL route, invalid email = '{code}', for user = '{user.email}'.")
             abort(404)
 
     # ----------------------------------------------------------- #
@@ -269,21 +269,21 @@ def reset_password() -> Response | str:
 
         if form.password1.data != form.password2.data:
             app.logger.debug(f"reset_password(): Form route, Passwords don't match! Email = '{email}'.")
-            EventRepository().log_event("Reset Fail", f"Form route, Passwords don't match! Email = '{email}'.")
+            EventRepository.log_event("Reset Fail", f"Form route, Passwords don't match! Email = '{email}'.")
             flash("Passwords don't match!")
             # Back to the same page for another try
             return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())
 
-        if UserRepository().reset_password(email, form.password1.data):
+        if UserRepository.reset_password(email, form.password1.data):
             app.logger.debug(f"reset_password(): Form route, Password has been reset, email = '{email}'.")
-            EventRepository().log_event("Reset Success", f"Form route, Password has been reset, email = '{email}'.")
+            EventRepository.log_event("Reset Success", f"Form route, Password has been reset, email = '{email}'.")
             flash("Password has been reset, please login!")
             # Forward to login page
             return redirect(url_for('login', email=email))  # type: ignore
         else:
             # Should never happen, but...
             app.logger.debug(f"reset_password(): User().reset_password() failed! email = '{email}'.")
-            EventRepository().log_event("Reset Fail", f"User().reset_password() failed! email = '{email}'.")
+            EventRepository.log_event("Reset Fail", f"User().reset_password() failed! email = '{email}'.")
             flash("Sorry, something went wrong!")
 
     return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())

@@ -57,9 +57,9 @@ def ride_history(group: str) -> Response | str:
     # Extract all the Rides and Gpxes from the calendar
     # ----------------------------------------------------------- #
     print("Hello 1")
-    group_rides: list[CalendarModel] = CalendarRepository().last_20_by_group(group=group_name)
-    all_gpxes: list[GpxModel] = GpxRepository().all_gpxes()
-    all_cafes: list[CafeModel] = CafeRepository().all_cafes()
+    group_rides: list[CalendarModel] = CalendarRepository.last_20_by_group(group=group_name)
+    all_gpxes: list[GpxModel] = GpxRepository.all_gpxes()
+    all_cafes: list[CafeModel] = CafeRepository.all_cafes()
 
     # ----------------------------------------------------------- #
     # Extract details from the GPX and add to the ride objects

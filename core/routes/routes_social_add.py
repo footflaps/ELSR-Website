@@ -61,12 +61,12 @@ def route_add_social() -> Response | str:
             return abort(404)
 
         # Look up the social by id
-        social = SocialRepository().one_by_id(id=int(social_id))
+        social = SocialRepository.one_by_id(id=int(social_id))
 
         # Handle failure...
         if not social:
             app.logger.debug(f"add_social(): Failed to locate social, social_id = '{social_id}'.")
-            EventRepository().log_event("Add Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
+            EventRepository.log_event("Add Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
             return abort(404)
 
     else:
@@ -80,12 +80,12 @@ def route_add_social() -> Response | str:
     if request.method == 'GET':
         if social:
             # Try and get owner from email address in the db
-            owner: UserModel | None = UserRepository().one_by_email(social.email)
+            owner: UserModel | None = UserRepository.one_by_email(social.email)
             if not owner:
                 # Should never happen but....
                 app.logger.debug(f"add_social(): Failed to locate owner, "
                                  f"social_id = '{social_id}', social.email = '{social.email}'.")
-                EventRepository().log_event("Edit Social Fail", f"Failed to locate owner, "
+                EventRepository.log_event("Edit Social Fail", f"Failed to locate owner, "
                                                       f"social_id = '{social_id}', social.email = '{social.email}'.")
                 flash("Failed to locate owner, so defaulting to current_user")
                 # Default to current user
@@ -147,12 +147,12 @@ def route_add_social() -> Response | str:
 
         # Get owner
         if current_user.admin:
-            owner = UserRepository().user_from_combo_string(form.owner.data)
+            owner = UserRepository.user_from_combo_string(form.owner.data)
             if not owner:
                 # Should never happen but....
                 app.logger.debug(f"add_social(): Failed to locate owner, "
                                  f"social_id = '{social_id}', social.email = '{social.email}'.")
-                EventRepository().log_event("Edit Social Fail", f"Failed to locate owner, "
+                EventRepository.log_event("Edit Social Fail", f"Failed to locate owner, "
                                                       f"social_id = '{social_id}', social.email = '{social.email}'.")
                 flash("Failed to locate owner, so defaulting to current_user")
                 # Default to current user
@@ -182,11 +182,11 @@ def route_add_social() -> Response | str:
         # ----------------------------------------------------------- #
         # Add to the db
         # ----------------------------------------------------------- #
-        new_social = SocialRepository().add_social(new_social)
+        new_social = SocialRepository.add_social(new_social)
         if new_social:
             # Success
             app.logger.debug(f"add_social(): Successfully added new social.")
-            EventRepository().log_event("Add social Pass", f"Successfully added new social.")
+            EventRepository.log_event("Add social Pass", f"Successfully added new social.")
             if social:
                 flash("Social updated!")
             else:
@@ -199,7 +199,7 @@ def route_add_social() -> Response | str:
             # Should never happen, but...
             # NB new_social is None
             app.logger.debug(f"add_social(): Failed to add social for '{current_user.email}'.")
-            EventRepository().log_event("Add Social Fail", f"Failed to add social for '{current_user.email}'.")
+            EventRepository.log_event("Add Social Fail", f"Failed to add social for '{current_user.email}'.")
             flash("Sorry, something went wrong.")
             return render_template("calendar_add_social.html", year=current_year, form=form, social=social,
                                    live_site=live_site())
@@ -258,20 +258,20 @@ def delete_social() -> Response | str:
     # ----------------------------------------------------------- #
     if not social_id:
         app.logger.debug(f"delete_social(): Missing social_id!")
-        EventRepository().log_event("Delete social Fail", f"Missing social_id!")
+        EventRepository.log_event("Delete social Fail", f"Missing social_id!")
         return abort(400)
     if not password:
         app.logger.debug(f"delete_social(): Missing Password!")
-        EventRepository().log_event("Delete social Fail", f"Missing Password!")
+        EventRepository.log_event("Delete social Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate social_id
     # ----------------------------------------------------------- #
-    social = SocialRepository().one_by_id(social_id)
+    social = SocialRepository.one_by_id(social_id)
     if not social:
         app.logger.debug(f"delete_social(): Failed to locate social, social_id = '{social_id}'.")
-        EventRepository().log_event("Delete Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
+        EventRepository.log_event("Delete Social Fail", f"Failed to locate social, social_id = '{social_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -283,7 +283,7 @@ def delete_social() -> Response | str:
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}'.")
-        EventRepository().log_event("Delete Social Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository.log_event("Delete Social Fail", f"Refusing permission for '{current_user.email}', "
                                                 f"social_id = '{social_id}'.")
         return abort(403)
 
@@ -291,12 +291,12 @@ def delete_social() -> Response | str:
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().one_by_id(current_user.id)
+    user: UserModel | None = UserRepository.one_by_id(current_user.id)
 
     # Validate against current_user's password
-    if not user.validate_password(user, password, user_ip):
+    if not UserRepository.validate_password(user, password, user_ip):
         app.logger.debug(f"delete_social(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        EventRepository().log_event("Social Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository.log_event("Social Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
         return redirect(url_for('display_socials'))  # type: ignore
@@ -304,13 +304,13 @@ def delete_social() -> Response | str:
     # ----------------------------------------------------------- #
     # Delete social
     # ----------------------------------------------------------- #
-    if SocialRepository().delete_social(social_id):
+    if SocialRepository.delete_social(social_id):
         app.logger.debug(f"delete_social(): Deleted social, social_id = '{social_id}'.")
-        EventRepository().log_event("Delete Social Success", f"Deleted social, social_id = '{social_id}'.")
+        EventRepository.log_event("Delete Social Success", f"Deleted social, social_id = '{social_id}'.")
         flash("Social has been deleted.")
     else:
         app.logger.debug(f"delete_social(): Failed to delete social, social_id = '{social_id}'.")
-        EventRepository().log_event("Delete Social Fail", f"Failed to delete social, social_id = '{social_id}'.")
+        EventRepository.log_event("Delete Social Fail", f"Failed to delete social, social_id = '{social_id}'.")
         flash("Sorry, something went wrong.")
 
     return redirect(url_for('display_socials'))  # type: ignore

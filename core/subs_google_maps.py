@@ -18,7 +18,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, CONFIG_FOLDER, NEW_GOOGLE_MAPS_API_
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository, SUPER_ADMIN_USER_ID
+from core.database.repositories.user_repository import UserModel, UserRepository, SUPER_ADMIN_USER_ID
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email import send_system_alert_email
@@ -213,7 +213,7 @@ def markers_for_cafes_native(cafes):
     for cafe_summary in cafes:
 
         # Need to look up current cafe open / closed status
-        if CafeRepository().one_by_id(cafe_summary["id"]).active:
+        if CafeRepository.one_by_id(cafe_summary["id"]).active:
             icon_colour = '#2196f3'
         else:
             icon_colour = '#ff0000'
@@ -350,7 +350,7 @@ def maps_enabled():
     if not os.path.exists(filename):
         # Create it disabled just to be safe
         app.logger.error(f"maps_enabled(): Missing file '{filename}'. Created new one.")
-        EventRepository().log_event("maps_enabled()", f"Missing file '{filename}'. Created new one.")
+        EventRepository.log_event("maps_enabled()", f"Missing file '{filename}'. Created new one.")
         with open(filename, 'w') as file:
             file.write("False")
 
@@ -391,7 +391,7 @@ def set_enable_maps():
     send_system_alert_email("Maps have been enabled.")
 
     # SMS Alert
-    site_owner = UserRepository().one_by_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository.one_by_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Maps have been enabled")
 
 
@@ -414,7 +414,7 @@ def set_disable_maps():
     send_system_alert_email("Maps have been disabled.")
 
     # SMS Alert
-    site_owner = UserRepository().one_by_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository.one_by_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Maps have been disabled")
 
 
@@ -462,7 +462,7 @@ def boost_map_limit():
     send_system_alert_email("Map boost has been applied.")
 
     # SMS Alert
-    site_owner = UserRepository().one_by_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository.one_by_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Map boost has been applied")
 
 
@@ -487,7 +487,7 @@ def count_map_loads(count: int):
             lines = file.readlines()
     else:
         app.logger.error(f"count_map_loads(): Missing file '{filename}'.")
-        EventRepository().log_event("count_map_loads()", f"Missing file '{filename}'.")
+        EventRepository.log_event("count_map_loads()", f"Missing file '{filename}'.")
         lines = []
 
     # ----------------------------------------------------------- #
@@ -530,7 +530,7 @@ def count_map_loads(count: int):
         if maps_enabled():
             # Disable maps
             app.logger.debug(f"count_map_loads(): Disabling maps as count is {total_today} / {map_limit}!")
-            EventRepository().log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
+            EventRepository.log_event("Map Load Count", f"Disabling maps as count is {total_today} / {map_limit}!")
             set_disable_maps()
         else:
             # Already disabled
@@ -561,7 +561,7 @@ def get_current_map_count():
             lines = file.readlines()
     else:
         app.logger.error(f"get_current_map_count(): Missing file '{filename}'.")
-        EventRepository().log_event("get_current_map_count()", f"Missing file '{filename}'.")
+        EventRepository.log_event("get_current_map_count()", f"Missing file '{filename}'.")
         lines = []
 
     # ----------------------------------------------------------- #
@@ -653,4 +653,4 @@ def graph_map_counts():
 
 print(f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
 app.logger.debug(f"Start of day: Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
-EventRepository().log_event("Start of day:", f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")
+EventRepository.log_event("Start of day:", f"Maps Status = {maps_enabled()}, current map count = {get_current_map_count()}")

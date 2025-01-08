@@ -48,7 +48,7 @@ def csrf_error(e) -> Response | str:
     flash("NB Forms time out after 60 minutes.")
     app.logger.debug(f"400: CSRF Error '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("400", f"CSRF Error for '{requested_route}', previous page was "
+    EventRepository.log_event("400", f"CSRF Error for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 400 status explicitly
@@ -67,7 +67,7 @@ def bad_request(e) -> Response | str:
     # Log error in event log
     app.logger.debug(f"400: Bad request for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("400", f"Bad request for '{requested_route}', previous page was "
+    EventRepository.log_event("400", f"Bad request for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 400 status explicitly
@@ -86,7 +86,7 @@ def unauthorized(e) -> Response | str:
     # Log error in event log
     app.logger.debug(f"401: Unauthorized for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("401", f"Unauthorized for '{requested_route}', previous page was "
+    EventRepository.log_event("401", f"Unauthorized for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 401 status explicitly
@@ -106,7 +106,7 @@ def forbidden(e) -> Response | str:
     # Log error in event log
     app.logger.debug(f"403: Forbidden for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("403", f"Forbidden for '{requested_route}', previous page was "
+    EventRepository.log_event("403", f"Forbidden for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
@@ -125,7 +125,7 @@ def not_rw() -> Response | str:
     # Log error in event log
     app.logger.debug(f"403: Not readwrite for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("403", f"Not readwrite for '{requested_route}', previous page was "
+    EventRepository.log_event("403", f"Not readwrite for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
@@ -144,7 +144,7 @@ def not_logged_in() -> Response | str:
     # Log error in event log
     app.logger.debug(f"403: Not logged in for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("403", f"Not logged in for '{requested_route}', previous page was "
+    EventRepository.log_event("403", f"Not logged in for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 403 status explicitly
@@ -163,7 +163,7 @@ def page_not_found(e) -> Response | str:
     # Log error in event log
     app.logger.debug(f"404: Not found for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("404", f"Not found for '{requested_route}', previous page was "
+    EventRepository.log_event("404", f"Not found for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 404 status explicitly
@@ -182,7 +182,7 @@ def method_not_allowed(e) -> Response | str:
     # Log error in event log
     app.logger.debug(f"405: Not allowed for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("405", f"Not allowed for '{requested_route}', previous page was "
+    EventRepository.log_event("405", f"Not allowed for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 405 status explicitly
@@ -202,7 +202,7 @@ def file_too_large(e) -> Response | str:
     flash("The file was too large, limit is 10 MB.")
     app.logger.debug(f"413: File too large for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("413", f"File too large for '{requested_route}', previous page was "
+    EventRepository.log_event("413", f"File too large for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # note that we set the 413 status explicitly
@@ -221,7 +221,7 @@ def internal_server_error(e) -> Response | str:
     # Log error in event log
     app.logger.debug(f"500: Internal server error for '{requested_route}', previous page was "
                      f"'{request.referrer}', '{users_ip}', '{request.headers.get('User-Agent')}'.")
-    EventRepository().log_event("500", f"Internal server error for '{requested_route}', previous page was "
+    EventRepository.log_event("500", f"Internal server error for '{requested_route}', previous page was "
                              f"'{request.referrer}', '{users_ip}'.")
 
     # now you're handling non-HTTP exceptions only

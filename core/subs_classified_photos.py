@@ -191,7 +191,7 @@ def add_one_classified_photo(classified, form_data):
             # Should never happen, but....
             app.logger.debug(f"add_one_classified_photo(): Failed to get local filename, "
                              f"classified.id = '{classified.id}'.")
-            EventRepository().log_event("Classified Photo Fail", f"Failed to get local filename, "
+            EventRepository.log_event("Classified Photo Fail", f"Failed to get local filename, "
                                                        f"classified.id = '{classified.id}'.")
             flash(f"Sorry, failed to upload the file '{upload_filename}!")
             # Just abort
@@ -224,7 +224,7 @@ def add_one_classified_photo(classified, form_data):
     else:
         # allowed_file() failed.
         app.logger.debug(f"add_one_classified_photo(): Invalid file type for image.")
-        EventRepository().log_event("Classified Photo Fail",
+        EventRepository.log_event("Classified Photo Fail",
                           f"Invalid image filename '{os.path.basename(upload_filename)}',"
                           f"permitted file types are '{IMAGE_ALLOWED_EXTENSIONS}'.")
         flash("Invalid file type for image!")

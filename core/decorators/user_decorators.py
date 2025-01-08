@@ -8,7 +8,7 @@ from functools import wraps
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import app
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.event_repository import EventRepository
 
 
@@ -59,7 +59,7 @@ def rw_required(f):
 
         # Return 403
         app.logger.debug(f"rw_required(): User '{who}' attempted access to a rw only page!")
-        EventRepository().log_event("RW Access Fail", f"User '{who}' attempted access to a rw only page!")
+        EventRepository.log_event("RW Access Fail", f"User '{who}' attempted access to a rw only page!")
         return redirect(url_for('not_rw'))
     return decorated_function
 
@@ -86,7 +86,7 @@ def admin_only(f):
 
         # Return 403
         app.logger.debug(f"admin_only(): User '{who}' attempted access to an admin page!")
-        EventRepository().log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
+        EventRepository.log_event("Admin Access Fail", f"User '{who}' attempted access to an admin page!")
         return abort(403)
 
     return decorated_function
@@ -117,7 +117,7 @@ def update_last_seen(f):
             # They are logged in, so log their activity
             app.logger.debug(f"update_last_seen(): User logged in as '{current_user.email}', IP = '{user_ip}', "
                              f"request = {request.method} '{request.path}'")
-            UserRepository().log_activity(current_user.id)
+            UserRepository.log_activity(current_user.id)
             return f(*args, **kwargs)
 
     return decorated_function
@@ -134,12 +134,12 @@ def logout_barred_user(f):
             # Not logged in, so no idea who they are
             return f(*args, **kwargs)
         else:
-            user = UserRepository().one_by_id(current_user.id)
+            user: UserModel | None = UserRepository.one_by_id(current_user.id)
             if user:
                 if user.blocked:
                     # Log out the user
                     app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
-                    EventRepository().log_event("Blocked User logout", "Logged out user as blocked")
+                    EventRepository.log_event("Blocked User logout", "Logged out user as blocked")
                     flash("You have been logged out.")
                     logout_user()
             return f(*args, **kwargs)
@@ -158,12 +158,12 @@ def must_be_readwrite(f):
             # Not logged in, so no idea who they are
             return abort(403)
         else:
-            user = UserRepository().one_by_id(current_user.id)
+            user: UserModel | None = UserRepository.one_by_id(current_user.id)
             if user:
                 if not user.blocked:
                     # Log out the user
                     app.logger.debug(f"logout_barred_user(): Logged out user '{user.email}'.")
-                    EventRepository().log_event("Blocked User logout", "Logged out user as blocked")
+                    EventRepository.log_event("Blocked User logout", "Logged out user as blocked")
                     flash("You have been logged out.")
                     logout_user()
             return f(*args, **kwargs)

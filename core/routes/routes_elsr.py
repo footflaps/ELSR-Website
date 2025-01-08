@@ -26,7 +26,7 @@ from core.decorators.user_decorators import update_last_seen
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.cafe_repository import CafeModel, CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.subs_google_maps import google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
 from core.subs_email import contact_form_email
 
@@ -92,7 +92,7 @@ def home() -> Response | str:
     # -------------------------------------------------------------------------------------------- #
 
     # Get the cafe
-    cafe: CafeModel | None = CafeRepository().one_by_id(BEAN_THEORY_INDEX)
+    cafe: CafeModel | None = CafeRepository.one_by_id(BEAN_THEORY_INDEX)
 
     if cafe:
         # Create a GM marker
@@ -134,7 +134,7 @@ def gdpr() -> Response | str:
     # ----------------------------------------------------------- #
     # List of all admins
     # ----------------------------------------------------------- #
-    admins = UserRepository().all_admins()
+    admins = UserRepository.all_admins()
 
     return render_template("main_gdpr.html", year=current_year, admins=admins, live_site=live_site())
 

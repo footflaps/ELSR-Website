@@ -63,7 +63,7 @@ def check_new_cafe_with_all_gpxes(cafe: CafeModel):
     app.logger.debug(f"check_new_cafe_with_all_gpxes(): Called with '{cafe.name}'.")
 
     # Get all the routes
-    gpxes: list[GpxModel] = GpxRepository().all_gpxes()
+    gpxes: list[GpxModel] = GpxRepository.all_gpxes()
 
     # Keep a count of how many routes pass this cafe
     routes_passing: int = 0
@@ -120,20 +120,20 @@ def check_new_cafe_with_all_gpxes(cafe: CafeModel):
                 if min_dist_to_cafe_km <= MIN_DIST_TO_CAFE_KM:
                     app.logger.debug(f"-- Closest to cafe {cafe.name} was {round(min_dist_to_cafe_km, 1)} km"
                                      f" at {round(saved_dist_along_route_km, 1)} km along the route. Total length was {round(dist_along_route_km, 1)} km")
-                    GpxRepository().update_cafe_list(gpx_id=gpx.id,
+                    GpxRepository.update_cafe_list(gpx_id=gpx.id,
                                                      cafe_id=cafe.id,
                                                      dist_to_cafe_km=round(min_dist_to_cafe_km, 1),
                                                      dist_along_route_km=round(saved_dist_along_route_km, 1))
                     routes_passing += 1
                 else:
                     # Just in case they edited the route and now it doesn't pass this cafe
-                    GpxRepository().remove_cafe_from_cafes_passed(gpx_id=gpx.id, cafe_id=cafe.id)
+                    GpxRepository.remove_cafe_from_cafes_passed(gpx_id=gpx.id, cafe_id=cafe.id)
 
     # ----------------------------------------------------------- #
     # Update cafe
     # ----------------------------------------------------------- #
     cafe.num_routes_passing = routes_passing
-    CafeRepository().update_cafe(cafe=cafe)
+    CafeRepository.update_cafe(cafe=cafe)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -149,12 +149,12 @@ def remove_cafe_from_all_gpxes(cafe_id: int):
     app.logger.debug(f"remove_cafe_from_all_gpxes(): Called with cafe_id = '{cafe_id}'.")
 
     # Get all the routes
-    gpxes = GpxRepository().all_gpxes()
+    gpxes = GpxRepository.all_gpxes()
 
     # Loop over each GPX file
     for gpx in gpxes:
         # Remove this entry
-        GpxRepository().remove_cafe_from_cafes_passed(gpx_id=gpx.id, cafe_id=cafe_id)
+        GpxRepository.remove_cafe_from_cafes_passed(gpx_id=gpx.id, cafe_id=cafe_id)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -165,21 +165,21 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_by_id(gpx_id)
+    gpx = GpxRepository.one_by_id(gpx_id)
 
     # Make sure gpx_id is valid
     if not gpx:
         app.logger.debug(f"check_new_gpx_with_all_cafes(): Failed to locate GPX: gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("GPX Fail", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("GPX Fail", f"Failed to locate GPX: gpx_id = '{gpx_id}'.")
         return False
 
     app.logger.debug(f"check_new_gpx_with_all_cafes(): Updating GPX '{gpx.name}' for closeness to all cafes.")
-    EventRepository().log_event("Update GPX", f"Updating GPX '{gpx.name}' for closeness to all cafes.'")
+    EventRepository.log_event("Update GPX", f"Updating GPX '{gpx.name}' for closeness to all cafes.'")
 
     # ----------------------------------------------------------- #
     # Get all the cafes
     # ----------------------------------------------------------- #
-    cafes = CafeRepository().all_cafes()
+    cafes = CafeRepository.all_cafes()
 
     # Need a list of closeness
     min_distance_km = [100] * len(cafes)
@@ -234,7 +234,7 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
                     app.logger.debug(f"-- Route passes within {round(min_distance_km[cafe.id - 1], 1)} km of {cafe.name} "
                                      f"after {round(min_distance_path_km[cafe.id - 1], 1)} km.")
                     # Push update to GPX file
-                    GpxRepository().update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
+                    GpxRepository.update_cafe_list(gpx.id, cafe.id, min_distance_km[cafe.id - 1],
                                                      min_distance_path_km[cafe.id - 1])
 
     # ----------------------------------------------------------- #
@@ -243,12 +243,12 @@ def check_new_gpx_with_all_cafes(gpx_id: int, send_email):
     # send_email is either 'False' for no, or set to an int (ride_id) for yes
     if type(send_email) is int:
         # We have a ride_id index into the calendar
-        ride = CalendarRepository().one_by_id(send_email)
+        ride = CalendarRepository.one_by_id(send_email)
         # Check that worked
         if not ride:
             # Should never happen, but...
             app.logger.debug(f"check_new_gpx_with_all_cafes(): Passed invalid ride ID, send_email = '{send_email}'")
-            EventRepository().log_event("check_new_gpx_with_all_cafes() Fail", f"Passed invalid ride ID, send_email = '{send_email}'")
+            EventRepository.log_event("check_new_gpx_with_all_cafes() Fail", f"Passed invalid ride ID, send_email = '{send_email}'")
             return
         # Send emails
         send_ride_notification_emails(ride)

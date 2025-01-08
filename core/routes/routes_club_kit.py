@@ -14,7 +14,7 @@ from core import app, current_year, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.event_repository import EventRepository
 from core.decorators.user_decorators import update_last_seen
 from core.forms.user_forms import ClothingSizesForm
@@ -36,10 +36,10 @@ def club_kit() -> Response | str:
     form = ClothingSizesForm()
 
     if current_user.is_authenticated:
-        user = UserRepository().one_by_id(current_user.id)
+        user: UserModel | None = UserRepository.one_by_id(current_user.id)
         if not user:
             app.logger.debug(f"club_kit(): Failed to find user, if = '{current_user.id}'!")
-            EventRepository().log_event("club_kit Fail", f"Failed to find user, if = '{current_user.id}'!")
+            EventRepository.log_event("club_kit Fail", f"Failed to find user, if = '{current_user.id}'!")
             abort(404)
 
         if request.method == 'GET':
@@ -80,14 +80,14 @@ def club_kit() -> Response | str:
             user_id = user.id
 
             # Save to user
-            if UserRepository().update_user(user):
+            if UserRepository.update_user(user):
                 app.logger.debug(f"club_kit(): Updated user, user_id = '{user_id}'.")
-                EventRepository().log_event("club_kit Success", f"Updated user, user_id = '{user_id}'.")
+                EventRepository.log_event("club_kit Success", f"Updated user, user_id = '{user_id}'.")
                 flash("Your sizes have been updated!")
             else:
                 # Should never get here, but..
                 app.logger.debug(f"club_kit(): Failed to update user, user_id = '{user_id}'.")
-                EventRepository().log_event("club_kit Fail", f"Failed to update user, user_id = '{user_id}'.")
+                EventRepository.log_event("club_kit Fail", f"Failed to update user, user_id = '{user_id}'.")
                 flash("Sorry, something went wrong!")
 
         elif request.method == 'POST':

@@ -628,14 +628,6 @@ class UserRepository(UserModel):
                 return True
         return False
 
-    def display_name(self, email: str) -> str:
-        with app.app_context():
-            user = self.one_by_email(email)
-            if user:
-                return user.name
-            else:
-                return "unknown"
-
     @staticmethod
     def hash_password(raw_password: str) -> str:
         return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)

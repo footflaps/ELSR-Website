@@ -53,7 +53,7 @@ def send_2fa_sms(user: UserModel) -> None:
         from_=twilio_mobile_number,
         to=user.phone_number
     )
-    EventRepository().log_event("SMS", f"SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
+    EventRepository.log_event("SMS", f"SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
 
 
@@ -80,7 +80,7 @@ def send_sms_verif_code(user: UserModel) -> None:
         from_=twilio_mobile_number,
         to=user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number)]
     )
-    EventRepository().log_event("SMS", f"SMS code sent to '{user.email}'. Status is '{message.status}'.")
+    EventRepository.log_event("SMS", f"SMS code sent to '{user.email}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): SMS code sent to '{user.email}'. Status is '{message.status}'.")
 
 
@@ -111,7 +111,7 @@ def send_sms(user: UserModel, body: str) -> None:
         from_=twilio_mobile_number,
         to=user.phone_number
     )
-    EventRepository().log_event("SMS", f"Sent SMS to '{user.email}'. Status is '{message.status}'.")
+    EventRepository.log_event("SMS", f"Sent SMS to '{user.email}'. Status is '{message.status}'.")
     app.logger.debug(f"send_sms(): Sent SMS to '{user.email}'. Status is '{message.status}'.")
 
 
@@ -122,7 +122,7 @@ def alert_admin_via_sms(from_user: UserModel, message: str) -> None:
     # ----------------------------------------------------------- #
     #   Loop over all Admins
     # ----------------------------------------------------------- #
-    admins: list[UserModel] = UserRepository().all_admins()
+    admins: list[UserModel] = UserRepository.all_admins()
     for admin in admins:
         # All admins should have a valid phone number...
         if admin.has_valid_phone_number:
@@ -132,7 +132,7 @@ def alert_admin_via_sms(from_user: UserModel, message: str) -> None:
             send_sms(admin, f"ELSR Admin alert from '{from_user.name}': {message}")
         else:
             # Should never get here, but...
-            EventRepository().log_event("SMS admin alert", f"Admin '{admin.email}' doesn't appear to have a valid mobile number.")
+            EventRepository.log_event("SMS admin alert", f"Admin '{admin.email}' doesn't appear to have a valid mobile number.")
             app.logger.debug(f"alert_admin_sms(): Admin '{admin.email}' doesn't appear to have a valid mobile number.")
 
 

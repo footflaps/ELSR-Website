@@ -17,7 +17,7 @@ from core import app, current_year, live_site, CLASSIFIEDS_PHOTO_FOLDER
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.classified_repository import ClassifiedRepository, MAX_NUM_PHOTOS, SELL, STATUS_SOLD
 from core.database.repositories.event_repository import EventRepository
 
@@ -56,10 +56,10 @@ def classifieds() -> Response | str:
     # Validate classified_id
     # ----------------------------------------------------------- #
     if classified_id:
-        classified = ClassifiedRepository().find_by_id(classified_id)
+        classified = ClassifiedRepository.find_by_id(classified_id)
         if not classified:
             app.logger.debug(f"classifieds(): Failed to locate classifieds, classified_id = '{classified_id}'.")
-            EventRepository().log_event("Classifieds Fail", f"Failed to locate classifieds, classified_id = '{classified_id}'.")
+            EventRepository.log_event("Classifieds Fail", f"Failed to locate classifieds, classified_id = '{classified_id}'.")
             return abort(404)
     else:
         classified = None
@@ -70,7 +70,7 @@ def classifieds() -> Response | str:
     if classified:
         classifieds = [classified]
     else:
-        classifieds = ClassifiedRepository().all()
+        classifieds = ClassifiedRepository.all()
 
     # ----------------------------------------------------------- #
     # Update image filenames with paths
@@ -111,10 +111,10 @@ def add_sell() -> Response | str:
     # Validate classified_id
     # ----------------------------------------------------------- #
     if classified_id:
-        classified = ClassifiedRepository().find_by_id(classified_id)
+        classified = ClassifiedRepository.find_by_id(classified_id)
         if not classified:
             app.logger.debug(f"add_sell(): Failed to locate, classified_id = '{classified_id}'.")
-            EventRepository().log_event("Edit Sell Fail", f"Failed to locate, classified_id = '{classified_id}'.")
+            EventRepository.log_event("Edit Sell Fail", f"Failed to locate, classified_id = '{classified_id}'.")
             return abort(404)
     else:
         classified = None
@@ -128,7 +128,7 @@ def add_sell() -> Response | str:
             # We are editing an existing entry
             # ----------------------------------------------------------- #
             # Sort out num photos (as editing photos in form is tricky)
-            num_photos_used = ClassifiedRepository().number_photos(classified_id)
+            num_photos_used = ClassifiedRepository.number_photos(classified_id)
             photos_left = MAX_NUM_PHOTOS - num_photos_used
             # Create form with correct number of outstanding photo upload options
             form = create_classified_form(photos_left)
@@ -166,7 +166,7 @@ def add_sell() -> Response | str:
 
         # Need to know number of photos already used up
         if classified:
-            num_photos_used = ClassifiedRepository().number_photos(classified_id)
+            num_photos_used = ClassifiedRepository.number_photos(classified_id)
         else:
             num_photos_used = 0
 
@@ -212,11 +212,11 @@ def add_sell() -> Response | str:
             # Add to dB
             # ----------------------------------------------------------- #
             # Meed to add before we upload photos to get a id
-            new_classified = ClassifiedRepository().add_classified(new_classified)
+            new_classified = ClassifiedRepository.add_classified(new_classified)
             if not new_classified:
                 # Should never happen, but...
                 app.logger.debug(f"add_sell(): Failed to add classified: '{new_classified}'.")
-                EventRepository().log_event("Add Sell Fail", f"Failed to add classified: '{new_classified}'.")
+                EventRepository.log_event("Add Sell Fail", f"Failed to add classified: '{new_classified}'.")
                 flash("Sorry, something went wrong.")
                 return render_template("classifieds_sell.html", year=current_year, form=form, live_site=live_site(),
                                        num_photos_used=num_photos_used, classified=classified)
@@ -232,11 +232,11 @@ def add_sell() -> Response | str:
             # Add to dB
             # ----------------------------------------------------------- #
             # Now add again to update photos
-            new_classified = ClassifiedRepository().add_classified(new_classified)
+            new_classified = ClassifiedRepository.add_classified(new_classified)
             if not new_classified:
                 # Should never happen, but...
                 app.logger.debug(f"add_sell(): Failed to add classified: '{new_classified}'.")
-                EventRepository().log_event("Add Sell Fail", f"Failed to add classified: '{new_classified}'.")
+                EventRepository.log_event("Add Sell Fail", f"Failed to add classified: '{new_classified}'.")
                 flash("Sorry, something went wrong.")
                 return render_template("classifieds_sell.html", year=current_year, form=form, live_site=live_site(),
                                        num_photos_used=num_photos_used, classified=classified)
@@ -248,7 +248,7 @@ def add_sell() -> Response | str:
             if not classified:
                 flash("New Classified post has been created!")
                 # Can't use current_user with Threading as it doesn't persist past return, so re-acquire user
-                user = UserRepository().one_by_id(current_user.id)
+                user: UserModel | None = UserRepository.one_by_id(current_user.id)
                 Thread(target=alert_admin_via_sms,
                        args=(user, "New Classified post alert, please check it's OK!",)).start()
             else:
@@ -307,20 +307,20 @@ def delete_classified() -> Response | str:
     # ----------------------------------------------------------- #
     if not classified_id:
         app.logger.debug(f"delete_classified(): Missing classified!")
-        EventRepository().log_event("Delete Classified Fail", f"Missing classified!")
+        EventRepository.log_event("Delete Classified Fail", f"Missing classified!")
         return abort(400)
     if not password:
         app.logger.debug(f"delete_classified(): Missing Password!")
-        EventRepository().log_event("Delete Classified Fail", f"Missing Password!")
+        EventRepository.log_event("Delete Classified Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate classified_id
     # ----------------------------------------------------------- #
-    classified = ClassifiedRepository().find_by_id(classified_id)
+    classified = ClassifiedRepository.find_by_id(classified_id)
     if not classified:
         app.logger.debug(f"delete_classified(): Failed to locate, classified_id = '{classified_id}'.")
-        EventRepository().log_event("Delete Classified Fail", f"Failed to locate, classified_id = '{classified_id}.")
+        EventRepository.log_event("Delete Classified Fail", f"Failed to locate, classified_id = '{classified_id}.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -332,7 +332,7 @@ def delete_classified() -> Response | str:
         # Failed authentication
         app.logger.debug(f"delete_classified(): Refusing permission for '{current_user.email}' and "
                          f"classified_id = '{classified_id}.")
-        EventRepository().log_event("Delete Classified Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository.log_event("Delete Classified Fail", f"Refusing permission for '{current_user.email}', "
                                                     f"classified_id = '{classified_id}.")
         return abort(403)
 
@@ -340,13 +340,13 @@ def delete_classified() -> Response | str:
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().one_by_id(current_user.id)
+    user: UserModel | None = UserRepository.one_by_id(current_user.id)
 
     # Validate against current_user's password
-    if not user.validate_password(user, password, user_ip):
+    if not UserRepository.validate_password(user, password, user_ip):
         app.logger.debug(
             f"delete_classified(): Delete failed, incorrect password for classified_id = '{classified_id}!")
-        EventRepository().log_event("Delete Classified Fail", f"Incorrect password for classified_id = '{classified_id}!")
+        EventRepository.log_event("Delete Classified Fail", f"Incorrect password for classified_id = '{classified_id}!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to socials page
         return redirect(url_for('classifieds'))  # type: ignore
@@ -359,13 +359,13 @@ def delete_classified() -> Response | str:
     # ----------------------------------------------------------- #
     # Delete Classified
     # ----------------------------------------------------------- #
-    if ClassifiedRepository().delete_classified(classified_id):
+    if ClassifiedRepository.delete_classified(classified_id):
         app.logger.debug(f"delete_classified(): Deleted social, classified_id = '{classified_id}.")
-        EventRepository().log_event("Delete Classified Success", f"Deleted social, classified_id = '{classified_id}.")
+        EventRepository.log_event("Delete Classified Success", f"Deleted social, classified_id = '{classified_id}.")
         flash("Classified has been deleted.")
     else:
         app.logger.debug(f"delete_classified(): Failed to delete, classified_id = '{classified_id}.")
-        EventRepository().log_event("Delete Classified Fail", f"Failed to delete, classified_id = '{classified_id}.")
+        EventRepository.log_event("Delete Classified Fail", f"Failed to delete, classified_id = '{classified_id}.")
         flash("Sorry, something went wrong.")
 
     return redirect(url_for('classifieds'))  # type: ignore
@@ -389,16 +389,16 @@ def message_seller() -> Response | str:
     # ----------------------------------------------------------- #
     if not classified_id:
         app.logger.debug(f"message_seller(): Missing classified!")
-        EventRepository().log_event("message_seller Fail", f"Missing classified!")
+        EventRepository.log_event("message_seller Fail", f"Missing classified!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate classified_id
     # ----------------------------------------------------------- #
-    classified = ClassifiedRepository().find_by_id(classified_id)
+    classified = ClassifiedRepository.find_by_id(classified_id)
     if not classified:
         app.logger.debug(f"message_seller(): Failed to locate, classified_id = '{classified_id}'.")
-        EventRepository().log_event("Message Seller Fail", f"Failed to locate, classified_id = '{classified_id}.")
+        EventRepository.log_event("Message Seller Fail", f"Failed to locate, classified_id = '{classified_id}.")
         return abort(404)
 
     # ----------------------------------------------------------- #

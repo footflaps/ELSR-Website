@@ -15,7 +15,7 @@ from core import app
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email import send_message_notification_email
@@ -52,16 +52,16 @@ def mark_read() -> Response | str:
     # ----------------------------------------------------------- #
     if not message_id:
         app.logger.debug(f"mark_read(): Missing message_id!")
-        EventRepository().log_event("Message Read Fail", f"Missing message_id!")
+        EventRepository.log_event("Message Read Fail", f"Missing message_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = MessageRepository().find_messages_by_id(message_id)
+    message = MessageRepository.find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"mark_read(): Can't locate message id = '{message_id}'.")
-        EventRepository().log_event("Message Read Fail", f"Can't locate message id = '{message_id}'.")
+        EventRepository.log_event("Message Read Fail", f"Can't locate message id = '{message_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -75,19 +75,19 @@ def mark_read() -> Response | str:
             message.to_email != current_user.email:
         app.logger.debug(f"mark_read(): Prevented attempt by '{current_user.email}' to mark as "
                          f"read message id = '{message_id}'.")
-        EventRepository().log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to mark as "
+        EventRepository.log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to mark as "
                                                f"read message id = '{message_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Mark as read
     # ----------------------------------------------------------- #
-    if MessageRepository().mark_as_read(message_id):
+    if MessageRepository.mark_as_read(message_id):
         flash("Message has been marked as read")
     else:
         # Should never get here, but...
         app.logger.debug(f"mark_read(): Message().mark_as_read() failed, message id = '{message_id}'.")
-        EventRepository().log_event("Message Read Fail", f"Failed to mark as read, id = '{message_id}'.")
+        EventRepository.log_event("Message Read Fail", f"Failed to mark as read, id = '{message_id}'.")
         flash("Sorry, something went wrong")
 
     # ----------------------------------------------------------- #
@@ -123,16 +123,16 @@ def mark_unread() -> Response | str:
     # ----------------------------------------------------------- #
     if not message_id:
         app.logger.debug(f"mark_unread(): Missing message_id!")
-        EventRepository().log_event("Message unRead Fail", f"Missing message_id!")
+        EventRepository.log_event("Message unRead Fail", f"Missing message_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = MessageRepository().find_messages_by_id(message_id)
+    message = MessageRepository.find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"mark_unread(): Can't locate message_id = '{message_id}'")
-        EventRepository().log_event("Message unRead Fail", f"Can't locate message_id = '{message_id}'")
+        EventRepository.log_event("Message unRead Fail", f"Can't locate message_id = '{message_id}'")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -146,19 +146,19 @@ def mark_unread() -> Response | str:
             message.to_email != current_user.email:
         app.logger.debug(f"mark_unread(): Prevented attempt by '{current_user.email}' to mark "
                          f"as unread message id = '{message_id}'.")
-        EventRepository().log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to mark as "
+        EventRepository.log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to mark as "
                                                f"unread message id = '{message_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Mark as read
     # ----------------------------------------------------------- #
-    if MessageRepository().mark_as_unread(message_id):
+    if MessageRepository.mark_as_unread(message_id):
         flash("Message has been marked as unread")
     else:
         # Should never get here, but...
         app.logger.debug(f"mark_unread(): Message().mark_as_unread() failed, message_id = '{message_id}'.")
-        EventRepository().log_event("Message unRead Fail", f"Message().mark_as_unread() failed, message_id = '{message_id}'")
+        EventRepository.log_event("Message unRead Fail", f"Message().mark_as_unread() failed, message_id = '{message_id}'")
         flash("Sorry, something went wrong")
 
     # ----------------------------------------------------------- #
@@ -195,16 +195,16 @@ def delete_message() -> Response | str:
     # ----------------------------------------------------------- #
     if not message_id:
         app.logger.debug(f"delete_message(): Missing message_id")
-        EventRepository().log_event("Message Delete Fail", f"Missing message_id!")
+        EventRepository.log_event("Message Delete Fail", f"Missing message_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = MessageRepository().find_messages_by_id(message_id)
+    message = MessageRepository.find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"delete_message(): Can't locate message id = '{message_id}'.")
-        EventRepository().log_event("Message Delete Fail", f"Can't locate message id = '{message_id}'.")
+        EventRepository.log_event("Message Delete Fail", f"Can't locate message id = '{message_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -218,21 +218,21 @@ def delete_message() -> Response | str:
             message.to_email != current_user.email:
         app.logger.debug(f"delete_message(): Prevented attempt by '{current_user.email}' to delete "
                          f"message_id = '{message_id}'.")
-        EventRepository().log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to Delete "
+        EventRepository.log_event("Message Read Fail", f"Prevented attempt by '{current_user.email}' to Delete "
                                                f"message_id = '{message_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Mark as read
     # ----------------------------------------------------------- #
-    if MessageRepository().delete(message_id):
+    if MessageRepository.delete(message_id):
         app.logger.debug(f"delete_message(): Success for message_id = '{message_id}'.")
-        EventRepository().log_event("Message Delete Success", f"message_id = '{message_id}'")
+        EventRepository.log_event("Message Delete Success", f"message_id = '{message_id}'")
         flash("Message has been deleted")
     else:
         # Should never get here, but...
         app.logger.debug(f"delete_message(): Message().delete() failed for message_id = '{message_id}'.")
-        EventRepository().log_event("Message Delete Fail", f"Failed to delete, message_id = '{message_id}'")
+        EventRepository.log_event("Message Delete Fail", f"Failed to delete, message_id = '{message_id}'")
         flash("Sorry, something went wrong")
 
     # ----------------------------------------------------------- #
@@ -277,20 +277,20 @@ def reply_message() -> Response | str:
     # ----------------------------------------------------------- #
     if not message_id:
         app.logger.debug(f"reply_message(): Missing message_id!")
-        EventRepository().log_event("Message Reply Fail", f"Missing message_id!")
+        EventRepository.log_event("Message Reply Fail", f"Missing message_id!")
         return abort(400)
     elif not body:
         app.logger.debug(f"reply_message(): Missing body!")
-        EventRepository().log_event("Message Reply Fail", f"Missing body!")
+        EventRepository.log_event("Message Reply Fail", f"Missing body!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = MessageRepository().find_messages_by_id(message_id)
+    message = MessageRepository.find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"reply_message(): Can't locate message_id = '{message_id}'.")
-        EventRepository().log_event("Message Reply Fail", f"Can't locate message_id = '{message_id}'.")
+        EventRepository.log_event("Message Reply Fail", f"Can't locate message_id = '{message_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -304,7 +304,7 @@ def reply_message() -> Response | str:
             message.to_email != current_user.email:
         app.logger.debug(f"reply_message(): Prevented attempt by '{current_user.email}' to "
                          f"reply to message id = '{message_id}'.")
-        EventRepository().log_event("Message Reply Fail", f"Prevented attempt by '{current_user.email}' to Reply to "
+        EventRepository.log_event("Message Reply Fail", f"Prevented attempt by '{current_user.email}' to Reply to "
                                                 f"message, id = '{message_id}'.")
         return abort(403)
 
@@ -319,17 +319,17 @@ def reply_message() -> Response | str:
     )
 
     # Try and send it
-    if MessageRepository().add_message(new_message):
+    if MessageRepository.add_message(new_message):
         # Success!
         app.logger.debug(f"reply_message(): User '{current_user.email}' has sent message "
                          f"to '{message.from_email}', body = '{body}'.")
-        EventRepository().log_event("Message Reply Success", f" User '{current_user.name}' has sent message "
+        EventRepository.log_event("Message Reply Success", f" User '{current_user.name}' has sent message "
                                                    f"to '{message.from_email}'.")
         flash("Your message has been sent.")
     else:
         # Should never get here, but...
         app.logger.debug(f"reply_message(): Message().add_message() failed for user.id = '{current_user.id}'.")
-        EventRepository().log_event("Message Reply Fail", f"Failed to send message.")
+        EventRepository.log_event("Message Reply Fail", f"Failed to send message.")
         flash("Sorry, something went wrong")
 
     # ----------------------------------------------------------- #
@@ -337,7 +337,7 @@ def reply_message() -> Response | str:
     # ----------------------------------------------------------- #
     if message.from_email == ADMIN_EMAIL:
         # Threading won't have access to current_user, so need to acquire persistent user to pass on
-        user = UserRepository().one_by_id(current_user.id)
+        user: UserModel | None = UserRepository.one_by_id(current_user.id)
         Thread(target=alert_admin_via_sms, args=(user, f"Reply Message: {body}",)).start()
 
     # ----------------------------------------------------------- #
@@ -377,22 +377,22 @@ def message_admin() -> Response | str:
     # ----------------------------------------------------------- #
     if not user_id:
         app.logger.debug(f"message_admin(): Missing user_id!")
-        EventRepository().log_event("Message Admin Fail", f"Missing user_id!")
+        EventRepository.log_event("Message Admin Fail", f"Missing user_id!")
         return abort(400)
     elif not body:
         app.logger.debug(f"message_admin(): Missing body")
-        EventRepository().log_event("Message Admin Fail", f"Missing body!")
+        EventRepository.log_event("Message Admin Fail", f"Missing body!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().one_by_id(user_id)
+    user: UserModel | None = UserRepository.one_by_id(user_id)
 
     # Check id is valid
     if not user:
         app.logger.debug(f"message_admin(): FAILED to locate user user_id = '{user_id}'.")
-        EventRepository().log_event("Message Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
+        EventRepository.log_event("Message Admin Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -402,7 +402,7 @@ def message_admin() -> Response | str:
         # Fraudulent attempt!
         print(f"user_id = '{user_id}', current_user.id = '{current_user.id}' ")
         app.logger.debug(f"message_admin(): User '{current_user.email}' attempted to spoof user '{user.email}'.")
-        EventRepository().log_event("Message Admin Fail", f"User '{current_user.email}' attempted to spoof user '{user.email}'.")
+        EventRepository.log_event("Message Admin Fail", f"User '{current_user.email}' attempted to spoof user '{user.email}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
@@ -416,18 +416,18 @@ def message_admin() -> Response | str:
         body=body
     )
     # Send it
-    message = MessageRepository().add_message(message)
+    message = MessageRepository.add_message(message)
     # Either get back the message or None
     if message:
         # Success
         Thread(target=send_message_notification_email, args=(message, ADMIN_EMAIL,)).start()
         app.logger.debug(f"message_admin(): User '{user.email}' has sent message = '{body}'")
-        EventRepository().log_event("Message Admin Success", f"Message was sent successfully.")
+        EventRepository.log_event("Message Admin Success", f"Message was sent successfully.")
         flash("Your message has been forwarded to the Admin Team")
     else:
         # Should never get here, but...
         app.logger.debug(f"message_admin(): Message().add_message() failed user.email = '{user.email}'.")
-        EventRepository().log_event("Message Admin Fail", f"Message send failed!")
+        EventRepository.log_event("Message Admin Fail", f"Message send failed!")
         flash("Sorry, something went wrong")
 
     # ----------------------------------------------------------- #
@@ -462,22 +462,22 @@ def message_user() -> Response | str:
     # ----------------------------------------------------------- #
     if not user_id:
         app.logger.debug(f"message_user(): Missing user_id!")
-        EventRepository().log_event("Message User Fail", f"Missing user_id!")
+        EventRepository.log_event("Message User Fail", f"Missing user_id!")
         return abort(400)
     elif not body:
         app.logger.debug(f"message_user(): Missing body!")
-        EventRepository().log_event("Message User Fail", f"Missing body!")
+        EventRepository.log_event("Message User Fail", f"Missing body!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().one_by_id(user_id)
+    user: UserModel | None = UserRepository.one_by_id(user_id)
 
     # Check id is valid
     if not user:
         app.logger.debug(f"message_user(): FAILED to locate user user_id = '{user_id}'.")
-        EventRepository().log_event("Message User Fail", f"FAILED to locate user user_id = '{user_id}'.")
+        EventRepository.log_event("Message User Fail", f"FAILED to locate user user_id = '{user_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -491,18 +491,18 @@ def message_user() -> Response | str:
         body=body
     )
     # Send it
-    message = MessageRepository().add_message(message)
+    message = MessageRepository.add_message(message)
     # Either get back the message or None
     if message:
         # Success
         Thread(target=send_message_notification_email, args=(message, user,)).start()
         app.logger.debug(f"message_user(): Admin has sent message to '{user.name}', body = '{body}'.")
-        EventRepository().log_event("Message User Success", f"Message was sent successfully to '{user.email}'.")
+        EventRepository.log_event("Message User Success", f"Message was sent successfully to '{user.email}'.")
         flash(f"Your message has been forwarded to {user.name}")
     else:
         # Should never get here, but...
         app.logger.debug(f"message_user(): Message().add_message() failed, user.email = '{user.email}'.")
-        EventRepository().log_event("Message User Fail", f"Message send failed to user.email = '{user.email}'.")
+        EventRepository.log_event("Message User Fail", f"Message send failed to user.email = '{user.email}'.")
         flash("Sorry, something went wrong")
 
     # Back to user page

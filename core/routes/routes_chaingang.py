@@ -98,7 +98,7 @@ def chaingang() -> Response | str:
         # Should never happen, but may as well handle it cleanly
         flash("Sorry, we seem to have lost that GPX file!")
         flash("Somebody should probably fire the web developer...")
-        EventRepository().log_event("One GPX Fail", f"Can't find '{filename}'!")
+        EventRepository.log_event("One GPX Fail", f"Can't find '{filename}'!")
         app.logger.error(f"gpx_details(): Can't find '{filename}'!")
         return abort(404)
 

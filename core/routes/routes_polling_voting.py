@@ -48,21 +48,21 @@ def remove_vote() -> Response | str:
     # ----------------------------------------------------------- #
     if not poll_id:
         app.logger.debug(f"remove_vote(): Missing poll_id!")
-        EventRepository().log_event("remove_vote() Fail", f"Missing poll_id!")
+        EventRepository.log_event("remove_vote() Fail", f"Missing poll_id!")
         return abort(404)
     if not option or not option.isdigit():
         app.logger.debug(f"remove_vote(): Missing option!")
-        EventRepository().log_event("remove_vote() Fail", f"Missing option!")
+        EventRepository.log_event("remove_vote() Fail", f"Missing option!")
         return abort(404)
     option = int(option)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = PollRepository().one_poll_by_id(poll_id)
+    poll = PollRepository.one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"remove_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
-        EventRepository().log_event("remove_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
+        EventRepository.log_event("remove_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -71,7 +71,7 @@ def remove_vote() -> Response | str:
     # Poll must be open
     if poll.status != POLL_OPEN:
         app.logger.debug(f"remove_vote(): Poll is closed, poll_id = '{poll_id}'.")
-        EventRepository().log_event("remove_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
+        EventRepository.log_event("remove_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
         flash("The poll is now closed!")
         return abort(403)
 
@@ -86,7 +86,7 @@ def remove_vote() -> Response | str:
     # Check option is a valid index into option_list (offset by 1 as option starts at 1)
     if option <= 0 or option > len(option_list):
         app.logger.debug(f"remove_vote(): Invalid option = '{option}'.")
-        EventRepository().log_event("remove_vote() Fail", f"Invalid option = '{option}'.")
+        EventRepository.log_event("remove_vote() Fail", f"Invalid option = '{option}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -104,7 +104,7 @@ def remove_vote() -> Response | str:
     if not current_user.email in option_votes:
         # Should never happen, but...
         app.logger.debug(f"remove_vote(): Can't remove non existent vote!")
-        EventRepository().log_event("remove_vote() Fail", f"Can't remove non existent vote!")
+        EventRepository.log_event("remove_vote() Fail", f"Can't remove non existent vote!")
         flash("Invalid vote option!")
         return abort(404)
 
@@ -116,12 +116,12 @@ def remove_vote() -> Response | str:
     # Push back to poll object as JSON string
     poll.responses = json.dumps(votes)
     # Update in db
-    poll = PollRepository().add_poll(poll)
+    poll = PollRepository.add_poll(poll)
     # Did that work?
     if not poll:
         # Should never happen, but...
         app.logger.debug(f"remove_vote(): Can't update poll, id = '{poll_id}'!")
-        EventRepository().log_event("remove_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
+        EventRepository.log_event("remove_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
         flash("Sorry, something went wrong!")
 
     # ----------------------------------------------------------- #
@@ -151,21 +151,21 @@ def add_vote() -> Response | str:
     # ----------------------------------------------------------- #
     if not poll_id:
         app.logger.debug(f"add_vote(): Missing poll_id!")
-        EventRepository().log_event("add_vote() Fail", f"Missing poll_id!")
+        EventRepository.log_event("add_vote() Fail", f"Missing poll_id!")
         return abort(404)
     if not option or not option.isdigit():
         app.logger.debug(f"add_vote(): Missing option!")
-        EventRepository().log_event("add_vote() Fail", f"Missing option!")
+        EventRepository.log_event("add_vote() Fail", f"Missing option!")
         return abort(404)
     option = int(option)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = PollRepository().one_poll_by_id(poll_id)
+    poll = PollRepository.one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"add_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
-        EventRepository().log_event("add_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
+        EventRepository.log_event("add_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -174,7 +174,7 @@ def add_vote() -> Response | str:
     # Poll must be open
     if poll.status != POLL_OPEN:
         app.logger.debug(f"add_vote(): Poll is closed, poll_id = '{poll_id}'.")
-        EventRepository().log_event("add_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
+        EventRepository.log_event("add_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
         flash("The poll is now closed!")
         return abort(403)
 
@@ -192,7 +192,7 @@ def add_vote() -> Response | str:
     # Check option is a valid index into option_list (offset by 1 as option starts at 1)
     if option <= 0 or option > len(option_list):
         app.logger.debug(f"add_vote(): Invalid option = '{option}'.")
-        EventRepository().log_event("add_vote() Fail", f"Invalid option = '{option}'.")
+        EventRepository.log_event("add_vote() Fail", f"Invalid option = '{option}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -211,7 +211,7 @@ def add_vote() -> Response | str:
     if current_user.email in option_votes:
         # Should never happen, but...
         app.logger.debug(f"remove_vote(): User already voted for this option!")
-        EventRepository().log_event("remove_vote() Fail", f"User already voted for this optione!")
+        EventRepository.log_event("remove_vote() Fail", f"User already voted for this optione!")
         flash("You've already voted for that option!")
         return abort(404)
 
@@ -223,12 +223,12 @@ def add_vote() -> Response | str:
     # Push back to poll object as JSON string
     poll.responses = json.dumps(votes)
     # Update in db
-    poll = PollRepository().add_poll(poll)
+    poll = PollRepository.add_poll(poll)
     # Did that work?
     if not poll:
         # Should never happen, but...
         app.logger.debug(f"add_vote(): Can't update poll, id = '{poll_id}'!")
-        EventRepository().log_event("add_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
+        EventRepository.log_event("add_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
         flash("Sorry, something went wrong!")
 
     # ----------------------------------------------------------- #
@@ -258,21 +258,21 @@ def swap_vote() -> Response | str:
     # ----------------------------------------------------------- #
     if not poll_id:
         app.logger.debug(f"swap_vote(): Missing poll_id!")
-        EventRepository().log_event("swap_vote() Fail", f"Missing poll_id!")
+        EventRepository.log_event("swap_vote() Fail", f"Missing poll_id!")
         return abort(404)
     if not option or not option.isdigit():
         app.logger.debug(f"swap_vote(): Missing option!")
-        EventRepository().log_event("swap_vote() Fail", f"Missing option!")
+        EventRepository.log_event("swap_vote() Fail", f"Missing option!")
         return abort(404)
     option = int(option)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = PollRepository().one_poll_by_id(poll_id)
+    poll = PollRepository.one_poll_by_id(poll_id)
     if not poll:
         app.logger.debug(f"swap_vote(): Failed to locate Poll with poll_id = '{poll_id}'.")
-        EventRepository().log_event("swap_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
+        EventRepository.log_event("swap_vote() Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -281,7 +281,7 @@ def swap_vote() -> Response | str:
     # Poll must be open
     if poll.status != POLL_OPEN:
         app.logger.debug(f"swap_vote(): Poll is closed, poll_id = '{poll_id}'.")
-        EventRepository().log_event("swap_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
+        EventRepository.log_event("swap_vote() Fail", f"Poll is closed, poll_id = '{poll_id}'.")
         flash("The poll is now closed!")
         return abort(403)
 
@@ -297,7 +297,7 @@ def swap_vote() -> Response | str:
     # Check option is a valid index into option_list (offset by 1 as option starts at 1)
     if option <= 0 or option > len(option_list):
         app.logger.debug(f"swap_vote(): Invalid option = '{option}'.")
-        EventRepository().log_event("swap_vote() Fail", f"Invalid option = '{option}'.")
+        EventRepository.log_event("swap_vote() Fail", f"Invalid option = '{option}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -342,12 +342,12 @@ def swap_vote() -> Response | str:
     # Convert to JSON string
     poll.responses = json.dumps(votes)
     # Update in db
-    poll = PollRepository().add_poll(poll)
+    poll = PollRepository.add_poll(poll)
     # Did that work?
     if not poll:
         # Should never happen, but...
         app.logger.debug(f"swap_vote(): Can't update poll, id = '{poll_id}'!")
-        EventRepository().log_event("swap_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
+        EventRepository.log_event("swap_vote() Fail", f"Can't update poll, id = '{poll_id}'!")
         flash("Sorry, something went wrong!")
 
     # ----------------------------------------------------------- #

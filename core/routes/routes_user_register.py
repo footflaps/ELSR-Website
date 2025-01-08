@@ -16,7 +16,7 @@ from core import app, current_year, live_site, admin_email_address, admin_phone_
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
+from core.database.repositories.user_repository import UserModel, UserRepository, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
 from core.forms.user_forms import CreateUserForm, VerifyUserForm, TwoFactorLoginForm, VerifySMSForm
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
@@ -62,19 +62,19 @@ def register() -> Response | str:
                          f"new_user.email = '{new_user.email}'")
 
         # Does the user already exist?
-        if UserRepository().one_by_email(new_user.email):
+        if UserRepository.one_by_email(new_user.email):
 
-            if UserRepository().one_by_email(new_user.email).verified:
+            if UserRepository.one_by_email(new_user.email).verified:
                 # Email is validated, so they can just login
                 app.logger.debug(f"register(): Duplicate email '{new_user.email}'.")
-                EventRepository().log_event("Register Fail", f"Duplicate email '{new_user.email}'.")
+                EventRepository.log_event("Register Fail", f"Duplicate email '{new_user.email}'.")
                 flash("You've already signed up with that email, log in instead!")
                 return redirect(url_for('login', email=new_user.email))  # type: ignore
 
             else:
                 # Email is registered, but unvalidated
                 app.logger.debug(f"register(): Already signed up '{new_user.email}'.")
-                EventRepository().log_event("Register Fail", f"Already signed up '{new_user.email}'.")
+                EventRepository.log_event("Register Fail", f"Already signed up '{new_user.email}'.")
                 flash("You've already signed up with that email, verify your email to login!")
                 return redirect(url_for('validate_email'))  # type: ignore
 
@@ -85,23 +85,23 @@ def register() -> Response | str:
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Names must be unique
-        if UserRepository().check_name_in_use(new_user.name):
+        if UserRepository.check_name_in_use(new_user.name):
             app.logger.debug(f"user_page(): Username clash '{new_user.name}' for new_user.id = '{new_user.id}'.")
-            EventRepository().log_event("User Page Succes", f"Username clash '{new_user.name}' "
+            EventRepository.log_event("User Page Succes", f"Username clash '{new_user.name}' "
                                                   f"for new_user.id = '{new_user.id}'.")
             flash(f"Sorry, the name '{new_user.name.strip()}' is already in use!")
             return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
         # Add to dB
-        if UserRepository().create_user(new_user, form.password.data):
+        if UserRepository.create_user(new_user, form.password.data):
 
             # Debug
-            user = UserRepository().one_by_email(form.email.data)
+            user: UserModel | None = UserRepository.one_by_email(form.email.data)
 
             # They now need to validate email address
             app.logger.debug(f"register(): Sending verification email to '{user.email}'.")
-            EventRepository().log_event("Register Pass", f"Verification code sent to '{user.email}'.")
+            EventRepository.log_event("Register Pass", f"Verification code sent to '{user.email}'.")
             flash("Please validate your email address with the code you have been sent.")
             # User threading as sending an email can take a while and we want a snappy website
             Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
@@ -110,7 +110,7 @@ def register() -> Response | str:
         else:
             # User already exists probably
             app.logger.debug(f"register(): User().create_user() failed for '{new_user.email}'.")
-            EventRepository().log_event("Register Error", f"User().create_user() failed for '{new_user.email}'.")
+            EventRepository.log_event("Register Error", f"User().create_user() failed for '{new_user.email}'.")
             flash("Sorry, something went wrong!")
             return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
@@ -153,21 +153,21 @@ def validate_email() -> Response | str:
         # ----------------------------------------------------------- #
 
         email = email.strip('"').strip("'")
-        user = UserRepository().one_by_email(email)
+        user: UserModel | None = UserRepository.one_by_email(email)
         if not user:
             # User doesn't exist
             app.logger.debug(f"validate_email(): URL route, can't find user email = '{email}'.")
-            EventRepository().log_event("Validate Fail", f"URL route, can't find user email = '{email}'.")
+            EventRepository.log_event("Validate Fail", f"URL route, can't find user email = '{email}'.")
             abort(404)
 
-        if UserRepository().validate_email(user, code):
+        if UserRepository.validate_email(user, code):
             # Success, user email validated!
             app.logger.debug(f"validate_email(): URL route, user '{email}' has been validated.")
-            EventRepository().log_event("Validate Pass", f"URL route, user '{email}' has been validated.")
+            EventRepository.log_event("Validate Pass", f"URL route, user '{email}' has been validated.")
             flash("Email verified, please now log in!")
 
             # Send welcome email
-            MessageRepository().send_welcome_message(user.email)
+            MessageRepository.send_welcome_message(user.email)
 
             # ----------------------------------------------------------- #
             # Alert admin via SMS
@@ -184,14 +184,14 @@ def validate_email() -> Response | str:
                 body="New user has joined - check permissions."
             )
 
-            if MessageRepository().add_message(admin_message):
+            if MessageRepository.add_message(admin_message):
                 # Success!
                 app.logger.debug(f"validate_email(): User '{user.email}' has sent message to Admin.")
-                EventRepository().log_event("Validate Pass", f"Message to Admin was sent successfully for '{user.email}'.")
+                EventRepository.log_event("Validate Pass", f"Message to Admin was sent successfully for '{user.email}'.")
             else:
                 # Should never get here, but...
                 app.logger.debug(f"validate_email(): Message().add_message() failed, user.email = '{user.email}'.")
-                EventRepository().log_event("Validate Fail", f"Message send failed to Admin for '{user.email}'.")
+                EventRepository.log_event("Validate Fail", f"Message send failed to Admin for '{user.email}'.")
 
             # ----------------------------------------------------------- #
             # Forward to login page
@@ -216,7 +216,7 @@ def validate_email() -> Response | str:
         code = form.verification_code.data
 
         # Find out user
-        user = UserRepository().one_by_email(new_user.email)
+        user: UserModel | None = UserRepository.one_by_email(new_user.email)
 
         # Did we find that email address
         if user:
@@ -224,20 +224,20 @@ def validate_email() -> Response | str:
             # Already verified
             if user.verified:
                 app.logger.debug(f"validate_email(): Form, user '{user.email}' is already validated.")
-                EventRepository().log_event("Validate Fail", f"Form, user '{user.email}' is already validated.")
+                EventRepository.log_event("Validate Fail", f"Form, user '{user.email}' is already validated.")
                 flash("Email has already been verified! Log in with your password.")
                 return redirect(url_for('login', email=new_user.email))  # type: ignore
 
             # Check email exists in db
-            if UserRepository().validate_email(user, code):
+            if UserRepository.validate_email(user, code):
 
                 # Go to login page
                 app.logger.debug(f"validate_email(): Form, user '{user.email}' has been validated.")
-                EventRepository().log_event("Validate Pass", f"Form, user '{user.email}' has been validated.")
+                EventRepository.log_event("Validate Pass", f"Form, user '{user.email}' has been validated.")
                 flash("Email verified, please now log in!")
 
                 # Send welcome message
-                MessageRepository().send_welcome_message(new_user.email)
+                MessageRepository.send_welcome_message(new_user.email)
 
                 # ----------------------------------------------------------- #
                 # Alert admin via SMS
@@ -254,14 +254,14 @@ def validate_email() -> Response | str:
                     body="New user has joined - check permissions."
                 )
 
-                if MessageRepository().add_message(admin_message):
+                if MessageRepository.add_message(admin_message):
                     # Success!
                     app.logger.debug(f"validate_email(): User '{user.email}' has sent message to Admin.")
-                    EventRepository().log_event("Validate Pass", f"Message to Admin was sent successfully for '{user.email}'.")
+                    EventRepository.log_event("Validate Pass", f"Message to Admin was sent successfully for '{user.email}'.")
                 else:
                     # Should never get here, but...
                     app.logger.debug(f"validate_email(): Message().add_message() failed, user.email = '{user.email}'.")
-                    EventRepository().log_event("Validate Fail", f"Message send failed to Admin for '{user.email}'.")
+                    EventRepository.log_event("Validate Fail", f"Message send failed to Admin for '{user.email}'.")
 
                 # ----------------------------------------------------------- #
                 # Forward to login page
@@ -271,14 +271,14 @@ def validate_email() -> Response | str:
             else:
                 # Wrong code entered, or it's expired
                 app.logger.debug(f"validate_email(): Form, code didn't work for user '{user.email}'.")
-                EventRepository().log_event("Validate Fail", f"Form, code didn't work for user '{user.email}'.")
+                EventRepository.log_event("Validate Fail", f"Form, code didn't work for user '{user.email}'.")
                 flash("Incorrect code (or code has expired), please try again!")
                 return render_template("user_validate.html", form=form, year=current_year, live_site=live_site())
 
         else:
             # Invalid email
             app.logger.debug(f"validate_email(): Form, unrecognised email '{new_user.email}'.")
-            EventRepository().log_event("Validate Fail", f"Form, unrecognised email '{new_user.email}'.")
+            EventRepository.log_event("Validate Fail", f"Form, unrecognised email '{new_user.email}'.")
             flash("Unrecognised email, please try again!")
             # Just fall through to validate page
 
@@ -314,14 +314,14 @@ def twofa_login() -> Response | str:
         # ----------------------------------------------------------- #
 
         email = email.strip('"').strip("'")
-        user = UserRepository().one_by_email(email)
+        user: UserModel | None = UserRepository.one_by_email(email)
         if not user:
             # User doesn't exist
             app.logger.debug(f"twofa_login(): URL route, can't find user email = '{email}'.")
-            EventRepository().log_event("2FA login Fail", f"URL route, can't find user email = '{email}'.")
+            EventRepository.log_event("2FA login Fail", f"URL route, can't find user email = '{email}'.")
             abort(404)
 
-        if UserRepository().validate_sms(user, code):
+        if UserRepository.validate_sms(user, code):
             # Success, user validated!
             login_user(user, remember=True)
             flash(f"Welcome back {user.name}!")
@@ -333,7 +333,7 @@ def twofa_login() -> Response | str:
 
             # Log event after they've logged in, so current_user can have an email address
             app.logger.debug(f"twofa_login(): User logged in for '{email}'.")
-            EventRepository().log_event("Login", f"User logged in via 2FA, forwarding user '{user.email}' to '{session['url']}'.")
+            EventRepository.log_event("Login", f"User logged in via 2FA, forwarding user '{user.email}' to '{session['url']}'.")
 
             # Return back to cached page
             app.logger.debug(f"login(): Success, forwarding user to '{session['url']}'.")
@@ -352,7 +352,7 @@ def twofa_login() -> Response | str:
         # ----------------------------------------------------------- #
 
         # Is that a valid email address?
-        user = UserRepository().one_by_email(form.email.data)
+        user: UserModel | None = UserRepository.one_by_email(form.email.data)
 
         # Did we find that email address
         if user:
@@ -360,7 +360,7 @@ def twofa_login() -> Response | str:
             # Verify their SMS code
             code = form.verification_code.data
 
-            if UserRepository().validate_sms(user, code):
+            if UserRepository.validate_sms(user, code):
                 # Success, 2FA complete!
                 login_user(user, remember=True)
                 flash(f"Welcome back {user.name}!")
@@ -372,7 +372,7 @@ def twofa_login() -> Response | str:
 
                 # Log event after they've logged in, so current_user can have an email address
                 app.logger.debug(f"twofa_login(): User logged in for '{email}'.")
-                EventRepository().log_event("Login",
+                EventRepository.log_event("Login",
                                   f"User logged in via 2FA, forwarding user '{user.email}' to '{session['url']}'.")
 
                 # Return back to cached page
@@ -382,13 +382,13 @@ def twofa_login() -> Response | str:
             else:
                 # Wrong code entered, or it's expired
                 app.logger.debug(f"twofa_login(): Form, code didn't work for user '{user.email}'.")
-                EventRepository().log_event("2FA login Fail", f"Form, code didn't work for user '{user.email}'.")
+                EventRepository.log_event("2FA login Fail", f"Form, code didn't work for user '{user.email}'.")
                 flash("Incorrect code (or code has expired), please try again!")
                 return render_template("user_sms_login.html", form=form, year=current_year, live_site=live_site())
 
         # Invalid email
         app.logger.debug(f"twofa_login(): Form, unrecognised email '{form.email.data}'.")
-        EventRepository().log_event("2FA login Fail", f"Form, unrecognised email '{form.email.data}'.")
+        EventRepository.log_event("2FA login Fail", f"Form, unrecognised email '{form.email.data}'.")
         flash("Unrecognised email, please try again!")
 
     # Show register page / form
@@ -418,20 +418,20 @@ def add_phone_number() -> Response | str:
     # ----------------------------------------------------------- #
     if not user_id:
         app.logger.debug(f"add_phone_number(): Missing user_id!")
-        EventRepository().log_event("Add Phone Fail", f"Missing user id!")
+        EventRepository.log_event("Add Phone Fail", f"Missing user id!")
         abort(400)
     if not phone_number:
         app.logger.debug(f"add_phone_number(): Missing user_id!")
-        EventRepository().log_event("Add Phone Fail", f"Missing user id!")
+        EventRepository.log_event("Add Phone Fail", f"Missing user id!")
         abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().one_by_id(user_id)
+    user: UserModel | None = UserRepository.one_by_id(user_id)
     if not user:
         app.logger.debug(f"add_phone_number(): Invalid user user_id = '{user_id}'!")
-        EventRepository().log_event("Add Phone Fail", f"Invalid user user_id = '{user_id}'.")
+        EventRepository.log_event("Add Phone Fail", f"Invalid user user_id = '{user_id}'.")
         abort(404)
 
     # ----------------------------------------------------------- #
@@ -466,35 +466,35 @@ def add_phone_number() -> Response | str:
             not current_user.admin:
         app.logger.debug(f"add_phone_number(): User isn't allowed "
                          f"current_user.id='{current_user.id}', user_id='{user_id}'.")
-        EventRepository().log_event("Add Phone Fail", f"User isn't allowed "
+        EventRepository.log_event("Add Phone Fail", f"User isn't allowed "
                                             f"current_user.id='{current_user.id}', user_id='{user_id}'.")
         abort(403)
 
     # ----------------------------------------------------------- #
     # Update phone number
     # ----------------------------------------------------------- #
-    if UserRepository().set_phone_number(user_id, UNVERIFIED_PHONE_PREFIX + phone_number):
+    if UserRepository.set_phone_number(user_id, UNVERIFIED_PHONE_PREFIX + phone_number):
 
         # Now generate a verification code
-        if UserRepository().generate_sms_code(user_id):
+        if UserRepository.generate_sms_code(user_id):
             # Reacquire user
-            user = UserRepository().one_by_id(user_id)
+            user: UserModel | None = UserRepository.one_by_id(user_id)
             # Send the code to the user
             send_sms_verif_code(user)
             app.logger.debug(f"add_phone_number(): SMS code sent, user_id='{user_id}'.")
-            EventRepository().log_event("Add Phone Pass", f"SMS code sent, user_id='{user_id}'.")
+            EventRepository.log_event("Add Phone Pass", f"SMS code sent, user_id='{user_id}'.")
             flash(f"A verification code has been sent to '{phone_number}'.")
             return redirect(url_for('mobile_verify', user_id=user_id))  # type: ignore
 
         else:
             # Should never get here, but...
             app.logger.debug(f"add_phone_number(): User().generate_sms_code() failed, user_id='{user_id}'.")
-            EventRepository().log_event("Add Phone Fail", f"User().generate_sms_code() failed, user_id='{user_id}'.")
+            EventRepository.log_event("Add Phone Fail", f"User().generate_sms_code() failed, user_id='{user_id}'.")
             flash("Sorry, something went wrong!")
     else:
         # Should never get here, but...
         app.logger.debug(f"add_phone_number(): User().set_phone_number() failed, user_id='{user_id}'.")
-        EventRepository().log_event("Add Phone Fail", f"User().set_phone_number() failed, user_id='{user_id}'.")
+        EventRepository.log_event("Add Phone Fail", f"User().set_phone_number() failed, user_id='{user_id}'.")
         flash("Sorry, something went wrong!")
 
     # Back to user page
@@ -520,16 +520,16 @@ def mobile_verify() -> Response | str:
     # ----------------------------------------------------------- #
     if not user_id:
         app.logger.debug(f"mobile_verify(): Missing user_id!")
-        EventRepository().log_event("Verify Mobile Fail", f"Missing user id!")
+        EventRepository.log_event("Verify Mobile Fail", f"Missing user id!")
         abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().one_by_id(user_id)
+    user: UserModel | None = UserRepository.one_by_id(user_id)
     if not user:
         app.logger.debug(f"mobile_verify(): Invalid user user_id = '{user_id}'!")
-        EventRepository().log_event("Verify Mobile Fail", f"Invalid user user_id = '{user_id}'.")
+        EventRepository.log_event("Verify Mobile Fail", f"Invalid user user_id = '{user_id}'.")
         abort(404)
 
     # Need a form
@@ -543,14 +543,14 @@ def mobile_verify() -> Response | str:
         # Get code from the form
         code = form.verification_code.data
 
-        if UserRepository().validate_sms(user, code):
+        if UserRepository.validate_sms(user, code):
             # Success, user validated!
             login_user(user, remember=True)
             flash(f"Mobile number has been verified!")
 
             # Log event after they've logged in, so current_user can have an email address
             app.logger.debug(f"mobile_verify(): Mobile verified for user_id = '{user_id}'.")
-            EventRepository().log_event("Verify Mobile Pass", f"Mobile verified for user_id = '{user_id}'.")
+            EventRepository.log_event("Verify Mobile Pass", f"Mobile verified for user_id = '{user_id}'.")
 
             # Return back to user page
             return redirect(url_for('user_page', user_id=user_id))  # type: ignore

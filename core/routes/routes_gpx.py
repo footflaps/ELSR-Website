@@ -16,7 +16,7 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, current_year, delete_file_if_exists
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.gpx_repository import GpxModel, GpxRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
@@ -77,7 +77,7 @@ def gpx_list() -> Response | str:
     # ----------------------------------------------------------- #
     # Grab all our routes
     # ----------------------------------------------------------- #
-    gpxes: list[GpxModel] = GpxRepository().all_gpxes()
+    gpxes: list[GpxModel] = GpxRepository.all_gpxes()
 
     # ----------------------------------------------------------- #
     # Grab all our users
@@ -127,7 +127,7 @@ def gpx_list() -> Response | str:
 @update_last_seen
 def gpx_top10() -> Response | str:
     # Grab all our gpxes
-    gpxes = GpxRepository().all_gpxes_sorted_downloads()
+    gpxes = GpxRepository.all_gpxes_sorted_downloads()
 
     # Convert JSON field into int
     for gpx in gpxes:
@@ -147,10 +147,10 @@ def gpx_details(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_by_id(gpx_id)
+    gpx = GpxRepository.one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"gpx_details(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("One GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("One GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -163,7 +163,7 @@ def gpx_details(gpx_id) -> Response | str:
     if not gpx.public and \
             not current_user.is_authenticated:
         app.logger.debug(f"gpx_details(): Refusing permission for non logged in user and hidden route '{gpx_id}'.")
-        EventRepository().log_event("One GPX Fail", f"Refusing permission for non logged in user and hidden route '{gpx_id}'.")
+        EventRepository.log_event("One GPX Fail", f"Refusing permission for non logged in user and hidden route '{gpx_id}'.")
         return redirect(url_for('not_logged_in'))   # type: ignore
 
     elif not gpx.public and \
@@ -171,15 +171,15 @@ def gpx_details(gpx_id) -> Response | str:
             not current_user.admin:
         app.logger.debug(f"gpx_details(): Refusing permission for user '{current_user.email}' to see "
                          f"hidden GPX route '{gpx.id}'!")
-        EventRepository().log_event("One GPX Fail", f"Refusing permission for user {current_user.email} to see "
+        EventRepository.log_event("One GPX Fail", f"Refusing permission for user {current_user.email} to see "
                                           f"hidden GPX route, gpx_id = '{gpx_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     # Get info for webpage
     # ----------------------------------------------------------- #
-    author = UserRepository().one_by_email(gpx.email).name
-    cafe_list = CafeRepository().cafes_passed_by_gpx(gpx.cafes_passed)
+    author = UserRepository.one_by_email(gpx.email).name
+    cafe_list = CafeRepository.cafes_passed_by_gpx(gpx.cafes_passed)
 
     # ----------------------------------------------------------- #
     # Double check GPX file actually exists
@@ -203,12 +203,12 @@ def gpx_details(gpx_id) -> Response | str:
         if admin:
             # Admin needs to be able to rectify the situation
             app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
-            EventRepository().log_event("One GPX Fail", f"Can't find '{filename}'!")
+            EventRepository.log_event("One GPX Fail", f"Can't find '{filename}'!")
             flash("Sorry, we seem to have lost that GPX file!")
         else:
             # Non admin just gets a Dear John...
             app.logger.debug(f"gpx_details(): Can't find '{filename}'!")
-            EventRepository().log_event("One GPX Fail", f"Can't find '{filename}'!")
+            EventRepository.log_event("One GPX Fail", f"Can't find '{filename}'!")
             flash("Sorry, we seem to have lost that GPX file!")
             flash("Someone should probably fire the web developer...")
             return abort(404)
@@ -254,7 +254,7 @@ def gpx_details(gpx_id) -> Response | str:
     # Is this GPX in the calendar as a ride or rides
     # ----------------------------------------------------------- #
     # If the route in attached to a ride in the Calendar, then they can't hide it as it would break the ride
-    rides = CalendarRepository().all_rides_gpx_id(gpx.id)
+    rides = CalendarRepository.all_rides_gpx_id(gpx.id)
 
     # ----------------------------------------------------------- #
     # Num downloads
@@ -304,7 +304,7 @@ def new_route() -> Response | str:
         if 'filename' not in request.files:
             # Almost certain the form failed validation
             app.logger.debug(f"new_route(): Failed to find 'filename' in request.files!")
-            EventRepository().log_event(f"New GPX Fail", f"Failed to find 'filename' in request.files!")
+            EventRepository.log_event(f"New GPX Fail", f"Failed to find 'filename' in request.files!")
             flash("Couldn't find the file.")
             return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
@@ -317,14 +317,14 @@ def new_route() -> Response | str:
             # empty file without a filename.
             if file.filename == '':
                 app.logger.debug(f"new_route(): No selected file!")
-                EventRepository().log_event(f"New GPX Fail", f"No selected file!")
+                EventRepository.log_event(f"New GPX Fail", f"No selected file!")
                 flash('No selected file')
                 return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             if not file or \
                     not allowed_file(file.filename):
                 app.logger.debug(f"new_route(): Invalid file '{file.filename}'!")
-                EventRepository().log_event(f"New GPX Fail", f"Invalid file '{file.filename}'!")
+                EventRepository.log_event(f"New GPX Fail", f"Invalid file '{file.filename}'!")
                 flash("That's not a GPX file!")
                 return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
@@ -347,11 +347,11 @@ def new_route() -> Response | str:
             if gpx:
                 # Success, added GPX to dB
                 app.logger.debug(f"new_route(): GPX added to dB, id = '{gpx.id}'.")
-                EventRepository().log_event(f"New GPX Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
+                EventRepository.log_event(f"New GPX Success", f" GPX added to dB, gpx.id = '{gpx.id}'.")
             else:
                 # Failed to create new dB entry
                 app.logger.debug(f"new_route(): Failed to add gpx to the dB!")
-                EventRepository().log_event(f"New GPX Fail", f"Failed to add gpx to the dB!")
+                EventRepository.log_event(f"New GPX Fail", f"Failed to add gpx to the dB!")
                 flash("Sorry, something went wrong!")
                 return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
@@ -370,14 +370,14 @@ def new_route() -> Response | str:
                 file.save(filename)
             except Exception as e:
                 app.logger.debug(f"new_route(): Failed to upload/save '{filename}', error code was {e.args}.")
-                EventRepository().log_event(f"New GPX Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
+                EventRepository.log_event(f"New GPX Fail", f"Failed to upload/save '{filename}', error code was {e.args}.")
                 flash("Sorry, something went wrong!")
                 return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
             # Update gpx object with filename
-            if not GpxRepository().update_filename(gpx.id, filename):
+            if not GpxRepository.update_filename(gpx.id, filename):
                 app.logger.debug(f"new_route(): Failed to update filename in the dB for gpx_id='{gpx.id}'.")
-                EventRepository().log_event(f"New GPX Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
+                EventRepository.log_event(f"New GPX Fail", f"Failed to update filename in the dB for gpx_id='{gpx.id}'.")
                 flash("Sorry, something went wrong!")
                 return render_template("gpx_add.html", year=current_year, form=form, live_site=live_site())
 
@@ -387,7 +387,7 @@ def new_route() -> Response | str:
 
             # Forward to edit route as that's the next step
             app.logger.debug(f"new_route(): New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
-            EventRepository().log_event(f"New GPX Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
+            EventRepository.log_event(f"New GPX Success", f"New GPX added, gpx_id = '{gpx.id}', ({gpx.name}).")
             return redirect(url_for('edit_route', gpx_id=gpx.id))   # type: ignore
 
     elif request.method == 'POST':
@@ -446,21 +446,21 @@ def route_delete() -> Response | str:
     # ----------------------------------------------------------- #
     if not gpx_id:
         app.logger.debug(f"route_delete(): Missing gpx_id!")
-        EventRepository().log_event("GPX Delete Fail", f"Missing gpx_id!")
+        EventRepository.log_event("GPX Delete Fail", f"Missing gpx_id!")
         return abort(400)
     elif not password:
         app.logger.debug(f"route_delete(): Missing Password!")
-        EventRepository().log_event("GPX Delete Fail", f"Missing Password!")
+        EventRepository.log_event("GPX Delete Fail", f"Missing Password!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_by_id(gpx_id)
+    gpx = GpxRepository.one_by_id(gpx_id)
 
     if not gpx:
         app.logger.debug(f"route_delete(): Failed to locate GPX with gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("GPX Delete Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("GPX Delete Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -469,19 +469,19 @@ def route_delete() -> Response | str:
     if current_user.email != gpx.email \
             and not current_user.admin:
         app.logger.debug(f"route_delete(): Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("GPX Delete Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("GPX Delete Fail", f"Refusing permission for '{current_user.email}', gpx_id = '{gpx_id}'.")
         return abort(403)
 
     # ----------------------------------------------------------- #
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().one_by_id(current_user.id)
+    user: UserModel | None = UserRepository.one_by_id(current_user.id)
 
     # Validate against current_user's password
-    if not user.validate_password(user, password, user_ip):
+    if not UserRepository.validate_password(user, password, user_ip):
         app.logger.debug(f"route_delete(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        EventRepository().log_event("GPX Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository.log_event("GPX Delete Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to route detail page
         return redirect(url_for('gpx_details', gpx_id=gpx_id))  # type: ignore
@@ -489,14 +489,14 @@ def route_delete() -> Response | str:
     # ----------------------------------------------------------- #
     # Delete #1: Remove from dB
     # ----------------------------------------------------------- #
-    if GpxRepository().delete_gpx(gpx.id):
+    if GpxRepository.delete_gpx(gpx.id):
         app.logger.debug(f"route_delete(): Success, gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("GPX Delete Success", f"Successfully deleted GPX from dB, gpx_id = {gpx_id}!")
+        EventRepository.log_event("GPX Delete Success", f"Successfully deleted GPX from dB, gpx_id = {gpx_id}!")
         flash("Route was deleted!")
     else:
         # Should never get here, but..
         app.logger.debug(f"route_delete(): Gpx().delete_gpx(gpx.id) failed for gpx.id = '{gpx.id}'.")
-        EventRepository().log_event("GPX Delete Fail", f"Gpx().delete_gpx(gpx.id) failed for gpx.id = '{gpx.id}'.")
+        EventRepository.log_event("GPX Delete Fail", f"Gpx().delete_gpx(gpx.id) failed for gpx.id = '{gpx.id}'.")
         flash("Sorry, something went wrong!")
         # Back to GPX list page
         return redirect(url_for('gpx_list'))  # type: ignore
@@ -510,7 +510,7 @@ def route_delete() -> Response | str:
         app.logger.debug(f"route_delete(): File '{filename}' deleted from directory.")
     except Exception as e:
         app.logger.debug(f"route_delete(): Failed to delete GPX file '{filename}', error code was '{e.args}'.")
-        EventRepository().log_event("GPX Delete Fail", f"Failed to delete GPX file '{filename}', "
+        EventRepository.log_event("GPX Delete Fail", f"Failed to delete GPX file '{filename}', "
                                              f"error code was {e.args}, gpx_id = {gpx_id}!")
 
     # Back to GPX list page
@@ -544,20 +544,20 @@ def flag_gpx() -> Response | str:
     # ----------------------------------------------------------- #
     if not reason:
         app.logger.debug(f"flag_gpx(): Missing reason!")
-        EventRepository().log_event("Flag GPX Fail", f"Missing reason!")
+        EventRepository.log_event("Flag GPX Fail", f"Missing reason!")
         return abort(400)
     elif not gpx_id:
         app.logger.debug(f"flag_gpx(): Missing gpx_id!")
-        EventRepository().log_event("Flag GPX Fail", f"Missing gpx_id!")
+        EventRepository.log_event("Flag GPX Fail", f"Missing gpx_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_by_id(gpx_id)
+    gpx = GpxRepository.one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"flag_gpx(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
-        EventRepository().log_event("Flag GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
+        EventRepository.log_event("Flag GPX Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -569,23 +569,23 @@ def flag_gpx() -> Response | str:
         body=f"GPX Objection to '{gpx.name}' (id={gpx.id}). Reason: {reason}"
     )
 
-    if MessageRepository().add_message(message):
+    if MessageRepository.add_message(message):
         # Success
         send_message_notification_email(message, current_user)
         app.logger.debug(f"flag_gpx(): Flagged GPX, gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("Flag GPX Success", f"Flagged GPX, gpx_id = '{gpx_id}', reason = '{reason}'.")
+        EventRepository.log_event("Flag GPX Success", f"Flagged GPX, gpx_id = '{gpx_id}', reason = '{reason}'.")
         flash("Your message has been forwarded to an admin.")
     else:
         # Should never get here, but....
         app.logger.debug(f"flag_gpx(): Message().add_message failed, gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("Flag GPX Fail", f"Message().add_message failed, gpx_id = '{gpx_id}', reason = '{reason}'.")
+        EventRepository.log_event("Flag GPX Fail", f"Message().add_message failed, gpx_id = '{gpx_id}', reason = '{reason}'.")
         flash("Sorry, something went wrong.")
 
     # ----------------------------------------------------------- #
     # Alert admin via SMS
     # ----------------------------------------------------------- #
     # Threading won't have access to current_user, so need to acquire persistent user to pass on
-    user = UserRepository().one_by_id(current_user.id)
+    user: UserModel | None = UserRepository.one_by_id(current_user.id)
     Thread(target=alert_admin_via_sms, args=(user, f"GPX '{gpx.name}', Reason: '{reason}'",)).start()
 
     # Back to GPX details page
@@ -604,10 +604,10 @@ def route_download(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_by_id(gpx_id)
+    gpx = GpxRepository.one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"route_download(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
-        EventRepository().log_event("GPX Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("GPX Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         flash("Sorry, we couldn't find that GPX file in the database!")
         return abort(404)
 
@@ -618,7 +618,7 @@ def route_download(gpx_id) -> Response | str:
     if not os.path.exists(filename):
         # Should never get here, but..
         app.logger.debug(f"route_download(): Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("GPX Download Fail", f"Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("GPX Download Fail", f"Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
         flash("Sorry, we couldn't find that GPX file on the server!")
         flash("You should probably fire the web developer...")
         return abort(404)
@@ -629,7 +629,7 @@ def route_download(gpx_id) -> Response | str:
     if not gpx.public:
         owner_name = get_user_name(gpx.email)
         app.logger.debug(f"route_download(): Private GPX, gpx_id = '{gpx_id}' in dB.")
-        EventRepository().log_event("GPX Download Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("GPX Download Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")
         flash(f"Sorry, that GPX file has been marked as Private by '{owner_name}'")
         return abort(404)
 
@@ -641,7 +641,7 @@ def route_download(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Update count
     # ----------------------------------------------------------- #
-    GpxRepository().update_downloads(gpx.id, current_user.email)
+    GpxRepository.update_downloads(gpx.id, current_user.email)
 
     # ----------------------------------------------------------- #
     # Send link to download the file
@@ -652,7 +652,7 @@ def route_download(gpx_id) -> Response | str:
 
     app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}) to '{current_user.email}', "
                      f"filename = '{filename}'.")
-    EventRepository().log_event("GPX Downloaded", f"Serving GPX gpx_id = '{gpx_id}' to '{current_user.email}', "
+    EventRepository.log_event("GPX Downloaded", f"Serving GPX gpx_id = '{gpx_id}' to '{current_user.email}', "
                                         f"filename = ({gpx.name}).")
     return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
                                path=os.path.basename(gpx.filename),
@@ -679,31 +679,31 @@ def gpx_download2() -> Response | str:
     # ----------------------------------------------------------- #
     if not gpx_id:
         app.logger.debug(f"gpx_download2(): Missing gpx_id!")
-        EventRepository().log_event("gpx_download2 Fail", f"missing gpx_id!")
+        EventRepository.log_event("gpx_download2 Fail", f"missing gpx_id!")
         abort(400)
     elif not email:
         app.logger.debug(f"gpx_download2(): Missing email!")
-        EventRepository().log_event("gpx_download2 Fail", f"Missing email!")
+        EventRepository.log_event("gpx_download2 Fail", f"Missing email!")
         abort(400)
     elif not code:
         app.logger.debug(f"gpx_download2(): Missing code!")
-        EventRepository().log_event("gpx_download2 Fail", f"Missing code!")
+        EventRepository.log_event("gpx_download2 Fail", f"Missing code!")
         abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_by_id(gpx_id)
+    gpx = GpxRepository.one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"gpx_download2(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
-        EventRepository().log_event("gpx_download2 Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("gpx_download2 Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
         flash("Sorry, we couldn't find that GPX file in the database!")
         return abort(404)
 
-    user = UserRepository().one_by_email(email)
+    user: UserModel | None = UserRepository.one_by_email(email)
     if not user:
         app.logger.debug(f"gpx_download2(): Failed to locate user email = '{email}'.")
-        EventRepository().log_event("gpx_download2 Fail", f"Failed to locate user email = '{email}'.")
+        EventRepository.log_event("gpx_download2 Fail", f"Failed to locate user email = '{email}'.")
         flash("Sorry, we couldn't find that email address in the database!")
         return abort(404)
 
@@ -712,7 +712,7 @@ def gpx_download2() -> Response | str:
     # ----------------------------------------------------------- #
     if user.blocked:
         app.logger.debug(f"gpx_download2(): User account blocked, email = '{email}'.")
-        EventRepository().log_event("gpx_download2 Fail", f" User account blocked, email = '{email}'.")
+        EventRepository.log_event("gpx_download2 Fail", f" User account blocked, email = '{email}'.")
         flash("Sorry, but your account has been locked!")
         return abort(403)
 
@@ -721,7 +721,7 @@ def gpx_download2() -> Response | str:
     # ----------------------------------------------------------- #
     if code != user.gpx_download_code(gpx.id):
         app.logger.debug(f"gpx_download2(): Passed invalid download code = '{code}'.")
-        EventRepository().log_event("gpx_download2 Fail", f"Passed invalid download code = '{code}'.")
+        EventRepository.log_event("gpx_download2 Fail", f"Passed invalid download code = '{code}'.")
         flash("Invalid download code!")
         return abort(404)
 
@@ -733,7 +733,7 @@ def gpx_download2() -> Response | str:
     if not os.path.exists(filename):
         # Should never get here, but..
         app.logger.debug(f"gpx_download2(): Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
-        EventRepository().log_event("gpx_download2 Fail", f"Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("gpx_download2 Fail", f"Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
         flash("Sorry, we couldn't find that GPX file on the server!")
         flash("You should probably fire the web developer...")
         return abort(404)
@@ -744,7 +744,7 @@ def gpx_download2() -> Response | str:
     if not gpx.public:
         owner_name = get_user_name(gpx.email)
         app.logger.debug(f"route_download2(): Private GPX, gpx_id = '{gpx_id}' in dB.")
-        EventRepository().log_event("gpx_download2 Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")
+        EventRepository.log_event("gpx_download2 Fail", f"Private GPX, GPX with gpx_id = '{gpx_id}'.")
         flash(f"Sorry, that GPX file has been marked as Private by '{owner_name}'")
         return abort(404)
 
@@ -756,7 +756,7 @@ def gpx_download2() -> Response | str:
     # ----------------------------------------------------------- #
     # Update count
     # ----------------------------------------------------------- #
-    GpxRepository().update_downloads(gpx.id, email)
+    GpxRepository.update_downloads(gpx.id, email)
 
     # ----------------------------------------------------------- #
     # Send link to download the file
@@ -767,7 +767,7 @@ def gpx_download2() -> Response | str:
 
     app.logger.debug(f"gpx_download2d(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}) to '{user.email}', "
                      f"filename = '{filename}'.")
-    EventRepository().log_event("gpx_download2", f"Serving GPX gpx_id = '{gpx_id}' to '{user.email}', "
+    EventRepository.log_event("gpx_download2", f"Serving GPX gpx_id = '{gpx_id}' to '{user.email}', "
                                        f"filename = ({gpx.name}).")
     return send_from_directory(directory=GPX_UPLOAD_FOLDER_ABS,
                                path=os.path.basename(gpx.filename),

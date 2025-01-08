@@ -7,11 +7,11 @@ from core import app
 # -------------------------------------------------------------------------------------------------------------- #
 
 def admin_has_mail() -> bool:
-    return MessageRepository().all_unread_messages_to_email(ADMIN_EMAIL)
+    return MessageRepository.all_unread_messages_to_email(ADMIN_EMAIL)
 
 
 def user_has_mail(email: str) -> bool:
-    return MessageRepository().all_unread_messages_to_email(email)
+    return MessageRepository.all_unread_messages_to_email(email)
 
 
 app.jinja_env.globals.update(admin_has_mail=admin_has_mail)

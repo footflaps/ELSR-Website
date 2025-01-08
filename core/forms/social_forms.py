@@ -9,7 +9,7 @@ from datetime import datetime
 # Import our own classes etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.social_repository import SIGN_UP_CHOICES, SOCIAL_FORM_PRIVATE, SOCIAL_FORM_PUBLIC
 
 
@@ -49,7 +49,7 @@ def create_social_form(admin: bool):
         # ----------------------------------------------------------- #
         # Generate the list of users
         # ----------------------------------------------------------- #
-        users = UserRepository().all_users_sorted()
+        users = UserRepository.all_users_sorted()
         all_users = []
         for user in users:
             all_users.append(user.combo_str)

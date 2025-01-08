@@ -75,7 +75,7 @@ def display_blog() -> Response | str:
         blog: BlogModel | None = Blog().one_by_id(blog_id)
         if not blog:
             app.logger.debug(f"blog(): Failed to locate blog, blog_id = '{blog_id}'.")
-            EventRepository().log_event("Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+            EventRepository.log_event("Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
             flash("Sorry, looks like that Blog post has been deleted...")
             return abort(404)
     else:
@@ -90,14 +90,14 @@ def display_blog() -> Response | str:
             if not current_user.is_authenticated:
                 # Not logged in
                 app.logger.debug(f"blog(): Refusing permission for unregistered user.")
-                EventRepository().log_event("Blog Fail", f"Refusing permission for unregistered user.")
+                EventRepository.log_event("Blog Fail", f"Refusing permission for unregistered user.")
                 flash("You must be logged in to see private blog posts!")
                 return redirect(url_for("not_logged_in"))
 
             elif not current_user.readwrite:
                 # Failed authentication
                 app.logger.debug(f"blog(): Refusing permission for '{current_user.email}'.")
-                EventRepository().log_event("Blog Fail", f"Refusing permission for '{current_user.email}'.")
+                EventRepository.log_event("Blog Fail", f"Refusing permission for '{current_user.email}'.")
                 flash("You do not have permission to see private blog posts!")
                 return redirect(url_for("not_rw"))
 
@@ -168,7 +168,7 @@ def blog_ics() -> Response | str:
     # ----------------------------------------------------------- #
     if not blog_id:
         app.logger.debug(f"blog_ics(): Missing blog_id.")
-        EventRepository().log_event("Blog ICS Fail", f"Missing blog_id.")
+        EventRepository.log_event("Blog ICS Fail", f"Missing blog_id.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -177,7 +177,7 @@ def blog_ics() -> Response | str:
     blog = Blog().one_by_id(blog_id)
     if not blog:
         app.logger.debug(f"blog_icsg(): Failed to locate blog, blog_id = '{blog_id}'.")
-        EventRepository().log_event("Blog ICS Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
+        EventRepository.log_event("Blog ICS Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -205,7 +205,7 @@ def blog_ics() -> Response | str:
 
     app.logger.debug(f"download_ics(): Serving ICS blog_id = '{blog_id}' ({blog.title}), "
                      f"download_name = '{download_name}'.")
-    EventRepository().log_event("ICS Downloaded", f"Serving ICS blog_id = '{blog_id}' ({blog.title}).")
+    EventRepository.log_event("ICS Downloaded", f"Serving ICS blog_id = '{blog_id}' ({blog.title}).")
     return send_from_directory(directory=ICS_DIRECTORY,
                                path=os.path.basename(filename),
                                download_name=download_name)

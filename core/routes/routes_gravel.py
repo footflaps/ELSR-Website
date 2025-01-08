@@ -71,7 +71,7 @@ def gravel_all() -> Response | str:
     # ----------------------------------------------------------- #
     # Grab all our routes
     # ----------------------------------------------------------- #
-    gpxes = GpxRepository().all_gravel()
+    gpxes = GpxRepository.all_gravel()
 
     # ----------------------------------------------------------- #
     # Double check we have all the files present
@@ -133,12 +133,12 @@ def gravel_ldt() -> Response | str:
     # ----------------------------------------------------------- #
     # Grab the specific routes
     # ----------------------------------------------------------- #
-    gpxes = [GpxRepository().one_by_id(REBELLION_WAY_INDEX),
-             GpxRepository().one_by_id(PEDARS_WAY_INDEX),
-             GpxRepository().one_by_id(WOLF_WAY_INDEX),
-             GpxRepository().one_by_id(WOLF_CUB_INDEX),
-             GpxRepository().one_by_id(WOLF_WINTER_INDEX),
-             GpxRepository().one_by_id(WOLF_EAST_INDEX)]
+    gpxes = [GpxRepository.one_by_id(REBELLION_WAY_INDEX),
+             GpxRepository.one_by_id(PEDARS_WAY_INDEX),
+             GpxRepository.one_by_id(WOLF_WAY_INDEX),
+             GpxRepository.one_by_id(WOLF_CUB_INDEX),
+             GpxRepository.one_by_id(WOLF_WINTER_INDEX),
+             GpxRepository.one_by_id(WOLF_EAST_INDEX)]
 
     # ----------------------------------------------------------- #
     # Double check we have all the files present
@@ -200,7 +200,7 @@ def gravel_local() -> Response | str:
     # ----------------------------------------------------------- #
     # Start with all gravel
     # ----------------------------------------------------------- #
-    all_gpxes = GpxRepository().all_gravel()
+    all_gpxes = GpxRepository.all_gravel()
 
     # ----------------------------------------------------------- #
     # Filter by start location

@@ -51,11 +51,11 @@ def display_socials() -> Response | str:
     # ----------------------------------------------------------- #
     if date:
         # Get socials specific to that date
-        socials = SocialRepository().all_socials_date(date)
+        socials = SocialRepository.all_socials_date(date)
 
     else:
         # Just get ones yet to happen
-        socials = SocialRepository().all_socials_future()
+        socials = SocialRepository.all_socials_future()
 
     # ----------------------------------------------------------- #
     # Tweak the data before we show it
@@ -115,16 +115,16 @@ def download_ics() -> Response | str:
     # ----------------------------------------------------------- #
     if not social_id:
         app.logger.debug(f"download_ics(): Missing social_id!")
-        EventRepository().log_event("download_ics Fail", f"Missing social_id!")
+        EventRepository.log_event("download_ics Fail", f"Missing social_id!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate social_id
     # ----------------------------------------------------------- #
-    social = SocialRepository().one_by_id(social_id)
+    social = SocialRepository.one_by_id(social_id)
     if not social:
         app.logger.debug(f"download_ics(): Failed to locate social, social_id = '{social_id}'.")
-        EventRepository().log_event("download_ics Fail", f"Failed to locate social, social_id = '{social_id}'.")
+        EventRepository.log_event("download_ics Fail", f"Failed to locate social, social_id = '{social_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -135,7 +135,7 @@ def download_ics() -> Response | str:
         # Failed authentication
         app.logger.debug(f"delete_social(): Refusing permission for '{current_user.email}' and "
                          f"social_id = '{social_id}' as Private.")
-        EventRepository().log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
+        EventRepository.log_event("Delete SocialX Fail", f"Refusing permission for '{current_user.email}', "
                                                  f"social_id = '{social_id}' as Private.")
         flash("Private events are for regular riders only!")
         return redirect(url_for("not_rw"))  # type: ignore
@@ -167,7 +167,7 @@ def download_ics() -> Response | str:
 
     app.logger.debug(f"download_ics(): Serving ICS social_id = '{social_id}' ({social.date}), "
                      f"download_name = '{download_name}'.")
-    EventRepository().log_event("ICS Downloaded", f"Serving ICS social_idd = '{social_id}' ({social.date}).")
+    EventRepository.log_event("ICS Downloaded", f"Serving ICS social_idd = '{social_id}' ({social.date}).")
     return send_from_directory(directory=ICS_DIRECTORY,
                                path=os.path.basename(filename),
                                download_name=download_name)

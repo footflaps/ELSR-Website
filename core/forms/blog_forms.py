@@ -11,7 +11,7 @@ from datetime import datetime
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core import GPX_UPLOAD_FOLDER_ABS
-from core.database.repositories.user_repository import UserRepository
+from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.blog_repository import NO_GPX, NO_CAFE, Sticky, Privacy, Category
@@ -50,7 +50,7 @@ def create_blogs_form(admin: bool):
         # Generate the list of users
         # ----------------------------------------------------------- #
 
-        users = UserRepository().all_users_sorted()
+        users = UserRepository.all_users_sorted()
         all_users = []
         for user in users:
             all_users.append(user.combo_str)
@@ -59,7 +59,7 @@ def create_blogs_form(admin: bool):
         # Generate the list of cafes
         # ----------------------------------------------------------- #
         cafe_choices = [NO_CAFE]
-        cafes = CafeRepository().all_cafes_sorted()
+        cafes = CafeRepository.all_cafes_sorted()
         for cafe in cafes:
             cafe_choices.append(cafe.combo_string)
 
@@ -67,7 +67,7 @@ def create_blogs_form(admin: bool):
         # Generate the list of routes
         # ----------------------------------------------------------- #
         gpx_choices = [NO_GPX]
-        gpxes = GpxRepository().all_gpxes_sorted()
+        gpxes = GpxRepository.all_gpxes_sorted()
         for gpx in gpxes:
             filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
             # Route must be public and double check we have an actual GPX file on tap....
