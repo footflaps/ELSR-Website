@@ -34,7 +34,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 
 from core.subs_gpx import allowed_file, GPX_UPLOAD_FOLDER_ABS
 from core.subs_gpx_edit import strip_excess_info_from_gpx
-from core.subs_email_sms import send_ride_notification_emails
+from core.subs_email import send_ride_notification_emails
 from core.subs_dates import get_date_from_url
 
 

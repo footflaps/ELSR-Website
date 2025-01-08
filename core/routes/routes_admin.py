@@ -18,12 +18,13 @@ from core import app, current_year, is_mobile, live_site
 # Import our own Classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository, SUPER_ADMIN_USER_ID
+from core.database.repositories.user_repository import UserModel, UserRepository, SUPER_ADMIN_USER_ID
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.social_repository import SocialRepository, SOCIAL_DB_PRIVATE
-from core.subs_email_sms import send_sms, get_twilio_balance, send_message_notification_email, email_ride_alert_summary
+from core.subs_email import send_message_notification_email, email_ride_alert_summary
+from core.subs_sms import send_sms, get_twilio_balance
 from core.subs_google_maps import maps_enabled, get_current_map_count, map_limit_by_day, graph_map_counts
 from core.database.repositories.blog_repository import BlogRepository as Blog
 from core.database.repositories.classified_repository import ClassifiedRepository
@@ -724,7 +725,7 @@ def user_readwrite() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user: UserModel | None = UserRepository().find_user_from_id(user_id)
     if not user:
         app.logger.debug(f"user_readwrite(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("ReadWrite Fail", f"Invalid user user_id = '{user_id}'!")

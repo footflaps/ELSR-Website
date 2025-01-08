@@ -610,16 +610,24 @@ class UserRepository(UserModel):
         else:
             return False
 
-    def notification_choice(self, chosen_name: str) -> int | bool:
+    @staticmethod
+    def notification_choice(user: UserModel, notification_type: str) -> bool:
+        """
+        Look up whether a given user has selected to receive email notifications for a
+        given notification type.
+        :param user:                            User ORM
+        :param notification_type:               The name of the notification type
+        :return:                                True if they have, False otherwise
+        """
         # Handle unset as new column
-        if not self.notifications:
-            self.notifications = 0
+        if not user.notifications:
+            user.notifications = 0
         # Loop through our set
         for notification in NOTIFICATIONS:
-            name = notification['name']
-            mask = notification['mask']
-            if name == chosen_name:
-                return self.notifications & mask
+            name: str = notification['name']
+            bit_mask: int = notification['mask']
+            if name == notification_type:
+                return bool(user.notifications & bit_mask)
         return False
 
     def check_name_in_use(self, name: str) -> bool:

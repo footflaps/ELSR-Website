@@ -21,7 +21,7 @@ from core.database.repositories.social_repository import SocialModel, SocialRepo
 from core.forms.social_forms import create_social_form
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.user_repository import UserModel, UserRepository
-from core.subs_email_sms import send_social_notification_emails
+from core.subs_email import send_social_notification_emails
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 

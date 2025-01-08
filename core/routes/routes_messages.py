@@ -18,7 +18,8 @@ from core import app
 from core.database.repositories.user_repository import UserRepository
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
-from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
+from core.subs_email import send_message_notification_email
+from core.subs_sms import alert_admin_via_sms
 
 from core.decorators.user_decorators import admin_only, update_last_seen, logout_barred_user, login_required
 

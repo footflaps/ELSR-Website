@@ -16,10 +16,10 @@ from core import app, current_year, live_site, admin_email_address
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.user_repository import UserRepository
-from core.forms.user_forms import LoginUserForm, ResetPasswordForm
 from core.database.repositories.event_repository import EventRepository
-from core.subs_email_sms import send_reset_email, send_verification_email, send_2fa_sms
-
+from core.forms.user_forms import LoginUserForm, ResetPasswordForm
+from core.subs_email import send_reset_email, send_verification_email
+from core.subs_sms import send_2fa_sms
 from core.decorators.user_decorators import update_last_seen
 
 

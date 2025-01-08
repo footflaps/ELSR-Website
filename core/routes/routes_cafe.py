@@ -30,7 +30,9 @@ from core.forms.cafe_comment_forms import CreateCafeCommentForm
 
 from core.subs_google_maps import (create_polyline_set, MAX_NUM_GPX_PER_GRAPH, ELSR_HOME, MAP_BOUNDS,
                                    google_maps_api_key, count_map_loads)
-from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
+from core.subs_email import send_message_notification_email
+from core.subs_sms import alert_admin_via_sms
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Constants used to verify sensible cafe coordinates

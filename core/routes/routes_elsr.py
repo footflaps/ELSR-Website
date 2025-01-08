@@ -28,7 +28,7 @@ from core.decorators.user_decorators import update_last_seen
 from core.database.repositories.cafe_repository import CafeModel, CafeRepository, OPEN_CAFE_COLOUR, BEAN_THEORY_INDEX
 from core.database.repositories.user_repository import UserRepository
 from core.subs_google_maps import google_maps_api_key, ELSR_HOME, MAP_BOUNDS, count_map_loads
-from core.subs_email_sms import contact_form_email
+from core.subs_email import contact_form_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #

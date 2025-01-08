@@ -26,7 +26,8 @@ from core.database.jinja.user_jinja import get_user_name
 from core.forms.classified_forms import create_classified_form
 
 from core.subs_classified_photos import delete_classifieds_photos, delete_all_classified_photos, add_classified_photos
-from core.subs_email_sms import send_message_to_seller, alert_admin_via_sms
+from core.subs_email import send_message_to_seller
+from core.subs_sms import alert_admin_via_sms
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 

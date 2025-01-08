@@ -26,7 +26,7 @@ from core import app, current_year, live_site
 # Import our database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.user_repository import UserRepository, DELETED_NAME, NOTIFICATIONS_DEFAULT_VALUE
+from core.database.repositories.user_repository import UserModel, UserRepository, DELETED_NAME, NOTIFICATIONS_DEFAULT_VALUE
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository

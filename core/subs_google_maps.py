@@ -20,8 +20,9 @@ from core import app, GPX_UPLOAD_FOLDER_ABS, CONFIG_FOLDER, NEW_GOOGLE_MAPS_API_
 
 from core.database.repositories.user_repository import UserRepository, SUPER_ADMIN_USER_ID
 from core.database.repositories.cafe_repository import CafeRepository
-from core.subs_email_sms import send_system_alert_email, send_sms
 from core.database.repositories.event_repository import EventRepository
+from core.subs_email import send_system_alert_email
+from core.subs_sms import send_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #

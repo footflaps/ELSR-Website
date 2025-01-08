@@ -20,7 +20,7 @@ from core.database.repositories.gpx_repository import GpxModel, GpxRepository, G
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
-from core.subs_email_sms import send_ride_notification_emails
+from core.subs_email import send_ride_notification_emails
 
 
 # -------------------------------------------------------------------------------------------------------------- #

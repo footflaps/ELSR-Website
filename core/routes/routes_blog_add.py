@@ -28,7 +28,8 @@ from core.forms.blog_forms import create_blogs_form
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
 from core.subs_blog_photos import update_blog_photo, delete_blog_photos
-from core.subs_email_sms import alert_admin_via_sms, send_blog_notification_emails
+from core.subs_email import send_blog_notification_emails
+from core.subs_sms import alert_admin_via_sms
 
 
 # -------------------------------------------------------------------------------------------------------------- #

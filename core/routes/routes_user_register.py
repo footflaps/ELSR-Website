@@ -20,8 +20,8 @@ from core.database.repositories.user_repository import UserRepository, DELETED_N
 from core.forms.user_forms import CreateUserForm, VerifyUserForm, TwoFactorLoginForm, VerifySMSForm
 from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
-from core.subs_email_sms import send_verification_email, send_sms_verif_code
-from core.subs_email_sms import alert_admin_via_sms
+from core.subs_email import send_verification_email
+from core.subs_sms import alert_admin_via_sms, send_sms_verif_code
 
 from core.decorators.user_decorators import login_required, update_last_seen, logout_barred_user
 

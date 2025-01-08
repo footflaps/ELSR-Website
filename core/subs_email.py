@@ -1,8 +1,4 @@
-from flask import url_for
 import smtplib
-from requests.auth import HTTPBasicAuth
-from twilio.rest import Client
-import requests
 from unidecode import unidecode
 from datetime import datetime
 import json
@@ -12,22 +8,22 @@ import json
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import (app, live_site, gmail_admin_acc_email, gmail_admin_acc_password, brf_personal_email,
-                  twilio_account_sid, twilio_auth_token, twilio_mobile_number)
+from core import app, live_site, gmail_admin_acc_email, gmail_admin_acc_password, brf_personal_email
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.event_repository import EventRepository
 from core.database.models.user_model import MESSAGE_NOTIFICATION, GROUP_NOTIFICATIONS, SOCIAL_NOTIFICATION, BLOG_NOTIFICATION
-from core.database.repositories.user_repository import UserRepository, UNVERIFIED_PHONE_PREFIX, SUPER_ADMIN_USER_ID
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
-from core.database.repositories.calendar_repository import CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES
-from core.database.repositories.social_repository import SocialRepository
-from core.database.repositories.blog_repository import BlogRepository as Blog, Privacy
-from core.database.repositories.gpx_repository import GpxRepository
+from core.database.repositories.event_repository import EventRepository
+from core.database.repositories.user_repository import UserModel, UserRepository, UNVERIFIED_PHONE_PREFIX, SUPER_ADMIN_USER_ID
+from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
+from core.database.repositories.calendar_repository import CalendarModel, CalendarRepository, GROUP_CHOICES, DEFAULT_START_TIMES
+from core.database.repositories.social_repository import SocialModel, SocialRepository
+from core.database.repositories.blog_repository import BlogModel, BlogRepository, Privacy
+from core.database.repositories.gpx_repository import GpxModel, GpxRepository
+from core.database.repositories.classified_repository import ClassifiedModel, ClassifiedRepository
 
 from core.database.jinja.calendar_jinja import start_time_string, beautify_date
 from core.database.jinja.user_jinja import get_user_name
@@ -152,9 +148,9 @@ CLASSIFIED_BODY = "Dear [USER], \n\n" \
 # Send Blog notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_blog_notification_emails(blog: Blog):
+def send_blog_notification_emails(blog: BlogModel) -> None:
     # ----------------------------------------------------------- #
-    # Make sure social exists
+    # Make sure blog exists
     # ----------------------------------------------------------- #
     if not blog:
         app.logger.debug(f"send_blog_notification_emails(): Passed invalid blog object")
@@ -165,7 +161,7 @@ def send_blog_notification_emails(blog: Blog):
     # Scan all users
     # ----------------------------------------------------------- #
     for user in UserRepository().all_users():
-        if user.notification_choice(BLOG_NOTIFICATION):
+        if UserRepository.notification_choice(user, BLOG_NOTIFICATION):
             # Users without write permissions can't see private blog posts
             if blog.private == Privacy.PUBLIC \
                     or user.readwrite:
@@ -175,7 +171,7 @@ def send_blog_notification_emails(blog: Blog):
                 send_one_blog_notification_email(user, blog)
 
 
-def send_one_blog_notification_email(user: UserRepository, blog: Blog):
+def send_one_blog_notification_email(user: UserModel, blog: BlogModel) -> None:
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -183,6 +179,7 @@ def send_one_blog_notification_email(user: UserRepository, blog: Blog):
         app.logger.debug(f"send_one_blog_notification_email(): Passed invalid user object")
         EventRepository().log_event("send_one_blog_notification_email() Fail", f"Passed invalid user object")
         return
+
     if not blog:
         app.logger.debug(f"send_one_blog_notification_email(): Passed invalid blog object")
         EventRepository().log_event("send_one_blog_notification_email() Fail", f"Passed invalid blog object")
@@ -234,26 +231,33 @@ def send_one_blog_notification_email(user: UserRepository, blog: Blog):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
+            print(f"Sending Blog notification to '{target_email}'")
             EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
             EventRepository().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
                                             f"error code was '{e.args}'.")
-            return False
+            return
 
 
-# user = User().find_user_from_id(1)
-# blog = Blog().find_blog_from_id(1)
-# send_one_blog_notification_email(user, blog)
+# # Test Blogs
+# if not live_site():
+#     blog: BlogModel | None = BlogRepository.one_by_id(1)
+#     if blog:
+#         print("Sending blog notifications....")
+#         send_blog_notification_emails(blog)
+#     else:
+#         print("Can't find blog!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send Social notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_social_notification_emails(social: SocialRepository):
+def send_social_notification_emails(social: SocialModel) -> None:
     # ----------------------------------------------------------- #
     # Make sure social exists
     # ----------------------------------------------------------- #
@@ -266,14 +270,14 @@ def send_social_notification_emails(social: SocialRepository):
     # Scan all users
     # ----------------------------------------------------------- #
     for user in UserRepository().all_users():
-        if user.notification_choice(SOCIAL_NOTIFICATION):
+        if UserRepository.notification_choice(user, SOCIAL_NOTIFICATION):
             # ----------------------------------------------------------- #
             # Send email
             # ----------------------------------------------------------- #
             send_one_social_notification_email(user, social)
 
 
-def send_one_social_notification_email(user: UserRepository, social: SocialRepository):
+def send_one_social_notification_email(user: UserModel, social: SocialModel) -> None:
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -281,6 +285,7 @@ def send_one_social_notification_email(user: UserRepository, social: SocialRepos
         app.logger.debug(f"send_one_social_notification_email(): Passed invalid user object")
         EventRepository().log_event("send_one_social_notification_email() Fail", f"Passed invalid user object")
         return
+
     if not social:
         app.logger.debug(f"send_one_social_notification_email(): Passed invalid social object")
         EventRepository().log_event("send_one_social_notification_email() Fail", f"Passed invalid social object")
@@ -333,25 +338,33 @@ def send_one_social_notification_email(user: UserRepository, social: SocialRepos
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
+            print(f"Sending Social notification to '{target_email}'")
             EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
             EventRepository().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
                                             f"error code was '{e.args}'.")
-            return False
+            return
 
-# user = User().find_user_from_id(1)
-# social = Socials().one_social_id(1)
-# send_one_social_notification_email(user, social)
+
+# # Test Socials
+# if not live_site():
+#     social: SocialModel | None = SocialRepository.one_by_id(1)
+#     if social:
+#         print("Sending social notifications....")
+#         send_social_notification_emails(social)
+#     else:
+#         print("Can't find social!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send ride notifications
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_ride_notification_emails(ride: CalendarRepository):
+def send_ride_notification_emails(ride: CalendarModel) -> None:
     # ----------------------------------------------------------- #
     # Make sure ride exists
     # ----------------------------------------------------------- #
@@ -364,7 +377,7 @@ def send_ride_notification_emails(ride: CalendarRepository):
     # ----------------------------------------------------------- #
     # Make sure the GPX exists
     # ----------------------------------------------------------- #
-    gpx = GpxRepository().one_by_id(ride.gpx_id)
+    gpx: GpxModel | None = GpxRepository().one_by_id(ride.gpx_id)
     if not gpx:
         # Should never happen, but...
         app.logger.debug(f"send_ride_notification_emails(): Can't find GPX, ride.id = '{ride.id}', "
@@ -410,7 +423,7 @@ def send_ride_notification_emails(ride: CalendarRepository):
         for choice, notification in zip(GROUP_CHOICES, GROUP_NOTIFICATIONS):
             # Match both the ride and the user's email preference
             if ride.group == choice and \
-                    user.notification_choice(notification):
+                    UserRepository.notification_choice(user, notification):
 
                 # ----------------------------------------------------------- #
                 # Send email
@@ -418,7 +431,7 @@ def send_ride_notification_emails(ride: CalendarRepository):
                 send_one_ride_notification_email(user, ride)
 
 
-def send_one_ride_notification_email(user: UserRepository, ride: CalendarRepository):
+def send_one_ride_notification_email(user: UserModel, ride: CalendarModel) -> None:
     # ----------------------------------------------------------- #
     # Make sure user and ride exist
     # ----------------------------------------------------------- #
@@ -426,6 +439,7 @@ def send_one_ride_notification_email(user: UserRepository, ride: CalendarReposit
         app.logger.debug(f"send_one_ride_notification_email(): Passed invalid user object")
         EventRepository().log_event("send_one_ride_notification_email() Fail", f"Passed invalid user object")
         return
+
     if not ride:
         app.logger.debug(f"send_one_ride_notification_email(): Passed invalid ride object")
         EventRepository().log_event("send_one_ride_notification_email() Fail", f"Passed invalid ride object")
@@ -521,72 +535,78 @@ def send_one_ride_notification_email(user: UserRepository, ride: CalendarReposit
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
+            print(f"Sending {group} ride notification to '{target_email}'.")
             EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
             EventRepository().log_event("Email Fail", f"Failed to send message email to '{target_email}', "
                                             f"error code was '{e.args}'.")
-            return False
+            return
 
-# user = User().find_user_from_id(1)
-# ride = Calendar().one_ride_id(1)
-# send_one_ride_notification_email(user, ride)
 
-# for group in GROUP_CHOICES:
-#     ride = Calendar(group=group)
-#     print(f"Testing ride {ride.group}")
-#     send_ride_notification_emails(ride)
+# # Test Ride Notifications
+# if not live_site():
+#     ride: CalendarModel | None = CalendarRepository.one_by_id(4)
+#     if ride:
+#         print("Sending ride notifications....")
+#         send_ride_notification_emails(ride)
+#     else:
+#         print("Can't find ride!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send email notification for message to user
 # -------------------------------------------------------------------------------------------------------------- #
 
-def send_message_notification_email(message: MessageRepository, user: UserRepository):
+def send_message_notification_email(message: MessageModel, user: UserModel) -> bool:
     # ----------------------------------------------------------- #
     # Make sure user and message exist
     # ----------------------------------------------------------- #
     if not user:
         app.logger.debug(f"send_message_notification_email(): Passed invalid user object")
         EventRepository().log_event("send_message_notification_email() Fail", f"Passed invalid user object")
-        return
+        return False
+
     if not message:
         app.logger.debug(f"send_message_notification_email(): Passed invalid message object")
         EventRepository().log_event("send_message_notification_email() Fail", f"Passed invalid message object")
-        return
+        return False
 
     # ----------------------------------------------------------- #
     # Check user wants email alerts for messages
     # ----------------------------------------------------------- #
-    if user == ADMIN_EMAIL:
+    if message.to_email == ADMIN_EMAIL:
         # Send email to admins not really supported
         print(f"Message to admins.... TBC")
-        return
-    elif not user.notification_choice(MESSAGE_NOTIFICATION):
+        return False
+
+    elif not UserRepository.notification_choice(user, MESSAGE_NOTIFICATION):
         # Nope, so just return
         print(f"User '{user.email}' doesn't want email alerts for messages.")
-        return
+        return False
+
     else:
         print(f"User '{user.email}' does want email alerts for messages.")
 
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
-    target_email = unidecode(user.email)
-    user_name = unidecode(user.name)
-    content = unidecode(message.body)
+    target_email: str = unidecode(user.email)
+    user_name: str = unidecode(user.name)
+    content: str = unidecode(message.body)
     if message.from_email == ADMIN_EMAIL:
-        from_name = "The Admin Team"
+        from_name: str = "The Admin Team"
     else:
         from_name = unidecode(get_user_name(message.from_email))
 
     # ----------------------------------------------------------- #
     # Create hyperlinks
     # ----------------------------------------------------------- #
-    user_page = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
-    one_click_unsubscribe = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code}"
+    user_page: str = f"https://www.elsr.co.uk/user_page?user_id={user.id}&anchor=account"
+    one_click_unsubscribe: str = f"https://www.elsr.co.uk/unsubscribe_all?email={user.email}&code={user.unsubscribe_code}"
 
     # ----------------------------------------------------------- #
     # Don't message from test site
@@ -595,15 +615,15 @@ def send_message_notification_email(message: MessageRepository, user: UserReposi
         # Only message developer
         if user.id != SUPER_ADMIN_USER_ID:
             # Suppress SMS
-            return
+            return False
 
     # ----------------------------------------------------------- #
     # Send an email
     # ----------------------------------------------------------- #
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as connection:
         connection.login(user=gmail_admin_acc_email, password=gmail_admin_acc_password)
-        subject = f"ELSR: Message notification from '{from_name}'"
-        body = MESSAGE_BODY.replace("[USER]", user_name)
+        subject: str = f"ELSR: Message notification from '{from_name}'"
+        body: str = MESSAGE_BODY.replace("[USER]", user_name)
         body = body.replace("[BODY]", content)
         body = body.replace("[FROM]", from_name)
         body = body.replace("[ACCOUNT_LINK]", user_page)
@@ -618,6 +638,7 @@ def send_message_notification_email(message: MessageRepository, user: UserReposi
             app.logger.debug(f"Email(): sent message email to '{target_email}'")
             EventRepository().log_event("Email Success", f"Sent message email to '{target_email}'.")
             return True
+
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message email to '{target_email}', error code was '{e.args}'.")
@@ -626,24 +647,29 @@ def send_message_notification_email(message: MessageRepository, user: UserReposi
             return False
 
 
-# user = User().find_user_from_id(1)
-# print(f"user.notifications = '{user.notifications}'")
-# message = Message(
-#     from_email=ADMIN_EMAIL,
-#     to_email="ben@freeman.net",
-#     body=f"Hi Ben. from fred"
-# )
-# send_message_notification_email(message, user)
+# # Test Message Notifications
+# if not live_site():
+#     user: UserModel | None = UserRepository().find_user_from_id(1)
+#     if user:
+#         print("Sending message notifications....")
+#         message = MessageModel(
+#                 from_email=ADMIN_EMAIL,
+#                 to_email="ben@freeman.net",
+#                 body=f"Hi Ben. from fred"
+#             )
+#         send_message_notification_email(message, user)
+#     else:
+#         print("Can't find user!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send message to classified seller
 # -------------------------------------------------------------------------------------------------------------- #
-def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, buyer_message):
+def send_message_to_seller(classified: ClassifiedModel, buyer_name: str, buyer_email: str, buyer_mobile: str, buyer_message: str) -> None:
     # ----------------------------------------------------------- #
     # Find user
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_email(classified.email)
+    user: UserModel | None = UserRepository().find_user_from_email(classified.email)
     if not user:
         app.logger.debug(f"send_message_to_seller(): Can't locate user from email = '{classified.email}'.")
         EventRepository().log_event("send_message_to_seller() Fail", f"Can't locate user from email = '{classified.email}'.")
@@ -695,19 +721,34 @@ def send_message_to_seller(classified, buyer_name, buyer_email, buyer_mobile, bu
             )
             app.logger.debug(f"Alert Email(): sent message to '{brf_personal_email}'.")
             EventRepository().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Alert Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
             EventRepository().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
                                                   f"error code was '{e.args}'.")
-            return False
+            return
+
+
+# # Test Classified Message
+# if not live_site():
+#     classified: ClassifiedModel | None = ClassifiedRepository.find_by_id(2)
+#     if classified:
+#         print("Sending classified notifications....")
+#         send_message_to_seller(classified=classified,
+#                                buyer_name="ben",
+#                                buyer_email="a@b.c",
+#                                buyer_mobile="123",
+#                                buyer_message="buy!")
+#     else:
+#         print("Can't find classified!")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Send email verification code to new user
 # -------------------------------------------------------------------------------------------------------------- #
-def send_verification_email(target_email, user_name, code):
+def send_verification_email(target_email: str, user_name: str, code: int) -> None:
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
@@ -718,6 +759,7 @@ def send_verification_email(target_email, user_name, code):
     # Don't message from test site
     # ----------------------------------------------------------- #
     if not live_site():
+        print(f"Suppressing email verification for '{target_email}' from Test Site!")
         return
 
     # ----------------------------------------------------------- #
@@ -736,20 +778,30 @@ def send_verification_email(target_email, user_name, code):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent verification email to '{target_email}'")
+            print(f"Sending verification email to '{target_email}'.")
             EventRepository().log_event("Email Success", f"Sent verification email to '{target_email}'.")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send verification email to '{target_email}', error code was '{e.args}'.")
             EventRepository().log_event("Email Fail", f"Failed to send verification email to '{target_email}', "
                                             f"error code was '{e.args}'.")
-            return False
+            return
+
+
+# # Test Email Verification code
+# if not live_site():
+#     print("Sending verification email....")
+#     user: UserModel | None = UserRepository.find_user_from_id(SUPER_ADMIN_USER_ID)
+#     if user:
+#         send_verification_email(target_email=user.email, user_name="Ben", code=123456)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Sent reset password code to user
 # -------------------------------------------------------------------------------------------------------------- #
-def send_reset_email(target_email, user_name, code):
+def send_reset_email(target_email: str, user_name: str, code: int) -> None:
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
@@ -760,6 +812,7 @@ def send_reset_email(target_email, user_name, code):
     # Don't message from test site
     # ----------------------------------------------------------- #
     if not live_site():
+        print(f"Suppressing email reset for '{target_email}' from Test Site!")
         return
 
     # ----------------------------------------------------------- #
@@ -778,20 +831,30 @@ def send_reset_email(target_email, user_name, code):
                 msg=f"To:{target_email}\nSubject:{subject}\n\n{body}"
             )
             app.logger.debug(f"Email(): sent reset email to '{target_email}'")
+            print(f"Sending reset email to '{target_email}'.")
             EventRepository().log_event("Email Success", f"Sent reset email to '{target_email}'.")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send reset email to '{target_email}', error code was '{e.args}'.")
             EventRepository().log_event("Email Fail", f"Failed to send reset email to '{target_email}', "
                                             f"error code was '{e.args}'.")
-            return False
+            return
+
+
+# # Test Email Reset code
+# if not live_site():
+#     print("Sending reset email....")
+#     user: UserModel | None = UserRepository.find_user_from_id(SUPER_ADMIN_USER_ID)
+#     if user:
+#         send_reset_email(target_email=user.email, user_name="Ben", code=123456)
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Forward message from contact form onto site owner (BRF)
 # -------------------------------------------------------------------------------------------------------------- #
-def contact_form_email(from_name, from_email, body):
+def contact_form_email(from_name: str, from_email: str, body: str) -> None:
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
@@ -813,19 +876,28 @@ def contact_form_email(from_name, from_email, body):
             )
             app.logger.debug(f"Email(): sent message to '{brf_personal_email}'.")
             EventRepository().log_event("Email Success", f"Sent message to '{brf_personal_email}'")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
             EventRepository().log_event("Email Fail", f"Failed to send message to '{brf_personal_email}', "
                                             f"error code was '{e.args}'.")
-            return False
+            return
+
+
+# # Test Contact Form Email message
+# if not live_site():
+#     print("Sending contact form email....")
+#     user: UserModel | None = UserRepository.find_user_from_id(SUPER_ADMIN_USER_ID)
+#     if user:
+#         contact_form_email(from_name="from me", from_email="a@b.c", body="Hello there")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Internal system alerts to site owner (BRF)
 # -------------------------------------------------------------------------------------------------------------- #
-def send_system_alert_email(body):
+def send_system_alert_email(body: str) -> None:
     # ----------------------------------------------------------- #
     # Strip out any non ascii chars
     # ----------------------------------------------------------- #
@@ -845,157 +917,50 @@ def send_system_alert_email(body):
             )
             app.logger.debug(f"Alert Email(): sent message to '{brf_personal_email}'.")
             EventRepository().log_event("Alert Email Success", f"Sent message to '{brf_personal_email}'")
-            return True
+            return
+
         except Exception as e:
             app.logger.debug(
                 f"Alert Email(): Failed to send message to '{brf_personal_email}', error code was '{e.args}'.")
             EventRepository().log_event("Alert Email Fail", f"Failed to send message to '{brf_personal_email}', "
                                                   f"error code was '{e.args}'.")
-            return False
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# SMS Functions
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-# -------------------------------------------------------------------------------------------------------------- #
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Send SMS for Two Factor Authentication
-# -------------------------------------------------------------------------------------------------------------- #
-def send_2fa_sms(user):
-    # ----------------------------------------------------------- #
-    # Don't message from test site
-    # ----------------------------------------------------------- #
-    if not live_site():
-        # Only message developer
-        if user.id != SUPER_ADMIN_USER_ID:
-            # Suppress SMS
             return
 
-    # ----------------------------------------------------------- #
-    # Send SMS via Twilio
-    # ----------------------------------------------------------- #
-    client = Client(twilio_account_sid, twilio_auth_token)
-    message = client.messages.create(
-        body=f"2FA URL: https://www.elsr.co.uk/{url_for('twofa_login')}?code={user.verification_code}"
-             f"&email='{user.email}'  Code is {user.verification_code}",
-        from_=twilio_mobile_number,
-        to=user.phone_number
-    )
-    EventRepository().log_event("SMS", f"SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
-    app.logger.debug(f"send_sms(): SMS 2FA sent to '{user.email}'. Status is '{message.status}'.")
 
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Send SMS to verify phone number is correct
-# -------------------------------------------------------------------------------------------------------------- #
-def send_sms_verif_code(user):
-    # ----------------------------------------------------------- #
-    # Don't message from test site
-    # ----------------------------------------------------------- #
-    if not live_site():
-        # Only message developer
-        if user.id != SUPER_ADMIN_USER_ID:
-            # Suppress SMS
-            return
-
-    # ----------------------------------------------------------- #
-    # Send SMS via Twilio
-    # ----------------------------------------------------------- #
-    client = Client(twilio_account_sid, twilio_auth_token)
-    message = client.messages.create(
-        body=f"Mobile verification URL: https://www.elsr.co.uk{url_for('mobile_verify')}?code={user.verification_code}"
-             f"&email='{user.email}'   Code is {user.verification_code}",
-        from_=twilio_mobile_number,
-        to=user.phone_number[len(UNVERIFIED_PHONE_PREFIX):len(user.phone_number)]
-    )
-    EventRepository().log_event("SMS", f"SMS code sent to '{user.email}'. Status is '{message.status}'.")
-    app.logger.debug(f"send_sms(): SMS code sent to '{user.email}'. Status is '{message.status}'.")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Generic send SMS
-# -------------------------------------------------------------------------------------------------------------- #
-def send_sms(user, body):
-    # ----------------------------------------------------------- #
-    # Don't message from test site
-    # ----------------------------------------------------------- #
-    if not live_site():
-        # Only message developer
-        if user.id != SUPER_ADMIN_USER_ID:
-            # Suppress SMS
-            return
-
-    # ----------------------------------------------------------- #
-    # Strip out any non ascii chars
-    # ----------------------------------------------------------- #
-    body = unidecode(body)
-
-    # ----------------------------------------------------------- #
-    # Send SMS
-    # ----------------------------------------------------------- #
-    client = Client(twilio_account_sid, twilio_auth_token)
-    message = client.messages.create(
-        body=body,
-        from_=twilio_mobile_number,
-        to=user.phone_number
-    )
-    EventRepository().log_event("SMS", f"Sent SMS to '{user.email}'. Status is '{message.status}'.")
-    app.logger.debug(f"send_sms(): Sent SMS to '{user.email}'. Status is '{message.status}'.")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Alert Admin
-# -------------------------------------------------------------------------------------------------------------- #
-def alert_admin_via_sms(from_user: UserRepository, message: str):
-    # ----------------------------------------------------------- #
-    #   Loop over all Admins
-    # ----------------------------------------------------------- #
-    admins = UserRepository().all_admins()
-    for admin in admins:
-        # All admins should have a valid phone number...
-        if admin.has_valid_phone_number:
-            # ----------------------------------------------------------- #
-            #   Send SMS
-            # ----------------------------------------------------------- #
-            send_sms(admin, f"ELSR Admin alert from '{from_user.name}': {message}")
-        else:
-            # Should never get here, but..
-            EventRepository().log_event("SMS admin alert", f"Admin '{admin.email}' doesn't appear to have a valid mobile number.")
-            app.logger.debug(f"alert_admin_sms(): Admin '{admin.email}' doesn't appear to have a valid mobile number.")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Get Twillio balance
-# -------------------------------------------------------------------------------------------------------------- #
-def get_twilio_balance():
-    url = f"https://api.twilio.com/2010-04-01/Accounts/{twilio_account_sid}/Balance.json"
-    auth = HTTPBasicAuth(twilio_account_sid, twilio_auth_token)
-    response = requests.get(url=url, auth=auth)
-    response.raise_for_status()
-    return [float(response.json()['balance']), response.json()['currency']]
+# # Test System alert emails
+# if not live_site():
+#     print("Sending system alert emails....")
+#     send_system_alert_email(body="Hello there")
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Summarise who gets emails
 # -------------------------------------------------------------------------------------------------------------- #
-def email_ride_alert_summary():
+def email_ride_alert_summary() -> dict[str, list[str]]:
+    """
+    Look up which users have requested email notifications by notification type eg decaff, espresso etc.
+    This is used the Admin page to summarise who gets emails.
+    :return:                A dictionary whose key is the notification type and whose value is a list of emails.
+    """
     # Get all users
-    users = UserRepository().all_users_sorted()
-    # Scan by ride types
-    results = {}
+    users: list[UserModel] = UserRepository().all_users_sorted()
+    # We return a dictionary whose key is the notification type and whose value is a list of emails.
+    results: dict[str, list[str]] = {}
+
+    # Combine Ride Groups with other categories
     one_words = GROUP_CHOICES + ["Socials", "Blogs", "Messages"]
     user_notifications = GROUP_NOTIFICATIONS + [SOCIAL_NOTIFICATION, BLOG_NOTIFICATION, MESSAGE_NOTIFICATION]
+
+    # Loop by category
     for choice, notification in zip(one_words, user_notifications):
-        alerted_users = []
+        # Build a list of emails for this category
+        alerted_users: list[str] = []
         for user in users:
-            if user.notification_choice(notification):
+            # See if the user signed up or not
+            if UserRepository.notification_choice(user, notification):
                 alerted_users.append(user.email)
         results[choice] = alerted_users
+
     # Return our Dictionary
     return results
 

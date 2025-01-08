@@ -33,7 +33,8 @@ from core.subs_google_maps import polyline_json, markers_for_cafes_native, MAP_B
                                   count_map_loads
 from core.subs_gpx_edit import check_route_name, strip_excess_info_from_gpx
 from core.subs_graphjs import get_elevation_data, get_cafe_heights_from_gpx
-from core.subs_email_sms import alert_admin_via_sms, send_message_notification_email
+from core.subs_email import send_message_notification_email
+from core.subs_sms import alert_admin_via_sms
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
 
