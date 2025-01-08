@@ -244,7 +244,7 @@ def user_page() -> Response | str:
         if message.from_email == ADMIN_EMAIL:
             message.from_name = "Admin team"
         else:
-            message.from_name = UserRepository().find_user_from_email(message.from_email).name
+            message.from_name = UserRepository().one_by_email(message.from_email).name
         if not message.been_read:
             count += 1
 
@@ -598,7 +598,7 @@ def unsubscribe_all() -> Response | str:
     # ----------------------------------------------------------- #
     # Validate parameters
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_email(email)
+    user = UserRepository().one_by_email(email)
     if not user:
         app.logger.debug(f"unsubscribe_all(): Invalid email = '{email}'!")
         EventRepository().log_event("unsubscribe_all Fail", f"Invalid email = '{email}'!")

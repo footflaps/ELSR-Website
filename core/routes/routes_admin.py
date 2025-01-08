@@ -266,7 +266,7 @@ def admin_page() -> Response | str:
     for message in messages:
         # We add the current user's public name to each message before passing to the Jinja.
         # NB Internally we only use email as they are immutable and unique.
-        message.from_name = UserRepository().find_user_from_email(message.from_email).name
+        message.from_name = UserRepository().one_by_email(message.from_email).name
         if not message.been_read:
             count += 1
 

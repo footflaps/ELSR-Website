@@ -80,7 +80,7 @@ def route_add_social() -> Response | str:
     if request.method == 'GET':
         if social:
             # Try and get owner from email address in the db
-            owner: UserModel | None = UserRepository().find_user_from_email(social.email)
+            owner: UserModel | None = UserRepository().one_by_email(social.email)
             if not owner:
                 # Should never happen but....
                 app.logger.debug(f"add_social(): Failed to locate owner, "

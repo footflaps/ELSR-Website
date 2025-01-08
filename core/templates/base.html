@@ -248,7 +248,7 @@
 									 alt="Gravatar icon"/>
 								
 								<!-- Personal Mail icon -->
-								{% if current_user.has_mail() %}
+								{% if user_has_mail(current_user.email) %}
 									<i class="fa-solid fa-envelope fa-bounce fa-xl"
 									   style=" --fa-bounce-start-scale-x: 1; --fa-bounce-start-scale-y: 1; --fa-bounce-jump-scale-x: 1; --fa-bounce-jump-scale-y: 1; --fa-bounce-land-scale-x: 1; --fa-bounce-land-scale-y: 1; --fa-bounce-rebound: 0;"></i>
 								{% endif %}

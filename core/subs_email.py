@@ -669,7 +669,7 @@ def send_message_to_seller(classified: ClassifiedModel, buyer_name: str, buyer_e
     # ----------------------------------------------------------- #
     # Find user
     # ----------------------------------------------------------- #
-    user: UserModel | None = UserRepository().find_user_from_email(classified.email)
+    user: UserModel | None = UserRepository().one_by_email(classified.email)
     if not user:
         app.logger.debug(f"send_message_to_seller(): Can't locate user from email = '{classified.email}'.")
         EventRepository().log_event("send_message_to_seller() Fail", f"Can't locate user from email = '{classified.email}'.")

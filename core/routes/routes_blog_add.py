@@ -116,7 +116,7 @@ def add_blog() -> Response | str:
 
         # Admin things
         if current_user.admin:
-            form.owner.data = UserRepository().find_user_from_email(blog.email).combo_str
+            form.owner.data = UserRepository().one_by_email(blog.email).combo_str
             if blog.sticky:
                 form.sticky.data = Sticky.TRUE.value
             else:

@@ -90,7 +90,7 @@ def login() -> Response | str:
             user_ip = request.remote_addr
 
         # See if user exists by looking up their email address
-        user = UserRepository().find_user_from_email(email)
+        user = UserRepository().one_by_email(email)
 
         # Test 1: Does the user exist?
         if not user:
@@ -107,7 +107,7 @@ def login() -> Response | str:
             # Generate a new code
             UserRepository().create_new_reset_code(email)
             # Find the user to get the details
-            user = UserRepository().find_user_from_email(email)
+            user = UserRepository().one_by_email(email)
             # Send an email
             Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()
             # Tell user to expect an email
@@ -121,7 +121,7 @@ def login() -> Response | str:
             # Generate a new code
             UserRepository().create_new_verification(user.id)
             # Find the user to get the details
-            user = UserRepository().find_user_from_email(email)
+            user = UserRepository().one_by_email(email)
             # Send an email
             Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
             # Tell user to expect an email
@@ -242,7 +242,7 @@ def reset_password() -> Response | str:
     # Only validate if we were actually sent them
     if email and code:
         email = email.strip('"').strip("'")
-        user = UserRepository().find_user_from_email(email)
+        user = UserRepository().one_by_email(email)
         if not user:
             app.logger.debug(f"reset_password(): URL route, invalid email = '{email}'.")
             EventRepository().log_event("Reset Fail", f"URL route, invalid email = '{email}'.")

@@ -262,7 +262,7 @@ def add_ride() -> Response | str:
         cafe = CafeRepository().one_by_id(calendar_entry.cafe_id)
 
         # 3: Need to locate the owner of the ride
-        user: UserModel = UserRepository().find_user_from_email(calendar_entry.email)
+        user: UserModel = UserRepository().one_by_email(calendar_entry.email)
         if not user:
             # Should never happen, but...
             app.logger.debug(f"add_ride(): Failed to locate user, ride_id  = '{calendar_id}', "

@@ -116,7 +116,7 @@ def edit_route() -> Response | str:
             new_user = UserRepository().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
         else:
             # Make sure we have new_user defined if not admin user
-            new_user = UserRepository().find_user_from_email(gpx.email)
+            new_user = UserRepository().one_by_email(gpx.email)
 
         # Do we need to update anything?
         if new_name != gpx.name \
@@ -164,7 +164,7 @@ def edit_route() -> Response | str:
         form.details.data = gpx.details
         # And existing owner
         if current_user.admin:
-            user = UserRepository().find_user_from_email(gpx.email)
+            user = UserRepository().one_by_email(gpx.email)
             form.owner.data = f"{user.name} ({user.id})"
 
     # Keep count of Google Map Loads

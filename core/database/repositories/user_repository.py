@@ -2,9 +2,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import time
 from datetime import date, datetime
 import random
-import hashlib
 from sqlalchemy import func
-import json
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -14,7 +12,6 @@ import json
 from core import db, app, login_manager, PROTECTED_USERS
 from core.database.models.user_model import (UserModel, MASK_ADMIN, MASK_VERIFIED, MASK_BLOCKED, MASK_READWRITE, 
                                              UNVERIFIED_PHONE_PREFIX, NOTIFICATIONS_DEFAULT_VALUE, NOTIFICATIONS)
-from core.database.repositories.message_repository import MessageRepository
 
 
 # Default User Permissions on verification
@@ -565,18 +562,18 @@ class UserRepository(UserModel):
     def all_non_admins() -> list[UserModel]:
         with (app.app_context()):
             non_admins = db.session.query(UserModel).filter(UserModel.permissions != MASK_ADMIN + MASK_VERIFIED) \
-                                        .filter(UserModel.name != DELETED_NAME) \
-                                        .all()
+                                                    .filter(UserModel.name != DELETED_NAME) \
+                                                    .all()
             return non_admins
 
     @staticmethod
-    def find_user_from_id(user_id: int) -> UserModel | None:
+    def one_by_id(user_id: int) -> UserModel | None:
         with app.app_context():
             user = db.session.query(UserModel).filter_by(id=user_id).first()
             return user
 
     @staticmethod
-    def find_user_from_email(email: str) -> UserModel | None:
+    def one_by_email(email: str) -> UserModel | None:
         with app.app_context():
             user = db.session.query(UserModel).filter_by(email=email).first()
             return user
@@ -598,17 +595,11 @@ class UserRepository(UserModel):
             user_id = int(combo_string.split('(')[-1].split(')')[0])
         except Exception:
             return None
-        return cls.find_user_from_id(user_id)
+        return cls.one_by_id(user_id)
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Other
     # ---------------------------------------------------------------------------------------------------------- #
-
-    def has_mail(self) -> bool:
-        if MessageRepository().all_unread_messages_to_email(self.email):
-            return True
-        else:
-            return False
 
     @staticmethod
     def notification_choice(user: UserModel, notification_type: str) -> bool:
@@ -639,16 +630,7 @@ class UserRepository(UserModel):
 
     def display_name(self, email: str) -> str:
         with app.app_context():
-            user = self.find_user_from_email(email)
-            if user:
-                return user.name
-            else:
-                return "unknown"
-
-    @staticmethod
-    def name_from_id(id: int) -> str:
-        with app.app_context():
-            user: UserModel | None = db.session.query(UserModel).filter_by(id=id).first()
+            user = self.one_by_email(email)
             if user:
                 return user.name
             else:

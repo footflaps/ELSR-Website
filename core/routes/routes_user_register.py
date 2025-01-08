@@ -62,9 +62,9 @@ def register() -> Response | str:
                          f"new_user.email = '{new_user.email}'")
 
         # Does the user already exist?
-        if UserRepository().find_user_from_email(new_user.email):
+        if UserRepository().one_by_email(new_user.email):
 
-            if UserRepository().find_user_from_email(new_user.email).verified:
+            if UserRepository().one_by_email(new_user.email).verified:
                 # Email is validated, so they can just login
                 app.logger.debug(f"register(): Duplicate email '{new_user.email}'.")
                 EventRepository().log_event("Register Fail", f"Duplicate email '{new_user.email}'.")
@@ -97,7 +97,7 @@ def register() -> Response | str:
         if UserRepository().create_user(new_user, form.password.data):
 
             # Debug
-            user = UserRepository().find_user_from_email(form.email.data)
+            user = UserRepository().one_by_email(form.email.data)
 
             # They now need to validate email address
             app.logger.debug(f"register(): Sending verification email to '{user.email}'.")
@@ -153,7 +153,7 @@ def validate_email() -> Response | str:
         # ----------------------------------------------------------- #
 
         email = email.strip('"').strip("'")
-        user = UserRepository().find_user_from_email(email)
+        user = UserRepository().one_by_email(email)
         if not user:
             # User doesn't exist
             app.logger.debug(f"validate_email(): URL route, can't find user email = '{email}'.")
@@ -216,7 +216,7 @@ def validate_email() -> Response | str:
         code = form.verification_code.data
 
         # Find out user
-        user = UserRepository().find_user_from_email(new_user.email)
+        user = UserRepository().one_by_email(new_user.email)
 
         # Did we find that email address
         if user:
@@ -314,7 +314,7 @@ def twofa_login() -> Response | str:
         # ----------------------------------------------------------- #
 
         email = email.strip('"').strip("'")
-        user = UserRepository().find_user_from_email(email)
+        user = UserRepository().one_by_email(email)
         if not user:
             # User doesn't exist
             app.logger.debug(f"twofa_login(): URL route, can't find user email = '{email}'.")
@@ -352,7 +352,7 @@ def twofa_login() -> Response | str:
         # ----------------------------------------------------------- #
 
         # Is that a valid email address?
-        user = UserRepository().find_user_from_email(form.email.data)
+        user = UserRepository().one_by_email(form.email.data)
 
         # Did we find that email address
         if user:

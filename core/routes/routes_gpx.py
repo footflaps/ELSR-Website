@@ -178,7 +178,7 @@ def gpx_details(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Get info for webpage
     # ----------------------------------------------------------- #
-    author = UserRepository().find_user_from_email(gpx.email).name
+    author = UserRepository().one_by_email(gpx.email).name
     cafe_list = CafeRepository().cafes_passed_by_gpx(gpx.cafes_passed)
 
     # ----------------------------------------------------------- #
@@ -700,7 +700,7 @@ def gpx_download2() -> Response | str:
         flash("Sorry, we couldn't find that GPX file in the database!")
         return abort(404)
 
-    user = UserRepository().find_user_from_email(email)
+    user = UserRepository().one_by_email(email)
     if not user:
         app.logger.debug(f"gpx_download2(): Failed to locate user email = '{email}'.")
         EventRepository().log_event("gpx_download2 Fail", f"Failed to locate user email = '{email}'.")
