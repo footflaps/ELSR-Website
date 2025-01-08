@@ -227,7 +227,7 @@ def cafe_details(cafe_id) -> Response | str:
         # ----------------------------------------------------------- #
 
         # Who is trying to post
-        user = UserRepository().find_user_from_id(current_user.id)
+        user = UserRepository().one_by_id(current_user.id)
         if not user:
             # Should never get here, but....
             app.logger.debug(f"cafe_details(): Couldn't locate user, current_user.id = '{current_user.id}'.")
@@ -527,7 +527,7 @@ def flag_cafe() -> Response | str:
     # Alert admin via SMS
     # ----------------------------------------------------------- #
     # Threading won't have access to current_user, so need to acquire persistent user to pass on
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
     Thread(target=alert_admin_via_sms, args=(user, f"Cafe '{cafe.name}', Reason: '{reason}'",)).start()
 
     # Back to cafe details page

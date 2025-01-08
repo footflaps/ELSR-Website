@@ -113,7 +113,7 @@ def edit_route() -> Response | str:
         # Admin can change ownership
         if current_user.admin:
             # Get new owner
-            new_user = UserRepository().find_user_from_id(form.owner.data.split('(')[1].split(')')[0])
+            new_user = UserRepository().one_by_id(form.owner.data.split('(')[1].split(')')[0])
         else:
             # Make sure we have new_user defined if not admin user
             new_user = UserRepository().one_by_email(gpx.email)

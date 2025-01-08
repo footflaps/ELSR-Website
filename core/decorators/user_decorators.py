@@ -134,7 +134,7 @@ def logout_barred_user(f):
             # Not logged in, so no idea who they are
             return f(*args, **kwargs)
         else:
-            user = UserRepository().find_user_from_id(current_user.id)
+            user = UserRepository().one_by_id(current_user.id)
             if user:
                 if user.blocked:
                     # Log out the user
@@ -158,7 +158,7 @@ def must_be_readwrite(f):
             # Not logged in, so no idea who they are
             return abort(403)
         else:
-            user = UserRepository().find_user_from_id(current_user.id)
+            user = UserRepository().one_by_id(current_user.id)
             if user:
                 if not user.blocked:
                     # Log out the user

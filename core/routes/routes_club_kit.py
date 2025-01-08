@@ -36,7 +36,7 @@ def club_kit() -> Response | str:
     form = ClothingSizesForm()
 
     if current_user.is_authenticated:
-        user = UserRepository().find_user_from_id(current_user.id)
+        user = UserRepository().one_by_id(current_user.id)
         if not user:
             app.logger.debug(f"club_kit(): Failed to find user, if = '{current_user.id}'!")
             EventRepository().log_event("club_kit Fail", f"Failed to find user, if = '{current_user.id}'!")

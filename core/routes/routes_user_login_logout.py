@@ -151,7 +151,7 @@ def login() -> Response | str:
                 # Admins must use 2FA via SMS
                 UserRepository().generate_sms_code(user.id)
                 flash(f"2FA code has been sent to '{user.phone_number}'.")
-                user = UserRepository().find_user_from_id(user.id)
+                user = UserRepository().one_by_id(user.id)
                 send_2fa_sms(user)
                 return redirect(url_for('twofa_login'))  # type: ignore
 

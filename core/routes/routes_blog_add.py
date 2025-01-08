@@ -131,7 +131,7 @@ def add_blog() -> Response | str:
         if request.method == 'GET':
             form.date.data = date.today()
             if current_user.admin:
-                form.owner.data = UserRepository().find_user_from_id(current_user.id).combo_str
+                form.owner.data = UserRepository().one_by_id(current_user.id).combo_str
 
     # Are we posting the completed comment form?
     if request.method == 'POST' and form.validate_on_submit():
@@ -228,7 +228,7 @@ def add_blog() -> Response | str:
             flash("Blog updated!")
         else:
             flash("New Blog created!")
-            user = UserRepository().find_user_from_id(current_user.id)
+            user = UserRepository().one_by_id(current_user.id)
             Thread(target=send_blog_notification_emails, args=(new_blog,)).start()
             # Suppress SMS alerts for me as I post 95% of blogs and I'm just wasting my own money alerting myself!
             if current_user.id != SUPER_ADMIN_USER_ID:
@@ -351,7 +351,7 @@ def delete_blog() -> Response | str:
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

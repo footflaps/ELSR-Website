@@ -391,7 +391,7 @@ def set_enable_maps():
     send_system_alert_email("Maps have been enabled.")
 
     # SMS Alert
-    site_owner = UserRepository().find_user_from_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository().one_by_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Maps have been enabled")
 
 
@@ -414,7 +414,7 @@ def set_disable_maps():
     send_system_alert_email("Maps have been disabled.")
 
     # SMS Alert
-    site_owner = UserRepository().find_user_from_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository().one_by_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Maps have been disabled")
 
 
@@ -462,7 +462,7 @@ def boost_map_limit():
     send_system_alert_email("Map boost has been applied.")
 
     # SMS Alert
-    site_owner = UserRepository().find_user_from_id(SUPER_ADMIN_USER_ID)
+    site_owner = UserRepository().one_by_id(SUPER_ADMIN_USER_ID)
     send_sms(site_owner, "Map boost has been applied")
 
 

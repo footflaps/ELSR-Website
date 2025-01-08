@@ -337,7 +337,7 @@ def reply_message() -> Response | str:
     # ----------------------------------------------------------- #
     if message.from_email == ADMIN_EMAIL:
         # Threading won't have access to current_user, so need to acquire persistent user to pass on
-        user = UserRepository().find_user_from_id(current_user.id)
+        user = UserRepository().one_by_id(current_user.id)
         Thread(target=alert_admin_via_sms, args=(user, f"Reply Message: {body}",)).start()
 
     # ----------------------------------------------------------- #
@@ -387,7 +387,7 @@ def message_admin() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
 
     # Check id is valid
     if not user:
@@ -472,7 +472,7 @@ def message_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
 
     # Check id is valid
     if not user:

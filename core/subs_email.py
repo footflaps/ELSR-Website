@@ -649,7 +649,7 @@ def send_message_notification_email(message: MessageModel, user: UserModel) -> b
 
 # # Test Message Notifications
 # if not live_site():
-#     user: UserModel | None = UserRepository().find_user_from_id(1)
+#     user: UserModel | None = UserRepository().one_by_id(1)
 #     if user:
 #         print("Sending message notifications....")
 #         message = MessageModel(
@@ -793,7 +793,7 @@ def send_verification_email(target_email: str, user_name: str, code: int) -> Non
 # # Test Email Verification code
 # if not live_site():
 #     print("Sending verification email....")
-#     user: UserModel | None = UserRepository.find_user_from_id(SUPER_ADMIN_USER_ID)
+#     user: UserModel | None = UserRepository.one_by_id(SUPER_ADMIN_USER_ID)
 #     if user:
 #         send_verification_email(target_email=user.email, user_name="Ben", code=123456)
 
@@ -846,7 +846,7 @@ def send_reset_email(target_email: str, user_name: str, code: int) -> None:
 # # Test Email Reset code
 # if not live_site():
 #     print("Sending reset email....")
-#     user: UserModel | None = UserRepository.find_user_from_id(SUPER_ADMIN_USER_ID)
+#     user: UserModel | None = UserRepository.one_by_id(SUPER_ADMIN_USER_ID)
 #     if user:
 #         send_reset_email(target_email=user.email, user_name="Ben", code=123456)
 
@@ -889,7 +889,7 @@ def contact_form_email(from_name: str, from_email: str, body: str) -> None:
 # # Test Contact Form Email message
 # if not live_site():
 #     print("Sending contact form email....")
-#     user: UserModel | None = UserRepository.find_user_from_id(SUPER_ADMIN_USER_ID)
+#     user: UserModel | None = UserRepository.one_by_id(SUPER_ADMIN_USER_ID)
 #     if user:
 #         contact_form_email(from_name="from me", from_email="a@b.c", body="Hello there")
 

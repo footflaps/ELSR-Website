@@ -428,7 +428,7 @@ def add_phone_number() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"add_phone_number(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Add Phone Fail", f"Invalid user user_id = '{user_id}'.")
@@ -478,7 +478,7 @@ def add_phone_number() -> Response | str:
         # Now generate a verification code
         if UserRepository().generate_sms_code(user_id):
             # Reacquire user
-            user = UserRepository().find_user_from_id(user_id)
+            user = UserRepository().one_by_id(user_id)
             # Send the code to the user
             send_sms_verif_code(user)
             app.logger.debug(f"add_phone_number(): SMS code sent, user_id='{user_id}'.")
@@ -526,7 +526,7 @@ def mobile_verify() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"mobile_verify(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Verify Mobile Fail", f"Invalid user user_id = '{user_id}'.")

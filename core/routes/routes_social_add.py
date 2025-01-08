@@ -291,7 +291,7 @@ def delete_social() -> Response | str:
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

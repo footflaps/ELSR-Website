@@ -476,7 +476,7 @@ def route_delete() -> Response | str:
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):
@@ -585,7 +585,7 @@ def flag_gpx() -> Response | str:
     # Alert admin via SMS
     # ----------------------------------------------------------- #
     # Threading won't have access to current_user, so need to acquire persistent user to pass on
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
     Thread(target=alert_admin_via_sms, args=(user, f"GPX '{gpx.name}', Reason: '{reason}'",)).start()
 
     # Back to GPX details page

@@ -268,7 +268,7 @@ def add_poll() -> Response | str:
     # ----------------------------------------------------------- #
     # Get user
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
     if not user:
         # Should never get here, but...
         app.logger.debug(f"add_poll(): Failed to find user, id = '{current_user.id}'!")
@@ -453,7 +453,7 @@ def edit_poll() -> Response | str:
     # ----------------------------------------------------------- #
     if password:
         # Need current user
-        user = UserRepository().find_user_from_id(current_user.id)
+        user = UserRepository().one_by_id(current_user.id)
 
         # Validate against current_user's password
         if not user.validate_password(user, password, user_ip):
@@ -471,7 +471,7 @@ def edit_poll() -> Response | str:
     # ----------------------------------------------------------- #
     # Get user
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
     if not user:
         # Should never get here, but...
         app.logger.debug(f"edit_poll(): Failed to find user, id = '{current_user.id}'!")
@@ -636,7 +636,7 @@ def delete_poll() -> Response | str:
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

@@ -248,7 +248,7 @@ def add_sell() -> Response | str:
             if not classified:
                 flash("New Classified post has been created!")
                 # Can't use current_user with Threading as it doesn't persist past return, so re-acquire user
-                user = UserRepository().find_user_from_id(current_user.id)
+                user = UserRepository().one_by_id(current_user.id)
                 Thread(target=alert_admin_via_sms,
                        args=(user, "New Classified post alert, please check it's OK!",)).start()
             else:
@@ -340,7 +340,7 @@ def delete_classified() -> Response | str:
     #  Validate password
     # ----------------------------------------------------------- #
     # Need current user
-    user = UserRepository().find_user_from_id(current_user.id)
+    user = UserRepository().one_by_id(current_user.id)
 
     # Validate against current_user's password
     if not user.validate_password(user, password, user_ip):

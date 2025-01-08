@@ -146,7 +146,7 @@ def delete_events() -> Response | str:
     # Validate user_id (unless it's admin) & Confirm
     # ----------------------------------------------------------- #
     if user_id != "admin":
-        user = UserRepository().find_user_from_id(user_id)
+        user = UserRepository().one_by_id(user_id)
         if not user:
             app.logger.debug(f"delete_events(): Invalid user_id = '{user_id}'.")
             EventRepository().log_event("Delete Events Fail", f"Invalid user_id = '{user_id}'.")

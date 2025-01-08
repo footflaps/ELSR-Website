@@ -351,7 +351,7 @@ def make_admin() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
 
     # Check id is valid
     if not user:
@@ -453,7 +453,7 @@ def unmake_admin() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
 
     # Check id is valid
     if not user:
@@ -542,7 +542,7 @@ def block_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"block_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Block User Fail", f"invalid user user_id = '{user_id}'.")
@@ -633,7 +633,7 @@ def unblock_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"unblock_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("unBlock User Fail", f"invalid user user_id = '{user_id}'.")
@@ -725,7 +725,7 @@ def user_readwrite() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user: UserModel | None = UserRepository().find_user_from_id(user_id)
+    user: UserModel | None = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"user_readwrite(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("ReadWrite Fail", f"Invalid user user_id = '{user_id}'!")
@@ -817,7 +817,7 @@ def user_readonly() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"user_readonly(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("ReadOnly Fail", f"Invalid user user_id = '{user_id}'!")
@@ -890,7 +890,7 @@ def reverify_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"reverify_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Send Verify Fail", f"Invalid user_id = '{user_id}'.")
@@ -938,7 +938,7 @@ def password_reset_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"password_reset_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Send Reset Fail", f"Invalid user user_id = '{user_id}'.")

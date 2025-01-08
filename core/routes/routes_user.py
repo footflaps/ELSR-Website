@@ -183,7 +183,7 @@ def user_page() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"user_page(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("User Page Fail", f"Invalid user_id = '{user_id}'.")
@@ -430,7 +430,7 @@ def delete_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"delete_user(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Delete User Fail", f"Invalid user user_id = '{user_id}'!")
@@ -535,7 +535,7 @@ def set_notifications() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    user = UserRepository().find_user_from_id(user_id)
+    user = UserRepository().one_by_id(user_id)
     if not user:
         app.logger.debug(f"set_notifications(): Invalid user user_id = '{user_id}'!")
         EventRepository().log_event("Set Notifications Fail", f"Invalid user user_id = '{user_id}'!")
