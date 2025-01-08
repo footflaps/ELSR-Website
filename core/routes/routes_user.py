@@ -30,7 +30,7 @@ from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.social_repository import SocialRepository

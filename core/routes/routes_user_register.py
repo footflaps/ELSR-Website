@@ -18,7 +18,7 @@ from core import app, current_year, live_site, admin_email_address, admin_phone_
 
 from core.database.repositories.user_repository import UserModel, UserRepository, DELETED_NAME, UNVERIFIED_PHONE_PREFIX
 from core.forms.user_forms import CreateUserForm, VerifyUserForm, TwoFactorLoginForm, VerifySMSForm
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email import send_verification_email
 from core.subs_sms import alert_admin_via_sms, send_sms_verif_code
@@ -167,7 +167,7 @@ def validate_email() -> Response | str:
             flash("Email verified, please now log in!")
 
             # Send welcome email
-            MessageRepository.send_welcome_message(user.email)
+            MessageRepository.send_welcome_message(target_email=user.email)
 
             # ----------------------------------------------------------- #
             # Alert admin via SMS
@@ -178,7 +178,7 @@ def validate_email() -> Response | str:
             # ----------------------------------------------------------- #
             # Alert admin via internal message
             # ----------------------------------------------------------- #
-            admin_message = MessageRepository(
+            admin_message = MessageModel(
                 from_email=user.email,
                 to_email=ADMIN_EMAIL,
                 body="New user has joined - check permissions."
@@ -248,7 +248,7 @@ def validate_email() -> Response | str:
                 # ----------------------------------------------------------- #
                 # Alert admin via internal message
                 # ----------------------------------------------------------- #
-                admin_message = MessageRepository(
+                admin_message = MessageModel(
                     from_email=user.email,
                     to_email=ADMIN_EMAIL,
                     body="New user has joined - check permissions."

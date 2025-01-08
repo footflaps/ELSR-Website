@@ -18,7 +18,7 @@ from core import app, current_year, live_site, is_mobile, DOPPIO_GROUP, ESPRESSO
 from core.database.models.cafe_model import CafeModel
 from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.cafe_repository import CafeRepository, OPEN_CAFE_COLOUR, CLOSED_CAFE_COLOUR
-from core.database.repositories.cafe_comment_repository import CafeCommentRepository
+from core.database.repositories.cafe_comment_repository import CafeCommentModel, CafeCommentRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
@@ -246,7 +246,7 @@ def cafe_details(cafe_id) -> Response | str:
             return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
 
         # New comment
-        new_comment = CafeCommentRepository(
+        new_comment = CafeCommentModel(
             cafe_id=cafe.id,
             date=date.today().strftime("%B %d, %Y"),
             email=current_user.email,

@@ -16,7 +16,7 @@ from core import app, current_year, live_site
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
@@ -371,7 +371,7 @@ def delete_blog() -> Response | str:
     # ----------------------------------------------------------- #
     if user.email != blog.email:
         # Create a new message
-        new_message = MessageRepository(
+        new_message = MessageModel(
             from_email=ADMIN_EMAIL,
             to_email=blog.email,
             body=f"Sorry, an Admin has deleted your blog '{blog.title}'. The reason given was '{reason}'."

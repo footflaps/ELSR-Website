@@ -19,7 +19,7 @@ from core import app, current_year, is_mobile, live_site
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.user_repository import UserModel, UserRepository, SUPER_ADMIN_USER_ID
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.calendar_repository import CalendarRepository
 from core.database.repositories.social_repository import SocialRepository, SOCIAL_DB_PRIVATE

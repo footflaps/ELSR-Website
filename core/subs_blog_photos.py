@@ -12,7 +12,7 @@ from core import app, delete_file_if_exists, BLOG_IMAGE_FOLDER
 # Import our three database classes and associated forms, decorators etc
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.blog_repository import BlogRepository as Blog
+from core.database.repositories.blog_repository import BlogModel, BlogRepository
 from core.database.repositories.event_repository import EventRepository
 from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EXTENSIONS
 
@@ -32,7 +32,7 @@ from core.subs_photos import shrink_image, allowed_image_files, IMAGE_ALLOWED_EX
 #    blog_<blog_id>.jpg             for the 1st photo
 #    blog_<blog_id>_<n>.jpg         for subsequent photos where n starts at 1
 #
-def new_blog_photo_filename(blog):
+def new_blog_photo_filename(blog: BlogModel) -> str:
     # What are we up to...
     if not blog.image_filename:
         # First photo for this blog post
@@ -63,7 +63,7 @@ def new_blog_photo_filename(blog):
                 return f"blog_{blog.id}_1.jpg"
 
 
-def update_blog_photo(form, blog):
+def update_blog_photo(form, blog: BlogModel) -> None:
     app.logger.debug(f"update_blog_photo(): Passed photo '{form.photo_filename.data.filename}'")
 
     if allowed_image_files(form.photo_filename.data.filename):
@@ -78,7 +78,7 @@ def update_blog_photo(form, blog):
             form.photo_filename.data.save(filename)
 
             # Update cafe object with filename
-            if Blog().update_photo(blog.id, f"{os.path.basename(filename)}"):
+            if BlogRepository().update_photo(blog.id, f"{os.path.basename(filename)}"):
                 # Updated ok
                 app.logger.debug(f"update_blog_photo(): Successfully uploaded the photo.")
                 EventRepository.log_event("Blog Pass", f"Blog photo updated. blog.id = '{blog.id}'.")
@@ -105,7 +105,7 @@ def update_blog_photo(form, blog):
         flash("Invalid file type for image!")
 
 
-def delete_blog_photos(blog: Blog) -> None:
+def delete_blog_photos(blog: BlogModel) -> None:
     # Check it has an id!
     if not blog.id:
         app.logger.debug(f"delete_blog_photos(): Passed blog object with no id!")

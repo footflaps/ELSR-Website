@@ -16,7 +16,7 @@ from core import app
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.user_repository import UserModel, UserRepository
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.event_repository import EventRepository
 from core.subs_email import send_message_notification_email
 from core.subs_sms import alert_admin_via_sms
@@ -312,7 +312,7 @@ def reply_message() -> Response | str:
     # Send the reply itself
     # ----------------------------------------------------------- #
     # Create a new message
-    new_message = MessageRepository(
+    new_message = MessageBody(
         from_email=message.to_email,
         to_email=message.from_email,
         body=body
@@ -410,7 +410,7 @@ def message_admin() -> Response | str:
     # ----------------------------------------------------------- #
 
     # Create a new message
-    message = MessageRepository(
+    message = MessageModel(
         from_email=user.email,
         to_email=ADMIN_EMAIL,
         body=body
@@ -485,7 +485,7 @@ def message_user() -> Response | str:
     # ----------------------------------------------------------- #
 
     # Create a new message
-    message = MessageRepository(
+    message = MessageModel(
         from_email=ADMIN_EMAIL,
         to_email=user.email,
         body=body

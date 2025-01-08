@@ -20,7 +20,7 @@ from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.gpx_repository import GpxModel, GpxRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.message_repository import MessageRepository, ADMIN_EMAIL
+from core.database.repositories.message_repository import MessageModel, MessageRepository, ADMIN_EMAIL
 from core.database.repositories.calendar_repository import CalendarRepository
 
 from core.database.jinja.user_jinja import get_user_name
@@ -143,7 +143,7 @@ def gpx_top10() -> Response | str:
 
 @app.route('/route/<int:gpx_id>', methods=['GET'])
 @update_last_seen
-def gpx_details(gpx_id) -> Response | str:
+def gpx_details(gpx_id: int) -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
@@ -331,7 +331,7 @@ def new_route() -> Response | str:
             # Create a new GPX object
             # We do this first as we need the id in order to create
             # the filename for the GPX file when we upload it
-            gpx = GpxRepository()
+            gpx = GpxModel()
             gpx.name = form.name.data
             gpx.email = current_user.email
             gpx.cafes_passed = "[]"
@@ -563,7 +563,7 @@ def flag_gpx() -> Response | str:
     # ----------------------------------------------------------- #
     # Send a message to Admin
     # ----------------------------------------------------------- #
-    message = MessageRepository(
+    message = MessageModel(
         from_email=current_user.email,
         to_email=ADMIN_EMAIL,
         body=f"GPX Objection to '{gpx.name}' (id={gpx.id}). Reason: {reason}"

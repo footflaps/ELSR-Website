@@ -164,26 +164,29 @@ class MessageRepository:
     # ---------------------------------------------------------------------------------------------------------- #
     # Other
     # ---------------------------------------------------------------------------------------------------------- #
-    def send_welcome_message(self, target_email: str) -> MessageModel | None:
+    @classmethod
+    def send_welcome_message(cls, target_email: str) -> MessageModel | None:
         message = MessageModel(
             from_email=ADMIN_EMAIL,
             to_email=target_email,
             body=WELCOME_MESSAGE
         )
-        return self.add_message(message)
+        return cls.add_message(message)
 
-    def send_readwrite_message(self, target_email: str) -> MessageModel | None:
+    @classmethod
+    def send_readwrite_message(cls, target_email: str) -> MessageModel | None:
         message = MessageModel(
             from_email=ADMIN_EMAIL,
             to_email=target_email,
             body=READWRITE_MESSAGE
         )
-        return self.add_message(message)
+        return cls.add_message(message)
 
-    def send_readonly_message(self, target_email: str) -> MessageModel | None:
+    @classmethod
+    def send_readonly_message(cls, target_email: str) -> MessageModel | None:
         message = MessageModel(
             from_email=ADMIN_EMAIL,
             to_email=target_email,
             body=READONLY_MESSAGE
         )
-        return self.add_message(message)
+        return cls.add_message(message)

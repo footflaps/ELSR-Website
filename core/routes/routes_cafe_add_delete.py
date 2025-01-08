@@ -100,7 +100,7 @@ def new_cafe() -> Response | str:
 
         # Create a new Cafe object
         cafe_name = form.name.data.strip()
-        new_cafe = CafeRepository(
+        new_cafe = CafeModel(
             name=cafe_name,
             lat=form.lat.data,
             lon=form.lon.data,
@@ -264,7 +264,7 @@ def edit_cafe() -> Response | str:
         # ----------------------------------------------------------- #
 
         # Create a new BP object
-        updated_cafe = CafeRepository(
+        updated_cafe = CafeModel(
             name=form.name.data,
             lat=form.lat.data,
             lon=form.lon.data,

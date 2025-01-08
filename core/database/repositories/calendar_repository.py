@@ -180,7 +180,7 @@ class CalendarRepository:
             return ride
 
     @staticmethod
-    def all_rides_gpx_id(gpx_id: str) -> list[CalendarModel]:
+    def all_rides_gpx_id(gpx_id: int) -> list[CalendarModel]:
         with app.app_context():
             rides = CalendarModel.query.filter_by(gpx_id=gpx_id).all()
             # Will return nothing if id is invalid
