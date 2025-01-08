@@ -227,9 +227,21 @@ class CafeRepository:
                                             'status':       The active status of the café, typically a boolean (`True` or `False`).
         """
         # ----------------------------------------------------------- #
+        # Validate cafes_passed JSON string
+        # ----------------------------------------------------------- #
+        try:
+            cafes_json: list[dict[str, Any]] = json.loads(cafes_passed)
+        except Exception:
+            # Failed to parse JSON for some reason
+            return []
+
+        if not cafes_json:
+            # No cafes
+            return []
+
+        # ----------------------------------------------------------- #
         # Get a list of IDs
         # ----------------------------------------------------------- #
-        cafes_json: list[dict[str, Any]] = json.loads(cafes_passed)
         cafe_ids: list[int] = [dct["cafe_id"] for dct in cafes_json]
 
         # ----------------------------------------------------------- #
