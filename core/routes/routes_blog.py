@@ -144,7 +144,7 @@ def blog_ics() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id?
     # ----------------------------------------------------------- #
-    blog_id = int_or_none(request.args.get('blog_id', None))
+    blog_id: int | None = int_or_none(request.args.get('blog_id', None))
 
     # ----------------------------------------------------------- #
     # Must have parameters
@@ -157,7 +157,7 @@ def blog_ics() -> Response | str:
     # ----------------------------------------------------------- #
     # Validate blog_id
     # ----------------------------------------------------------- #
-    blog = Blog().one_by_id(blog_id)
+    blog: BlogModel | None = Blog().one_by_id(blog_id)
     if not blog:
         app.logger.debug(f"blog_icsg(): Failed to locate blog, blog_id = '{blog_id}'.")
         EventRepository.log_event("Blog ICS Fail", f"Failed to locate blog, blog_id = '{blog_id}''.")
@@ -177,14 +177,14 @@ def blog_ics() -> Response | str:
     new_cal.events.add(new_event)
 
     # Save as file
-    filename = os.path.join(ICS_DIRECTORY, f"Blog_Event_{blog.id}.ics")
+    filename: str = os.path.join(ICS_DIRECTORY, f"Blog_Event_{blog.id}.ics")
     with open(filename, 'w') as my_file:
         my_file.writelines(new_cal.serialize_iter())
 
     # ----------------------------------------------------------- #
     # Send link to download the file
     # ----------------------------------------------------------- #
-    download_name = f"ELSR_Event_{blog.id}.ics"
+    download_name: str = f"ELSR_Event_{blog.id}.ics"
 
     app.logger.debug(f"download_ics(): Serving ICS blog_id = '{blog_id}' ({blog.title}), "
                      f"download_name = '{download_name}'.")
