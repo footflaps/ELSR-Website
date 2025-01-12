@@ -10,7 +10,7 @@ from threading import Thread
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site, delete_file_if_exists
+from core import app, current_year, live_site, delete_file_if_exists, int_or_none
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -19,7 +19,7 @@ from core import app, current_year, live_site, delete_file_if_exists
 
 from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.cafe_repository import CafeModel, CafeRepository
-from core.database.repositories.cafe_comment_repository import CafeCommentRepository
+from core.database.repositories.cafe_comment_repository import CafeCommentModel, CafeCommentRepository
 from core.database.repositories.event_repository import EventRepository
 
 from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
@@ -84,7 +84,7 @@ def new_cafe() -> Response | str:
         # ----------------------------------------------------------- #
 
         # Validate range
-        range_km = mpu.haversine_distance((float(form.lat.data), float(form.lon.data)), (ELSR_LAT, ELSR_LON))
+        range_km: float = mpu.haversine_distance((float(form.lat.data), float(form.lon.data)), (ELSR_LAT, ELSR_LON))
         if range_km > ELSR_MAX_KM:
             # Too far out of range from Cambridge
             app.logger.debug(f"new_cafe(): Fail, Lat and Lon are {round(range_km, 1)} km from Cambridge.")
@@ -99,7 +99,7 @@ def new_cafe() -> Response | str:
                                    ELSR_HOME=ELSR_HOME, live_site=live_site())
 
         # Create a new Cafe object
-        cafe_name = form.name.data.strip()
+        cafe_name: str = form.name.data.strip()
         new_cafe: CafeModel = CafeModel(
             name=cafe_name,
             lat=form.lat.data,
@@ -130,9 +130,10 @@ def new_cafe() -> Response | str:
         # ----------------------------------------------------------- #
         #   Try to add the cafe
         # ----------------------------------------------------------- #
-        if CafeRepository.add_cafe(new_cafe):
-            app.logger.debug(f"new_cafe(): Success, cafe '{cafe_name}' has been added!")
-            EventRepository.log_event("New Cafe Success", f"Cafe '{cafe_name}' has been added!")
+        new_cafe = CafeRepository.add_cafe(new_cafe)  # type: ignore
+        if new_cafe:
+            app.logger.debug(f"new_cafe(): Success, cafe '{cafe_name}' has been added as cafe_id = '{new_cafe.id}'.!")
+            EventRepository.log_event("New Cafe Success", f"Cafe '{cafe_name}' has been added as cafe_id = '{new_cafe.id}'!")
             flash(f"Cafe {cafe_name} has been added!")
         else:
             # Should never get here, but....
@@ -149,31 +150,23 @@ def new_cafe() -> Response | str:
                                    ELSR_HOME=ELSR_HOME, live_site=live_site())
 
         # ----------------------------------------------------------- #
-        #   Look up our new cafe
-        # ----------------------------------------------------------- #
-        # Look up our new cafe in the dB as we can't know its ID until after it's been added
-        cafe = CafeRepository.one_by_name(cafe_name)
-        app.logger.debug(f"new_cafe(): Cafe added, cafe_id = '{cafe.id}'.")
-
-        # ----------------------------------------------------------- #
         #   Did we get passed a path for a photo?
         # ----------------------------------------------------------- #
         if form.cafe_photo.data != "" and \
                 form.cafe_photo.data is not None:
             # Upload the photo
-            update_cafe_photo(form, cafe)
+            update_cafe_photo(form, new_cafe)
 
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
         # ----------------------------------------------------------- #
-
-        app.logger.debug(f"new_cafe(): calling check_new_cafe_with_all_gpxes for '{cafe.name}'. ")
-        flash(f"All GPX routes are being updated with distance to {cafe.name}.")
+        app.logger.debug(f"new_cafe(): calling check_new_cafe_with_all_gpxes for '{new_cafe.name}'. ")
+        flash(f"All GPX routes are being updated with distance to {new_cafe.name}.")
         # Update the routes in the background
-        Thread(target=check_new_cafe_with_all_gpxes, args=(cafe,)).start()
+        Thread(target=check_new_cafe_with_all_gpxes, args=(new_cafe,)).start()
 
         # Back to Cafe details page
-        return redirect(url_for('cafe_details', cafe_id=cafe.id))  # type: ignore
+        return redirect(url_for('cafe_details', cafe_id=new_cafe.id))  # type: ignore
 
     else:
 
@@ -202,7 +195,7 @@ def edit_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    cafe_id = request.args.get('cafe_id', None)
+    cafe_id: int | None = int_or_none(request.args.get('cafe_id', None))
 
     # ----------------------------------------------------------- #
     # Handle missing parameters
@@ -210,12 +203,13 @@ def edit_cafe() -> Response | str:
     if not cafe_id:
         app.logger.debug(f"edit_cafe(): Missing cafe_id!")
         EventRepository.log_event("Edit Cafe Fail", f"Missing cafe_id!")
+        flash(f"Invalid cafe ID value!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = CafeRepository.one_by_id(cafe_id)
+    cafe: CafeModel | None = CafeRepository.one_by_id(cafe_id)
 
     # Check id is valid
     if not cafe:
@@ -238,7 +232,6 @@ def edit_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Need a form for the cafe details
     # ----------------------------------------------------------- #
-
     form = CreateCafeForm(
         name=cafe.name,
         lat=cafe.lat,
@@ -262,18 +255,15 @@ def edit_cafe() -> Response | str:
         # ----------------------------------------------------------- #
         # Entry method #1 - form submitted successfully
         # ----------------------------------------------------------- #
-
-        # Create a new BP object
-        updated_cafe: CafeModel = CafeModel(
-            name=form.name.data,
-            lat=form.lat.data,
-            lon=form.lon.data,
-            website_url=form.website_url.data,
-            details=form.detail.data,
-            summary=form.summary.data,
-            rating=form.rating.data,
-            added_email=current_user.email
-        )
+        updated_cafe: CafeModel = cafe
+        updated_cafe.name = form.name.data
+        updated_cafe.lat = form.lat.data
+        updated_cafe.lon = form.lon.data
+        updated_cafe.website_url = form.website_url.data
+        updated_cafe.details = form.detail.data
+        updated_cafe.summary = form.summary.data
+        updated_cafe.rating = form.rating.data
+        updated_cafe.added_email = current_user.email
 
         # ----------------------------------------------------------- #
         #   Name must be unique
@@ -296,7 +286,8 @@ def edit_cafe() -> Response | str:
         # ----------------------------------------------------------- #
         # Update details
         # ----------------------------------------------------------- #
-        if CafeRepository.update_cafe(cafe=updated_cafe):
+        updated_cafe = CafeRepository.update_cafe(cafe=updated_cafe)  # type: ignore
+        if updated_cafe:
             # Flash back a message
             app.logger.debug(f"edit_cafe(): Successfully updated the cafe, cafe_id = '{cafe_id}'.")
             EventRepository.log_event("Edit Cafe Success", f"Cafe updated '{updated_cafe.name}', cafe_id = '{cafe_id}'.")
@@ -313,13 +304,12 @@ def edit_cafe() -> Response | str:
         if form.cafe_photo.data != "" and \
                 form.cafe_photo.data is not None:
             # Upload the photo
-            update_cafe_photo(form, cafe)
+            update_cafe_photo(form=form, cafe=cafe)
 
         # ----------------------------------------------------------- #
         #   Update GPX routes with new cafe etc
         # ----------------------------------------------------------- #
-        updated_cafe = CafeRepository.one_by_id(cafe_id)
-        dist_km = mpu.haversine_distance((last_lat, last_lon), (updated_cafe.lat, updated_cafe.lon))
+        dist_km: float = mpu.haversine_distance((last_lat, last_lon), (updated_cafe.lat, updated_cafe.lon))
 
         # Only update GPX if it's really moved
         if dist_km >= ELSR_UPDATE_GPX_MIN_DISTANCE_KM:
@@ -369,8 +359,8 @@ def delete_comment() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    comment_id = request.args.get('comment_id', None)
-    cafe_id = request.args.get('cafe_id', None)
+    comment_id = int_or_none(request.args.get('comment_id', None))
+    cafe_id = int_or_none(request.args.get('cafe_id', None))
     try:
         password = request.form['password']
     except exceptions.BadRequestKeyError:
@@ -384,7 +374,7 @@ def delete_comment() -> Response | str:
     # Get user's IP
     # ----------------------------------------------------------- #
     if request.headers.getlist("X-Forwarded-For"):
-        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+        user_ip: str | None = request.headers.getlist("X-Forwarded-For")[0]
     else:
         user_ip = request.remote_addr
 
@@ -407,13 +397,13 @@ def delete_comment() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = CafeRepository.one_by_id(cafe_id)
+    cafe: CafeModel | None = CafeRepository.one_by_id(cafe_id)
     if not cafe:
         app.logger.debug(f"delete_comment(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
         EventRepository.log_event("Delete Comment Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
         return abort(404)
 
-    comment = CafeCommentRepository.get_comment(comment_id)
+    comment: CafeCommentModel | None = CafeCommentRepository.get_comment(comment_id)
     if not comment:
         app.logger.debug(f"delete_comment(): Failed to locate comment with comment_id = '{comment_id}'.")
         EventRepository.log_event("Delete Comment Fail", f"Failed to locate comment with comment_id = '{comment_id}'.")
@@ -434,14 +424,11 @@ def delete_comment() -> Response | str:
     # ----------------------------------------------------------- #
     #  Validate password
     # ----------------------------------------------------------- #
-    # Need current user
-    user: UserModel | None = UserRepository.one_by_id(current_user.id)
-
     # Validate against current_user's password
-    if not UserRepository.validate_password(user, password, user_ip):
-        app.logger.debug(f"delete_comment(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        EventRepository.log_event("Delete Comment Fail", f"Incorrect password for user_id = '{user.id}'!")
-        flash(f"Incorrect password for user {user.name}!")
+    if not UserRepository.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"delete_comment(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        EventRepository.log_event("Delete Comment Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for user {current_user.name}!")
         # Go back to route detail page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore
 
@@ -476,11 +463,11 @@ def delete_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    cafe_id = request.args.get('cafe_id', None)
+    cafe_id = int_or_none(request.args.get('cafe_id', None))
     try:
-        password = request.form['password']
+        password: str = request.form['password']
     except exceptions.BadRequestKeyError:
-        password = None
+        password = ""
 
     # Stop 400 error for blank string as very confusing (it's not missing, it's blank)
     if password == "":
@@ -490,7 +477,7 @@ def delete_cafe() -> Response | str:
     # Get user's IP
     # ----------------------------------------------------------- #
     if request.headers.getlist("X-Forwarded-For"):
-        user_ip = request.headers.getlist("X-Forwarded-For")[0]
+        user_ip: str | None = request.headers.getlist("X-Forwarded-For")[0]
     else:
         user_ip = request.remote_addr
 
@@ -509,7 +496,7 @@ def delete_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    cafe = CafeRepository.one_by_id(cafe_id)
+    cafe: CafeModel | None = CafeRepository.one_by_id(cafe_id)
     if not cafe:
         app.logger.debug(f"delete_cafe(): Failed to locate cafe with cafe_id = '{cafe_id}'.")
         EventRepository.log_event("Delete Cafe Fail", f"Failed to locate cafe with cafe_id = '{cafe_id}'.")
@@ -530,21 +517,18 @@ def delete_cafe() -> Response | str:
     # ----------------------------------------------------------- #
     #  Validate password
     # ----------------------------------------------------------- #
-    # Need current user
-    user: UserModel | None = UserRepository.one_by_id(current_user.id)
-
     # Validate against current_user's password
-    if not UserRepository.validate_password(user, password, user_ip):
-        app.logger.debug(f"delete_cafe(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        EventRepository.log_event("Delete Cafe Fail", f"Incorrect password for user_id = '{user.id}'!")
-        flash(f"Incorrect password for user {user.name}!")
+    if not UserRepository.validate_password(current_user, password, user_ip):
+        app.logger.debug(f"delete_cafe(): Delete failed, incorrect password for user_id = '{current_user.id}'!")
+        EventRepository.log_event("Delete Cafe Fail", f"Incorrect password for user_id = '{current_user.id}'!")
+        flash(f"Incorrect password for user {current_user.name}!")
         # Go back to socials page
         return redirect(url_for('cafe_details', cafe_id=cafe_id))  # type: ignore
 
     # ----------------------------------------------------------- #
     #  Delete any comments
     # ----------------------------------------------------------- #
-    comments = CafeCommentRepository.all_comments_by_cafe_id(cafe.id)
+    comments: list[CafeCommentModel] = CafeCommentRepository.all_comments_by_cafe_id(cafe.id)
     for comment in comments:
         if not CafeCommentRepository.delete_comment(comment.id):
             # This is not terminal, just leaves orphaned comments in the db
@@ -555,7 +539,7 @@ def delete_cafe() -> Response | str:
     #  Delete any images
     # ----------------------------------------------------------- #
     if cafe.image_name:
-        filename = os.path.join(CAFE_FOLDER, os.path.basename(cafe.image_name))
+        filename: str = os.path.join(CAFE_FOLDER, os.path.basename(cafe.image_name))
         delete_file_if_exists(filename)
 
     # ----------------------------------------------------------- #
@@ -582,4 +566,3 @@ def delete_cafe() -> Response | str:
 
     # Back to cafe list page
     return redirect(url_for('cafe_list'))  # type: ignore
-

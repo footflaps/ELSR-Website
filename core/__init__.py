@@ -251,3 +251,10 @@ def user_ip():
     else:
         users_ip = request.remote_addr
     return users_ip
+
+
+def int_or_none(value: str | None) -> int | None:
+    try:
+        return int(value)  # type: ignore
+    except ValueError:
+        return None

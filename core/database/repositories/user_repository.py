@@ -214,7 +214,7 @@ class UserRepository(UserModel):
         return False
 
     @staticmethod
-    def validate_password(user: UserModel, raw_password: str, user_ip: str) -> bool:
+    def validate_password(user: UserModel, raw_password: str, user_ip: str | None) -> bool:
         with app.app_context():
             if user.password:
                 if check_password_hash(user.password, raw_password):
