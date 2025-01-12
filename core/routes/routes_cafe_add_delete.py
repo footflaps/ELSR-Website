@@ -38,7 +38,7 @@ from core.subs_cafe_photos import update_cafe_photo, CAFE_FOLDER
 # We only allow cafes within a sensible range to Cambridge
 ELSR_LAT = 52.203316
 ELSR_LON = 0.131689
-ELSR_MAX_KM = 100
+ELSR_MAX_KM = 200
 # Update routes for the cafe if it has moved by at least 100m
 ELSR_UPDATE_GPX_MIN_DISTANCE_KM = 0.1
 
