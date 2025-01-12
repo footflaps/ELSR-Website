@@ -164,8 +164,12 @@ class CafeRepository:
     # Return a list of all cafes
     @staticmethod
     def all_cafes() -> list[CafeModel]:
+        """
+        Return all the cafes in the tabel ordered by id.
+        :return:            List of cafes.
+        """
         with app.app_context():
-            cafes = CafeModel.query.all()
+            cafes = CafeModel.query.order_by('id').all()
             return cafes
 
     @staticmethod
