@@ -244,10 +244,10 @@ def delete_file_if_exists(filename):
     return True
 
 
-def user_ip():
+def user_ip() -> str | None:
     # Get user's IP
     if request.headers.getlist("X-Forwarded-For"):
-        users_ip = request.headers.getlist("X-Forwarded-For")[0]
+        users_ip: str | None = request.headers.getlist("X-Forwarded-For")[0]
     else:
         users_ip = request.remote_addr
     return users_ip
@@ -256,5 +256,5 @@ def user_ip():
 def int_or_none(value: str | None) -> int | None:
     try:
         return int(value)  # type: ignore
-    except ValueError:
+    except Exception:
         return None

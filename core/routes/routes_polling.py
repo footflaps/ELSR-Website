@@ -3,6 +3,7 @@ from flask_login import current_user
 from werkzeug import exceptions
 from datetime import datetime
 import json
+from typing import Any
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -37,7 +38,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 # Filter polling options from html in for to list
 # -------------------------------------------------------------------------------------------------------------- #
 
-def extract_options_from_form(options):
+def extract_options_from_form(options: str) -> list[str]:
     results = []
 
     chunks = options.split("<li>")
@@ -51,7 +52,7 @@ def extract_options_from_form(options):
 # -------------------------------------------------------------------------------------------------------------- #
 # Convert string in db into html
 # -------------------------------------------------------------------------------------------------------------- #
-def html_options(options: str):
+def html_options(options: str) -> str:
     # Get set from the string the db
     data = json.loads(options)
     html = ""
@@ -63,7 +64,7 @@ def html_options(options: str):
 # -------------------------------------------------------------------------------------------------------------- #
 # Test for value in list for jinja
 # -------------------------------------------------------------------------------------------------------------- #
-def is_in_list(value, list):
+def is_in_list(value: Any, list: list[Any]) -> bool:
     if value in list:
         return True
     return False

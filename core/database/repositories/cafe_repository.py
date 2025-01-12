@@ -174,6 +174,10 @@ class CafeRepository:
 
     @staticmethod
     def all_cafes_sorted() -> list[CafeModel]:
+        """
+        Return all the cafes in the tabel ordered by name.
+        :return:            List of cafes.
+        """
         with app.app_context():
             cafes = CafeModel.query.order_by('name').all()
             return cafes
@@ -194,7 +198,7 @@ class CafeRepository:
             return cafe
 
     @staticmethod
-    def find_all_cafes_by_email(email) -> list[CafeModel]:
+    def find_all_cafes_by_email(email: str) -> list[CafeModel]:
         with app.app_context():
             cafes = CafeModel.query.filter_by(added_email=email).all()
             return cafes

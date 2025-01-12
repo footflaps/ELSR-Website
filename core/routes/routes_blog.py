@@ -1,7 +1,7 @@
 from flask import render_template, request, flash, abort, redirect, url_for, send_from_directory, Response
 from flask_login import current_user
 import os
-from datetime import date, datetime
+from datetime import datetime
 from ics import Calendar as icsCalendar, Event as icsEvent
 
 
@@ -9,17 +9,17 @@ from ics import Calendar as icsCalendar, Event as icsEvent
 # Import app from __init__.py
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core import app, current_year, live_site, BLOG_IMAGE_FOLDER, ICS_DIRECTORY
+from core import app, current_year, live_site, BLOG_IMAGE_FOLDER, ICS_DIRECTORY, int_or_none
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import our classes
 # -------------------------------------------------------------------------------------------------------------- #
 
-from core.database.repositories.blog_repository import BlogModel, BlogRepository as Blog, Privacy, NO_CAFE, NO_GPX, Category
+from core.database.repositories.blog_repository import BlogModel, BlogRepository as Blog, Privacy, Category
 from core.database.repositories.event_repository import EventRepository
 
-from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required, rw_required
+from core.decorators.user_decorators import update_last_seen, logout_barred_user, login_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -48,30 +48,13 @@ def display_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id? (Optional)
     # ----------------------------------------------------------- #
-    blog_str: str | None = request.args.get('blog_id', None)
-    page_str: str | None = request.args.get('page', None)
-
-    # ----------------------------------------------------------- #
-    # Validate page
-    # ----------------------------------------------------------- #
-    page: int | None = None
-    if page_str:
-        # Must be integer (get string back from html)
-        try:
-            page = int(page_str)
-        except Exception:
-            pass
+    blog_id: int | None = int_or_none(request.args.get('blog_id', None))
+    page: int | None = int_or_none(request.args.get('page', None))
 
     # ----------------------------------------------------------- #
     # Validate blog_id
     # ----------------------------------------------------------- #
-    if blog_str:
-        try:
-            blog_id: int = int(blog_str)
-        except Exception:
-            flash(f"Invalid blog ID '{blog_str}' - must be an integer.")
-            return abort(404)
-
+    if blog_id:
         blog: BlogModel | None = Blog().one_by_id(blog_id)
         if not blog:
             app.logger.debug(f"blog(): Failed to locate blog, blog_id = '{blog_id}'.")
@@ -161,7 +144,7 @@ def blog_ics() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a blog_id?
     # ----------------------------------------------------------- #
-    blog_id = request.args.get('blog_id', None)
+    blog_id = int_or_none(request.args.get('blog_id', None))
 
     # ----------------------------------------------------------- #
     # Must have parameters
