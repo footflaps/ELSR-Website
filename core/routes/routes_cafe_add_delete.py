@@ -18,7 +18,7 @@ from core import app, current_year, live_site, delete_file_if_exists
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.user_repository import UserModel, UserRepository
-from core.database.repositories.cafe_repository import CafeRepository
+from core.database.repositories.cafe_repository import CafeModel, CafeRepository
 from core.database.repositories.cafe_comment_repository import CafeCommentRepository
 from core.database.repositories.event_repository import EventRepository
 
@@ -100,7 +100,7 @@ def new_cafe() -> Response | str:
 
         # Create a new Cafe object
         cafe_name = form.name.data.strip()
-        new_cafe = CafeModel(
+        new_cafe: CafeModel = CafeModel(
             name=cafe_name,
             lat=form.lat.data,
             lon=form.lon.data,
@@ -264,7 +264,7 @@ def edit_cafe() -> Response | str:
         # ----------------------------------------------------------- #
 
         # Create a new BP object
-        updated_cafe = CafeModel(
+        updated_cafe: CafeModel = CafeModel(
             name=form.name.data,
             lat=form.lat.data,
             lon=form.lon.data,
