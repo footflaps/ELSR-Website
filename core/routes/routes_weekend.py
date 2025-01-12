@@ -1,5 +1,4 @@
 from flask import render_template, url_for, flash, abort, Response
-from bbc_feeds import weather
 from datetime import datetime, timedelta
 import os
 
@@ -350,20 +349,6 @@ def weekend() -> Response | str:
         elevation_cafes[day] = get_destination_cafe_height(elevation_data[day], gpxes[day], cafes[day])
 
     # ----------------------------------------------------------- #
-    # Get weather
-    # ----------------------------------------------------------- #
-    bbc_weather = weather().forecast(CAMBRIDGE_BBC_WEATHER_CODE)
-    today = datetime.today().strftime("%A")
-    weather_data = {}
-    for day in days:
-        for item in bbc_weather:
-            title = item['title'].split(':')
-            # Weather is titled 'Saturday', 'Sunday', etc or 'Today' - so we have to figure out what 'Today' is...
-            if title[0] == day \
-                    or today == day and title == "Today":
-                weather_data[day] = item['summary'].split(',')[0:7]
-
-    # ----------------------------------------------------------- #
     # Render the page
     # ----------------------------------------------------------- #
     if private_gpx:
@@ -378,6 +363,6 @@ def weekend() -> Response | str:
                            GOOGLE_MAPS_API_KEY=google_maps_api_key(), ELSR_HOME=ELSR_HOME, MAP_BOUNDS=MAP_BOUNDS,
                            days=days, dates_long=dates_long, dates_short=dates_short,
                            DEFAULT_START_TIMES=DEFAULT_START_TIMES,
-                           rides=rides, start_details=start_details, weather_data=weather_data,
+                           rides=rides, start_details=start_details,
                            polylines=polylines, cafe_coords=cafe_coords, live_site=live_site(),
                            elevation_data=elevation_data, elevation_cafes=elevation_cafes, anchor=target_date_str)
