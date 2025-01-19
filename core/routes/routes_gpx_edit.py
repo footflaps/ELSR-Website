@@ -244,7 +244,7 @@ def gpx_cut_start() -> Response | str:
     if GpxRepository.clear_cafe_list(gpx_id):
         # Go ahead and update the list
         flash("Nearby cafe list is being been updated.")
-        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, False, )).start()
+        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, None, )).start()
 
     else:
         # Should never happen, but...
@@ -323,7 +323,7 @@ def gpx_cut_end() -> Response | str:
     if GpxRepository.clear_cafe_list(gpx_id):
         # Go ahead and update the list
         flash("Nearby cafe list is being updated...")
-        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, False, )).start()
+        Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, None, )).start()
     else:
         # Should never get here, but..
         app.logger.debug(f"gpx_cut_end(): Gpx().clear_cafe_list() failed for gpx_id = '{gpx_id}'.")
@@ -409,17 +409,17 @@ def publish_route() -> Response | str:
     # If there is a ride which uses this GPX, which hasn't already sent email notification, then it is waiting
     # on the route being made public, which kicks off this function. We need the updated cafe distances for the
     # notification email, so this is where we send the emails!
-    need_to_send_emails = False
+    calendar_id: int | None = None
     for ride in CalendarRepository.all_rides_gpx_id(gpx_id):
         if ride.sent_email != "True":
-            need_to_send_emails = ride.id
+            calendar_id = ride.id
             break
 
     # ----------------------------------------------------------- #
     # Add new existing nearby cafe list
     # ----------------------------------------------------------- #
     flash("Nearby cafe list is being updated.")
-    Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, need_to_send_emails)).start()
+    Thread(target=check_new_gpx_with_all_cafes, args=(gpx_id, calendar_id)).start()
 
     # Decide where to go next...
     if return_path and \
