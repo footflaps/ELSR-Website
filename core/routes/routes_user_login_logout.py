@@ -1,4 +1,4 @@
-from flask import render_template, redirect, url_for, flash, request, abort, session, make_response, Response
+from flask import render_template, redirect, url_for, flash, request, session, make_response, Response
 from flask_login import login_user, current_user, logout_user
 from threading import Thread
 from urllib.parse import urlparse
@@ -34,7 +34,7 @@ DEFAULT_EVENT_DAYS = 7
 # Functions
 # -------------------------------------------------------------------------------------------------------------- #
 
-def same_origin(current_uri, compare_uri):
+def same_origin(current_uri: str, compare_uri: str) -> bool:
     current = urlparse(current_uri)
     compare = urlparse(compare_uri)
 
@@ -63,7 +63,7 @@ def login() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page (optional)
     # ----------------------------------------------------------- #
-    email = request.args.get('email', None)
+    email: str | None = request.args.get('email', None)
 
     # ----------------------------------------------------------- #
     # Need a login form
@@ -74,23 +74,22 @@ def login() -> Response | str:
 
     # Detect form submission
     if form.validate_on_submit():
-
         # ------------------------------------------------------------------------------------------------- #
         #   POST - login attempt via form                                                                   #
         # ------------------------------------------------------------------------------------------------- #
 
         # Get login details
         email = form.email.data
-        password = form.password.data
+        password: str = form.password.data
 
         # Get user's IP
         if request.headers.getlist("X-Forwarded-For"):
-            user_ip = request.headers.getlist("X-Forwarded-For")[0]
+            user_ip: str | None = request.headers.getlist("X-Forwarded-For")[0]
         else:
             user_ip = request.remote_addr
 
         # See if user exists by looking up their email address
-        user: UserModel | None = UserRepository.one_by_email(email)
+        user: UserModel | None = UserRepository.one_by_email(email)  # type: ignore
 
         # Test 1: Does the user exist?
         if not user:
@@ -105,11 +104,11 @@ def login() -> Response | str:
             app.logger.debug(f"login(): Recovery email requested for '{email}'.")
             EventRepository.log_event("Login Fail", f"Recovery email requested for '{email}'.")
             # Generate a new code
-            UserRepository.create_new_reset_code(email)
+            UserRepository.create_new_reset_code(email)  # type: ignore
             # Find the user to get the details
-            user: UserModel | None = UserRepository.one_by_email(email)
+            user = UserRepository.one_by_email(email)  # type: ignore
             # Send an email
-            Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()
+            Thread(target=send_reset_email, args=(user.email, user.name, user.reset_code,)).start()  # type: ignore
             # Tell user to expect an email
             flash("If your email address is registered, an email recovery mail has been sent.")
             return render_template("user_login.html", form=form, year=current_year, live_site=live_site())
@@ -121,9 +120,9 @@ def login() -> Response | str:
             # Generate a new code
             UserRepository.create_new_verification(user.id)
             # Find the user to get the details
-            user: UserModel | None = UserRepository.one_by_email(email)
+            user = UserRepository.one_by_email(email)  # type: ignore
             # Send an email
-            Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()
+            Thread(target=send_verification_email, args=(user.email, user.name, user.verification_code,)).start()  # type: ignore
             # Tell user to expect an email
             flash("If your email address is registered, a new verification code has been sent.")
             return redirect(url_for('validate_email'))  # type: ignore
@@ -145,14 +144,14 @@ def login() -> Response | str:
 
         # Test 6: Check password
         if UserRepository.validate_password(user, password, user_ip):
-            # Admins require 2FA and we'll offer it to anyone with a phone number validated
+            # Admins require 2FA, and we'll offer it to anyone with a phone number validated
             if user.admin or \
                     user.has_valid_phone_number:
                 # Admins must use 2FA via SMS
                 UserRepository.generate_sms_code(user.id)
                 flash(f"2FA code has been sent to '{user.phone_number}'.")
-                user: UserModel | None = UserRepository.one_by_id(user.id)
-                send_2fa_sms(user)
+                user = UserRepository.one_by_id(user.id)
+                send_2fa_sms(user)  # type: ignore
                 return redirect(url_for('twofa_login'))  # type: ignore
 
             else:
@@ -222,11 +221,9 @@ def logout() -> Response | str:
     return response
 
 
-
 # -------------------------------------------------------------------------------------------------------------- #
 # Reset password
 # -------------------------------------------------------------------------------------------------------------- #
-
 @app.route('/reset', methods=['GET', 'POST'])
 @update_last_seen
 def reset_password() -> Response | str:
@@ -297,4 +294,3 @@ def reset_password() -> Response | str:
             EventRepository.log_event("Reset Fail", f"User().reset_password() failed! email = '{email}'.")
 
     return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())
-
