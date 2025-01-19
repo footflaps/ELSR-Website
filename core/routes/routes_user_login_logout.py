@@ -231,32 +231,16 @@ def logout() -> Response | str:
 @update_last_seen
 def reset_password() -> Response | str:
     # ----------------------------------------------------------- #
-    # Get details from the page
-    # ----------------------------------------------------------- #
-    code = request.args.get('code', None)
-    email = request.args.get('email', None)
-
-    # ----------------------------------------------------------- #
-    # Check params are valid
-    # ----------------------------------------------------------- #
-    # Only validate if we were actually sent them
-    if email and code:
-        email = email.strip('"').strip("'")
-        user: UserModel | None = UserRepository.one_by_email(email)
-        if not user:
-            app.logger.debug(f"reset_password(): URL route, invalid email = '{email}'.")
-            EventRepository.log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
-            abort(404)
-        if not UserRepository.validate_reset_code(user.id, int(code)):
-            app.logger.debug(f"reset_password(): URL route, invalid email = '{code}', for user = '{user.email}'.")
-            EventRepository.log_event("Reset Fail", f"URL route, invalid email = '{code}', for user = '{user.email}'.")
-            abort(404)
-
-    # ----------------------------------------------------------- #
     # Create form
     # ----------------------------------------------------------- #
     form = ResetPasswordForm()
-    form.email.data = email
+
+    if request.method == 'GET':
+        # ----------------------------------------------------------- #
+        # GET: pre-load form
+        # ----------------------------------------------------------- #
+        form.email.data = request.args.get('email', None)
+        form.reset_code.data = request.args.get('code', None)
 
     # Detect form submission
     if form.validate_on_submit():
@@ -265,26 +249,52 @@ def reset_password() -> Response | str:
         # POST: reset password form completed
         # ----------------------------------------------------------- #
         # This may have changed!
-        email = form.email.data
+        email: str = form.email.data
+        try:
+            reset_code: int = int(form.reset_code.data)
+        except ValueError:
+            reset_code = 0
+        password1: str = form.password1.data
+        password2: str = form.password2.data
 
-        if form.password1.data != form.password2.data:
+        # Test 1: Passwords much Match
+        if password1 != password2:
             app.logger.debug(f"reset_password(): Form route, Passwords don't match! Email = '{email}'.")
             EventRepository.log_event("Reset Fail", f"Form route, Passwords don't match! Email = '{email}'.")
             flash("Passwords don't match!")
             # Back to the same page for another try
-            return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())
+            return redirect(url_for('reset_password'))  # type: ignore
 
-        if UserRepository.reset_password(email, form.password1.data):
+        # Test 2: User must exist
+        user: UserModel | None = UserRepository.one_by_email(email)  # type: ignore
+        if not user:
+            flash("You miss-typed your email!")
+            app.logger.debug(f"reset_password(): Invalid email = '{email}'.")
+            EventRepository.log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
+            # Back to the same page for another try
+            return redirect(url_for('reset_password'))   # type: ignore
+
+        # Test 2: Validate the reset code
+        if not UserRepository.validate_reset_code(user_id=user.id, code=reset_code):
+            flash("Invalid reset code!")
+            app.logger.debug(f"reset_password(): Invalid reset code = '{reset_code}' for email = '{email}'.")
+            EventRepository.log_event("Reset Fail", f"URL route, invalid email = '{email}'.")
+            # Back to the same page for another try
+            return redirect(url_for('reset_password'))   # type: ignore
+
+        # Now Reset Password
+        if UserRepository.reset_password(email=email, password=password1):
             app.logger.debug(f"reset_password(): Form route, Password has been reset, email = '{email}'.")
             EventRepository.log_event("Reset Success", f"Form route, Password has been reset, email = '{email}'.")
             flash("Password has been reset, please login!")
             # Forward to login page
             return redirect(url_for('login', email=email))  # type: ignore
+
         else:
             # Should never happen, but...
+            flash("Sorry, something went wrong!")
             app.logger.debug(f"reset_password(): User().reset_password() failed! email = '{email}'.")
             EventRepository.log_event("Reset Fail", f"User().reset_password() failed! email = '{email}'.")
-            flash("Sorry, something went wrong!")
 
     return render_template("user_reset_password.html", form=form, year=current_year, live_site=live_site())
 

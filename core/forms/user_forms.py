@@ -84,7 +84,8 @@ class LoginUserForm(FlaskForm):
 # Reset Password form
 # -------------------------------------------------------------------------------------------------------------- #
 class ResetPasswordForm(FlaskForm):
-    email = EmailField("Email address", validators=[InputRequired("Please enter your email address."), Email()])
+    email = EmailField("Email address", validators=[InputRequired("Please enter your email address.")])
+    reset_code = IntegerField("Reset code", validators=[InputRequired("Please enter your reset code.")])
     password1 = PasswordField("Password", validators=[InputRequired("Please enter a password.")])
     password2 = PasswordField("Password again", validators=[InputRequired("Please enter a password.")])
     submit = SubmitField("Reset password")

@@ -365,14 +365,15 @@ class UserRepository(UserModel):
 
         return False
 
-    def reset_password(self, email: str, password: str) -> bool:
+    @classmethod
+    def reset_password(cls, email: str, password: str) -> bool:
         with app.app_context():
             user = db.session.query(UserModel).filter_by(email=email).first()
             if user:
                 try:
                     app.logger.debug(f"dB.reset_password(): Resetting password for user '{email}'.")
                     user.reset_code = None
-                    user.password = self.hash_password(password)
+                    user.password = cls.hash_password(password)
                     db.session.commit()
                     return True
 
@@ -633,9 +634,9 @@ class UserRepository(UserModel):
         return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
 
     @staticmethod
-    def validate_reset_code(user_id: int, code: str) -> bool:
+    def validate_reset_code(user_id: int, code: int) -> bool:
         with app.app_context():
-            user = db.session.query(UserModel).filter_by(id=user_id).first()
+            user: UserModel | None = db.session.query(UserModel).filter_by(id=user_id).first()
             if user:
                 if user.reset_code != code:
                     app.logger.debug(f"dB.validate_reset_code(): Invalid reset code for '{user.email}', "
@@ -643,9 +644,9 @@ class UserRepository(UserModel):
                     return False
 
                 else:
-                    reset_timestamp = user.reset_code_timestamp
-                    now = time.time()
-                    age_hours = round((now - reset_timestamp) / 60 / 60, 1)
+                    reset_timestamp: int = user.reset_code_timestamp
+                    now: int = int(time.time())
+                    age_hours: float = round((now - reset_timestamp) / 60 / 60, 1)
 
                     if now - reset_timestamp > RESET_TIMEOUT_SECS:
                         app.logger.debug(f"dB.validate_reset_code(): Valid reset code for '{user.email}', "
