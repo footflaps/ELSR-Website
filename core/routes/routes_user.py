@@ -318,7 +318,7 @@ def user_page() -> Response | str:
         # Did they change their username?
         if new_name != user.name:
             # Needs to be unique
-            if UserRepository.check_name_in_use(new_name):
+            if UserRepository().check_name_in_use(new_name):
                 # Not unique
                 flash(f"Sorry, the name '{new_name}' is already in use!")
                 app.logger.debug(f"user_page(): Username clash '{new_name}' for user_id = '{user_id}'.")

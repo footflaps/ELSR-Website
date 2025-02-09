@@ -51,7 +51,7 @@ def load_user(user_id: int) -> UserModel | None:
     # Only log user details on the webserver
     # if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
     #     app.logger.debug(f"session = '{session}', user_id = '{user_id}'")
-    return UserRepository.query.get(int(user_id))
+    return UserModel.query.get(int(user_id))
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -62,14 +62,25 @@ def load_user(user_id: int) -> UserModel | None:
 # -------------------------------------------------------------------------------------------------------------- #
 # -------------------------------------------------------------------------------------------------------------- #
 
-class UserRepository(UserModel):
+class UserRepository:
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Create
     # ---------------------------------------------------------------------------------------------------------- #
-    def create_user(self, new_user: UserModel, raw_password: str) -> bool:
+    @staticmethod
+    def create_user(new_user: UserModel, raw_password: str) -> UserModel | None:
+        """
+        Create a new user, which involves:
+        1. Hash password and store that
+        2. Generate Email verification code
+        3. Set registration time and default permissions.
+
+        :param new_user:                    User ORM
+        :param raw_password:                Their raw password
+        :return:                            The updated ORM or None (if db write failed).
+        """
         # Hash password before adding to dB
-        new_user.password = self.hash_password(raw_password)
+        new_user.password = UserRepository.hash_password(raw_password)
 
         # By default, new users are not verified and have no permissions until verified
         new_user.verification_code = random_code(NUM_DIGITS_CODES)
@@ -84,12 +95,13 @@ class UserRepository(UserModel):
             try:
                 db.session.add(new_user)
                 db.session.commit()
-                return True
+                db.session.refresh(new_user)
+                return new_user
             
             except Exception as e:
                 db.session.rollback()
                 app.logger.error(f"dB.create_user(): Failed with error code '{e.args}'.")
-                return False
+                return None
 
     # ---------------------------------------------------------------------------------------------------------- #
     # Update
@@ -599,8 +611,30 @@ class UserRepository(UserModel):
         return cls.one_by_id(user_id)
 
     # ---------------------------------------------------------------------------------------------------------- #
-    # Other
+    # Registration Functions
     # ---------------------------------------------------------------------------------------------------------- #
+
+    @classmethod
+    def check_name_in_use(cls, name: str) -> bool:
+        users = cls.all_users()
+        for user in users:
+            if name.strip().lower() == user.name.strip().lower():
+                return True
+        return False
+
+    @staticmethod
+    def hash_password(raw_password: str) -> str:
+        return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
+
+
+
+
+
+
+
+
+
+
 
     @staticmethod
     def notification_choice(user: UserModel, notification_type: str) -> bool:
@@ -622,16 +656,7 @@ class UserRepository(UserModel):
                 return bool(user.notifications & bit_mask)
         return False
 
-    def check_name_in_use(self, name: str) -> bool:
-        users = self.all_users()
-        for user in users:
-            if name.strip().lower() == user.name.strip().lower():
-                return True
-        return False
 
-    @staticmethod
-    def hash_password(raw_password: str) -> str:
-        return generate_password_hash(raw_password, method='pbkdf2:sha256', salt_length=8)
 
     @staticmethod
     def validate_reset_code(user_id: int, code: int) -> bool:
