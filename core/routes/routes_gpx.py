@@ -331,7 +331,7 @@ def new_route() -> Response | str:
             # Create a new GPX object
             # We do this first as we need the id in order to create
             # the filename for the GPX file when we upload it
-            gpx = GpxModel()
+            gpx: GpxModel = GpxModel()
             gpx.name = form.name.data
             gpx.email = current_user.email
             gpx.cafes_passed = "[]"
@@ -343,7 +343,7 @@ def new_route() -> Response | str:
             gpx.public = False
 
             # Add to the dB
-            gpx = gpx.add_gpx(gpx)
+            gpx = GpxRepository.add_gpx(gpx)  # type: ignore
             if gpx:
                 # Success, added GPX to dB
                 app.logger.debug(f"new_route(): GPX added to dB, id = '{gpx.id}'.")
