@@ -345,11 +345,14 @@ def twofa_login() -> Response | str:
         # ----------------------------------------------------------- #
         # Method 2: They manually filled the form in
         # ----------------------------------------------------------- #
-        user_code = request.args.get('code', None)
-        user_email = request.args.get('email', None)
+        user_code = form.verification_code.data
+        user_email = form.email.data
+
+        print(f"user_email = {user_email}")
 
         # Is that a valid email address?
         user = UserRepository.one_by_email(email=str(user_email))
+        print(f"user = {user}")
 
         # Did we find that email address
         if user:
