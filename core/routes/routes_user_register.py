@@ -55,6 +55,12 @@ def register() -> Response | str:
         user_email = form.email.data.strip()
         app.logger.debug(f"register(): Name = '{user_name}', Email = '{user_email}'")
 
+        # Detect spam
+        if "http" in user_name:
+            flash("Sorry, you can't use links in your name.")
+            return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
+                                   admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
+
         # Create a new User
         new_user = UserModel()
         new_user.name = user_name
