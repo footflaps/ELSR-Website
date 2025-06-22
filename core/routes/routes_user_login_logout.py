@@ -20,7 +20,7 @@ from core.database.repositories.event_repository import EventRepository
 from core.forms.user_forms import LoginUserForm, ResetPasswordForm
 from core.subs_email import send_reset_email, send_verification_email
 from core.subs_sms import send_2fa_sms
-from core.decorators.user_decorators import update_last_seen
+from core.decorators.user_decorators import update_last_seen, login_required
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -200,6 +200,7 @@ def login() -> Response | str:
 # -------------------------------------------------------------------------------------------------------------- #
 
 @app.route('/logout')
+@login_required
 @update_last_seen
 def logout() -> Response | str:
     # Have to log the event before we log out, so we still have their email address
