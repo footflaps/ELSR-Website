@@ -42,7 +42,7 @@ DEFAULT_EVENT_DAYS = 7
 # Register new user
 # -------------------------------------------------------------------------------------------------------------- #
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/register2', methods=['GET', 'POST'])
 @update_last_seen
 def register() -> Response | str:
     # Need a form
