@@ -56,8 +56,8 @@ def register() -> Response | str:
         app.logger.debug(f"register(): Name = '{user_name}', Email = '{user_email}'")
 
         # Detect spam
-        if "http" in user_name:
-            flash("Sorry, you can't use links in your name.")
+        if any(word in user_name for word in ["http", "www", "tinyurl", "/", "."]):
+            flash("Sorry, you can't use web links in your name (nor '/' nor '.').")
             return render_template("user_register.html", form=form, year=current_year, live_site=live_site(),
                                    admin_email_address=admin_email_address, admin_phone_number=admin_phone_number)
 
