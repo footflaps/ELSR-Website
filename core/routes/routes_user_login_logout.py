@@ -203,9 +203,14 @@ def login() -> Response | str:
 @login_required
 @update_last_seen
 def logout() -> Response | str:
-    # Have to log the event before we log out, so we still have their email address
-    app.logger.debug(f"logout(): Logging user '{current_user.get('email')}' out now...")
-    EventRepository.log_event("Logout", f"User '{current_user.get('email')}' logged out.")
+    user_id: int = current_user.id
+    user: UserModel | None = UserRepository.one_by_id(user_id)
+    if user:
+        user_email: str = user.email
+    else:
+        user_email = "Unknown"
+    app.logger.debug(f"logout(): Logging user '{user_email}' out now...")
+    EventRepository.log_event("Logout", f"User '{user_email}' logged out.")
     flash("You have been logged out!")
 
     # Logout the user
