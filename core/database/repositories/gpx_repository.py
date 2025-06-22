@@ -86,13 +86,13 @@ class GpxRepository:
     @staticmethod
     def update_downloads(gpx_id: int, email: str) -> bool:
         with app.app_context():
-            gpx = GpxModel.query.filter_by(id=gpx_id).first()
+            gpx: GpxModel | None = GpxModel.query.filter_by(id=gpx_id).first()
             if gpx:
                 try:
                     # Update filename
                     if gpx.downloads:
-                        emails = json.loads(gpx.downloads)
-                        if not email in emails:
+                        emails: list[str] = json.loads(gpx.downloads)
+                        if email not in emails:
                             emails.append(email)
                     else:
                         # Start new set

@@ -600,11 +600,11 @@ def flag_gpx() -> Response | str:
 @logout_barred_user
 @login_required
 @update_last_seen
-def route_download(gpx_id) -> Response | str:
+def route_download(gpx_id: int) -> Response | str:
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    gpx = GpxRepository.one_by_id(gpx_id)
+    gpx: GpxModel | None = GpxRepository.one_by_id(gpx_id)
     if not gpx:
         app.logger.debug(f"route_download(): Failed to locate GPX with gpx_id = '{gpx_id}' in dB.")
         EventRepository.log_event("GPX Download Fail", f"Failed to locate GPX with gpx_id = '{gpx_id}'.")
@@ -614,7 +614,7 @@ def route_download(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Check GPX file exists
     # ----------------------------------------------------------- #
-    filename = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
+    filename: str = os.path.join(GPX_UPLOAD_FOLDER_ABS, os.path.basename(gpx.filename))
     if not os.path.exists(filename):
         # Should never get here, but..
         app.logger.debug(f"route_download(): Failed to locate filename = '{filename}', gpx_id = '{gpx_id}'.")
@@ -636,19 +636,19 @@ def route_download(gpx_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Update the GPX file with the correct name (in case it's changed)
     # ----------------------------------------------------------- #
-    check_route_name(gpx)
+    check_route_name(gpx=gpx)
 
     # ----------------------------------------------------------- #
     # Update count
     # ----------------------------------------------------------- #
-    GpxRepository.update_downloads(gpx.id, current_user.email)
+    GpxRepository.update_downloads(gpx_id=gpx.id, email=current_user.email)
 
     # ----------------------------------------------------------- #
     # Send link to download the file
     # ----------------------------------------------------------- #
 
     # This is the filename the user will see
-    download_name = f"ELSR_{gpx.name.replace(' ', '_')}.gpx"
+    download_name: str = f"ELSR_{gpx.name.replace(' ', '_')}.gpx"
 
     app.logger.debug(f"route_download(): Serving GPX gpx_id = '{gpx_id}' ({gpx.name}) to '{current_user.email}', "
                      f"filename = '{filename}'.")
