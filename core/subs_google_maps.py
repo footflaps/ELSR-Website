@@ -60,13 +60,13 @@ MAP_COUNT_FILENAME = "map_counts.csv"
 
 # Map load limits by day
 MAP_LIMITS_BY_DAY = {
-    "Monday": 1000,
-    "Tuesday": 1000,
-    "Wednesday": 1000,
-    "Thursday": 1000,
-    "Friday": 1000,
-    "Saturday": 1000,
-    "Sunday": 1000,
+    "Monday": 2000,
+    "Tuesday": 2000,
+    "Wednesday": 2000,
+    "Thursday": 2000,
+    "Friday": 2000,
+    "Saturday": 2000,
+    "Sunday": 2000,
 }
 
 # Map Boost number
