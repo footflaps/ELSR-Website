@@ -19,7 +19,7 @@ from core import app, current_year, live_site
 
 from core.database.repositories.user_repository import UserModel, UserRepository
 from core.database.repositories.event_repository import EventRepository
-from core.database.repositories.poll_repository import PollRepository, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
+from core.database.repositories.poll_repository import PollModel, PollRepository, POLL_NO_RESPONSE, POLL_OPEN, POLL_CLOSED, POLL_PRIVATE
 
 from core.forms.poll_forms import create_poll_form
 
@@ -136,12 +136,17 @@ def poll_details(poll_id) -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed an anchor?
     # ----------------------------------------------------------- #
-    anchor = request.args.get('anchor', None)
+    anchor: str | None = request.args.get('anchor', None)
 
     # ----------------------------------------------------------- #
     # Check params are valid
     # ----------------------------------------------------------- #
-    poll = PollRepository.one_poll_by_id(poll_id)
+    try:
+        poll_id_int = int(poll_id)
+    except ValueError:
+        return abort(404, "Invalid poll_id")
+
+    poll: PollModel | None = PollRepository.one_poll_by_id(poll_id=poll_id_int)
     if not poll:
         app.logger.debug(f"poll_details(): Failed to locate Poll with poll_id = '{poll_id}'.")
         EventRepository.log_event("One Poll Fail", f"Failed to locate Poll with poll_id = '{poll_id}'.")
