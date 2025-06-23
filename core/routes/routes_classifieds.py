@@ -18,7 +18,7 @@ from core import app, current_year, live_site, CLASSIFIEDS_PHOTO_FOLDER
 # -------------------------------------------------------------------------------------------------------------- #
 
 from core.database.repositories.user_repository import UserModel, UserRepository
-from core.database.repositories.classified_repository import ClassifiedRepository, MAX_NUM_PHOTOS, SELL, STATUS_SOLD
+from core.database.repositories.classified_repository import ClassifiedModel, ClassifiedRepository, MAX_NUM_PHOTOS, SELL, STATUS_SOLD
 from core.database.repositories.event_repository import EventRepository
 
 from core.database.jinja.user_jinja import get_user_name
@@ -105,13 +105,21 @@ def add_sell() -> Response | str:
     # ----------------------------------------------------------- #
     # Did we get passed a classified_id? (Optional)
     # ----------------------------------------------------------- #
-    classified_id = request.args.get('classified_id', None)
+    classified_id_str: str | None = request.args.get('classified_id', None)
 
     # ----------------------------------------------------------- #
     # Validate classified_id
     # ----------------------------------------------------------- #
-    if classified_id:
-        classified = ClassifiedRepository.find_by_id(classified_id)
+    if classified_id_str:
+
+        try:
+            classified_id: int = int(classified_id_str)
+        except ValueError:
+            app.logger.debug(f"add_sell(): classified_id = '{classified_id_str}' is not an integer.")
+            EventRepository.log_event("Edit Sell Fail", f"classified_id = '{classified_id_str}' is not an integer.")
+            return abort(400)
+
+        classified: ClassifiedModel | None = ClassifiedRepository.find_by_id(classified_id)
         if not classified:
             app.logger.debug(f"add_sell(): Failed to locate, classified_id = '{classified_id}'.")
             EventRepository.log_event("Edit Sell Fail", f"Failed to locate, classified_id = '{classified_id}'.")
@@ -128,8 +136,8 @@ def add_sell() -> Response | str:
             # We are editing an existing entry
             # ----------------------------------------------------------- #
             # Sort out num photos (as editing photos in form is tricky)
-            num_photos_used = ClassifiedRepository.number_photos(classified_id)
-            photos_left = MAX_NUM_PHOTOS - num_photos_used
+            num_photos_used: int = ClassifiedRepository.number_photos(classified_id)
+            photos_left: int = MAX_NUM_PHOTOS - num_photos_used
             # Create form with correct number of outstanding photo upload options
             form = create_classified_form(photos_left)
 
@@ -187,9 +195,9 @@ def add_sell() -> Response | str:
             # Create new Classified object for the db
             # ----------------------------------------------------------- #
             if classified:
-                new_classified = classified
+                new_classified: ClassifiedModel = classified
             else:
-                new_classified = ClassifiedRepository()
+                new_classified = ClassifiedModel()
 
             # Update from form
             new_classified.email = current_user.email

@@ -115,7 +115,7 @@ class ClassifiedRepository:
             return classified
 
     @staticmethod
-    def number_photos(classified_id: int) -> int | None:
+    def number_photos(classified_id: int) -> int:
         with app.app_context():
             classified = ClassifiedModel.query.filter_by(id=classified_id).first()
             if classified:
@@ -128,5 +128,5 @@ class ClassifiedRepository:
 
             else:
                 app.logger.error(f"dB.number_photos(): Called with invalid classified_id = '{classified_id}'.")
-                return None
+                return 0
 
