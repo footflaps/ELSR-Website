@@ -154,6 +154,12 @@ def contact() -> Response | str:
         # ----------------------------------------------------------- #
         #   POST - form validated & submitted
         # ----------------------------------------------------------- #
+
+        # Detect SPAM
+        if any(word in str(form.message).lower() for word in ["http", "www", "tinyurl", "/", "unsubscribe", "elsr.co.uk", "sales", "marketing", "offer", "promotional"]):
+            flash("Sorry, No spam.")
+            return render_template("main_contact.html", year=current_year, form=form, live_site=live_site())
+
         Thread(target=contact_form_email, args=(form.name.data, form.email.data, form.message.data,)).start()
         flash("Thankyou, your message has been sent!")
 
