@@ -29,7 +29,7 @@ from core.decorators.user_decorators import update_last_seen, logout_barred_user
 # -------------------------------------------------------------------------------------------------------------- #
 
 # How much calendar we populate relative to the focus date
-LOOK_BACK_MONTHS = 3
+LOOK_BACK_MONTHS = 12
 LOOK_FORWARD_MONTHS = 6
 
 # ELSR Chaingang details
