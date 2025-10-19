@@ -255,13 +255,14 @@
 				</li>
 		
 				<!-- SQL -->
-				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/sqlite_icon.png')}}"
-				                      width=90 alt="SQL Logo">
-					SQLite databases courtesy of
+				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/Postgresql_elephant.svg.png')}}"
+				                      width=40 alt="SQL Logo">
+                    All the data is stored in a <strong>PostgreSQL</strong> database, using
 					<a href="https://www.sqlalchemy.org/">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>SQLAlchemy.</strong>
+						<i class="fa fa-external-link fa-2xs"></i> <strong>SQLAlchemy</strong>
 					</a>
-					This website uses eleven different databases for keeping track of all the content.
+					as the Python interface. Total overkill, but we use PostgreSQL at work, so it's simpler to only
+                    have to maintain one type of database.
 				</li>
 		
 				<!-- Forms -->
