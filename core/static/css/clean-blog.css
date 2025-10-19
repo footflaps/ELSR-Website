@@ -271,6 +271,74 @@ h1 {
   }
 }
 
+/* **************************************************************************
+                                   Page Header
+************************************************************************** */
+
+header.carousel.masthead {
+  margin-bottom: 50px;
+  position: relative;
+  background-color: #868e96;
+  height: 600px; /* Fixed height for the carousel */
+}
+
+header.carousel.masthead .carousel-inner {
+  height: 100%; /* Ensure the inner space matches the masthead size */
+}
+
+header.carousel.masthead .carousel-item {
+  height: 100%; /* Ensure every carousel slide has the same height */
+}
+
+header.carousel.masthead .carousel-overlay {
+  height: 100%; /* Match slide height */
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+}
+
+header.carousel.masthead .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #212529;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+header.carousel.masthead .page-heading {
+  position: relative;
+  z-index: 2; /* Text stays above overlay */
+  padding: 150px 0 100px; /* Adjust padding if too much or too little */
+  text-align: center;
+  color: white;
+}
+
+header.carousel.masthead .page-heading h1 {
+  font-size: 50px;
+  font-weight: 800;
+}
+
+header.carousel.masthead .page-heading .subheading {
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+  header.carousel.masthead .page-heading h1 {
+    font-size: 80px;
+  }
+
+  header.carousel.masthead .page-heading .subheading {
+    font-size: 30px;
+  }
+}
+
+
+
 
 /* **************************************************************************
                                    Forms
