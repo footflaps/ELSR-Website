@@ -23,7 +23,11 @@
 
         {% for i in range(1, 14) %}
         <div class="carousel-item {% if i == 1 %}active{% endif %}">
-            <div class="carousel-overlay" style="background-image: url({{ url_for('static', filename='img/page-headers/home-bg' ~ i ~ '.jpg') }})"></div>
+            <div class="carousel-overlay"
+                 style="background-image: url({{ url_for('static', filename='img/page-headers/home-bg' ~ i ~ '.jpg') }})"
+                 role="img"
+                aria-label="Cyclists on ELSR café ride in Cambridge countryside">
+            </div>
             <div class="overlay"></div>
         </div>
         {% endfor %}
