@@ -2,27 +2,28 @@
 <html lang = "en">
 
 <head>
-	
-	<!---------------------------------------------------------------------------------------------------->
-	<!--                                          Title                                                 -->
-	<!---------------------------------------------------------------------------------------------------->
-	
-	{% if live_site %}
-		<title>ELSR – Cambridge Cycling Club & Social Rides</title>
-	{% else %}
-		<title>TEST SITE</title>
-	{% endif %}
-	
+
 	<!---------------------------------------------------------------------------------------------------->
 	<!--                                      Site meta data                                            -->
 	<!---------------------------------------------------------------------------------------------------->
-	
+
+    {# NB Title is injected by each page #}
+    {% block title %} {% endblock %}
+
 	<meta charset="utf-8">
-	<meta name="description" content="ELSR Cambridge Cycling Club & Social Rides">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.url_root | trim('/') }}{{ request.path }}">
+
+    <!-- Primary meta tags -->
+    <meta name="description" content="ELSR Cambridge Cycling Club & Social Rides">
 	<meta name="author" content="Ben Freeman">
 	<meta name="keywords" content="cycling, social rides, cafe rides, cambridge, road riding, cycling club,
 	                               cycle routes, cambridge cycle club, group rides, gpx files, cycling cafes">
-	<meta lang = "en">
+
+    <!-- Language and viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Content-Language" content="en">
 	
 	
 	<!---------------------------------------------------------------------------------------------------->

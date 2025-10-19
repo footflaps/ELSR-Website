@@ -4,6 +4,8 @@ from datetime import date
 from werkzeug import exceptions
 import os
 from threading import Thread
+from typing import Any
+
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Import app from __init__.py
@@ -72,22 +74,20 @@ def cafe_list() -> Response | str:
     # ----------------------------------------------------------- #
     # Create a list of markers
     # ----------------------------------------------------------- #
-    cafe_markers: list = []
+    cafe_markers: list[dict[str,Any]] = []
 
     for cafe in cafes:
-        # Different colour icon for OPEN / CLOSED
-        if cafe.active:
-            colour: str = OPEN_CAFE_COLOUR
-        else:
-            colour = CLOSED_CAFE_COLOUR
+        colour = OPEN_CAFE_COLOUR if cafe.active else CLOSED_CAFE_COLOUR
 
-        marker: dict = {
+        cafe_markers.append({
+            "id":       cafe.id,
+            "name":     cafe.name,
             "position": {"lat": cafe.lat, "lng": cafe.lon},
-            "title":    f'<a href="{url_for("cafe_details", cafe_id=cafe.id)}">{cafe.name}</a>',
+            "title":    cafe.name,  # hover tooltip only
             "color":    colour,
-        }
+            "url":      url_for("cafe_details", cafe_id=cafe.id),
+        })
 
-        cafe_markers.append(marker)
 
     # ----------------------------------------------------------- #
     # Prep map

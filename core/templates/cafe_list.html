@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+    <title>ELSR Cafés – Best Cycling Café Stops around Cambridge</title>
+{% endblock %}
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                   Page specific JS / CSS                                       -->
@@ -101,36 +105,26 @@
 	
 	        /* This is our set of cafes */
 			const cafes = {{ cafe_markers | tojson }}
-		    
-		    // Create an info window to share between markers.
-		    const infoWindow = new InfoWindow();
-						
+
 	        // Create the markers.
-	        cafes.forEach( ({ position, title, color }, i) => {
-	            const pin = new PinElement({
-	            glyph: `${i + 1}`,
-	            });
-	            
-	            const marker = new AdvancedMarkerElement({
-	                position,
-	                map,
-	                title: `${title}`,
-	                content: new PinElement({
-	                                background: color,
-	                                borderColor: "black",
-	                                glyphColor: "black",
-								}).element
-	            });
-	            
-	            // Add a click listener for each marker, and set up the info window.
-	            marker.addListener("click", ({ domEvent, latLng }) => {
-	                const { target } = domEvent;
-	                infoWindow.close();
-	                infoWindow.setContent(marker.title);
-	                infoWindow.open(marker.map, marker);
-	            });
-	        });
-		}
+	        cafes.forEach(({ position, title, color, url }, i) => {
+                const marker = new AdvancedMarkerElement({
+                  position,
+                  map,
+                  title, // hover tooltip
+                  content: new PinElement({
+                    background: color,
+                    borderColor: "black",
+                    glyphColor: "black",
+                  }).element,
+                });
+
+                // On click → open the café details page
+                marker.addListener("click", () => {
+                  window.location.href = url;
+                });
+              });
+            }
 	
 		initMap();
 	
@@ -145,31 +139,30 @@
 <!---------------------------------------------------------------------------------------------------->
 
 <div class="container">
-	<div class="row">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
+  <div class="row">
+    <div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 
-			<h2 class="">ELSR Cafe Database</h2>
+      <h2>ELSR Café Database – Cycle-Friendly Cafés Around Cambridge</h2>
 
-            <p>
-                We maintain a database of cycle friendly cafes in and around Cambridge, which we regularly
-                visit on our group rides. If you click on the map, selecting a cafe, you will be taken to a
-                page with a description of the cafe, and a list of routes that pass through the cafe.
-            </p>
+      <p>
+        We maintain an ever-growing database of <strong>cycle-friendly cafés in and around Cambridge, UK</strong>.
+        These are the coffee stops and cafés our ride leaders regularly choose for weekend and mid-week group rides.
+        Click a café on the map to view its description, facilities, and the <strong>cycling routes that pass through it</strong>.
+      </p>
 
-            <p>
-                The list is maintained and updated by the community, so if you know of a cafe that should be
-                added to the list, please feel free to add it using the <strong>ADD CAFE</strong> button below.
-            </p>
+      <p>
+        The list is updated and curated by the <strong>ELSR community</strong>.
+        If you know a café that deserves to be added, simply click the <strong>ADD CAFE</strong> button below and
+        help other Cambridge riders discover new stops.
+      </p>
 
-            <p>
-                NB Cafes with a Red location icon are either permanently or temporarily closed.
-            </p>
+      <p>
+        <strong>Note:</strong> Cafés marked with a red location icon are temporarily or permanently closed.
+      </p>
 
-			<!-- Break before next section -->
-			<hr>
-
-		</div>
-	</div>
+      <hr>
+    </div>
+  </div>
 </div>
 
 <!---------------------------------------------------------------------------------------------------->
@@ -181,6 +174,10 @@
 		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
 
 			<h2 class="">Recent Additions</h2>
+
+            <p>
+                These are the most recent additions to the database.
+            </p>
 			
 			<ul class="my-3">
 				{% for cafe in cafes | reverse %}

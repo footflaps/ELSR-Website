@@ -1,12 +1,18 @@
 {% extends "base.html" %}
 
+{% block title %}
+    <title>ELSR Cafés – {{cafe.name}}</title>
+{% endblock %}
+
 
 <!---------------------------------------------------------------------------------------------------->
 <!--                                   Page specific JS / CSS                                       -->
 <!---------------------------------------------------------------------------------------------------->
 
+
+
 {% block head %}
-	
+
 	<!-- dataTables Bootstrap 4 CSS -->
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
 
@@ -23,9 +29,9 @@
 {% endblock %}
 
 
-
 <!-- Add import for bootstrap wtf quickform support -->
 {% import "bootstrap/wtf.html" as wtf %}
+
 
 {% block content %}
 
