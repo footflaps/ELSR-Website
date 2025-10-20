@@ -21,7 +21,7 @@ from core.database.repositories.event_repository import EventRepository
 from core.database.repositories.cafe_repository import CafeRepository
 from core.database.repositories.gpx_repository import GpxRepository
 from core.database.repositories.user_repository import UserModel, UserRepository, SUPER_ADMIN_USER_ID
-from core.database.repositories.blog_repository import BlogRepository as Blog, BlogModel, Privacy, Sticky, NO_CAFE, NO_GPX, Category
+from core.database.repositories.blog_repository import BlogModel, BlogRepository, Privacy, Sticky, NO_CAFE, NO_GPX, Category
 
 from core.forms.blog_forms import create_blogs_form
 
@@ -74,7 +74,7 @@ def add_blog() -> Response | str:
             flash("Invalid blog_id!")
             return abort(404)
         # Look up blog
-        blog: BlogModel | None = Blog().one_by_id(id=int(blog_id))
+        blog: BlogModel | None = BlogRepository().one_by_id(id=int(blog_id))
         # Handle missing
         if not blog:
             app.logger.debug(f"add_blog(): Failed to locate blog, blog_id = '{blog_id}'.")
@@ -102,11 +102,11 @@ def add_blog() -> Response | str:
         if blog.cafe_id == NO_CAFE:
             form.cafe.data = NO_CAFE
         else:
-            form.cafe.data = CafeRepository.one_by_id(blog.cafe_id).combo_string
+            form.cafe.data = CafeRepository().one_by_id(blog.cafe_id).combo_string
         if blog.gpx_index == NO_GPX:
             form.gpx.data = NO_GPX
         else:
-            form.gpx.data = GpxRepository.one_by_id(blog.gpx_index).combo_string
+            form.gpx.data = GpxRepository().one_by_id(blog.gpx_index).combo_string
         form.details.data = blog.details
 
         if blog.private:
@@ -116,7 +116,7 @@ def add_blog() -> Response | str:
 
         # Admin things
         if current_user.admin:
-            form.owner.data = UserRepository.one_by_email(blog.email).combo_str
+            form.owner.data = UserRepository().one_by_email(blog.email).combo_str
             if blog.sticky:
                 form.sticky.data = Sticky.TRUE.value
             else:
@@ -131,7 +131,7 @@ def add_blog() -> Response | str:
         if request.method == 'GET':
             form.date.data = date.today()
             if current_user.admin:
-                form.owner.data = UserRepository.one_by_id(current_user.id).combo_str
+                form.owner.data = UserRepository().one_by_id(current_user.id).combo_str
 
     # Are we posting the completed comment form?
     if request.method == 'POST' and form.validate_on_submit():
@@ -161,7 +161,7 @@ def add_blog() -> Response | str:
             new_blog: BlogModel = blog
         else:
             # New post
-            new_blog = Blog()
+            new_blog = BlogModel()
 
         # ----------------------------------------------------------- #
         # Populate new_blog from form
@@ -181,14 +181,14 @@ def add_blog() -> Response | str:
         # 2. The rest
         new_blog.title = form.title.data
         new_blog.category = form.category.data
-        new_blog.cafe_id = CafeRepository.cafe_id_from_combo_string(form.cafe.data)
-        new_blog.gpx_index = GpxRepository.gpx_id_from_combo_string(form.gpx.data)
+        new_blog.cafe_id = CafeRepository().cafe_id_from_combo_string(form.cafe.data)
+        new_blog.gpx_index = GpxRepository().gpx_id_from_combo_string(form.gpx.data)
         new_blog.details = form.details.data
         new_blog.private = form.privacy.data == Privacy.PRIVATE.value
 
         # 3. Admin fields
         if current_user.admin:
-            new_blog.email = UserRepository.user_from_combo_string(form.owner.data).email
+            new_blog.email = UserRepository().user_from_combo_string(form.owner.data).email
             new_blog.sticky = form.sticky.data == Sticky.TRUE.value
         else:
             new_blog.sticky = False
@@ -203,7 +203,7 @@ def add_blog() -> Response | str:
         # Try and add the blog post
         # ----------------------------------------------------------- #
         # Need to add before we upload the photo as we need new_blog to have a valid id
-        new_blog = Blog().add_blog(new_blog)
+        new_blog = BlogRepository().add_blog(new_blog)
         if not new_blog:
             # Should never happen, but...
             # NB new_blog is None
@@ -318,7 +318,7 @@ def delete_blog() -> Response | str:
     # ----------------------------------------------------------- #
     # Validate blog_id
     # ----------------------------------------------------------- #
-    blog = Blog().one_by_id(id=int(blog_id))
+    blog = BlogRepository().one_by_id(id=int(blog_id))
     if not blog:
         app.logger.debug(f"delete_blog(): Failed to locate blog, blog_id = '{blog_id}'.")
         EventRepository.log_event("Delete Blog Fail", f"Failed to locate blog, blog_id = '{blog_id}'.")
@@ -353,10 +353,15 @@ def delete_blog() -> Response | str:
     # Need current user
     user: UserModel | None = UserRepository.one_by_id(current_user.id)
 
+    if not user:
+        app.logger.debug(f"delete_blog(): Failed to locate user, user_id = '{current_user.id}'.")
+        EventRepository.log_event("Delete Blog Fail", f"Failed to locate user, user_id = '{current_user.id}'.")
+        return abort(404)
+
     # Validate against current_user's password
-    if not UserRepository.validate_password(user, password, user_ip):
+    if not UserRepository().validate_password(user, password, user_ip):
         app.logger.debug(f"delete_blog(): Delete failed, incorrect password for user_id = '{user.id}'!")
-        EventRepository.log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
+        EventRepository().log_event("Delete Blog Fail", f"Incorrect password for user_id = '{user.id}'!")
         flash(f"Incorrect password for user {user.name}!")
         # Go back to blogs page
         return redirect(url_for('display_blog'))  # type: ignore
@@ -377,25 +382,25 @@ def delete_blog() -> Response | str:
             body=f"Sorry, an Admin has deleted your blog '{blog.title}'. The reason given was '{reason}'."
         )
         # Send the message
-        if MessageRepository.add_message(new_message):
+        if MessageRepository().add_message(new_message):
             # Success!
             app.logger.debug(f"delete_blog(): Sent blog delete message to '{blog.email}'.")
-            EventRepository.log_event("Delete Blog Pass", f"Sent blog delete message to '{blog.email}'.")
+            EventRepository().log_event("Delete Blog Pass", f"Sent blog delete message to '{blog.email}'.")
         else:
             # Should never get here, but...
             app.logger.debug(f"delete_blog(): Message().add_message() failed, blog.email = '{blog.email}'.")
-            EventRepository.log_event("Delete Blog Fail", f"Message().add_message() failed, blog.email = '{blog.email}'.")
+            EventRepository().log_event("Delete Blog Fail", f"Message().add_message() failed, blog.email = '{blog.email}'.")
 
     # ----------------------------------------------------------- #
     # Delete blog
     # ----------------------------------------------------------- #
-    if Blog().delete_blog(id=int(blog_id)):
+    if BlogRepository().delete_blog(id=int(blog_id)):
         app.logger.debug(f"delete_blog(): Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
-        EventRepository.log_event("Delete Blog Success", f"Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
+        EventRepository().log_event("Delete Blog Success", f"Deleted blog, reason = '{reason}', blog_id = '{blog_id}'.")
         flash("Blog has been deleted.")
     else:
         app.logger.debug(f"delete_blog(): Failed to delete Blog, blog_id = '{blog_id}'.")
-        EventRepository.log_event("Delete Blog Fail", f"Failed to delete Blog, blog_id = '{blog_id}'.")
+        EventRepository().log_event("Delete Blog Fail", f"Failed to delete Blog, blog_id = '{blog_id}'.")
         flash("Sorry, something went wrong.")
 
     return redirect(url_for('display_blog'))  # type: ignore
