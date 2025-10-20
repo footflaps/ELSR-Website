@@ -264,13 +264,13 @@ def reply_message() -> Response | str:
     try:
         message_id: int = int(request.args.get('message_id', None))
     except Exception:
-        flash(f"Invalid message id: '{message_id}'.")
+        flash(f"Invalid message id.")
         return abort(404)
 
-    return_path = request.args.get('return_path', None)
+    return_path: str | None = request.args.get('return_path', None)
 
     try:
-        body = request.form['body']
+        body: str | None = request.form['body']
     except exceptions.BadRequestKeyError:
         body = None
 
@@ -416,24 +416,24 @@ def message_admin() -> Response | str:
     # ----------------------------------------------------------- #
 
     # Create a new message
-    message = MessageModel(
+    message: MessageModel = MessageModel(
         from_email=user.email,
         to_email=ADMIN_EMAIL,
         body=body
     )
     # Send it
-    message = MessageRepository.add_message(message)
+    message = MessageRepository().add_message(message)  # type: ignore
     # Either get back the message or None
     if message:
         # Success
         Thread(target=send_message_notification_email, args=(message, ADMIN_EMAIL,)).start()
         app.logger.debug(f"message_admin(): User '{user.email}' has sent message = '{body}'")
-        EventRepository.log_event("Message Admin Success", f"Message was sent successfully.")
+        EventRepository().log_event("Message Admin Success", f"Message was sent successfully.")
         flash("Your message has been forwarded to the Admin Team")
     else:
         # Should never get here, but...
         app.logger.debug(f"message_admin(): Message().add_message() failed user.email = '{user.email}'.")
-        EventRepository.log_event("Message Admin Fail", f"Message send failed!")
+        EventRepository().log_event("Message Admin Fail", f"Message send failed!")
         flash("Sorry, something went wrong")
 
     # ----------------------------------------------------------- #
@@ -457,7 +457,12 @@ def message_user() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    user_id = request.args.get('user_id', None)
+    try:
+        user_id: int = int(request.args.get('user_id', None))
+    except Exception:
+        flash(f"Invalid user id.")
+        return abort(404)
+
     try:
         body = request.form['user_message']
     except exceptions.BadRequestKeyError:
@@ -491,13 +496,13 @@ def message_user() -> Response | str:
     # ----------------------------------------------------------- #
 
     # Create a new message
-    message = MessageModel(
+    message: MessageModel = MessageModel(
         from_email=ADMIN_EMAIL,
         to_email=user.email,
         body=body
     )
     # Send it
-    message = MessageRepository.add_message(message)
+    message: MessageModel | None = MessageRepository().add_message(message)  # type: ignore
     # Either get back the message or None
     if message:
         # Success
