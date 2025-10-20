@@ -261,8 +261,14 @@ def reply_message() -> Response | str:
     # ----------------------------------------------------------- #
     # Get details from the page
     # ----------------------------------------------------------- #
-    message_id = request.args.get('message_id', None)
+    try:
+        message_id: int = int(request.args.get('message_id', None))
+    except Exception:
+        flash(f"Invalid message id: '{message_id}'.")
+        return abort(404)
+
     return_path = request.args.get('return_path', None)
+
     try:
         body = request.form['body']
     except exceptions.BadRequestKeyError:
@@ -277,20 +283,20 @@ def reply_message() -> Response | str:
     # ----------------------------------------------------------- #
     if not message_id:
         app.logger.debug(f"reply_message(): Missing message_id!")
-        EventRepository.log_event("Message Reply Fail", f"Missing message_id!")
+        EventRepository().log_event("Message Reply Fail", f"Missing message_id!")
         return abort(400)
     elif not body:
         app.logger.debug(f"reply_message(): Missing body!")
-        EventRepository.log_event("Message Reply Fail", f"Missing body!")
+        EventRepository().log_event("Message Reply Fail", f"Missing body!")
         return abort(400)
 
     # ----------------------------------------------------------- #
     # Validate id
     # ----------------------------------------------------------- #
-    message = MessageRepository.find_messages_by_id(message_id)
+    message: MessageModel | None = MessageRepository().find_messages_by_id(message_id)
     if not message:
         app.logger.debug(f"reply_message(): Can't locate message_id = '{message_id}'.")
-        EventRepository.log_event("Message Reply Fail", f"Can't locate message_id = '{message_id}'.")
+        EventRepository().log_event("Message Reply Fail", f"Can't locate message_id = '{message_id}'.")
         return abort(404)
 
     # ----------------------------------------------------------- #
@@ -304,7 +310,7 @@ def reply_message() -> Response | str:
             message.to_email != current_user.email:
         app.logger.debug(f"reply_message(): Prevented attempt by '{current_user.email}' to "
                          f"reply to message id = '{message_id}'.")
-        EventRepository.log_event("Message Reply Fail", f"Prevented attempt by '{current_user.email}' to Reply to "
+        EventRepository().log_event("Message Reply Fail", f"Prevented attempt by '{current_user.email}' to Reply to "
                                                 f"message, id = '{message_id}'.")
         return abort(403)
 
@@ -312,24 +318,24 @@ def reply_message() -> Response | str:
     # Send the reply itself
     # ----------------------------------------------------------- #
     # Create a new message
-    new_message = MessageBody(
+    new_message: MessageModel = MessageModel(
         from_email=message.to_email,
         to_email=message.from_email,
         body=body
     )
 
     # Try and send it
-    if MessageRepository.add_message(new_message):
+    if MessageRepository().add_message(message=new_message):
         # Success!
         app.logger.debug(f"reply_message(): User '{current_user.email}' has sent message "
                          f"to '{message.from_email}', body = '{body}'.")
-        EventRepository.log_event("Message Reply Success", f" User '{current_user.name}' has sent message "
+        EventRepository().log_event("Message Reply Success", f" User '{current_user.name}' has sent message "
                                                    f"to '{message.from_email}'.")
         flash("Your message has been sent.")
     else:
         # Should never get here, but...
         app.logger.debug(f"reply_message(): Message().add_message() failed for user.id = '{current_user.id}'.")
-        EventRepository.log_event("Message Reply Fail", f"Failed to send message.")
+        EventRepository().log_event("Message Reply Fail", f"Failed to send message.")
         flash("Sorry, something went wrong")
 
     # ----------------------------------------------------------- #
@@ -337,7 +343,7 @@ def reply_message() -> Response | str:
     # ----------------------------------------------------------- #
     if message.from_email == ADMIN_EMAIL:
         # Threading won't have access to current_user, so need to acquire persistent user to pass on
-        user: UserModel | None = UserRepository.one_by_id(current_user.id)
+        user: UserModel | None = UserRepository().one_by_id(current_user.id)
         Thread(target=alert_admin_via_sms, args=(user, f"Reply Message: {body}",)).start()
 
     # ----------------------------------------------------------- #
