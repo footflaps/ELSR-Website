@@ -320,11 +320,13 @@ header.carousel.masthead .page-heading {
 header.carousel.masthead .page-heading h1 {
   font-size: 50px;
   font-weight: 800;
+  text-align: center;
 }
 
 header.carousel.masthead .page-heading .subheading {
   font-size: 20px;
   line-height: 1.1;
+  text-align: center;
 }
 
 @media (min-width: 768px) {
