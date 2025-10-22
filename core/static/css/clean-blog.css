@@ -6,7 +6,7 @@ body {
   background-color:#f2f7fb;
   font-size: 20px;
   color: #212529;
-  font-family: 'Lora', 'Times New Roman', serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 p {
@@ -371,13 +371,13 @@ header.carousel.masthead .page-heading .subheading {
   border-radius: 0;
   background: none;
   box-shadow: none !important;
-  font-family: 'Lora', 'Times New Roman', serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 .floating-label-form-group input::-webkit-input-placeholder,
 .floating-label-form-group textarea::-webkit-input-placeholder {
   color: #868e96;
-  font-family: 'Lora', 'Times New Roman', serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 .floating-label-form-group label {

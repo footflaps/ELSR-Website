@@ -44,7 +44,7 @@
 			<div class="col-lg-8 col-md-10 mx-auto">
 				<div class="page-heading">
 					<h1>The Cafes</h1>
-					<span class="subheading">Our favourite spots</span>
+					<span class="subheading">Feed me Seymour...</span>
 				</div>
 			</div>
 		</div>
@@ -157,7 +157,21 @@
       </p>
 
       <p>
+        If you want to see the most popular cafes, from our group rides,
+        click here: <a href="{{ url_for('cafe_top10') }}"><strong>Top 10</strong></a>.
+      </p>
+
+      <p>
+        If you're thinking of planning a ride to a cafe and want some advice on how to do that, click here:
+          <a href="{{ url_for('plan') }}"><strong>How to choose a suitable route</strong></a>
+      </p>
+
+      <p>
         <strong>Note:</strong> Cafés marked with a red location icon are temporarily or permanently closed.
+      </p>
+
+      <p>
+          NB If you don't know who Seymour is, you really need to check <a href="https://www.youtube.com/watch?v=QETfA9_b7wM"><strong>this</strong></a> out.
       </p>
 
       <hr>
@@ -224,22 +238,7 @@
 			
 		</div>
 	</div>
-	
-	<div class="row my-3">
-		<div class="col-lg-8 col-md-10 col-sm-12 mx-auto">
-			
-			<!-- Link to route planning guide -->
-			<h2 class="text-center mb-2">
-				<a href="{{ url_for('plan') }}">
-					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
-					How to choose a suitable route
-					<i class="fa-solid fa-triangle-exclamation fa-fade"></i>
-				</a>
-			</h2>
-			
-		</div>
-	</div>
-	
+
 </div>
 
 
