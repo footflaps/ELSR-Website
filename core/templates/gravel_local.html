@@ -56,7 +56,7 @@
 			
 			<ul>
 				<li><a href="{{ url_for('gravel') }}"><strong>Gravel Intro</strong></a></li>
-				<li><a href="{{ url_for('gravel_local') }}"><strong>Routes from Cambridge</strong></a></li>
+				<li><strong>Routes from Cambridge</strong></li>
 				<li><a href="{{ url_for('gravel_ldt') }}"><strong>Long Distance Trails</strong></a></li>
 				<li><a href="{{ url_for('gravel_all') }}"><strong>All Gravel GPXes</strong></a></li>
 			</ul>
@@ -81,7 +81,13 @@
 				There are a few bridleways right next to Camrbidge and these can be linked up to create some pretty
 				decent offroad loops. I think Tom Begg is up to 100km on one of his creations (see below).
 			</p>
-			
+
+            <p>
+                If you're looking for a 'first' gravel ride, then <a href="{{ url_for('gpx_details', gpx_id=56) }}"><strong>this loop</strong></a>
+                would be a good place to start. The Stove is a nice cafe and the route is not too long and stays quite
+                close to Cambridge. If it's been wet, there will be some muddy sections, but the majority rides
+                fine all year round.
+            </p>
 			<hr>
 			
 		</div>
