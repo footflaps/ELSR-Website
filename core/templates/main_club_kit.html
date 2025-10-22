@@ -11,26 +11,36 @@
 {% import "bootstrap/wtf.html" as wtf %}
 
 
-
-
 <!---------------------------------------------------------------------------------------------------->
-<!--                                       Page Header                                              -->
+<!--                                     Page Header (Carousel)                                     -->
 <!---------------------------------------------------------------------------------------------------->
 
-<header class="masthead"
-        style="background-image: url('{{ url_for('static', filename='img/club_kit/v2/club-kit-v2-banner.jpg')}}')"
-		alt="ELSR Team Jersey">
-	<div class="overlay"></div>
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
-				<div class="page-heading">
-					<h1>2024 Team Kit</h1>
-					<span class="subheading">The best dressed cyclists in town...</span>
-				</div>
-			</div>
-		</div>
-	</div>
+<header id="carousel-header" class="carousel slide masthead" data-ride="carousel" data-interval="3000">
+
+    <!-- Single heading outside the slides -->
+    <div class="container-fluid position-absolute top-50 start-50 translate-middle text-center text-white">
+        <div class="page-heading">
+            <h1>Team Kit</h1>
+            <h2 class="subheading">The best dressed cyclists in town...</h2>
+        </div>
+    </div>
+
+    <!-- Carousel background slides -->
+    <div class="carousel-inner">
+
+        {% for i in range(1, 3) %}
+        <div class="carousel-item {% if i == 1 %}active{% endif %}">
+            <div class="carousel-overlay"
+                 style="background-image: url({{ url_for('static', filename='img/page-headers/team-kit-bg' ~ i ~ '.jpg') }})"
+                 role="img"
+                aria-label="Cyclists on ELSR café ride in Cambridge countryside">
+            </div>
+            <div class="overlay"></div>
+        </div>
+        {% endfor %}
+
+    </div>
+
 </header>
 
 

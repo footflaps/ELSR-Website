@@ -32,23 +32,35 @@
 
 
 <!---------------------------------------------------------------------------------------------------->
-<!--                                       Page Header                                              -->
+<!--                                     Page Header (Carousel)                                     -->
 <!---------------------------------------------------------------------------------------------------->
 
-<header class="masthead"
-        style="background-image: url({{ url_for('static', filename='img/page-headers/cafe-bg.jpg')}})"
-		alt="Generic Cafe">
-	<div class="overlay"></div>
-	<div class="container">
-		<div class="row">
-			<div class="col-lg-8 col-md-10 mx-auto">
-				<div class="page-heading">
-					<h1>The Cafes</h1>
-					<span class="subheading">Feed me Seymour...</span>
-				</div>
-			</div>
-		</div>
-	</div>
+<header id="carousel-header" class="carousel slide masthead" data-ride="carousel" data-interval="3000">
+
+    <!-- Single heading outside the slides -->
+    <div class="container-fluid position-absolute top-50 start-50 translate-middle text-center text-white">
+        <div class="page-heading">
+            <h1>The Cafe List</h1>
+            <h2 class="subheading">Feed me Seymour...</h2>
+        </div>
+    </div>
+
+    <!-- Carousel background slides -->
+    <div class="carousel-inner">
+
+        {% for i in range(1, 6) %}
+        <div class="carousel-item {% if i == 1 %}active{% endif %}">
+            <div class="carousel-overlay"
+                 style="background-image: url({{ url_for('static', filename='img/page-headers/cafe-bg' ~ i ~ '.jpg') }})"
+                 role="img"
+                aria-label="Cyclists on ELSR café ride in Cambridge countryside">
+            </div>
+            <div class="overlay"></div>
+        </div>
+        {% endfor %}
+
+    </div>
+
 </header>
 
 
