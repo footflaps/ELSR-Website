@@ -255,9 +255,9 @@ def admin_page() -> Response | str:
     # Server stats
     # ----------------------------------------------------------- #
     # This is file and directory sizes
-    files = get_file_sizes()
+    files = [] #= get_file_sizes()
     # This is free space on the server
-    free_per = get_free_space()
+    free_per = [] #= get_free_space()
 
     # ----------------------------------------------------------- #
     # Unread messages

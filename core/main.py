@@ -1,5 +1,4 @@
 from sqlalchemy import func
-import os
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -78,37 +77,37 @@ from core.routes.routes_cafe_add_delete import new_cafe
 
 with app.app_context():
 
-    num_users = db.session.query(func.count(UserModel.id)).scalar()
+    num_users: int = db.session.query(func.count(UserModel.id)).scalar()
     print(f"Found {num_users} users in the dB")
 
-    num_cafes = db.session.query(func.count(CafeModel.id)).scalar()
+    num_cafes: int = db.session.query(func.count(CafeModel.id)).scalar()
     print(f"Found {num_cafes} cafes in the dB")
 
-    num_gpx = db.session.query(func.count(GpxModel.id)).scalar()
+    num_gpx: int = db.session.query(func.count(GpxModel.id)).scalar()
     print(f"Found {num_gpx} gpx in the dB")
 
-    num_calendar = db.session.query(func.count(CalendarModel.id)).scalar()
+    num_calendar: int = db.session.query(func.count(CalendarModel.id)).scalar()
     print(f"Found {num_calendar} calendar entries in the dB")
 
-    num_socials = db.session.query(func.count(SocialModel.id)).scalar()
+    num_socials: int = db.session.query(func.count(SocialModel.id)).scalar()
     print(f"Found {num_socials} socials in the dB")
 
-    num_classifieds = db.session.query(func.count(ClassifiedModel.id)).scalar()
+    num_classifieds: int = db.session.query(func.count(ClassifiedModel.id)).scalar()
     print(f"Found {num_classifieds} classifieds in the dB")
 
-    num_messages = db.session.query(func.count(MessageModel.id)).scalar()
+    num_messages: int = db.session.query(func.count(MessageModel.id)).scalar()
     print(f"Found {num_messages} messages in the dB")
 
-    num_cafe_comments = db.session.query(func.count(CafeCommentModel.id)).scalar()
+    num_cafe_comments: int = db.session.query(func.count(CafeCommentModel.id)).scalar()
     print(f"Found {num_cafe_comments} cafe comments in the dB")
 
-    num_events = db.session.query(func.count(EventModel.id)).scalar()
+    num_events: int = db.session.query(func.count(EventModel.id)).scalar()
     print(f"Found {num_events} events in the dB")
 
-    num_polls = db.session.query(func.count(PollModel.id)).scalar()
+    num_polls: int = db.session.query(func.count(PollModel.id)).scalar()
     print(f"Found {num_polls} polls in the dB")
 
-    num_blogs = db.session.query(func.count(BlogModel.id)).scalar()
+    num_blogs: int = db.session.query(func.count(BlogModel.id)).scalar()
     print(f"Found {num_blogs} blogs in the dB")
 
 
@@ -121,7 +120,4 @@ with app.app_context():
 # -------------------------------------------------------------------------------------------------------------- #
 
 if __name__ == "__main__":
-    if os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py"):
-        app.run(debug=False)
-    else:
-        app.run(debug=False)
+    app.run(debug=False)

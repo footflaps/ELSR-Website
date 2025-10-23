@@ -6,11 +6,11 @@
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$">
       <sourceFolder url="file://$MODULE_DIR$/core" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/core/static" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/file_mounts/static" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/venv" />
     </content>
-    <orderEntry type="jdk" jdkName="Python 3.11 (ELSR-Website)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.11 (ELSR-Website) (2)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TemplatesService">

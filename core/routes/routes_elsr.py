@@ -5,6 +5,7 @@ from wtforms import StringField, EmailField, SubmitField
 from wtforms.validators import InputRequired
 from flask_ckeditor import CKEditorField
 from threading import Thread
+from typing import Tuple
 
 
 # -------------------------------------------------------------------------------------------------------------- #
@@ -61,6 +62,14 @@ def static_from_root() -> Response | str:
     filename = request.path[1:]
 
     return send_from_directory(directory="../core/static/", path=filename)
+
+
+# -------------------------------------------------------------------------------------------------------------- #
+# Healthcheck
+# -------------------------------------------------------------------------------------------------------------- #
+@app.route('/health')
+def health() -> Tuple[str, int]:
+    return "ok", 200
 
 
 # -------------------------------------------------------------------------------------------------------------- #

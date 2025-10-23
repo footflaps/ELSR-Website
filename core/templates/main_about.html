@@ -76,7 +76,17 @@
 			
 			<ul>
 		
-				<!-- Google Cloud -->
+				 <!-- Domain -->
+				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/google_domains_icon.png')}}"
+				                      width=30 alt="Google Domains Logo">
+					Domain courtesy of
+					<a href="https://domains.google/">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>Google Domains</strong>,
+					</a>
+                    a whole £10 for "elsr.co.uk". Although, recently SquareSpace has taken over Google Domains.
+				</li>
+
+                <!-- Google Cloud -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/google_cloud_icon.png')}}"
 				                      width=40
 									  alt="Google Cloud Logo">
@@ -95,14 +105,12 @@
 				    </a>, which forms part of Google zone
 					<a href="https://dgtlinfra.com/google-cloud-data-center-locations/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Europe-West 2c.</strong> </a>
-					The cost is currently approx £35 / month. See chart for a breakdown:
-					<a href="{{ url_for('static', filename='img/about-icons/cloud_costs_sep_ 2023.jpg') }}">
-						<strong>Cost breakdown for Sep 2023.</strong>
+					The cost is currently approx £1 / day. See chart for a breakdown:
+					<a href="{{ url_for('static', filename='img/about-icons/cloud_costs_nov_2025.png') }}">
+						<strong>Cost breakdown for Nov 2025.</strong>
 					</a>
-					NB The costs in the chart are before various discounts and taxes. The discounts reduce
-					it by about 25% as the map loads seem to be free for now.
 				</li>
-				
+
 				<!-- Linux -->
 				<li class="my-4">
 					<img src="{{ url_for('static', filename='img/about-icons/linux_icon.png')}}"
@@ -111,7 +119,18 @@
 					     width=100 alt="Ubuntu Logo">
 					The virtual machine runs Linux (Ubuntu Server flavour) as an operating system.
 				</li>
-				
+
+                <!-- Docker -->
+                <li class="my-4">
+                    <img src="{{ url_for('static', filename='img/about-icons/docker_icon.png')}}"
+					     width=140 alt="Docker Logo">
+                    As of December 2025, the website is fully containerised using Docker. The platform now runs across
+                    three containers: one for the Python/Flask application, one for the PostgreSQL database, and one
+                    for Nginx. Containerisation decouples the application from the underlying host
+                    system, making deployments more reliable and significantly simpler to manage. It also results
+                    in a cleaner architecture with improved scalability, portability, and long-term maintainability.
+                </li>
+
 				<!-- Nginx -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/nginx_icon.png')}}"
 				                      width=100 alt="Nginx Logo">
@@ -119,57 +138,29 @@
 					handles your incoming requests, to the server, and decides what to do with them. In most cases it
 					will just pass your request on to Gunicorn, but for files (e.g. css, js, jpg, etc) it also acts as
 					a file server, serving the files direct. Downloading GPX files is handled by Gunicorn as they are
-					restricted (you have to be logged in). There's an excellent guide to setting this all up:
-					<a href="https://www.digitalocean.com/community/tutorials/how-to-serve-flask-applications-with-gunicorn-and-nginx-on-ubuntu-18-04">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>Flask / Gunicorn / Nginx.</strong>
-					</a>
+					restricted (you have to be logged in).
 				</li>
-				
-				<!-- HTTP/2 -->
-				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/http2_icon.png')}}"
-				                      width=100 alt="HTTP/2 Logo">
-					ELSR is served using <a href="https://en.wikipedia.org/wiki/HTTP/2">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>HTTP/2</strong></a>, which is the latest
-					revision of the HTTP protocol and increases the speed at which web pages are served over the
-					internet. You can test websites for HTTP/2 compatibility using an online
-					<a href="https://tools.keycdn.com/http2-test">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>HTTP/2 Tester</strong>.
+
+                <!-- SQL -->
+				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/Postgresql_elephant.svg.png')}}"
+				                      width=40 alt="SQL Logo">
+                    All the data is stored in a <strong>PostgreSQL</strong> database, using
+					<a href="https://www.sqlalchemy.org/">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>SQLAlchemy</strong>
 					</a>
-					Configuring NGINX to use HTTP/2 is absolutely trivial e.g.
-					<a href="https://www.tutorialspoint.com/how-to-enable-http2-0-in-nginx">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>NGINX and HTTP/2</strong>.
-					</a>
+					as the Python interface. Total overkill, but we use PostgreSQL at work, so it's simpler to only
+                    have to maintain one type of database.
 				</li>
-				
-				<!-- Python -->
+
+                <!-- Python -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/python_icon.png')}}"
 				                      width=40 alt="Python Logo">
 					<a href="https://www.python.org/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Python</strong>
-					</a> as the underlying back end language. The website runs in a
-					<a href="https://realpython.com/python-virtual-environments-a-primer/">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>Virtual Python Environment</strong>
-					</a> on a virtual machine. That's a lot of virtualness...
+					</a> as the underlying back end language.
 				</li>
-				
-				<!-- JavaScript -->
-				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/javascript-logo.png')}}"
-				                      width=40 alt="Javascript Logo">
-					<a href="https://www.javascript.com/">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>JavaScript</strong>.
-					</a>
-					Initially the site was mainly written in Python, using a few Javascript frameworks, eg BootStrap.
-					However, I'm now porting more and more functionality to the client in JavaScript and away from
-					the server side and Python. This is because you get a better user experience with a more intelligent
-					client. E.g. Take the <a href="{{ url_for('add_ride') }}"> <strong>Add Ride Form</strong>,</a>
-					originally you filled out the form, posted it back to the server where Python would validate the
-					content and if there were any issues found, the form would be served back to you for correction.
-					This is the standard HTML model. However, with JavaScript, the validation can take place in the
-					browser, and now you can't actually submit an invalid form. Form completion is also sped up
-					e.g. as soon as you pick a date from the calendar, the start time and location auto complete.
-				</li>
-				
-				<!-- Gunicorn -->
+
+                <!-- Gunicorn -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/gunicorn_icon.png')}}"
 				                      width=80 alt="Gunicorn Logo">
 					This website uses
@@ -180,9 +171,9 @@
 					<a href="https://medium.com/building-the-system/gunicorn-3-means-of-concurrency-efbb547674b7">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Gunicorn Concurrency.</strong></a>
 					If you're interested this website is configured to use five servers.
-					
+
 				</li>
-				
+
 				<!-- Flask-->
 				<li class="my-4">
 					<img src="{{ url_for('static', filename='img/about-icons/flask_icon.png')}}"
@@ -195,7 +186,7 @@
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Flask Mega Tutorial.</strong>
 					</a>
 				</li>
-				
+
 				<!-- Jinja -->
 				<li class="my-4">
 					<img src="{{ url_for('static', filename='img/about-icons/jinja_icon.png')}}"
@@ -215,7 +206,23 @@
 					</a>
 					from within Jinja.
 				</li>
-				
+
+                <!-- HTTP/2 -->
+				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/http2_icon.png')}}"
+				                      width=100 alt="HTTP/2 Logo">
+					ELSR is served using <a href="https://en.wikipedia.org/wiki/HTTP/2">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>HTTP/2</strong></a>, which is the latest
+					revision of the HTTP protocol and increases the speed at which web pages are served over the
+					internet. You can test websites for HTTP/2 compatibility using an online
+					<a href="https://tools.keycdn.com/http2-test">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>HTTP/2 Tester</strong>.
+					</a>
+					Configuring NGINX to use HTTP/2 is absolutely trivial e.g.
+					<a href="https://www.tutorialspoint.com/how-to-enable-http2-0-in-nginx">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>NGINX and HTTP/2</strong>.
+					</a>
+				</li>
+
 				<!-- Bootstrap -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/bootstrap_icon.png')}}"
 				                      width=50 alt="Bootstrap Logo">
@@ -257,18 +264,7 @@
 						<i class="fa fa-external-link fa-2xs"></i> <strong style="font-family:Roboto">Roboto</strong>
 					</a> for the tables.
 				</li>
-		
-				<!-- SQL -->
-				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/Postgresql_elephant.svg.png')}}"
-				                      width=40 alt="SQL Logo">
-                    All the data is stored in a <strong>PostgreSQL</strong> database, using
-					<a href="https://www.sqlalchemy.org/">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>SQLAlchemy</strong>
-					</a>
-					as the Python interface. Total overkill, but we use PostgreSQL at work, so it's simpler to only
-                    have to maintain one type of database.
-				</li>
-		
+
 				<!-- Forms -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/flask_forms_icon.png')}}"
 				                      width=40 alt="Flask Forms Logo">
@@ -296,14 +292,7 @@
 					Google Map plugins using
 					<a href="https://developers.google.com/maps">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Google Maps API.</strong>
-					</a> I'll probably swap this out for
-					<img src="{{ url_for('static', filename='img/about-icons/osm_icon.jpg')}}"
-					     width=40 alt="OSM Logo">
-					<a href="https://www.openstreetmap.org">
-						<i class="fa fa-external-link fa-2xs"></i>
-						<strong>OSM</strong>
-					</a>
-	                 as it costs me £0.003 everytime you see a map.
+					</a>.
 				</li>
 				
 				<!-- Gpxpy -->
@@ -344,7 +333,24 @@
 					The shrunken size is 150 kB, which is fine for using as a background image and
 					about the same size as when you share a photo via WhatsApp.
 				</li>
-				
+
+                <!-- JavaScript -->
+				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/javascript-logo.png')}}"
+				                      width=40 alt="Javascript Logo">
+					<a href="https://www.javascript.com/">
+						<i class="fa fa-external-link fa-2xs"></i> <strong>JavaScript</strong>.
+					</a>
+					Initially the site was mainly written in Python, using a few Javascript frameworks, eg BootStrap.
+					However, I'm now porting more and more functionality to the client in JavaScript and away from
+					the server side and Python. This is because you get a better user experience with a more intelligent
+					client. E.g. Take the <a href="{{ url_for('add_ride') }}"> <strong>Add Ride Form</strong>,</a>
+					originally you filled out the form, posted it back to the server where Python would validate the
+					content and if there were any issues found, the form would be served back to you for correction.
+					This is the standard HTML model. However, with JavaScript, the validation can take place in the
+					browser, and now you can't actually submit an invalid form. Form completion is also sped up
+					e.g. as soon as you pick a date from the calendar, the start time and location auto complete.
+				</li>
+
 				<!-- Chart.js -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/chartjs_icon.png')}}"
 				                      width=45 alt="ChartJS Logo">
@@ -374,6 +380,15 @@
 						<strong>Twilio.</strong>
 					</a>It costs me approx. 4p per SMS message sent. All Admin accounts are protected by 2FA.
 				</li>
+
+                <!-- Email -->
+                <li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/gmail_icon.png')}}"
+				                      width=50  alt="Gmail Logo">
+					Emails are sent to users via Google Mail, using a dedicated email account. Registration requires
+                    a valid email address, to which an authentication code is sent. Users can also sign up for email
+                    alerts e.g. when someone posts a ride in the calendar for a specific group. The ride GPX can be
+                    downloaded direct from a link in the email.
+				</li>
 				
 				<!-- Gravatars -->
 				<li class="my-4"><img src="/static/img/about-icons/Blake_et_Mortimer.jpg"
@@ -387,24 +402,15 @@
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Blake et Mortimer FB page.</strong>
 					</a>
 				</li>
-				
-				<!-- Domain -->
-				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/google_domains_icon.png')}}"
-				                      width=30 alt="Google Domains Logo">
-					Domain courtesy of
-					<a href="https://domains.google/">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>Google Domains</strong>,
-					</a>
-                    a whole £10 for "elsr.co.uk". Although, recently SquareSpace has taken over Google Domains.
-				</li>
-		
+
 				<!-- Sentry -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/sentry_icon.png')}}"
 				                      width=30  alt="Sentry Logo">
 					Site diagnostics and real time performance data courtesy of
 					<a href="https://sentry.io/welcome/">
 						<i class="fa fa-external-link fa-2xs"></i> <strong>Sentry.</strong>
-					</a>
+					</a> I get an email every time the site has an issue, which luckily is not too often. It also emails
+                    me when it sees inefficient SQL queries! I have quite a few N+1 queries to fix at some point...
 				</li>
 			
 				<!-- Stack overflow -->
@@ -428,22 +434,7 @@
 						<i class="fa fa-external-link fa-2xs"></i> <strong>ELSR on Github.</strong>
 					</a>
 				</li>
-				
-				<!-- Fail2Ban -->
-				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/fail2ban_icon.png')}}"
-				                      width=50 alt="Fail2Ban Logo">
-					As soon as you put a site on the internet, 100s of robots start probing it, looking for known
-					vulnerabilities	in software packages. They're pretty stupid, I get dozens of attacks on Microsoft
-					Exchange servers every day, even though I'm not hosting one. However, they now all get blocked by
-					<a href="https://www.fail2ban.org/wiki/index.php/Main_Page">
-						<i class="fa fa-external-link fa-2xs"></i> <strong>Fail2Ban,</strong>
-					</a>which looks for servers trying it on and blocks their IPs.
-					If you want to see someone probing the site, trying to find the right webpage for admin access:
-					<a href="{{ url_for('static', filename='img/about-icons/hacking_attempt.jpg') }}">
-						<strong>Site Probing.</strong>
-                    </a>
-				</li>
-				
+
 				<!-- Backups -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/google_cloud_icon.png')}}"
 				                      width=40 alt="Google cloud Logo">
@@ -477,7 +468,7 @@
 				</li>
 				
 				
-				<!-- SEO -->
+				<!-- Site Optimisation -->
 				<li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/lighthouse-logo.png')}}"
 				                      width=45 alt="Lighthouse Logo">
 					Site Optimisation. Google's Chrome browser has an amazing built in developer tool, called
@@ -498,7 +489,30 @@
 					<br>Some work to be done shrinking image sizes for faster loads on low quality mobile connections.
 					
 				</li>
-				
+
+                <!-- Documentation -->
+                <li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/confluence_logo.png')}}"
+				                      width=150 alt="Confluence Logo">
+                    The Devops side of the website e.g. deployment, maintenance, configuration, backup, restore etc is
+                    all documented in a dedicated Confluence site (free for up to 10 users). Confluence is a really
+                    nice and simple to use online documentation platform.
+				</li>
+
+                <!-- SPAM -->
+                <li class="my-4"><img src="{{ url_for('static', filename='img/about-icons/spam_icon.jpg')}}"
+				                      width=75 alt="Spam Logo">
+                    Stick a website on the internet and you get SPAM, a lot of SPAM. One day I found someone had
+                    registered 8000 fake users overnight and was still at it, all trying to promote some crappy website.
+                    Even the contact form gets SPAM, mainly from people offering a paid service to SPAM site contact forms!
+                    We even get the odd blackmail threat! Turns out the solution to all this was very simple, they all
+                    want to promote some crappy website, so now all the forms prevent URLs. This turned out to be
+                    incredibly effective and overnight, our SPAM vanished! Here is a blackmail attempt, I only noticed
+                    six months after it had been sent (before we blocked URLs):
+                    <a href="{{ url_for('static', filename='img/about-icons/blackmail_july_2025.jpg') }}">
+						<strong>You've been hacked!</strong>
+					</a>
+				</li>
+
 			</ul>
 			
 			<hr>

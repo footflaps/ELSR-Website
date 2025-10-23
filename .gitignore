@@ -1,16 +1,14 @@
-/core/static/img/cafe_photos/
-/core/ics/Social_30082023.ics
-/core/ics/tmp.ics
-/core/ics/
-/core/config/
-/core/static/img/blog_photos/
-/core/static/img/classifieds_photos/
+# All our image files etc are private
+/file_mounts/
 
-# Files we don't want public
-/run.env
-/GCP_Instructions.md
-/elsr_website.nginx
-/elsr_website.gunicorn
+# ENV files contain credentials
+*.env
+*.env.*
 
+# Likewise MD files
+*.md
+*.md.*
 
-/remove.txt
+# Any Docker image files
+elsr-web*
+

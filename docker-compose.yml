@@ -1,0 +1,119 @@
+services:                         # Declares services (containers) that will run
+
+  # -------------------------------------------------------------------------------- #
+  # Flask / Gunicorn container
+  # -------------------------------------------------------------------------------- #
+  elsr:                           # Defines the web application service
+
+    # Builds the Docker image using the Dockerfile in this directory
+    build: .
+    image: elsr-web:latest
+
+    container_name: elsr-web
+
+    # Ensures the container restarts automatically unless manually stopped
+    restart: unless-stopped
+
+    # Maps the host machine's port 8000 to the container's port 8000
+    ports:
+      - "8000:8000"
+
+    # Loads environment variables from an external file
+    # These contain credentials...
+    env_file:
+      - ./run_docker.env
+
+    # Sets additional environment variables directly in compose
+    environment:
+      # File locations for local storage
+      ELSR_BLOG_PHOTO_FOLDER: /app/user_uploads/blog_photos
+      ELSR_CAFE_FOLDER: /app/user_uploads/cafe_photos
+      ELSR_CLASSIFIEDS_PHOTO_FOLDER: /app/user_uploads/classifieds_photos
+      ELSR_GPX_UPLOAD_FOLDER_ABS: /app/user_uploads/gpx
+      ELSR_ICS_DIRECTORY: /app/user_uploads/ics
+      ELSR_CONFIG_FOLDER: /app/config
+      ELSR_STATIC_FOLDER: /app/static
+
+    volumes:
+      # Static files (volume)
+      - elsr_static:/app/static
+      # User uploads eg img, gpx (volume)
+      - elsr_uploads:/app/user_uploads
+      # Config eg map stats (volume)
+      - elsr_config:/app/config
+      # Save logs on host (file mount)
+      - /var/log/elsr-web:/var/log/elsr
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nginx:
+        condition: service_started
+
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8000/health || exit 1" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+
+  # -------------------------------------------------------------------------------- #
+  # Nginx reverse proxy
+  # -------------------------------------------------------------------------------- #
+  nginx:
+    image: nginx:alpine                       # Lightweight NGINX image
+    container_name: elsr-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"                               # HTTP
+      - "443:443"                             # HTTPS
+    volumes:
+      # So Nginx can serve static web files eg img, css, js etc
+      - elsr_static:/usr/share/nginx/html/static
+      # So Nginx can serve user uploaded gpx files direct
+      - elsr_uploads:/usr/share/nginx/html/user_uploads
+      # Nginx config files (file mounts)
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/proxy_params:/etc/nginx/proxy_params:ro
+      # SSL Certificates (file mount)
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+
+    healthcheck:
+      test: ["CMD-SHELL", "if [ -f /run/nginx.pid ]; then exit 0; else exit 1; fi"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+
+  # -------------------------------------------------------------------------------- #
+  # Postgres Database container
+  # -------------------------------------------------------------------------------- #
+  postgres:
+      env_file:
+        - ./run_docker.env
+      image: postgres:17
+      container_name: elsr-postgres
+      restart: unless-stopped
+      healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U elsr_user}" ]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+      volumes:
+        - elsr_db:/var/lib/postgresql/data
+      ports:
+        - "5432:5432"
+
+
+# -------------------------------------------------------------------------------- #
+# All the volumes...
+# -------------------------------------------------------------------------------- #
+volumes:
+  # Database
+  elsr_db:
+  # Static web content eg css, js etc
+  elsr_static:
+  # Where we store images, gpx uploaded by users
+  elsr_uploads:
+  # Use this for any config files
+  elsr_config:

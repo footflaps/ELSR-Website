@@ -18,23 +18,6 @@ from core.gravatar_hack import Gravatar
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# Useful to know if this is the live site or not
-# -------------------------------------------------------------------------------------------------------------- #
-
-def live_site():
-    return os.path.exists("/home/ben_freeman_eu/elsr_website/ELSR-Website/env_vars.py")
-
-
-# -------------------------------------------------------------------------------------------------------------- #
-# Import env vars if on live web server (test site uses Pycharm Env Vars)
-# -------------------------------------------------------------------------------------------------------------- #
-
-if live_site():
-    sys.path.insert(1, '/home/ben_freeman_eu/elsr_website/ELSR-Website/')
-    import env_vars
-
-
-# -------------------------------------------------------------------------------------------------------------- #
 # Constants
 # -------------------------------------------------------------------------------------------------------------- #
 
@@ -61,39 +44,49 @@ GLOBAL_FLASH = None
 
 
 # -------------------------------------------------------------------------------------------------------------- #
-# File upload constants
+# Env Vars
 # -------------------------------------------------------------------------------------------------------------- #
 
+# Directories (These are defined in docker-compose.yml)
+STATIC_FOLDER: str = os.environ['ELSR_STATIC_FOLDER']
+CONFIG_FOLDER: str = os.environ['ELSR_CONFIG_FOLDER']
+CAFE_FOLDER: str = os.environ['ELSR_CAFE_FOLDER']
+CLASSIFIEDS_PHOTO_FOLDER: str = os.environ['ELSR_CLASSIFIEDS_PHOTO_FOLDER']
+BLOG_IMAGE_FOLDER: str = os.environ.get('ELSR_BLOG_PHOTO_FOLDER')
+ICS_DIRECTORY: str = os.environ['ELSR_ICS_DIRECTORY']
 # Flask only seems to allow one global upload folder, but we have two different end folders for GPX files and
 # cafe images. So, we upload to the same place and then move the file afterward to its final home.
 GPX_UPLOAD_FOLDER_ABS = os.environ['ELSR_GPX_UPLOAD_FOLDER_ABS']
 
+# Live site
+DEPLOYMENT_TYPE: str = os.environ.get('ELSR_DEPLOYMENT_TYPE', 'TEST')
+
+
+PROTECTED_USERS: str = os.environ['ELSR_PROTECTED_USERS']
+admin_email_address: str = os.environ['ELSR_ADMIN_EMAIL']
+admin_phone_number: str = os.environ['ELSR_TWILIO_NUMBER']
+NEW_GOOGLE_MAPS_API_KEY: str = os.environ['ELSR_GOOGLE_MAPS_API_KEY']
+gmail_admin_acc_email: str = os.environ['ELSR_ADMIN_EMAIL']
+gmail_admin_acc_password: str = os.environ['ELSR_ADMIN_EMAIL_PASSWORD']
+brf_personal_email: str = os.environ['ELSR_CONTACT_EMAIL']
+twilio_account_sid: str = os.environ['ELSR_TWILIO_SID']
+twilio_auth_token: str = os.environ['ELSR_TWILIO_TOKEN']
+twilio_mobile_number: str = os.environ['ELSR_TWILIO_NUMBER']
+
+
 # -------------------------------------------------------------------------------------------------------------- #
-# Env Vars
+# Useful to know if this is the live site or not
 # -------------------------------------------------------------------------------------------------------------- #
 
-CONFIG_FOLDER = os.environ['ELSR_CONFIG_FOLDER']
-CAFE_FOLDER = os.environ['ELSR_CAFE_FOLDER']
-CLASSIFIEDS_PHOTO_FOLDER = os.environ['ELSR_CLASSIFIEDS_PHOTO_FOLDER']
-BLOG_IMAGE_FOLDER = os.environ.get('ELSR_BLOG_PHOTO_FOLDER', '/img/blog_photos/')
-PROTECTED_USERS = os.environ['ELSR_PROTECTED_USERS']
-ICS_DIRECTORY = os.environ['ELSR_ICS_DIRECTORY']
-admin_email_address = os.environ['ELSR_ADMIN_EMAIL']
-admin_phone_number = os.environ['ELSR_TWILIO_NUMBER']
-NEW_GOOGLE_MAPS_API_KEY = os.environ['ELSR_GOOGLE_MAPS_API_KEY']
-gmail_admin_acc_email = os.environ['ELSR_ADMIN_EMAIL']
-gmail_admin_acc_password = os.environ['ELSR_ADMIN_EMAIL_PASSWORD']
-brf_personal_email = os.environ['ELSR_CONTACT_EMAIL']
-twilio_account_sid = os.environ['ELSR_TWILIO_SID']
-twilio_auth_token = os.environ['ELSR_TWILIO_TOKEN']
-twilio_mobile_number = os.environ['ELSR_TWILIO_NUMBER']
+def live_site():
+    return DEPLOYMENT_TYPE == "PRODUCTION"
 
 
 # -------------------------------------------------------------------------------------------------------------- #
 # Initialise Sentry (only for live site)
 # -------------------------------------------------------------------------------------------------------------- #
 
-dsn = os.environ.get('ELSR_SENTRY_DSN', None)
+dsn: str | None = os.environ.get('ELSR_SENTRY_DSN', None)
 
 if dsn:
     sentry_sdk.init(
@@ -113,7 +106,8 @@ if dsn:
 # Start Flask Framework
 # -------------------------------------------------------------------------------------------------------------- #
 
-app = Flask(__name__)
+app = Flask(__name__,
+            static_folder=STATIC_FOLDER,)
 
 # Details on the Secret Key: https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY
 # NOTE: The secret key is used to cryptographically-sign the cookies used for storing the session data.
@@ -144,18 +138,19 @@ app.config['MAX_CONTENT_LENGTH'] = 15 * 1000 * 1000
 # Configure logging
 # -------------------------------------------------------------------------------------------------------------- #
 
-app.logger.setLevel(logging.DEBUG)
-
 if __name__ != '__main__':
     gunicorn_logger = logging.getLogger('gunicorn.error')
     app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(logging.DEBUG)
 
-app.logger.debug('***********************************************************************')
-app.logger.debug('***********************************************************************')
-app.logger.debug('*                         Logging is working!                         *')
-app.logger.debug('***********************************************************************')
-app.logger.debug('***********************************************************************')
+app.logger.info('***********************************************************************')
+app.logger.info('***********************************************************************')
+app.logger.info('*                         Logging is working!                         *')
+if live_site():
+    app.logger.info('*                             LIVE SITE                               *')
+else:
+    app.logger.info('*                             TEST MODE                               *')
+app.logger.info('***********************************************************************')
+app.logger.info('***********************************************************************')
 
 
 # -------------------------------------------------------------------------------------------------------------- #

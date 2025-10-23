@@ -207,7 +207,7 @@ def send_one_blog_notification_email(user: UserModel, blog: BlogModel) -> None:
     if not live_site():
         # Only message developer
         if user.id != SUPER_ADMIN_USER_ID:
-            # Suppress SMS
+            # Suppress Emails
             return
 
     # ----------------------------------------------------------- #
