@@ -398,7 +398,7 @@
                             <td>
                                 {% if cafe.rating %}
                                     <span itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
-                                        <meta itemprop="ratingValue" content="{{ cafe.rating }}">
+                                        <meta itemprop="ratingCount" content="{{ cafe.rating }}">
                                         {{ cafe.rating }}
                                     </span>
                                 {% else %}
