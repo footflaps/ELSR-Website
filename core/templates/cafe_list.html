@@ -385,21 +385,24 @@
                                 <a href="{{ url_for('cafe_details', cafe_id=cafe.id) }}" itemprop="url">
                                     <span itemprop="name">{{ cafe.name }}</span>
                                 </a>
+
                                 {% if cafe.image_name %}
                                     <meta itemprop="image" content="{{ cafe.image_name }}">
                                     <i class="fa-solid fa-image"></i>
                                 {% endif %}
+
                                 {% if cafe.website_url %}
                                     <meta itemprop="sameAs" content="{{ cafe.website_url }}">
                                     <i class="fa-solid fa-link"></i>
                                 {% endif %}
                             </td>
 
+                            <!-- Rating shown as text / cups -->
                             <td>
                                 {% if cafe.rating %}
-                                    <span itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
-                                        <meta itemprop="ratingCount" content="{{ cafe.rating }}">
-                                        {{ cafe.rating }}
+                                    <span itemprop="additionalProperty" itemscope itemtype="https://schema.org/PropertyValue">
+                                        <meta itemprop="name" content="TeaCupRating">
+                                        <span itemprop="value">{{ cafe.rating }}</span>
                                     </span>
                                 {% else %}
                                     –
@@ -414,6 +417,7 @@
                         </tr>
                         {% endfor %}
                     </tbody>
+
                 </table>
 
             </div>
